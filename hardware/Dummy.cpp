@@ -67,7 +67,7 @@ namespace http {
 			std::vector<std::vector<std::string> > result;
 			result = m_sql.safe_query("SELECT MAX(ID) FROM DeviceStatus");
 
-			unsigned long nid = 1; //could be the first device ever
+			unsigned long nid = 0; //could be the first device ever
 
 			if (result.size() > 0)
 			{
@@ -271,6 +271,19 @@ namespace http {
 			case pTypeLux:
 				m_sql.UpdateValue(HwdID, ID, 1, pTypeLux, sTypeLux, 10, 255, 0, "0", devname);
 				bCreated = true;
+				break;
+			case pTypeThermostat:	
+				{
+				sprintf(ID, "%07ld", nid);
+				long long Uid = m_sql.UpdateValue(HwdID, ID, 1, pTypeThermostat, sTypeThermSetpoint, 10, 255, 0, "0", devname);
+				//set coefficient for PID
+				std::string uidstr = To_string(Uid);
+				m_sql.UpdateDeviceValue("AddjMulti",(float)100.0,uidstr);  //coef Kp proportionnal
+				m_sql.UpdateDeviceValue("AddjMulti2",(float)0.0,uidstr);    //coef Ki integral
+				m_sql.UpdateDeviceValue("TempIdx",(int)-1,uidstr);
+				m_sql.UpdateDeviceValue("SwitchIdx",(int)-1,uidstr);
+				bCreated = true;
+				}
 				break;
 			case pTypeP1Power:
 				m_sql.UpdateValue(HwdID, ID, 1, pTypeP1Power, sTypeP1Power, 10, 255, 0, "0;0;0;0;0;0", devname);

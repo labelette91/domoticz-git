@@ -103,6 +103,8 @@ public:
 
 	void UpdateDomoticzSecurityStatus(const int iSecStatus);
 	void SetInternalSecStatus();
+	void SetEventPeriod(unsigned char p_EventPeriod);
+  int ConvertPercentLevel(int dType,int dSubType,_eSwitchType switchtype,int level );
 
 	bool UpdateDevice(const int HardwareID, const std::string &DeviceID, const int unit, const int devType, const int subType, const int nValue, const std::string &sValue, const int signallevel, const int batterylevel);
 
@@ -125,6 +127,7 @@ public:
 	bool m_bHaveDownloadedDomoticzUpdateSuccessFull;
 	std::string m_UpdateStatusMessage;
 
+	bool SwitchLight(unsigned long long idx, const std::string &switchcmd, int level, int hue, bool ooc , const int ExtraDelay,bool IsTesting);
 	void GetAvailableWebThemes();
 
 	tcp::server::CTCPServer m_sharedserver;

@@ -29,6 +29,49 @@ double ConvertTemperature(const double tValue, const unsigned char tSign);
 
 std::vector<std::string> ExecuteCommandAndReturn(const std::string &szCommand);
 
+std::string To_string (double  val);
+std::string To_string (int  val);
+std::string To_string (long  val);
+std::string To_string (long  long val);
+void DateAsciiTotmTime (std::string &sLastUpdate , struct tm &LastUpdateTime  );
+void AsciiTime (struct tm &ltime , char * pLastUpdate );
+std::string  GetCurrentAsciiTime ();
+void AsciiTime ( time_t DateStart, char * DateStr );
+time_t DateAsciiToTime_t ( std::string & DateStr );
+
+class CircularBuffer {
+public:
+  double * Value;
+  int Size; //size of buffer'
+  int index; //current record index
+  double Sum;
+
+  CircularBuffer (int pSize);
+  ~CircularBuffer ();
+  int GetNext();
+  //store value and return last
+  double Put(double val);
+  //get last value
+  double GetLast();      
+  void Clear();
+  double GetSum();
+};
+
+//
+class LastValue{
+  typedef std::map<int,  double > T_Map_Double_Values;
+
+  T_Map_Double_Values LastValues ;
+  double Delta ;
+public:
+
+  LastValue(float delta=0);
+  double Get(int index);
+  void   Put(int index , double value);
+  bool AsChanged(int index , double value  );
+  bool AsChanged(int index , double value  , double delta );
+
+};
 std::string GenerateMD5Hash(const std::string &InputString, const std::string &Salt="");
 
 void hue2rgb(const float hue, int &outR, int &outG, int &outB, const double maxValue = 100.0);

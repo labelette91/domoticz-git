@@ -76,6 +76,17 @@ namespace http {
 				(*it)->ClearUserPasswords();
 			 }
 		}
+		void CWebServerHelper::RType_Scenes(Json::Value &root)//called from imperihome
+		{
+			if (plainServer_) { // assert
+				plainServer_->RType_Scenes(root);
+			}
+#ifdef NS_ENABLE_SSL
+			else if (secureServer_) {
+				secureServer_->RType_Scenes(root);
+			}
+#endif
+		}
 
 		//JSon
 		void CWebServerHelper::	GetJSonDevices(Json::Value &root, const std::string &rused, const std::string &rfilter, const std::string &order, const std::string &rowid, const std::string &planID, const std::string &floorID, const bool bDisplayHidden, const time_t LastUpdate, const bool bSkipUserCheck)

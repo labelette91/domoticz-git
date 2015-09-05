@@ -161,6 +161,8 @@ main/WebServerHelper.cpp
 main/WindCalculation.cpp
 main/Push.cpp
 main/DataPush.cpp
+main/VirtualThermostat.cpp
+main/Imperihome.cpp
 main/HttpPush.cpp
 httpclient/HTTPClient.cpp
 httpclient/UrlEncode.cpp

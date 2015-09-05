@@ -2,6 +2,7 @@
 #include "RFXNames.h"
 #include "RFXtrx.h"
 #include "../hardware/hardwaretypes.h"
+#include "Logger.h"
 #include "../hardware/evohome.h"
 
 typedef struct _STR_TABLE_SINGLE {
@@ -1839,6 +1840,8 @@ void GetLightStatus(
 		}
 		break;
 	}
+	if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"LIGH: GetLightStatus Typ:%2d STyp:%2d nVal:%d sVal:%-4s llvl:%2d isDim:%d maxDim:%2d GrpCmd:%d lstat:%s", 
+		dType,dSubType,nValue,sValue.c_str(),llevel,bHaveDimmer,maxDimLevel,bHaveGroupCmd,lstatus.c_str());
 }
 
 bool GetLightCommand(

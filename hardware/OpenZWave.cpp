@@ -919,7 +919,7 @@ void COpenZWave::EnableDisableDebug()
 
 bool COpenZWave::OpenSerialConnector()
 {
-	_log.Log(LOG_STATUS, "OpenZWave: Starting...");
+	_log.Log(LOG_STATUS, "OpenZWave: Starting on serial port:%s...",m_szSerialPort.c_str());
 	_log.Log(LOG_STATUS, "OpenZWave: Version: %s", GetVersionLong().c_str());
 
 	m_allNodesQueried = false;
@@ -1143,7 +1143,7 @@ bool COpenZWave::SwitchLight(const int nodeID, const int instanceID, const int c
 	if (m_pManager->IsNodeFailed(m_controllerID, nodeID))
 	{
 		_log.Log(LOG_ERROR, "OpenZWave: Node has failed (or is not alive), Switch command not sent! (NodeID: %d, 0x%02x)", nodeID, nodeID);
-		return false;
+//		return false;
 	}
 
 	_tZWaveDevice *pDevice = FindDevice(nodeID, instanceID, 0, ZWaveBase::ZDTYPE_SWITCH_DIMMER);
@@ -1286,7 +1286,7 @@ bool COpenZWave::SwitchColor(const int nodeID, const int instanceID, const int c
 	if (m_pManager->IsNodeFailed(m_controllerID, nodeID))
 	{
 		_log.Log(LOG_ERROR, "OpenZWave: Node has failed (or is not alive), Switch command not sent! (NodeID: %d, 0x%02x)", nodeID, nodeID);
-		return false;
+//		return false;
 	}
 
 	OpenZWave::ValueID vID(0, 0, OpenZWave::ValueID::ValueGenre_Basic, 0, 0, 0, OpenZWave::ValueID::ValueType_Bool);

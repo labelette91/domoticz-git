@@ -91,6 +91,35 @@
 			<td align="right"><label for="protected"><span data-i18n="Protected">Protected</span>:</label></td>
 			<td><input type="checkbox" id="protected"></td>
 		</tr>
+		<tr id="TemperatureDiv">
+			<td align="right"><label for="comboTemperature"><span data-i18n="Temperature">Temperature</span>: </label></td>
+			<td><select id="comboTemperature" style="width:150px" class="combobox ui-corner-all">
+				<!--#embed  -->
+			</select></td>
+		</tr>
+        <tr id="SwitchDiv">
+            <td align="right" style="width:60px"><label for="Thermostat">Thermostat: </label></td>
+ 		    <td>
+ 		    <select id="combosubdevice" style="width:250px" class="combobox ui-corner-all">
+		    </select>
+		    </td>
+        <tr>
+        <tr id="CoefPropDiv">
+          <td align="right" style="width:60px"><label>Kp: </label></td>
+          <td><input type="text" id="CoefProp" style="width: 50px; padding: .4em;" class="text ui-widget-content ui-corner-all" /></td>
+        </tr>
+        <tr id="CoefIntegDiv">
+          <td align="right" style="width:60px"><label>Ki: </label></td>
+          <td><input type="text" id="CoefInteg" style="width: 50px; padding: .4em;" class="text ui-widget-content ui-corner-all" /></td>
+        </tr>
+        <tr id="ConforDiv">
+          <td align="right" style="width:60px"><label data-i18n="Confor">Confor: </label></td>
+          <td><input type="text" id="Confor" style="width: 50px; padding: .4em;" class="text ui-widget-content ui-corner-all" /> &deg; <span id="Span1">C</span></td>
+        </tr>
+        <tr id="EcoDiv">
+          <td align="right" style="width:60px"><label data-i18n="Eco">Eco: </label></td>
+          <td><input type="text" id="Eco" style="width: 50px; padding: .4em;" class="text ui-widget-content ui-corner-all" /> &deg; <span id="Span2">C</span></td>
+        </tr>
         <tr>
           <td align="right"><label><span data-i18n="Value">Value</span>: </label></td>
           <td><input type="text" id="setpoint" style="width: 50px; padding: .4em;" class="text ui-widget-content ui-corner-all" /> &deg; <span id="tempunit">C</span></td>
@@ -213,11 +242,56 @@
 						:
 						<select id="combotimemin" style="width:50px" class="combobox ui-corner-all"></select>
 						<span data-i18n="(hour/minute)"></span>
-				</td>
+           </td>
+           <td>
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerHours(0  );">00</button> </label>                
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerHours(1  );">01</button> </label>                
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerHours(2  );">02</button> </label>                
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerHours(3  );">03</button> </label>                
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerHours(4  );">04</button> </label>                
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerHours(5  );">05</button> </label>                
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerHours(6  );">06</button> </label>                
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerHours(7  );">07</button> </label>                
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerHours(8  );">08</button> </label>                
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerHours(9  );">09</button> </label>                
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerHours(10 );">10</button> </label>                
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerHours(11 );">11</button> </label>                
+           <br>
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerHours(12 );">12</button> </label>
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerHours(13 );">13</button> </label>
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerHours(14 );">14</button> </label>
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerHours(15 );">15</button> </label>
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerHours(16 );">16</button> </label>
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerHours(17 );">17</button> </label>
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerHours(18 );">18</button> </label>
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerHours(19 );">19</button> </label>
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerHours(20 );">20</button> </label>
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerHours(21 );">21</button> </label>
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerHours(22 );">22</button> </label>
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerHours(23 );">23</button> </label>
+           <br>
+                <div style="margin-top: 10px ; height: 15px; width: 100%;" id="sliderDate"></div>
+           </td>
 			</tr>
 			<tr>
 				<td align="right" style="width:80px"><label for="tvalue"><span data-i18n="Value"></span>:</label></td>
 				<td><input type="text" id="tvalue" style="width: 60px; padding: .2em;" class="text ui-widget-content ui-corner-all"></td>
+        <td>
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerTemp(15 );">15</button></label>
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerTemp(16 );">16</button></label>
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerTemp(17 );">17</button></label>
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerTemp(18 );">18</button></label>
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerTemp(19 );">19</button></label>
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerTemp(20 );">20</button></label>
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerTemp(21 );">21</button></label>
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerTemp(22 );">22</button></label>
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerTemp(23 );">23</button></label>
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerTemp(24 );">24</button></label>
+                <label> <button class="btn btn-th btn-info" type="button"  onclick="SetTimerTemp(25 );">25</button></label>
+           <br>
+                <div style="margin-top:10px;height: 15px; " id="sliderValue"></div>
+        </td>
+
 			</tr>
 			<tr id="rnorm"><td></td></tr>
 			<tr id="rnorm">
@@ -232,7 +306,7 @@
 			<tr id="rnorm"><td></td></tr>
 			<tr id="rnorm">
 				<td align="right" style="width:80px"><label><span data-i18n="Days"></span>:</label></td>
-				<td>
+				<td colspan=2>
 					<input type="checkbox" id="ChkMon" checked/>&nbsp;<span data-i18n="Monday"></span>&nbsp;
 					<input type="checkbox" id="ChkTue" checked/>&nbsp;<span data-i18n="Tuesday"></span>&nbsp;
 					<input type="checkbox" id="ChkWed" checked/>&nbsp;<span data-i18n="Wednesday"></span>&nbsp;
@@ -246,7 +320,56 @@
 		<br>
     <a class="btnstyle3" onclick="AddSetpointTimer();" data-i18n="Add">Add</a>
 </div>
+<div id="ihmSetpointTimers" style="display:none;">
+  <table BORDER="0">       
+    
+	<tr>
+		<td align="right" ><label for="tvalue"><span data-i18n="Confor" onclick="selectConfButton();" >Confor</span>:</label></td>
+		<td><input type="text" id="tConf" style="width: 60px; padding: .2em;" class="text ui-widget-content ui-corner-all">
+		&nbsp;  
+    <label> <button id="cT1"  class="btn btn-th btn-conf" type="button"  onclick="SetConf(this);">15</button></label>
+    <label> <button id="cT2"  class="btn btn-th btn-conf" type="button"  onclick="SetConf(this);">16</button></label>
+    <label> <button id="cT3"  class="btn btn-th btn-conf" type="button"  onclick="SetConf(this);">17</button></label>
+    <label> <button id="cT4"  class="btn btn-th btn-conf" type="button"  onclick="SetConf(this);">18</button></label>
+    <label> <button id="cT5"  class="btn btn-th btn-conf" type="button"  onclick="SetConf(this);">19</button></label>
+    <label> <button id="cT6"  class="btn btn-th btn-conf" type="button"  onclick="SetConf(this);">20</button></label>
+    <label> <button id="cT7"  class="btn btn-th btn-conf" type="button"  onclick="SetConf(this);">21</button></label>
+    <label> <button id="cT8"  class="btn btn-th btn-conf" type="button"  onclick="SetConf(this);">22</button></label>
+    <label> <button id="cT9"  class="btn btn-th btn-conf" type="button"  onclick="SetConf(this);">23</button></label>
+    <label> <button id="cT10" class="btn btn-th btn-conf" type="button"  onclick="SetConf(this);">24</button></label>
+    <label> <button id="cT11" class="btn btn-th btn-conf" type="button"  onclick="SetConf(this);">25</button></label>
 
+  </td>
+	</tr>
+	<tr>
+		<td align="right" ><label for="tvalue"><span data-i18n="Eco" onclick="selectEcoButton();">Eco</span>:</label></td>
+		<td><input type="text" id="tEco" style="width: 60px; padding: .2em;" class="text ui-widget-content ui-corner-all">
+		&nbsp;  
+    <label> <button id="eT1"  class="btn btn-th btn-eco" type="button"  onclick="SetEco(this);">15</button></label>
+    <label> <button id="eT2"  class="btn btn-th btn-eco" type="button"  onclick="SetEco(this);">16</button></label>
+    <label> <button id="eT3"  class="btn btn-th btn-eco" type="button"  onclick="SetEco(this);">17</button></label>
+    <label> <button id="eT4"  class="btn btn-th btn-eco" type="button"  onclick="SetEco(this);">18</button></label>
+    <label> <button id="eT5"  class="btn btn-th btn-eco" type="button"  onclick="SetEco(this);">19</button></label>
+    <label> <button id="eT6"  class="btn btn-th btn-eco" type="button"  onclick="SetEco(this);">20</button></label>
+    <label> <button id="eT7"  class="btn btn-th btn-eco" type="button"  onclick="SetEco(this);">21</button></label>
+    <label> <button id="eT8"  class="btn btn-th btn-eco" type="button"  onclick="SetEco(this);">22</button></label>
+    <label> <button id="eT9"  class="btn btn-th btn-eco" type="button"  onclick="SetEco(this);">23</button></label>
+    <label> <button id="eT10" class="btn btn-th btn-eco" type="button"  onclick="SetEco(this);">24</button></label>
+    <label> <button id="eT11" class="btn btn-th btn-eco" type="button"  onclick="SetEco(this);">25</button></label>
+  </td>
+	</tr>
+  <tr style="height:50px;" >                                           
+		<td></td>
+		<td>
+			<input type="radio" name="when" id="when1" value="Everyday" checked>&nbsp;<span data-i18n="Everyday" style="margin-right: 20px;">Everyday</span>
+			<input type="radio" name="when" id="when2" value="Weekdays">&nbsp;<span data-i18n="Weekdays" style="margin-right: 20px;">Weekdays</span>
+			<input type="radio" name="when" id="when3" value="Weekends">&nbsp;<span data-i18n="Weekends" style="margin-right: 20px;">Weekends</span>
+			<input type="radio" name="when" id="when4" value="SelectedDays">&nbsp;<span data-i18n="Selected Days" style="margin-right: 20px;">SelectedDays</span><br>
+		</td>
+  <tr> 
+  </table>
+
+  </div>
 <div id="utilitycontent" class="container">
 </div>
 
@@ -270,4 +393,12 @@
   <br>
   <h2 data-i18n="Year">Year</h2>
   <div id="fanyeargraph" style="height: 300px;"></div>
+</div>
+<div id="dialog-copy" title="Copy Timers" style="display:none;">
+		<form>
+				<label for="sensor"><span data-i18n="Sensor">Sensor</span>: </label>
+				<select id="sensor" style="width:250px" class="combobox ui-corner-all">
+
+				</select>
+		</form>
 </div>

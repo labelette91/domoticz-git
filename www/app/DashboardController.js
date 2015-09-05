@@ -335,7 +335,7 @@ define(['app'], function (app) {
 															'<label id=\"statustext\"><button class="btn btn-mini" type="button" onclick="SwitchLight(' + item.idx + ',\'On\',RefreshFavorites,' + item.Protected +');">' + $.t("On") +'</button></label> ' +
 															'<label id=\"img\"><button class="btn btn-mini btn-info" type="button" onclick="SwitchLight(' + item.idx + ',\'Off\',RefreshFavorites,' + item.Protected +');">' + $.t("Off") +'</button></label>';
 											}
-										}
+                                        }
 										else if (item.SwitchType == "TPI") {
 											var RO=(item.Unit>100)?true:false;
 											isdimmer=true;
@@ -571,7 +571,7 @@ define(['app'], function (app) {
 															img='<img src="images/Dimmer48_Off.png" title="' + $.t("Turn On") +'" onclick="SwitchLight(' + item.idx + ',\'On\',RefreshFavorites,' + item.Protected +');" class="lcursor" height="40" width="40">';
 														}
 											}
-										}
+                                        }
 										else if (item.SwitchType == "TPI") {
 											var RO=(item.Unit>100)?true:false;
 											isdimmer=true;
@@ -1257,6 +1257,11 @@ define(['app'], function (app) {
 												status=item.Data;
 											}
 								}
+								else if (isVirtualThermostat(item))	{
+									RefreshTargetTemp(id, item.SetPoint);
+									RefreshRoomTemp(id, item.RoomTemp);
+									status = ShowThermostatMobile(item);
+								}
 								else if (item.SubType=="Alert") {
 									status=item.Data + ' <img src="images/Alert48_' + item.Level + '.png" height="16" width="16">';
 								}
@@ -1354,6 +1359,14 @@ define(['app'], function (app) {
 									status=item.Data;
 									bigtext=item.Data;
 								}
+								else if (isVirtualThermostat(item))	{
+                                        img = GetThermostatImg(item, "RefreshFavorites", 40);
+										setHtmlValue(id + " #img", img );
+                                        RefreshTargetTemp(id, item.SetPoint);
+                                        RefreshRoomTemp(id, item.RoomTemp);
+			                            status = getTextStatus(item) ;
+
+								}
 								else if ((item.Type == "Thermostat")&&(item.SubType=="SetPoint")) {
 									status=item.Data + '\u00B0 ' + $scope.config.TempSign;
 									bigtext=item.Data + '\u00B0 ' + $scope.config.TempSign;
@@ -1418,8 +1431,10 @@ define(['app'], function (app) {
 								if ($(id + " #status").html()!=status) {
 									$(id + " #status").html(status);
 								}
-								if ($(id + " #bigtext").html()!=bigtext) {
+								if (bigtext!=""){
+									if ($(id + " #bigtext").html()!=bigtext) {
 									$(id + " #bigtext").html(bigtext);
+								}
 								}
 								if ($(id + " #lastupdate").html()!=item.LastUpdate) {
 									$(id + " #lastupdate").html(item.LastUpdate);
@@ -1594,7 +1609,7 @@ define(['app'], function (app) {
 										var streamimg='<img src="images/webcam.png" title="' + $.t('Stream Video') +'" height="16" width="16">';
 										streamurl="<a href=\"javascript:ShowCameraLiveStream('" + escape(item.Name) + "','" + item.CameraIdx + "')\">" + streamimg + "</a>";
 										bigtext+="&nbsp;"+streamurl;
-									  }
+                                    }
 									  xhtm+=bigtext+'</td>\n';
 									if (item.Type.indexOf('Scene')==0) {
 										xhtm+='<td id="img1"><img src="images/push48.png" title="Activate" onclick="SwitchScene(' + item.idx + ',\'On\',RefreshFavorites, ' + item.Protected + ');" class="lcursor" height="40" width="40"></td>\n';
@@ -1631,6 +1646,7 @@ define(['app'], function (app) {
 				  htmlcontent+='</div>\n';
 				}
 				if (($scope.config.DashboardType==2)||(window.myglobals.ismobile==true)) {
+                            if (jj != 0)
 							htmlcontent+='\t    </table>\n';
 				}
 				
@@ -1832,7 +1848,7 @@ define(['app'], function (app) {
 															'<label id=\"statustext\"><button class="btn btn-mini" type="button" onclick="SwitchLight(' + item.idx + ',\'On\',RefreshFavorites,' + item.Protected +');">' + $.t("On") +'</button></label> ' +
 															'<label id=\"img\"><button class="btn btn-mini btn-info" type="button" onclick="SwitchLight(' + item.idx + ',\'Off\',RefreshFavorites,' + item.Protected +');">' + $.t("Off") +'</button></label>';
 											}
-										}
+                                    }
 									else if (item.SwitchType == "TPI") {
 										var img="";
 										var RO=(item.Unit>100)?true:false;
@@ -2111,7 +2127,7 @@ define(['app'], function (app) {
 														xhtm+='\t      <td id="img"><img src="images/Dimmer48_Off.png" title="' + $.t("Turn On") +'" onclick="SwitchLight(' + item.idx + ',\'On\',RefreshFavorites,' + item.Protected +');" class="lcursor" height="40" width="40"></td>\n';
 													}
 										}
-									}
+                                    }
 									else if (item.SwitchType == "TPI") {
 										var RO=(item.Unit>100)?true:false;
 										if (item.Status == 'On')
@@ -2214,6 +2230,7 @@ define(['app'], function (app) {
 				  htmlcontent+='</div>\n';
 				}
 				if (($scope.config.DashboardType==2)||(window.myglobals.ismobile==true)) {
+                            if (jj!=0)
 							htmlcontent+='\t    </table>\n';
 				}
 
@@ -2376,6 +2393,7 @@ define(['app'], function (app) {
 				  htmlcontent+='</div>\n';
 				}
 				if (($scope.config.DashboardType==2)||(window.myglobals.ismobile==true)) {
+                            if (jj != 0)
 							htmlcontent+='\t    </table>\n';
 				}
 
@@ -2586,6 +2604,7 @@ define(['app'], function (app) {
 				  htmlcontent+='</div>\n';
 				}
 				if (($scope.config.DashboardType==2)||(window.myglobals.ismobile==true)) {
+                            if (jj != 0)
 							htmlcontent+='\t    </table>\n';
 				}
 
@@ -2750,6 +2769,7 @@ define(['app'], function (app) {
 				  htmlcontent+='</div>\n';
 				}
 				if (($scope.config.DashboardType==2)||(window.myglobals.ismobile==true)) {
+                            if (jj != 0)
 							htmlcontent+='\t    </table>\n';
 				}
 				
@@ -2893,8 +2913,9 @@ define(['app'], function (app) {
 										htmlcontent+='\t    <table class="mobileitem">\n';
 										htmlcontent+='\t    <thead>\n';
 										htmlcontent+='\t    <tr>\n';
-										htmlcontent+='\t    		<th>' + $.t('Utility Sensors') + '</th>\n';
-										htmlcontent+='\t    		<th style="text-align:right"><a id="cUtility" href="javascript:SwitchLayout(\'Utility\')"><img src="images/next.png"></a></th>\n';
+										htmlcontent+='\t    		<th>' + $.t('Utility Sensors') + '\n';
+										htmlcontent+='\t    		<div style="text-align:right; float:right;"><a id="cUtility" href="javascript:SwitchLayout(\'Utility\')"><img src="images/next.png"></a></div>\n';
+										htmlcontent+='\t    		</th>\n';
 										htmlcontent+='\t    </tr>\n';
 										htmlcontent+='\t    </thead>\n';
 					  }
@@ -2916,7 +2937,7 @@ define(['app'], function (app) {
 					if (($scope.config.DashboardType==2)||(window.myglobals.ismobile==true)) {
 						xhtm+=
 								'\t    <tr id="utility_' + item.idx +'">\n' +
-								'\t      <td id="name">' + item.Name + '</td>\n';
+								'\t      <td > <lab id="name" style="float: left;">' + item.Name + '</lab>\n';
 						var status="";
 						if (typeof item.Counter != 'undefined') {
 							if ($scope.config.DashboardType==0) {
@@ -2960,6 +2981,9 @@ define(['app'], function (app) {
 										status=item.Data;
 									}
 						}
+						else if (isVirtualThermostat(item))	{
+							status = ShowThermostatMobile(item);
+						}
 						else if (item.SubType=="Alert") {
 							status=item.Data + ' <img src="images/Alert48_' + item.Level + '.png" height="16" width="16">';
 						}
@@ -2993,8 +3017,18 @@ define(['app'], function (app) {
 							}
 						}
 						xhtm+=
-									'\t      <td id="status">' + status + '</td>\n' +
+									'\t      <lab id="status" style="float:right;">' + status + '</lab>\n' + '</td>\n'
 									'\t    </tr>\n';
+						if (isVirtualThermostat(item))	{
+                            xhtm += '<tr id="utility_' + item.idx + '">';
+                            xhtm += '<td colspan="2" style="border:0px solid red; padding-top:0px; padding-bottom:10px; display: flex; ">';
+                            xhtm += ShowTempDownMobile(item);
+                            xhtm += getThermostatSlider(item.idx,item.SetPoint, "#dashcontent #utility_");
+                            xhtm += ShowTempUpMobile(item);
+                            xhtm += '</td>';
+                            xhtm += '</tr>\n';
+                        }
+
 					}
 					else {
 						if ($scope.config.DashboardType==0) {
@@ -3053,6 +3087,9 @@ define(['app'], function (app) {
 							) {
 							xhtm+=item.Data;
 						}
+						else if (isVirtualThermostat(item))	{
+							xhtm += ShowTargetRoomTemp(item.SetPoint, item.RoomTemp);
+						}
 						else if ((item.Type == "Thermostat")&&(item.SubType=="SetPoint")) {
 							xhtm+=item.Data + '\u00B0 ' + $scope.config.TempSign;
 						}
@@ -3060,8 +3097,14 @@ define(['app'], function (app) {
 							xhtm+=item.Data + '\u00B0 ' + $scope.config.TempSign;
 						}
 						xhtm+='</td>\n';
-						xhtm+='\t      <td id="img"><img src="images/';
 						var status="";
+
+						if (isVirtualThermostat(item))	{
+							xhtm += '\t      <td id="img">' + GetThermostatImg(item, "RefreshFavorites", 40) + '</td>\n';
+							status = getTextStatus(item) ;
+						}
+						else {
+							xhtm+='\t      <td id="img"><img src="images/';
 						if (typeof item.Counter != 'undefined') {
 							if (item.Type == "RFXMeter") {
 								if (item.SwitchTypeVal==1) {
@@ -3127,7 +3170,7 @@ define(['app'], function (app) {
 							xhtm+='lux48.png" class="lcursor" onclick="ShowLuxLog(\'#dashcontent\',\'ShowFavorites\',' + item.idx + ',\'' + escape(item.Name) + '\', ' + item.SwitchTypeVal + ');" height="40" width="40"></td>\n';
 							status=item.Data;
 						}
-						else if (item.Type == "Weight") {
+							else if (item.Type == "Weight") {
 							xhtm+='scale48.png" height="40" width="40"></td>\n';
 							status=item.Data;
 						}
@@ -3139,7 +3182,7 @@ define(['app'], function (app) {
 							xhtm+='moisture48.png" class="lcursor" onclick="ShowGeneralGraph(\'#dashcontent\',\'ShowFavorites\',' + item.idx + ',\'' + escape(item.Name) + '\',' + item.SwitchTypeVal +', \'' + item.SubType + '\');" height="40" width="40"></td>\n';
 							status=item.Data;
 						}
-						else if (item.SubType=="Leaf Wetness") {
+							else if (item.SubType=="Leaf Wetness") {
 							xhtm+='leaf48.png" height="40" width="40"></td>\n';
 							status=item.Data;
 						}
@@ -3167,6 +3210,10 @@ define(['app'], function (app) {
 							xhtm+='override.png" class="lcursor" onclick="ShowSetpointPopup(event, ' + item.idx + ', ShowFavorites, ' + item.Protected + ', ' + item.Data + ');" height="40" width="40"></td>\n';
 							status=item.Data + '\u00B0 ' + $scope.config.TempSign;
 						}
+						else if ((item.SubType=="Thermostat Mode")||(item.SubType=="Thermostat Fan Mode")) {
+							xhtm+='mode48.png" height="40" width="40"></td>\n';
+							status=item.Data;
+						}
 						else if (item.SubType=="Smartwares") {
 							xhtm+='override.png" class="lcursor" onclick="ShowSetpointPopup(event, ' + item.idx + ', ShowFavorites, ' + item.Protected + ', ' + item.Data + ');" height="40" width="40"></td>\n';
 							status=item.Data + '\u00B0 ' + $scope.config.TempSign;
@@ -3179,7 +3226,7 @@ define(['app'], function (app) {
 							xhtm+='Speaker48_On.png" class="lcursor" onclick="ShowGeneralGraph(\'#dashcontent\',\'ShowFavorites\',' + item.idx + ',\'' + escape(item.Name) + '\',' + item.SwitchTypeVal +', \'' + item.SubType + '\');" height="40" width="40"></td>\n';
 							status=item.Data;
 						}
-						
+						}
 						if (typeof item.Usage != 'undefined') {
 							if (item.Type!="P1 Smart Meter") {
 								if ($scope.config.DashboardType==0) {
@@ -3203,10 +3250,19 @@ define(['app'], function (app) {
 							}
 						}
 						
-						xhtm+=
-								'\t      <td id="status">' + status + '</td>\n' +
-								'\t      <td id="lastupdate">' + item.LastUpdate + '</td>\n' +
-						'\t    </tr>\n' +
+						xhtm+=	'\t      <td id="status">' + status + '</td>\n' ;
+						if (!isVirtualThermostat(item))	{
+							xhtm+=	'\t      <td id="lastupdate">' + item.LastUpdate + '</td>\n' ;
+						}
+						else  {
+						    xhtm += '<td style="display: flex;">';
+						    xhtm += '<img align="left"  src="images/down.png"  style="width: 32px;"                    height="24px" title="' + $.i18n('Decrement') + '" onclick="IncrementThermostat(' + item.idx + ',0,\'#dashcontent #utility_\');" onmouseover="cursorhand()" onmouseout="cursordefault()">';
+						    xhtm += getThermostatSlider(item.idx,item.SetPoint, "#dashcontent #utility_");
+						    xhtm += '<img align="right" src="images/up.png"    style="width: 32px;margin-right: 10px;" height="24px"  title="' + $.i18n('Increment') + '" onclick="IncrementThermostat(' + item.idx + ',1,\'#dashcontent #utility_\');" onmouseover="cursorhand()" onmouseout="cursordefault()">';
+						    xhtm += '</td>';
+						}
+
+						xhtm+=	'\t    </tr>\n' +
 						'\t    </table>\n' +
 						'\t  </span>\n' +
 						'\t</div>\n';
@@ -3220,6 +3276,7 @@ define(['app'], function (app) {
 				  htmlcontent+='</div>\n';
 				}
 				if (($scope.config.DashboardType==2)||(window.myglobals.ismobile==true)) {
+                            if (jj != 0)
 							htmlcontent+='\t    </table>\n';
 				}
 
@@ -3308,6 +3365,7 @@ define(['app'], function (app) {
 
 			$rootScope.RefreshTimeAndSun();
 			
+            createThermostatSlider("#dashcontent");
 			//Create Dimmer Sliders
 			$('#dashcontent .dimslider').slider({
 				//Config

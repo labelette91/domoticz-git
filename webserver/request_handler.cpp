@@ -17,6 +17,8 @@
 #include "reply.hpp"
 #include "request.hpp"
 #include "cWebem.h"
+#include "../main/Logger.h"
+extern bool  ImperiHomeRequest( std::string &request_path , std::string &rep_content);
 #include "GZipHelper.h"
 
 #define ZIPREADBUFFERSIZE (8192)
@@ -84,6 +86,7 @@ int request_handler::do_extract_currentfile(unzFile uf, const char* password, st
 void request_handler::handle_request(const std::string &sHost, const request& req, reply& rep)
 {
   // Decode url to path.
+  if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"WEB : Host:%s Uri;%s", sHost.c_str(),req.uri.c_str());
   std::string request_path;
   if (!url_decode(req.uri, request_path))
   {
@@ -152,6 +155,13 @@ void request_handler::handle_request(const std::string &sHost, const request& re
 #ifndef WEBSERVER_DONT_USE_ZIP
   if (!m_bIsZIP)
 #endif
+  {
+	//system command 
+	if (   ImperiHomeRequest(request_path,rep.content) ){
+		  rep.status = reply::ok;
+			extension="html";
+	}
+	else 
   {
 	  //first try gzip version
 	  if (bHaveGZipSupport)
@@ -224,6 +234,7 @@ void request_handler::handle_request(const std::string &sHost, const request& re
 				  rep.content.append(buf, (unsigned int)is.gcount());
 		  }
 	  }
+  }
   }
 #ifndef WEBSERVER_DONT_USE_ZIP
   else

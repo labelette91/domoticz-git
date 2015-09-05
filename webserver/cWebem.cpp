@@ -1377,6 +1377,9 @@ char *cWebemRequestHandler::strftime_t(const char *format, const time_t rawtime)
 void cWebemRequestHandler::handle_request( const std::string &sHost, const request& req, reply& rep)
 {
 	//_log.Log(LOG_NORM, "www-request: %s", req.uri.c_str());
+	if (_log.isTraceEnable())	  
+		_log.Log(LOG_TRACE, "WEB: www-request: %s", req.uri.c_str());
+
 	rep.bIsGZIP = false;
 	myWebem->m_bAddNewSession=false;
 	myWebem->m_bRemoveCookie=false;

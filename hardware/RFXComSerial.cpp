@@ -837,6 +837,7 @@ bool RFXComSerial::onInternalMessage(const unsigned char *pBuffer, const size_t 
 					if (pResponse->IRESPONSE.subtype == cmdStartRec)
 					{
 						m_bReceiverStarted = strstr((char*)&pResponse->IRESPONSE.msg1, "Copyright RFXCOM") != NULL;
+						_log.Log(LOG_STATUS, "RFXCOM: reception started");
 					}
 					else
 					{

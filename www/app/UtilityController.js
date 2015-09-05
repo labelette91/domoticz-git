@@ -352,7 +352,38 @@ define(['app'], function (app) {
 			}
 			return o;
 		};
+		ShowIhmSetpointTimers = function (id,name, isdimmer, stype,devsubtype)
+		{
+			if (typeof $scope.mytimer != 'undefined') {
+				$interval.cancel($scope.mytimer);
+				$scope.mytimer = undefined;
+			}
+			$.devIdx=id;
+			$.isDimmer=isdimmer;
+			
+			$('#modal').show();
+			var htmlcontent = '';
+		  
+		    htmlcontent+=
+			'\t<table class="bannav" id="bannav" border="0" cellpadding="0" cellspacing="0" width="100%">\n' +
+			'\t<tr>\n' +
+			'\t  <td align="left"><a class="btnstylerev" onclick="ShowUtilities();" data-i18n="Back">Back</a></td>\n' +
+			'\t  <td align="right"><a class="btnstyle" onclick="ProgCopy('+id+');" data-i18n="Copy">Copy</a>\n' +
+			'\t                    <a class="btnstyle" onclick="ProgAdd('+id+');" data-i18n="Add">Add</a></td>\n' +
+			'\t</tr>\n' +
+			'\t</table>\n';
 
+			htmlcontent+='<p><h2><span data-i18n="Name"></span>: ' + name + '</h2></p><br>\n';
+
+			htmlcontent+=$('#ihmSetpointTimers').html();
+			htmlcontent+=createDayHourTable();
+			$('#utilitycontent').html(/*GetBackbuttonHTMLTable('ShowUtilities')+*/htmlcontent);
+			$('#utilitycontent').i18n();
+
+			ShowIhmSetpointTimersInt(id,name, isdimmer, stype,devsubtype);
+
+			$('#modal').hide();
+		}
 		ShowSetpointTimers = function (id,name, isdimmer, stype,devsubtype)
 		{
 			if (typeof $scope.mytimer != 'undefined') {
@@ -422,7 +453,7 @@ define(['app'], function (app) {
 					$("#utilitycontent #timerparamstable #rnorm").show();
 				}
 			});
-
+			$("#utilitycontent #combotype").val(2);
 			oTable = $('#utilitycontent #setpointtimertable').dataTable( {
 			  "sDom": '<"H"lfrC>t<"F"ip>',
 			  "oTableTools": {
@@ -446,7 +477,7 @@ define(['app'], function (app) {
 			{
 				$('#timerparamstable #combotimehour').append($('<option></option>').val(ii).html($.strPad(ii,2)));  
 			}
-			for (ii=0; ii<60; ii++)
+			for (ii=0; ii<60; ii+=15)
 			{
 				$('#timerparamstable #combotimemin').append($('<option></option>').val(ii).html($.strPad(ii,2)));  
 			}
@@ -471,6 +502,7 @@ define(['app'], function (app) {
 
 			$('#modal').hide();
 			RefreshSetpointTimerTable(id);
+			createUtilityDateSlider();
 		}
 
 		MakeFavorite = function(id,isfavorite)
@@ -550,7 +582,7 @@ define(['app'], function (app) {
 		  $("#dialog-editenergydevice" ).dialog( "open" );
 		}
 
-		EditSetPoint = function(idx,name,description,setpoint,isprotected)
+		EditSetPoint = function(idx,name,description,setpoint,isprotected,TempIdx,SwitchIdx,isVirtual,CoefProp,Eco,Confor,CoefInteg)
 		{
 			if (typeof $scope.mytimer != 'undefined') {
 				$interval.cancel($scope.mytimer);
@@ -563,10 +595,50 @@ define(['app'], function (app) {
 				$('#dialog-editsetpointdevice #protected').prop('checked',(isprotected==true));
 				$("#dialog-editsetpointdevice #setpoint").val(setpoint);
 				$("#dialog-editsetpointdevice #tempunit").html($scope.config.TempSign);
+
+			if (isVirtual)
+			{
+				RefreshTemperatureComboArray("#dialog-editsetpointdevice");
+				$("#dialog-editsetpointdevice  #comboTemperature").val(TempIdx);
+				$("#dialog-editsetpointdevice  #TemperatureDiv").show();
+				RefreshSwitchesComboArray("#dialog-editsetpointdevice");
+				$("#dialog-editsetpointdevice  #combosubdevice").val(SwitchIdx);
+				$("#dialog-editsetpointdevice  #SwitchDiv").show();
+				$("#dialog-editsetpointdevice  #CoefProp").val(CoefProp);
+				$("#dialog-editsetpointdevice  #CoefPropDiv").show();
+				$("#dialog-editsetpointdevice  #CoefInteg").val(CoefInteg);
+				$("#dialog-editsetpointdevice  #CoefIntegDiv").show();
+
+				$("#dialog-editsetpointdevice  #Eco").val(Eco);
+				$("#dialog-editsetpointdevice  #EcoDiv").show();
+				$("#dialog-editsetpointdevice  #Confor").val(Confor);
+				$("#dialog-editsetpointdevice  #ConforDiv").show();
+
+			}
+			else
+			{
+				$("#dialog-editsetpointdevice  #comboTemperature").val("");
+				$("#dialog-editsetpointdevice  #combosubdevice").val("");
+				$("#dialog-editsetpointdevice  #CoefProp").val("");
+				$("#dialog-editsetpointdevice  #TemperatureDiv").hide();
+				$("#dialog-editsetpointdevice  #SwitchDiv").hide();
+				$("#dialog-editsetpointdevice  #CoefPropDiv").hide();
+				$("#dialog-editsetpointdevice  #Eco").val("");
+				$("#dialog-editsetpointdevice  #EcoDiv").hide();
+				$("#dialog-editsetpointdevice  #Confor").val("");
+				$("#dialog-editsetpointdevice  #ConforDiv").hide();
+				$("#dialog-editsetpointdevice  #CoefInteg").val("");
+				$("#dialog-editsetpointdevice  #CoefIntegDiv").hide();
+
+			}
+
+				
 				$("#dialog-editsetpointdevice" ).i18n();
 				$("#dialog-editsetpointdevice" ).dialog( "open" );
 			});
 		}
+
+
 		
 		EditThermostatClock = function(idx,name,description,daytime,isprotected)
 		{
@@ -741,6 +813,16 @@ define(['app'], function (app) {
 							status=item.Data;
 							bigtext=item.Data;
 						}
+						else if (isVirtualThermostat(item))
+						{
+								img = GetThermostatImg(item,"RefreshUtilities",48);
+								setHtmlValue(id + " #img", img );
+								RefreshTargetTemp ( id , item.SetPoint);
+								RefreshRoomTemp   ( id , item.RoomTemp);
+								RefreshThSlider(item.idx, "#utilitycontent #", item.SetPoint);
+								status = getTextStatus(item);
+								bigtext= $(id + " #bigtext").html();
+						}
 						else if ((item.Type == "Thermostat")&&(item.SubType=="SetPoint")) {
 							status=item.Data + '\u00B0 ' + $scope.config.TempSign;
 							bigtext=item.Data + '\u00B0 ' + $scope.config.TempSign;
@@ -827,7 +909,7 @@ define(['app'], function (app) {
 				$scope.mytimer = undefined;
 			}
 		  $('#modal').show();
-		  
+		  document.body.oncontextmenu = function(){return false;}		  
 		  var htmlcontent = '';
 			var bShowRoomplan=false;
 			$.RoomPlans = [];
@@ -902,11 +984,13 @@ define(['app'], function (app) {
 					htmlcontent+='<div class="row divider">\n';
 					bHaveAddedDevider=true;
 				  }
-				  
+				  var TypeTable;
+				   if (isVirtualThermostat(item)) TypeTable ="itemtable-th"; else TypeTable ="itemtable"
+						
 				  var xhtm=
 						'\t<div class="span4" id="' + item.idx + '">\n' +
 						'\t  <section>\n' +
-						'\t    <table id="itemtable" border="0" cellpadding="0" cellspacing="0">\n' +
+						'\t    <table id="'+TypeTable+'" border="0" cellpadding="0" cellspacing="0">\n' +
 						'\t    <tr>\n';
 						var nbackcolor="#D4E1EE";
 						if (item.Protected==true) {
@@ -968,6 +1052,9 @@ define(['app'], function (app) {
 						}
 						else if (item.Type == "Usage") {
 						  xhtm+=item.Data;
+						}
+						else if (isVirtualThermostat(item)){
+								xhtm+= ShowTargetRoomTemp(item.SetPoint, item.RoomTemp) ; 
 						}
 						else if (item.Type == "Thermostat") {
 						  xhtm+=item.Data + '\u00B0 ' + $scope.config.TempSign;
@@ -1076,6 +1163,11 @@ define(['app'], function (app) {
 					  xhtm+='current48.png" height="48" width="48"></td>\n';
 					  status=item.Data;
 					}
+					else if (isVirtualThermostat(item)){
+							xhtm = xhtm.substring(0, xhtm.length-37);
+							xhtm+='\t      <td id="img">' + GetThermostatImg(item,"RefreshUtilities",48) + '</td>\n';
+							status = getTextStatus(item);
+					}
 					else if (((item.Type == "Thermostat")&&(item.SubType=="SetPoint"))||(item.Type == "Radiator 1")) {
 					  xhtm+='override.png" class="lcursor" onclick="ShowSetpointPopup(event, ' + item.idx + ', RefreshUtilities, ' + item.Protected + ', ' + item.Data + ');" height="48" width="48" ></td>\n';
 					  status=item.Data + '\u00B0 ' + $scope.config.TempSign;
@@ -1101,11 +1193,20 @@ define(['app'], function (app) {
 							status+='<br>' + $.t("Return") + ': ' + item.CounterDeliv + ', ' + $.t("Today") + ': ' + item.CounterDelivToday;
 						}
 					}
-					xhtm+=      
-						'\t      <td id="status">' + status + '</td>\n' +
-						'\t      <td id="lastupdate">' + item.LastUpdate + '</td>\n' +
-						'\t      <td id="type">' + item.Type + ', ' + item.SubType + '</td>\n' +
-						'\t      <td>';
+					xhtm+='\t      <td id="status">' + status + '</td>\n' ;
+					xhtm+='\t      <td id="lastupdate">' + item.LastUpdate + '</td>\n' ;
+					if (isVirtualThermostat(item))
+					{
+						xhtm+='\t      <td id="type" style="display: flex;">' ;
+						xhtm+= ShowTempDown(item , "#utilitycontent #");
+						xhtm += getThermostatSlider(item.idx,item.SetPoint, "#utilitycontent #");
+						xhtm+= ShowTempUp(item , "#utilitycontent #");
+						xhtm+='</td>\n' ;
+
+					}
+					else
+						xhtm+='\t      <td id="type">' + item.Type + ', ' + item.SubType + '</td>\n' ;
+					xhtm+='\t      <td>';
 				  if (item.Favorite == 0) {
 					xhtm+=      
 						  '<img src="images/nofavorite.png" title="' + $.t('Add to Dashboard') +'" onclick="MakeFavorite(' + item.idx + ',1);" class="lcursor">&nbsp;&nbsp;&nbsp;&nbsp;';
@@ -1192,12 +1293,12 @@ define(['app'], function (app) {
 				  else if ((item.Type == "Thermostat")&&(item.SubType=="SetPoint")) {
 						if (permissions.hasPermission("Admin")) {
 							xhtm+='<a class="btnsmall" onclick="ShowTempLog(\'#utilitycontent\',\'ShowUtilities\',' + item.idx + ',\'' + escape(item.Name) + '\');" data-i18n="Log">Log</a> ';
-							xhtm+='<a class="btnsmall" onclick="EditSetPoint(' + item.idx + ',\'' + escape(item.Name) + '\',\'' + escape(item.Description) + '\', ' + item.SetPoint + ',' + item.Protected +');" data-i18n="Edit">Edit</a> ';
+							xhtm+='<a class="btnsmall" onclick="EditSetPoint(' + item.idx + ',\'' + escape(item.Name) + '\',\'' + escape(item.Description) + '\', ' + item.SetPoint + ',' + item.Protected + ',' + item.TempIdx + ',' + item.SwitchIdx + ',' + isVirtualThermostat(item) + ',' + item.AddjMulti + ',' + item.AddjValue + ',' + item.AddjValue2 + ',' + item.AddjMulti2 +');" data-i18n="Edit">Edit</a> ';
 							if (item.Timers == "true") {
-								xhtm+='<a class="btnsmall-sel" onclick="ShowSetpointTimers(' + item.idx + ',\'' + escape(item.Name) + '\');" data-i18n="Timers">Timers</a> ';
+								xhtm+='<a class="btnsmall-sel" onclick="ShowSetpointTimers(' + item.idx + ',\'' + escape(item.Name) + '\');" oncontextmenu="ShowIhmSetpointTimers(' + item.idx + ',\'' + item.Name + '\');" data-i18n="Timers">Timers</a> ';
 							}
 							else {
-								xhtm+='<a class="btnsmall" onclick="ShowSetpointTimers(' + item.idx + ',\'' + escape(item.Name) + '\');" data-i18n="Timers">Timers</a> ';
+								xhtm+='<a class="btnsmall" onclick="ShowSetpointTimers(' + item.idx + ',\'' + escape(item.Name) + '\');" oncontextmenu="ShowIhmSetpointTimers(' + item.idx + ',\'' + item.Name + '\');" data-i18n="Timers">Timers</a> ';
 							}
 						}
 				  }
@@ -1361,6 +1462,7 @@ define(['app'], function (app) {
 			$scope.mytimer=$interval(function() {
 				RefreshUtilities();
 			}, 10000);
+		  createThermostatSlider("#utilitycontent");
 		  return false;
 		}
 
@@ -1624,6 +1726,12 @@ define(['app'], function (app) {
 					 '&description=' + encodeURIComponent($("#dialog-editsetpointdevice #devicedescription").val()) +
 					 '&setpoint=' + $("#dialog-editsetpointdevice #setpoint").val() + 
 					 '&protected=' + $('#dialog-editsetpointdevice #protected').is(":checked") +
+					 '&TempIdx='   + $("#dialog-editsetpointdevice #comboTemperature").val() + 
+					 '&SwitchIdx=' + $("#dialog-editsetpointdevice #combosubdevice").val() + 
+					 '&addjmulti=' + $("#dialog-editsetpointdevice  #CoefProp").val() +
+					 '&addjvalue='  + $("#dialog-editsetpointdevice  #Eco").val() +
+					 '&addjvalue2='  + $("#dialog-editsetpointdevice  #Confor").val() +
+					 '&addjmulti2='  + $("#dialog-editsetpointdevice  #CoefInteg").val() +
 					 '&used=true',
 					 async: false, 
 					 dataType: 'json',
@@ -1663,6 +1771,7 @@ define(['app'], function (app) {
 				  modal: true,
 				  resizable: false,
 				  title: $.t("Edit Device"),
+
 				  buttons: dialog_editsetpointdevice_buttons,
 				  close: function() {
 					$( this ).dialog( "close" );
@@ -1791,7 +1900,6 @@ define(['app'], function (app) {
 					$( this ).dialog( "close" );
 				  }
 			});
-
 		  ShowUtilities();
 
 			$( "#dialog-editutilitydevice" ).keydown(function (event) {

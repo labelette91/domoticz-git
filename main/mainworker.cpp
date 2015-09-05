@@ -95,15 +95,18 @@
 #include "mainstructs.h"
 
 #ifdef _DEBUG
-	//#define DEBUG_RECEIVE
+	#define DEBUG_RECEIVE
 	//#define PARSE_RFXCOM_DEVICE_LOG
 	//#define DEBUG_DOWNLOAD
 #endif
+#define DEBUG_RECEIVE
 
 #ifdef PARSE_RFXCOM_DEVICE_LOG
 	#include <iostream>
 	#include <fstream>
 #endif
+
+#include "VirtualThermostat.h"
 
 #define round(a) ( int ) ( a + .5 )
 
@@ -285,6 +288,7 @@ void MainWorker::SendResetCommand(CDomoticzHardwareBase *pHardware)
 	}
 	pHardware->m_rxbufferpos = 0;
 	//Send Reset
+	boost::this_thread::sleep(boost::posix_time::millisec(1000));
 	SendCommand(pHardware->m_HwdID,cmdRESET,"Reset");
 	//wait at least 500ms
 	boost::this_thread::sleep(boost::posix_time::millisec(500));
@@ -833,6 +837,9 @@ bool MainWorker::Start()
 	{
 		return false;
 	}
+	//set the log preference
+	_log.GetLogPreference();
+
 	m_notifications.Init();
 	GetSunSettings();
 	GetAvailableWebThemes();
@@ -1321,10 +1328,14 @@ void MainWorker::Do_Work()
 		struct tm ltime;
 		localtime_r(&atime,&ltime);
 
+		////test
+//		ScheduleThermostat(ltime.tm_sec);
+
 		if (ltime.tm_min!=m_ScheduleLastMinute)
 		{
 			if (atime - m_ScheduleLastMinuteTime > 30) //avoid RTC/NTP clock drifts
 			{
+				m_VirtualThermostat.ScheduleThermostat(ltime.tm_min);
 				m_ScheduleLastMinuteTime = atime;
 				m_ScheduleLastMinute = ltime.tm_min;
 
@@ -1401,10 +1412,10 @@ void MainWorker::SendCommand(const int HwdID, unsigned char Cmd, const char *szM
 	int hindex=FindDomoticzHardware(HwdID);
 	if (hindex==-1)
 		return;
-#ifdef _DEBUG
+
 	if (szMessage!=NULL)
-		_log.Log(LOG_NORM,"Cmd: %s", szMessage);
-#endif
+		if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"CMD :%s", szMessage);
+
 
 	tRBUF cmd;
 	cmd.ICMND.packetlength = 13;
@@ -1432,6 +1443,8 @@ bool MainWorker::WriteToHardware(const int HwdID, const char *pdata, const unsig
 		return false;
 
 	return m_hardwaredevices[hindex]->WriteToHardware(pdata,length);
+	if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"HW  : send %s",m_hardwaredevices[hindex]->Name.c_str()  );
+
 }
 
 void MainWorker::WriteMessageStart()
@@ -4909,7 +4922,7 @@ unsigned long long MainWorker::decode_UNDECODED(const CDomoticzHardwareBase *pHa
 		break;
 	default:
 		sprintf(szTmp,"ERROR: Unknown Sub type for Packet type= %02X:%02X", pResponse->UNDECODED.packettype, pResponse->UNDECODED.subtype);
-		WriteMessage(szTmp);
+		WriteMessage(szTmp,false);
 		break;
 	}
 	std::stringstream sHexDump;
@@ -4919,6 +4932,7 @@ unsigned long long MainWorker::decode_UNDECODED(const CDomoticzHardwareBase *pHa
 		sHexDump << HEX(pRXBytes[i]);
 	}
 	WriteMessage(sHexDump.str().c_str());
+	WriteMessageEnd();
 	return -1;
 }
 
@@ -9297,6 +9311,9 @@ bool MainWorker::SwitchLightInt(const std::vector<std::string> &sd, std::string 
 
 	int HardwareID = atoi(sd[0].c_str());
 
+	if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"LIGH: SwitchLightI: switchcmd:%s level:%d HWid:%d  sd:%s %s %s %s %s %s", switchcmd.c_str(),level,HardwareID ,
+	 sd[0].c_str(), sd[1].c_str(), sd[2].c_str(), sd[3].c_str(), sd[4].c_str(), sd[5].c_str() );
+
 	if (HardwareID==1000)
 	{
 		//Special cases
@@ -9317,7 +9334,7 @@ bool MainWorker::SwitchLightInt(const std::vector<std::string> &sd, std::string 
 	}
 
 	int hindex=FindDomoticzHardware(HardwareID);
-	if (hindex == -1)
+	if (hindex==-1)
 	{
 		_log.Log(LOG_ERROR, "Switch command not send!, Hardware device disabled or not found!");
 		return false;
@@ -9330,6 +9347,14 @@ bool MainWorker::SwitchLightInt(const std::vector<std::string> &sd, std::string 
 	unsigned char dType=atoi(sd[3].c_str());
 	unsigned char dSubType=atoi(sd[4].c_str());
 	_eSwitchType switchtype=(_eSwitchType)atoi(sd[5].c_str());
+
+  /* gestion Set Level 0..100% */
+	if (switchcmd=="setLevel")
+  {
+    level = ConvertPercentLevel(dType,dSubType,switchtype,level );
+    switchcmd="Set Level" ;
+  }
+
 
 	//when level = 0, set switch command to Off
 	if (switchcmd=="Set Level")
@@ -10167,9 +10192,10 @@ bool MainWorker::SwitchLight(const std::string &idx, const std::string &switchcm
 	return SwitchLight(ID, switchcmd, atoi(level.c_str()), atoi(hue.c_str()), atoi(ooc.c_str())!=0, ExtraDelay);
 }
 
-bool MainWorker::SwitchLight(const unsigned long long idx, const std::string &switchcmd, const int level, const int hue, const bool ooc, const int ExtraDelay)
+bool MainWorker::SwitchLight(const unsigned long long idx, const std::string &switchcmd, const int level, const int hue, const bool ooc, const int ExtraDelay,bool IsTesting)
 {
 	//Get Device details
+    if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"LIGH: SwitchLight idx:%d cmd:%s lvl:%d " ,(long)idx,switchcmd.c_str(),level );
 	std::vector<std::vector<std::string> > result;
 	result=m_sql.safe_query(
 		"SELECT HardwareID,DeviceID,Unit,Type,SubType,SwitchType,AddjValue2,nValue,Name FROM DeviceStatus WHERE (ID == %llu)",
@@ -10200,9 +10226,12 @@ bool MainWorker::SwitchLight(const unsigned long long idx, const std::string &sw
 		return true;
 	}
 	else
-		return SwitchLightInt(sd,switchcmd,level,hue,false);
+		return SwitchLightInt(sd,switchcmd,level,hue,IsTesting);
 }
-
+bool MainWorker::SwitchLight(unsigned long long idx, const std::string &switchcmd, int level, int hue, bool ooc, const int ExtraDelay)
+{
+	return SwitchLight(   idx,  switchcmd, level, hue, ooc,ExtraDelay, false );
+}
 bool MainWorker::SetSetPoint(const std::string &idx, const float TempValue, const int newMode, const std::string &until)
 {
 	//Get Device details
@@ -10384,10 +10413,19 @@ bool MainWorker::SetSetPointInt(const std::vector<std::string> &sd, const float 
 			if (pHardware->HwdType == HTYPE_Dummy)
 			{
 				//Also set it in the database, ad this devices does not send updates
-				DecodeRXMessage(pHardware, (const unsigned char*)&tmeter);
+				//DecodeRXMessage(pHardware, (const unsigned char*)&tmeter);
+				_log.Log(LOG_TRACE, "SetPoint command Idx=%s : Temp=%f",sd[7].c_str(),TempValue);
+
 			}
 		}
 	}
+	//update setpoint value in sValue field
+	float tempcelcius = m_sql.ConvertTemperature (TempValue);
+	char szTmp[1024];    sprintf(szTmp, "%.1f", tempcelcius) ;
+	std::string SzTmp = szTmp ;
+	std::string Idx =  sd[7];
+	m_sql.UpdateDeviceValue("sValue", SzTmp , Idx );
+
 	return true;
 }
 
@@ -10562,6 +10600,12 @@ bool MainWorker::SetThermostatState(const std::string &idx, const int newState)
 		pGateway->SetProgramState(newState);
 		return true;
 	}
+	else if (pHardware->HwdType == HTYPE_Dummy) 
+	//virtual thermostat set state confor/eco/off/frozen
+	{
+		return m_VirtualThermostat.SetThermostatState(idx,newState);
+	}
+		
 	else if (pHardware->HwdType == HTYPE_NESTTHERMOSTAT)
 	{
 		CNestThermostat *pGateway = (CNestThermostat*)pHardware;
@@ -11124,6 +11168,26 @@ void MainWorker::HeartbeatCheck()
 
 		}
 	}
+}
+void MainWorker::SetEventPeriod(unsigned char p_EventPeriod)
+{
+//	m_eventsystem.SetEventPeriod(p_EventPeriod);
+}
+int MainWorker::ConvertPercentLevel(int dType,int dSubType,_eSwitchType switchtype,int level )
+{
+//add light details
+
+	std::string lstatus = "";
+	int llevel = 0;
+	bool bHaveDimmer = false;
+	bool bHaveGroupCmd = false;
+	int maxDimLevel = 0;
+
+	GetLightStatus(dType, dSubType, switchtype, 1, "1;1;1;1", lstatus, llevel, bHaveDimmer, maxDimLevel, bHaveGroupCmd);
+  //convert level from 0..100% to 0.. maxDimLevel
+	int iLevel = round((float(maxDimLevel) / 100.0f)*level);
+
+  return iLevel ;
 }
 
 bool MainWorker::UpdateDevice(const int HardwareID, const std::string &DeviceID, const int unit, const int devType, const int subType, const int nValue, const std::string &sValue, const int signallevel, const int batterylevel)

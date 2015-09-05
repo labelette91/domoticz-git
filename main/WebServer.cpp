@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "WebServer.h"
+#include "WebServerHelper.h"
 #include <boost/bind.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <iostream>
@@ -49,6 +50,8 @@ extern "C" {
 
 #include "mainstructs.h"
 
+#include "VirtualThermostat.h"
+
 #define round(a) ( int ) ( a + .5 )
 
 extern std::string szUserDataFolder;
@@ -91,6 +94,8 @@ static const _tGuiLanguage guiLanguage[] =
 
 	{ NULL, NULL }
 };
+
+extern http::server::CWebServerHelper m_webservers;
 
 namespace http {
 	namespace server {
@@ -732,6 +737,13 @@ namespace http {
 			if (rtype == "command")
 			{
 				std::string cparam = m_pWebEm->FindValue("param");
+				if (_log.isTraceEnable())
+				{
+				std::string idx    = m_pWebEm->FindValue("idx");
+					std::string cparamd=m_pWebEm->FindValue("param");
+					if (cparamd.size()==0) cparamd=rtype;
+					if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"JSON:%s idx:%s ",cparamd.c_str() ,  idx.c_str()  );
+				}
 				if (cparam == "")
 				{
 					cparam = m_pWebEm->FindValue("dparam");
@@ -1970,7 +1982,7 @@ namespace http {
 				}
 
 			}
-			
+
 			int nValue;
 			std::string sValue;
 
@@ -2372,9 +2384,12 @@ namespace http {
 		void CWebServer::Cmd_SetThermostatState(Json::Value &root)
 		{
 			std::string sstate = m_pWebEm->FindValue("state");
-			std::string idx = m_pWebEm->FindValue("idx");
+			std::string idx  = m_pWebEm->FindValue("idx");
+			std::string name = m_pWebEm->FindValue("name");
+  		_log.Log(LOG_TRACE, "Thermostat State cms Id:%s Name:%s State:%s",idx.c_str(), name.c_str(),sstate.c_str());
+
 			if (
-				(idx == "") ||
+				((idx == "")&&(name=="")) ||
 				(sstate == "")
 				)
 				return;
@@ -2391,13 +2406,28 @@ namespace http {
 					urights = static_cast<int>(m_users[iUser].userrights);
 					_log.Log(LOG_STATUS, "User: %s initiated a Thermostat State change command", m_users[iUser].Username.c_str());
 				}
+				if (urights < 1)		_log.Log(LOG_STATUS, "User: %s as no right to initiated a Thermostat State change command", m_users[iUser].Username.c_str());
 			}
 			if (urights < 1)
 				return;
 
 			root["status"] = "OK";
 			root["title"] = "Set Thermostat State";
-			_log.Log(LOG_NORM, "Setting Thermostat State....");
+
+			//allow use of name instead of idx
+			if ( (idx == "")&&(name != "")) 
+			{
+			  //use of name in place of ID : search idx from name 
+        TSqlQueryResult result=m_sql.Query("SELECT ID  FROM DeviceStatus where Name like '%s' " ,name.c_str() ) ;
+        for (int i=0;i<result.size();i++)
+				{
+          idx = result[i][0];
+					_log.Log(LOG_NORM, "Setting Thermostat State....%s Idx:%s  State:%d ",name.c_str(),idx.c_str(),iState);
+					m_mainworker.SetThermostatState(idx, iState);
+				}
+				return;
+			}
+			_log.Log(LOG_NORM, "Setting Thermostat State....%s : %d ",name.c_str(),iState);
 			m_mainworker.SetThermostatState(idx, iState);
 		}
 
@@ -2578,20 +2608,20 @@ namespace http {
 			}
 			root["statuscode"] = urights;
 
-			root["status"] = "OK";
-			root["title"] = "CheckForUpdate";
-			root["HaveUpdate"] = false;
+				root["status"] = "OK";
+				root["title"] = "CheckForUpdate";
+				root["HaveUpdate"] = false;
 			root["revision"] = m_mainworker.m_iRevision;
 
 			if (m_pWebEm->m_actualuser_rights != 2)
 				return; //Only admin users may update
 
-			int nValue = 0;
-			m_sql.GetPreferencesVar("UseAutoUpdate", nValue);
+				int nValue = 0;
+				m_sql.GetPreferencesVar("UseAutoUpdate", nValue);
 			if (nValue != 1)
-			{
+				{
 				return;
-			}
+					}
 
 			bool bIsForced = (m_pWebEm->FindValue("forced") == "true");
 
@@ -2605,7 +2635,7 @@ namespace http {
 				return;
 			root["status"] = "OK";
 			root["title"] = "DownloadUpdate";
-		}
+			}
 
 		void CWebServer::Cmd_DownloadReady(Json::Value &root)
 		{
@@ -2756,8 +2786,8 @@ namespace http {
 						devidx.c_str(), idx.c_str(), ondelay, offdelay, command);
 				}
 				else {
-					result = m_sql.safe_query("SELECT ID FROM SceneDevices WHERE (DeviceRowID=='%q') AND (SceneRowID =='%q') AND (OnDelay == %d)",
-						devidx.c_str(), idx.c_str(), ondelay);
+				result = m_sql.safe_query("SELECT ID FROM SceneDevices WHERE (DeviceRowID=='%q') AND (SceneRowID =='%q') AND (OnDelay == %d)",
+					devidx.c_str(), idx.c_str(), ondelay);
 				}
 				if (result.size() == 0)
 				{
@@ -2807,6 +2837,7 @@ namespace http {
 
 				unsigned char command = 0;
 
+				//first check if this device is not the scene code!
 				result = m_sql.safe_query("SELECT HardwareID, DeviceID, Unit, Type, SubType, SwitchType FROM DeviceStatus WHERE (ID=='%q')",
 					devidx.c_str());
 				if (result.size() > 0)
@@ -2977,7 +3008,6 @@ namespace http {
 						root["result"][ii]["OffDelay"] = atoi(sd[13].c_str());
 
 						_eSwitchType switchtype=(_eSwitchType)atoi(sd[14].c_str());
-
 						unsigned char devType = atoi(sd[3].c_str());
 						unsigned char subType = atoi(sd[4].c_str());
 						unsigned char nValue = (unsigned char)atoi(sd[5].c_str());
@@ -2990,7 +3020,7 @@ namespace http {
 						bool bHaveDimmer = false;
 						bool bHaveGroupCmd = false;
 						int maxDimLevel = 0;
-						GetLightStatus(devType, subType, STYPE_OnOff, command, sValue, lstatus, llevel, bHaveDimmer, maxDimLevel, bHaveGroupCmd);
+							GetLightStatus(devType, subType, STYPE_OnOff, command, sValue, lstatus, llevel, bHaveDimmer, maxDimLevel, bHaveGroupCmd);
 						root["result"][ii]["Command"] = lstatus;
 						root["result"][ii]["Level"] = level;
 						root["result"][ii]["Hue"] = atoi(sd[11].c_str());
@@ -3558,7 +3588,7 @@ namespace http {
 					if ((subtype != sTypeEMW100) && (subtype != sTypeLivolo) && (subtype != sTypeLivoloAppliance) && (subtype != sTypeRGB432W))
 						devid = "00" + id;
 					else
-						devid = id;
+					devid = id;
 				}
 				else if (lighttype < 70)
 				{
@@ -3889,7 +3919,7 @@ namespace http {
 					if ((subtype != sTypeEMW100) && (subtype != sTypeLivolo) && (subtype != sTypeLivoloAppliance) && (subtype != sTypeRGB432W))
 						devid = "00" + id;
 					else
-						devid = id;
+					devid = id;
 				}
 				else if (lighttype < 70)
 				{
@@ -5251,6 +5281,7 @@ namespace http {
 				std::string idx = m_pWebEm->FindValue("idx");
 				std::string switchcmd = m_pWebEm->FindValue("switchcmd");
 				std::string level = m_pWebEm->FindValue("level");
+		if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"JSON:switchlight idx:%s switchcmd:%s level:%s",  idx.c_str() , switchcmd.c_str() , level.c_str());
 				std::string onlyonchange=m_pWebEm->FindValue("ooc");//No update unless the value changed (check if updated)
 				if ((idx == "") || (switchcmd == ""))
 					return;
@@ -5946,6 +5977,15 @@ namespace http {
 					);
 				_log.Log(LOG_STATUS, "(Floorplan) Plan '%s' floorplan data reset.", idx.c_str());
 			}
+	else if (cparam=="thermostat")		{
+		std::string idx=m_pWebEm->FindValue("idx");
+		if ((idx==""))	return;
+		std::string duration=m_pWebEm->FindValue("duration"); //duration in hours
+		std::string setTemp=m_pWebEm->FindValue("setTemp"); //duration in hours
+		m_VirtualThermostat.ThermostatToggleEcoConfort ((char*)idx.c_str() ,(char*)setTemp.c_str()  ,  (char*)duration.c_str() );
+		root["status"]="OK";
+		root["title"]="thermostat";
+      }
 		}
 
 		char * CWebServer::DisplaySwitchTypesCombo()
@@ -6118,6 +6158,9 @@ namespace http {
 
 			std::string Latitude = m_pWebEm->FindValue("Latitude");
 			std::string Longitude = m_pWebEm->FindValue("Longitude");
+	    _log.SetLogPreference ( CURLEncode::URLDecode( m_pWebEm->FindValue("LogFilter")   ),
+								CURLEncode::URLDecode( m_pWebEm->FindValue("LogFileName") ),
+								CURLEncode::URLDecode( m_pWebEm->FindValue("LogLevel")    ) );
 			if ((Latitude != "") && (Longitude != ""))
 			{
 				std::string LatLong = Latitude + ";" + Longitude;
@@ -6379,6 +6422,7 @@ namespace http {
 			m_sql.UpdatePreferencesVar("FloorplanActiveOpacity", atoi(m_pWebEm->FindValue("FloorplanActiveOpacity").c_str()));
 			m_sql.UpdatePreferencesVar("FloorplanInactiveOpacity", atoi(m_pWebEm->FindValue("FloorplanInactiveOpacity").c_str()));
 
+
 			m_notifications.LoadConfig();
 
 			return (char*)m_retstr.c_str();
@@ -6410,6 +6454,7 @@ namespace http {
 		struct _tHardwareListInt{
 			std::string Name;
 			bool Enabled;
+			int  Type;
 		} tHardwareList;
 
 		void CWebServer::GetJSonDevices(Json::Value &root, const std::string &rused, const std::string &rfilter, const std::string &order, const std::string &rowid, const std::string &planID, const std::string &floorID, const bool bDisplayHidden, const time_t LastUpdate, const bool bSkipUserCheck)
@@ -6431,7 +6476,7 @@ namespace http {
 
 			//Get All Hardware ID's/Names, need them later
 			std::map<int, _tHardwareListInt> _hardwareNames;
-			result = m_sql.safe_query("SELECT ID, Name, Enabled FROM Hardware");
+			result = m_sql.safe_query("SELECT ID, Name, Enabled,Type FROM Hardware");
 			if (result.size() > 0)
 			{
 				std::vector<std::vector<std::string> >::const_iterator itt;
@@ -6443,6 +6488,7 @@ namespace http {
 					int ID = atoi(sd[0].c_str());
 					tlist.Name = sd[1];
 					tlist.Enabled = (atoi(sd[2].c_str()) != 0);
+					tlist.Type = atoi(sd[3].c_str()) ;
 					_hardwareNames[ID] = tlist;
 				}
 			}
@@ -6602,6 +6648,7 @@ namespace http {
 						" AddjValue, AddjMulti, AddjValue2, AddjMulti2,"
 						" LastLevel, CustomImage, StrParam1, StrParam2,"
 						" Protected, 0 as XOffset, 0 as YOffset, 0 as PlanID, Description "
+						" ,Power,  RoomTemp,  TempIdx,SwitchIdx "
 						"FROM DeviceStatus WHERE (ID=='%q')",
 						rowid.c_str());
 				else if ((planID != "") && (planID != "0"))
@@ -6614,6 +6661,7 @@ namespace http {
 						" A.LastLevel, A.CustomImage, A.StrParam1,"
 						" A.StrParam2, A.Protected, B.XOffset, B.YOffset,"
 						" B.PlanID, A.Description "
+						" ,A.Power,A.RoomTemp,A.TempIdx,A.SwitchIdx "
 						"FROM DeviceStatus as A, DeviceToPlansMap as B "
 						"WHERE (B.PlanID=='%q') AND (B.DeviceRowID==a.ID)"
 						" AND (B.DevSceneType==0) ORDER BY B.[Order]",
@@ -6628,6 +6676,7 @@ namespace http {
 						" A.LastLevel, A.CustomImage, A.StrParam1,"
 						" A.StrParam2, A.Protected, B.XOffset, B.YOffset,"
 						" B.PlanID, A.Description "
+						" ,A.Power,A.RoomTemp,A.TempIdx,A.SwitchIdx "
 						"FROM DeviceStatus as A, DeviceToPlansMap as B,"
 						" Plans as C "
 						"WHERE (C.FloorplanID=='%q') AND (C.ID==B.PlanID)"
@@ -6662,6 +6711,7 @@ namespace http {
 						" AddjValue, AddjMulti, AddjValue2, AddjMulti2,"
 						" LastLevel, CustomImage, StrParam1, StrParam2,"
 						" Protected, 0 as XOffset, 0 as YOffset, 0 as PlanID, Description "
+						",   Power,  RoomTemp,   TempIdx ,SwitchIdx "
 						"FROM DeviceStatus ORDER BY %s",
 						szOrderBy);
 				}
@@ -6679,6 +6729,7 @@ namespace http {
 						" A.LastLevel, A.CustomImage, A.StrParam1,"
 						" A.StrParam2, A.Protected, 0 as XOffset,"
 						" 0 as YOffset, 0 as PlanID, A.Description "
+						", A.Power,A.RoomTemp ,A.TempIdx,A.SwitchIdx "
 						"FROM DeviceStatus as A, SharedDevices as B "
 						"WHERE (B.DeviceRowID==a.ID)"
 						" AND (B.SharedUserID==%lu) AND (A.ID=='%q')",
@@ -6693,6 +6744,7 @@ namespace http {
 						" A.LastLevel, A.CustomImage, A.StrParam1,"
 						" A.StrParam2, A.Protected, C.XOffset,"
 						" C.YOffset, C.PlanID, A.Description "
+						", C.Power,C.RoomTemp,C.TempIdx,C.SwitchIdx "
 						"FROM DeviceStatus as A, SharedDevices as B,"
 						" DeviceToPlansMap as C "
 						"WHERE (C.PlanID=='%q') AND (C.DeviceRowID==a.ID)"
@@ -6709,6 +6761,7 @@ namespace http {
 						" A.LastLevel, A.CustomImage, A.StrParam1,"
 						" A.StrParam2, A.Protected, C.XOffset, C.YOffset,"
 						" C.PlanID, A.Description "
+						", C.Power,C.RoomTemp,C.TempIdx,C.SwitchIdx "
 						"FROM DeviceStatus as A, SharedDevices as B,"
 						" DeviceToPlansMap as C, Plans as D "
 						"WHERE (D.FloorplanID=='%q') AND (D.ID==C.PlanID)"
@@ -6745,6 +6798,7 @@ namespace http {
 						" A.LastLevel, A.CustomImage, A.StrParam1,"
 						" A.StrParam2, A.Protected, 0 as XOffset,"
 						" 0 as YOffset, 0 as PlanID, A.Description "
+						", A.Power,A.RoomTemp,A.TempIdx,A.SwitchIdx  "
 						"FROM DeviceStatus as A, SharedDevices as B "
 						"WHERE (B.DeviceRowID==a.ID)"
 						" AND (B.SharedUserID==%lu) ORDER BY %s",
@@ -7112,6 +7166,7 @@ namespace http {
 						GetLightStatus(dType, dSubType, switchtype, nValue, sValue, lstatus, llevel, bHaveDimmer, maxDimLevel, bHaveGroupCmd);
 
 						root["result"][ii]["Status"] = lstatus;
+						root["result"][ii]["nValue"] = nValue;
 						root["result"][ii]["StrParam1"] = strParam1;
 						root["result"][ii]["StrParam2"] = strParam2;
 
@@ -8373,6 +8428,20 @@ namespace http {
 							root["result"][ii]["SetPoint"] = szTmp;
 							root["result"][ii]["HaveTimeout"] = bHaveTimeout;
 							root["result"][ii]["TypeImg"] = "override_mini";
+							root["result"][ii]["HwType"] = _hardwareNames[hardwareID].Type;
+							#define INDEX_POWER  28     //index of power field in sql request
+							root["result"][ii]["Power"]		=sd[INDEX_POWER];
+							root["result"][ii]["RoomTemp"]	=sd[INDEX_POWER+1];
+							root["result"][ii]["TempIdx"]	  =sd[INDEX_POWER+2];
+							root["result"][ii]["nValue"]	  = nValue;
+							root["result"][ii]["SwitchIdx"]	=sd[INDEX_POWER+3];
+							
+							root["result"][ii]["AddjValue"] = AddjValue;
+							root["result"][ii]["AddjMulti"] = AddjMulti;
+							root["result"][ii]["AddjValue2"] = AddjValue2;
+							root["result"][ii]["AddjMulti2"] = AddjMulti2; 
+
+
 						}
 					}
 					else if (dType == pTypeRadiator1)
@@ -9720,7 +9789,7 @@ namespace http {
 
 			m_sql.safe_query("UPDATE CustomImages SET Name='%q', Description='%q' WHERE (ID == %d)", sname.c_str(), sdescription.c_str(), idx);
 			ReloadCustomSwitchIcons();
-		}
+			}
 
 		void CWebServer::Cmd_RenameDevice(Json::Value &root)
 		{
@@ -9886,7 +9955,7 @@ namespace http {
 			time_t timeA = mktime(&LastUpdateTime_A);
 			time_t timeB = mktime(&LastUpdateTime_B);
 
-			if (timeA < timeB)
+			if (timeA > timeB)
 			{
 				//Swap idx with newidx
 				sidx.swap(newidx);
@@ -10032,6 +10101,22 @@ namespace http {
 			bool bHasstrParam1 = m_pWebEm->HasValue("strparam1");
 			int iProtected = (tmpstr == "true") ? 1 : 0;
 
+			if ( (idx == "")&&(name != "")) 
+			{
+			  //use of name in place of ID : search idx from name : assume name is uniqu
+        TSqlQueryResult result=m_sql.Query("SELECT ID  FROM DeviceStatus where Name == '%s' " ,name.c_str() ) ;
+        if (result.size()==1)
+          idx = result[0][0];
+			}
+			
+			std::string TempIdx=m_pWebEm->FindValue("TempIdx");
+			if ( (TempIdx!="")&&(TempIdx!="null"))
+				m_sql.UpdateDeviceValue("TempIdx",TempIdx,idx);
+
+			std::string SwitchIdx=m_pWebEm->FindValue("SwitchIdx");
+			if ( (SwitchIdx!="")&&(SwitchIdx!="null"))
+				m_sql.UpdateDeviceValue("SwitchIdx",SwitchIdx,idx);
+
 			char szTmp[200];
 
 			bool bHaveUser = (m_pWebEm->m_actualuser != "");
@@ -10097,8 +10182,11 @@ namespace http {
 				}
 				else
 				{
+				//update done in m_mainworker.SetSetPoint
+/*
 					m_sql.safe_query("UPDATE DeviceStatus SET Used=%d, sValue='%q' WHERE (ID == '%q')",
 						used, szTmp, idx.c_str());
+*/
 				}
 			}
 			if (name == "")
@@ -10567,6 +10655,8 @@ namespace http {
 				{
 					root["WebTheme"] = sValue;
 				}
+				else 
+					root[Key]=sValue;
 			}
 		}
 
@@ -10852,6 +10942,15 @@ namespace http {
 								double tvalue = ConvertTemperature(atof(sd[0].c_str()), tempsign);
 								root["result"][ii]["te"] = tvalue;
 							}
+							//chill == romm temperature
+              //humidity = ppower
+							if ((dType == pTypeThermostat) && (dSubType == sTypeThermSetpoint))
+							{
+								double tvalue = ConvertTemperature(atof(sd[1].c_str()), tempsign);
+								root["result"][ii]["ch"] = tvalue;
+								root["result"][ii]["hu"] = sd[2];
+							}
+
 							if (
 								((dType == pTypeWIND) && (dSubType == sTypeWIND4)) ||
 								((dType == pTypeWIND) && (dSubType == sTypeWINDNoTemp))

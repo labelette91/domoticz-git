@@ -5,6 +5,7 @@
 #include "RFXNames.h"
 #include "../httpclient/UrlEncode.h"
 #include <map>
+#include "Helper.h"
 
 struct sqlite3;
 
@@ -262,6 +263,18 @@ public:
 	bool SetUserVariable(const unsigned long long idx, const std::string &varvalue, const bool eventtrigger);
 	std::vector<std::vector<std::string> > GetUserVariables();
 
+	void UpdateDeviceValue(const char * FieldName , std::string &Value , std::string &Idx );
+	void UpdateDeviceValue(const char * FieldName , int Value , std::string &Idx )   ;
+	void UpdateDeviceValue(const char * FieldName , float Value , std::string &Idx ) ;
+	double ConvertTemperature(double tempcelcius);
+	double ConvertTemperatureUnit(double tempcelcius);
+	std::string GetDeviceValue(const char * FieldName , const char *Idx );
+
+	std::vector<std::vector<std::string> > Query( const char fmt[] , ... );
+	float getTemperatureFromSValue(const char * sValue);
+
+	float getHumidityFromSValue(const char * sValue);
+	bool GetLastValue(  const char* DeviceID, int &nValue, std::string &sValue, struct tm &LastUpdateTime);
 	void AllowNewHardwareTimer(const int iTotMinutes);
 
 	bool InsertCustomIconFromZip(const std::string &szZip, std::string &ErrorMessage);
@@ -278,6 +291,7 @@ public:
 	bool		m_bAllowWidgetOrdering;
 	int			m_ActiveTimerPlan;
 	bool		m_bDisableEventSystem;
+	LastValue TempLog;
 	int			m_ShortLogInterval;
 private:
 	boost::mutex	m_sqlQueryMutex;
@@ -337,4 +351,12 @@ private:
 	std::vector<std::vector<std::string> > queryBlob(const std::string &szQuery);
 };
 
+//row result for an sql query : string Vector
+typedef   std::vector<std::string> TSqlRowQuery ;
+
+// result for an sql query : Vector of TSqlRowQuery
+typedef   std::vector<TSqlRowQuery> TSqlQueryResult ;
 extern CSQLHelper m_sql;
+
+std::string getSValuePart(const char * sValue, unsigned int part );
+std::string getSValuePart(std::string &sValue, unsigned int part );

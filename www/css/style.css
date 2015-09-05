@@ -1066,7 +1066,7 @@ body table#itemtablesmall tr td:first-child + td + td + td + td{
 	line-height:86%;
 }
 body table#itemtablesmall tr td:first-child + td + td + td + td:before{
-	content: "Last Seen: ";
+	content: "";
 	font-style: italic;
 }
 
@@ -1710,7 +1710,7 @@ table.mobileitem {
 	border-radius: 25px;
 	width: 100%;
 	margin-top: 0px;
-	position: absolute;
+/*	position: absolute;*/
 	height: 13px;
 	background-color: #8e8d8d;
 	background: url('images/bg-track.png') repeat top left;
@@ -2177,6 +2177,264 @@ a:link {
 
 table.dataTable thead th, table.dataTable thead td {
 	padding: 2px 2px;
+}
+
+/* *** ******** new for thermostat ************* */
+body table#itemtable-th,
+body table#itemtable-th tbody{
+	display: block;
+	width: 100%;
+}
+body table#itemtable-th tbody tr{
+	display: block;
+
+	width: 96%;
+	padding: 5px 5px 5px 5px;
+	margin: 2px 100% 5px 0;
+	
+	border-style: none;
+  border-radius: 5px;
+
+	color: #0D161F;
+	background-color: #F1F5FA;
+	
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+
+body table#itemtable-th thead{
+	display: none;
+}
+
+body table#itemtable-th tr > *{
+	display: block;
+	padding: 0;
+	margin: 0;
+}
+
+/* I am using the :first-child as a way to style each column by itself*/
+/* First column */
+body table#itemtable-th tr td:first-child{
+	height: 1.2em;
+	padding: 0 .5em 0 .5em;
+	margin-bottom: 5px;
+
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 130%;
+	white-space: nowrap;
+	
+	border-width: 1px 1px 1px 1px;
+	border-color: #2B5074;
+	border-style: solid;
+  border-radius: 5px;
+	
+	color: #0D161F;
+	background-color: #D4E1EE;
+}
+
+/* Second column */
+body table#itemtable-th tr td:first-child + td{ 
+	float: right;
+	margin: -27px 3px 0px 0px;
+	font-size: 140%;
+	font-weight: bold;
+	white-space: nowrap;
+	color: #000000;
+}
+
+/* Third column */
+body table#itemtable-th tr td:first-child + td + td{ 
+	border-color: #2B5074;  
+	border-style: none;  
+	border-width: 1px; 
+	
+	float: left;
+	margin: 0 10px 10px 0;
+}
+
+body table#itemtable-th tr td:first-child + td + td img{
+	display: block;
+}
+
+/* Fourth column */
+body table#itemtable-th tr td:first-child + td + td + td{
+	font-size: 90%;
+	font-weight: bold;
+}
+
+body table#itemtable-th tr td:first-child + td + td + td:before{
+	content: " Status: ";
+	font-style: italic;
+	font-size: 90%;
+}
+
+/* Fifth column */
+body table#itemtable-th tr td:first-child + td + td + td + td{
+	font-size: 80%;
+}
+body table#itemtable-th tr td:first-child + td + td + td + td:before{
+	content: "Last Seen: ";
+	font-style: italic;
+}
+
+/* Sixth column */
+body table#itemtable-th tr td:first-child + td + td + td + td + td{
+	font-size: 80%;
+}
+/*body table#itemtable-th tr td:first-child + td + td + td + td + td:before{
+	content: "Type: ";
+	font-style: italic;
+}*/
+
+/* Seventh column (bottom text)*/
+body table#itemtable-th tr td:first-child + td + td + td + td + td + td{
+	font-size: 90%;
+	clear: both;
+	padding: 0 5% 0 5%;
+	line-height: 130%;
+}
+
+/* Hover state*/
+/*body table#itemtable-th tbody tr:hover{
+	border-color: #2B2C74;
+	background-color: #F2F1FA;
+}
+body table#itemtable-th tr:hover td:first-child{
+	border-color: #2B2C74;
+	color: #0D0D1F;
+	background-color: #D4D5EE;
+}*/
+
+
+
+
+
+.btnl 
+{
+width: 52px;
+float:left;
+clear:both;
+border-radius: 0px 0 0 5px;  
+border-style: solid none solid  solid;  
+text-align: center;  
+font-size: 180%;
+}
+
+.btnr
+{
+width: 52px;
+float:left;
+border-radius: 0px 0 5px 0;  
+border-style: solid;  
+text-align: center;  
+font-size: 180%;
+}
+
+.temperature
+{
+width: 87px;
+float:left;
+border-radius: 5px 5px 0px 0px;
+border-style: solid solid none solid;
+text-align: center;
+font-size: 180%;
+padding: 10px 10px 10px 10px;
+clear:both;
+}
+
+
+#Temp:after {
+    content: attr(TemperatureUnit)  ;
+  	font-style: italic;
+		font-size: 100%;
+}
+#Time:after {
+    content: attr(TimeUnit);
+  	font-style: italic;
+		font-size: 60%;
+}
+
+
+.thslider {
+	z-index:1;
+	border-width: 1px;
+	border-style: solid;
+	border-color: #333 #333 #777 #333;
+	border-radius: 25px;
+	width: 100%;
+	margin-top: 0px;
+/*	position: absolute;*/
+	height: 13px;
+	background-color: #8e8d8d;
+	background: url('images/bg-track.png') repeat top left;
+    box-shadow: inset 0 1px 5px 0px rgba(0, 0, 0, .5), 
+    				  0 1px 0 0px rgba(250, 250, 250, .5);
+}
+
+.thslider .ui-slider-handle {
+	position: absolute;
+	z-index: 2;
+	width: 25px;
+	height: 25px;
+	cursor: pointer;
+	background: url('images/handle.png') no-repeat 50% 50%;
+	font-weight: bold;
+	color: #1C94C4;
+	border-style: none;
+	outline: none;
+	top: -7px;
+	margin-left: -12px;
+}
+
+.thslider .ui-slider-range {
+	background: #ffffff; /* Old browsers */
+	background: -moz-linear-gradient(top,  #11AAFD 0%, #0199E0 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#11AAFD), color-stop(100%,#0199E0)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #11AAFD 0%,#0199E0 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #11AAFD 0%,#0199E0 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #11AAFD 0%,#0199E0 100%); /* IE10+ */
+	background: linear-gradient(top,  #11AAFD 0%,#0199E0 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#11AAFD', endColorstr='#0199E0',GradientType=0 ); /* IE6-9 */
+	position: absolute;
+	border: 0;
+	top: 0;
+	height: 100%;
+	border-radius: 25px;
+}
+.temp 
+{
+    font-size: 12pt;
+    font-weight:bold;
+    margin-right: 1px;
+    margin-left: 1px;
+    vertical-align: middle;
+    float: left;
+}
+
+.mobileitem .btn-th {
+	font-family: Arial,Helvetica,sans-serif;
+	font-size: 10pt;
+    font-weight: bold;
+    height: 2.0em;
+    margin-left: 1px;
+    margin-right: 1px;
+    
+}
+
+.btn-timer {
+	font-family: Arial,Helvetica,sans-serif;
+	font-size: 10pt;
+    font-weight: bold;
+    height: 2.0em;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 4px 4px;
+    width:26px;
+    height:24px;
+}
+.btn-confor {
+    background-image: linear-gradient(to bottom, #FF0000, #FF0000);
+    background-color: #FF0000;
 }
 
 .messagepop {

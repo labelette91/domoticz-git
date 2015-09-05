@@ -1,8 +1,8 @@
 #include "stdafx.h"
+#include "Helper.h"
 #include "SQLHelper.h"
 #include <iostream>     /* standard I/O functions                         */
 #include "RFXtrx.h"
-#include "Helper.h"
 #include "RFXNames.h"
 #include "localtime_r.h"
 #include "Logger.h"
@@ -58,7 +58,12 @@ const char *sqlCreateDeviceStatus =
 "[StrParam2] VARCHAR(200) DEFAULT '', "
 "[LastLevel] INTEGER DEFAULT 0, "
 "[Protected] INTEGER DEFAULT 0, "
-"[CustomImage] INTEGER DEFAULT 0, "
+"[Power] INTEGER DEFAULT 0, "
+"[RoomTemp] VARCHAR(4) DEFAULT 0, "
+"[TempIdx] BIGINT DEFAULT 0 , "
+"[SwitchIdx] INTEGER DEFAULT 0 , "
+"[DeltaTemp] float DEFAULT 0, "
+"[CustomImage] INTEGER DEFAULT 0);";
 "[Description] VARCHAR(200) DEFAULT '');";
 
 const char *sqlCreateDeviceStatusTrigger =
@@ -1047,6 +1052,16 @@ bool CSQLHelper::OpenDatabase()
 			query("ALTER TABLE MultiMeter_Calendar ADD COLUMN [Counter3] BIGINT default 0");
 			query("ALTER TABLE MultiMeter_Calendar ADD COLUMN [Counter4] BIGINT default 0");
 		}
+    /*  new field for themostat */
+    /* Room temperature  */
+		if (dbversion<57)
+		{
+			query("ALTER TABLE DeviceStatus ADD COLUMN [Power]      INTEGER    default 0");
+			query("ALTER TABLE DeviceStatus ADD COLUMN [RoomTemp]   VARCHAR(4) default 0");
+			query("ALTER TABLE DeviceStatus ADD COLUMN [TempIdx]    BIGINT     DEFAULT 0");
+			query("ALTER TABLE DeviceStatus ADD COLUMN [SwitchIdx]  INTEGER    DEFAULT 0");
+			query("ALTER TABLE DeviceStatus ADD COLUMN [DeltaTemp]  float      DEFAULT 0");
+		}
 		if (dbversion < 52)
 		{
 			//Move onboard system sensor (temperature) to the motherboard hardware
@@ -1062,7 +1077,7 @@ bool CSQLHelper::OpenDatabase()
 		{
 			query("ALTER TABLE Floorplans ADD COLUMN [ScaleFactor] Float default 1.0");
 		}
-		if (dbversion < 54)
+		if (dbversion <= 54)
 		{
 			query("ALTER TABLE Temperature ADD COLUMN [SetPoint] FLOAT default 0");
 			query("ALTER TABLE Temperature_Calendar ADD COLUMN [SetPoint_Min] FLOAT default 0");
@@ -1911,6 +1926,9 @@ void CSQLHelper::Do_Work()
 		std::vector<_tTaskItem>::iterator itt=_items2do.begin();
 		while (itt!=_items2do.end())
 		{
+			if (_log.isTraceEnable())	  
+						_log.Log(LOG_TRACE,"SQL: Do Task ItemType:%d Cmd:%s Value:%s ",itt->_ItemType ,itt->_command.c_str() ,itt->_sValue.c_str() ); 
+
 			if (itt->_ItemType == TITEM_SWITCHCMD)
 			{
 				if (itt->_switchtype==STYPE_Motion)
@@ -2129,7 +2147,9 @@ std::vector<std::vector<std::string> > CSQLHelper::query(const std::string &szQu
 		return results;
 	}
 	boost::lock_guard<boost::mutex> l(m_sqlQueryMutex);
-	
+
+	if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"DBQY:%s",szQuery.c_str()) ;
+
 	sqlite3_stmt *statement;
 	std::vector<std::vector<std::string> > results;
 
@@ -2500,14 +2520,14 @@ unsigned long long CSQLHelper::UpdateValueInt(const int HardwareID, const char* 
 			return -1; //We do not allow new devices
 		}
 
-		devname="Unknown";
+		devname="Unknown" + std::string(ID) ;
 		safe_query(
-			"INSERT INTO DeviceStatus (HardwareID, DeviceID, Unit, Type, SubType, SignalLevel, BatteryLevel, nValue, sValue) "
-			"VALUES ('%d','%q','%d','%d','%d','%d','%d','%d','%q')",
+			"INSERT INTO DeviceStatus (HardwareID, DeviceID, Unit, Type, SubType, SignalLevel, BatteryLevel, nValue, sValue,Name) "
+			"VALUES ('%d','%q','%d','%d','%d','%d','%d','%d','%q','%q')",
 			HardwareID,
 			ID,unit,devType,subType,
 			signallevel,batterylevel,
-			nValue,sValue);
+			nValue,sValue,devname.c_str());
 
 		//Get new ID
 		result = safe_query(
@@ -2801,6 +2821,9 @@ unsigned long long CSQLHelper::UpdateValueInt(const int HardwareID, const char* 
 		CheckSceneStatusWithDevice(ulID);
 		break;
 	}
+
+	if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"SQL :UpdateValueInt %s HwID:%d  DevID:%s Type:%d  sType:%d nValue:%d sValue:%s ", devname.c_str(),HardwareID, ID, devType, subType, nValue, sValue );
+
 	m_mainworker.m_eventsystem.ProcessDevice(HardwareID, ulID, unit, devType, subType, signallevel, batterylevel, nValue, sValue, devname, 0);
 	return ulID;
 }
@@ -3124,6 +3147,8 @@ void CSQLHelper::ScheduleDay()
 	}
 }
 
+#define DELTA_TEMP 0.5
+
 void CSQLHelper::UpdateTemperatureLog()
 {
 	time_t now = mytime(NULL);
@@ -3136,7 +3161,7 @@ void CSQLHelper::UpdateTemperatureLog()
 	GetPreferencesVar("SensorTimeout", SensorTimeOut);
 
 	std::vector<std::vector<std::string> > result;
-	result=safe_query("SELECT ID,Type,SubType,nValue,sValue,LastUpdate FROM DeviceStatus WHERE (Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR (Type=%d AND SubType=%d) OR (Type=%d AND SubType=%d) OR (Type=%d AND SubType=%d))",
+	result=safe_query("SELECT ID,Type,SubType,nValue,sValue,LastUpdate,Power,RoomTemp FROM DeviceStatus WHERE (Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR (Type=%d AND SubType=%d) OR (Type=%d AND SubType=%d) OR (Type=%d AND SubType=%d))",
 		pTypeTEMP,
 		pTypeHUM,
 		pTypeTEMP_HUM,
@@ -3197,14 +3222,23 @@ void CSQLHelper::UpdateTemperatureLog()
 			unsigned char humidity=0;
 			int barometer=0;
 			float dewpoint=0;
+			bool ToRecord = true; //true if recording is allowed
 			float setpoint=0;
 
 			switch (dType)
 			{
 			case pTypeRego6XXTemp:
 			case pTypeTEMP:
+				temp = static_cast<float>(atof(splitresults[0].c_str()));
+				ToRecord = TempLog.AsChanged((int)ID,temp,DELTA_TEMP); //record if temperature change of 1 deg
+				break;
 			case pTypeThermostat:
 				temp = static_cast<float>(atof(splitresults[0].c_str()));
+				//record power % as humidity
+				humidity = atoi(sd[6].c_str()); 
+				//record room temp as chill
+				chill = (float)atof(sd[7].c_str()); 
+				ToRecord = TempLog.AsChanged((int)ID,chill,0.2); //record if room temperature change of 1 deg
 				break;
 			case pTypeThermostat1:
 				temp = static_cast<float>(atof(splitresults[0].c_str()));
@@ -3232,6 +3266,7 @@ void CSQLHelper::UpdateTemperatureLog()
 				break;
 			case pTypeHUM:
 				humidity=nValue;
+				ToRecord = TempLog.AsChanged((int)ID,humidity,5.0); 
 				break;
 			case pTypeTEMP_HUM:
 				if (splitresults.size()>=2)
@@ -3239,6 +3274,7 @@ void CSQLHelper::UpdateTemperatureLog()
 					temp = static_cast<float>(atof(splitresults[0].c_str()));
 					humidity=atoi(splitresults[1].c_str());
 					dewpoint=(float)CalculateDewPoint(temp,humidity);
+					ToRecord = TempLog.AsChanged((int)ID,temp,DELTA_TEMP); 
 				}
 				break;
 			case pTypeTEMP_HUM_BARO:
@@ -3251,6 +3287,7 @@ void CSQLHelper::UpdateTemperatureLog()
 					else
 						barometer=atoi(splitresults[3].c_str());
 					dewpoint=(float)CalculateDewPoint(temp,humidity);
+					ToRecord = TempLog.AsChanged((int)ID,temp,DELTA_TEMP); 
 				}
 				break;
 			case pTypeTEMP_BARO:
@@ -3258,6 +3295,7 @@ void CSQLHelper::UpdateTemperatureLog()
 				{
 					temp = static_cast<float>(atof(splitresults[0].c_str()));
 					barometer=int(atof(splitresults[1].c_str())*10.0f);
+					ToRecord = TempLog.AsChanged((int)ID,temp,DELTA_TEMP); 
 				}
 				break;
 			case pTypeUV:
@@ -3266,6 +3304,7 @@ void CSQLHelper::UpdateTemperatureLog()
 				if (splitresults.size()>=2)
 				{
 					temp = static_cast<float>(atof(splitresults[1].c_str()));
+					ToRecord = TempLog.AsChanged((int)ID,temp,DELTA_TEMP); 
 				}
 				break;
 			case pTypeWIND:
@@ -3275,17 +3314,20 @@ void CSQLHelper::UpdateTemperatureLog()
 				{
 					temp = static_cast<float>(atof(splitresults[4].c_str()));
 					chill = static_cast<float>(atof(splitresults[5].c_str()));
+					ToRecord = TempLog.AsChanged((int)ID,temp,DELTA_TEMP); 
 				}
 				break;
 			case pTypeRFXSensor:
 				if (dSubType!=sTypeRFXSensorTemp)
 					continue;
 				temp = static_cast<float>(atof(splitresults[0].c_str()));
+				ToRecord = TempLog.AsChanged((int)ID,temp,DELTA_TEMP); 
 				break;
 			case pTypeGeneral:
 				if (dSubType == sTypeSystemTemp)
 				{
 					temp = static_cast<float>(atof(splitresults[0].c_str()));
+					ToRecord = TempLog.AsChanged((int)ID,temp,DELTA_TEMP); 
 				}
 				else if (dSubType == sTypeBaro)
 				{
@@ -3295,7 +3337,8 @@ void CSQLHelper::UpdateTemperatureLog()
 				}
 				break;
 			}
-			//insert record
+			//insert record if allowed
+      if ( ToRecord ) {
 			safe_query(
 				"INSERT INTO Temperature (DeviceRowID, Temperature, Chill, Humidity, Barometer, DewPoint, SetPoint) "
 				"VALUES ('%llu', '%.2f', '%.2f', '%d', '%d', '%.2f', '%.2f')",
@@ -3307,6 +3350,7 @@ void CSQLHelper::UpdateTemperatureLog()
 				dewpoint,
 				setpoint
 				);
+      }
 		}
 	}
 }
@@ -4922,8 +4966,8 @@ void CSQLHelper::DeleteHardware(const std::string &idx)
 {
 	std::vector<std::vector<std::string> > result;
 	result=safe_query("DELETE FROM Hardware WHERE (ID == '%q')",idx.c_str());
+	//also delete all records in other tables
 
-	//and now delete all records in the DeviceStatus table itself
 	result=safe_query("SELECT ID FROM DeviceStatus WHERE (HardwareID == '%q')",idx.c_str());
 	if (result.size()>0)
 	{
@@ -4934,7 +4978,8 @@ void CSQLHelper::DeleteHardware(const std::string &idx)
 			DeleteDevice(sd[0]);
 		}
 	}
-	//also delete all records in other tables
+	//and now delete all records in the DeviceStatus table itself
+	safe_query("DELETE FROM DeviceStatus WHERE (HardwareID == '%q')",idx.c_str());
 	safe_query("DELETE FROM ZWaveNodes WHERE (HardwareID== '%q')",idx.c_str());
 	safe_query("DELETE FROM EnoceanSensors WHERE (HardwareID== '%q')", idx.c_str());
 	safe_query("DELETE FROM MySensors WHERE (HardwareID== '%q')", idx.c_str());
@@ -5550,10 +5595,12 @@ void CSQLHelper::SetUnitsAndScale()
 
 bool CSQLHelper::HandleOnOffAction(const bool bIsOn, const std::string &OnAction, const std::string &OffAction)
 {
+	if (OnAction.size()<1)
+		return true;
+	if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"SQL: HandleOnOffAction:%d OnAction:%s OffAction:%s",bIsOn, OnAction.c_str(),OffAction.c_str());
+
 	if (bIsOn)
 	{
-		if (OnAction.size()<1)
-			return true;
 		if ((OnAction.find("http://") != std::string::npos) || (OnAction.find("https://") != std::string::npos))
 		{
 			_tTaskItem tItem;
@@ -5584,8 +5631,6 @@ bool CSQLHelper::HandleOnOffAction(const bool bIsOn, const std::string &OnAction
 	}
 	else
 	{
-		if (OffAction.size()<1)
-			return true;
 		if ((OffAction.find("http://") != std::string::npos) || (OffAction.find("https://") != std::string::npos))
 		{
 			_tTaskItem tItem;
@@ -6212,6 +6257,149 @@ void CSQLHelper::AllowNewHardwareTimer(const int iTotMinutes)
 	_log.Log(LOG_STATUS, "New sensors allowed for %d minutes...", iTotMinutes);
 }
 
+std::string CSQLHelper::GetDeviceValue(const char * FieldName , const char *Idx )
+{	
+	TSqlQueryResult result = Query("SELECT %s from DeviceStatus WHERE (ID == %s )",FieldName, Idx );
+  if (result.size()>0)
+	  return  result[0][0];
+  else
+	  return  "";
+}
+
+void CSQLHelper::UpdateDeviceValue(const char * FieldName , std::string &Value , std::string &Idx )
+{	
+	Query("UPDATE DeviceStatus SET %s='%s' , LastUpdate='%s' WHERE (ID == %s )",FieldName, Value.c_str() ,GetCurrentAsciiTime ().c_str(),Idx.c_str());
+}
+void CSQLHelper::UpdateDeviceValue(const char * FieldName , int Value , std::string &Idx )
+{	
+	Query("UPDATE DeviceStatus SET %s=%d , LastUpdate='%s' WHERE (ID == %s )",FieldName, Value ,GetCurrentAsciiTime ().c_str(),Idx.c_str());
+}
+void CSQLHelper::UpdateDeviceValue(const char * FieldName , float Value , std::string &Idx )
+{	
+	Query("UPDATE DeviceStatus SET %s=%4.2f , LastUpdate='%s' WHERE (ID == %s )",FieldName, Value ,GetCurrentAsciiTime ().c_str(),Idx.c_str());
+}
+
+
+
+std::vector<std::vector<std::string> > CSQLHelper::Query( const char fmt[] , ... )
+{
+
+    va_list argptr;
+    va_start(argptr, fmt);  
+
+    char szTmp[1024];
+    vsnprintf(szTmp,sizeof(szTmp), fmt, argptr) ;
+	return query( std::string(szTmp)) ;
+}
+
+std::string getSValuePart(std::string &sValue, unsigned int part )
+{
+  return getSValuePart(sValue.c_str(),  part );
+}
+std::string getSValuePart(const char * sValue, unsigned int part )
+{
+	std::vector<std::string> splitresults;
+	StringSplit(sValue, ";", splitresults);
+	if (part>=splitresults.size())
+      return 0;
+    else
+      return splitresults[part] ;
+}
+
+//return temperature value from Svalue : is code temperature;humidity;???
+float CSQLHelper::getTemperatureFromSValue(const char * sValue)
+{
+	std::vector<std::string> splitresults;
+	StringSplit(sValue, ";", splitresults);
+	if (splitresults.size()<1)
+      return 0;
+    else
+      return (float)atof(splitresults[0].c_str());
+}
+//return humidity value from Svalue : is code temperature;humidity;???
+float CSQLHelper::getHumidityFromSValue(const char * sValue)
+{
+	std::vector<std::string> splitresults;
+	StringSplit(sValue, ";", splitresults);
+	if (splitresults.size()>=1)
+      return (float)atof(splitresults[1].c_str());
+    else
+      return 0;
+}
+
+bool CSQLHelper::GetLastValue(  const char* DeviceID, int &nValue, std::string &sValue, struct tm &LastUpdateTime)
+{
+    bool result=false;
+    std::vector<std::vector<std::string> > sqlresult;
+	char szTmp[400];
+	std::string sLastUpdate;
+	//std::string sValue;
+	//struct tm LastUpdateTime;
+	time_t now = mytime(NULL);
+	struct tm tm1;
+	localtime_r(&now,&tm1);
+		
+	sprintf(szTmp,"SELECT nValue,sValue,LastUpdate FROM DeviceStatus WHERE ( ID=%s ) ",DeviceID );
+	sqlresult=query(szTmp);
+	
+	if (sqlresult.size()!=0)
+	{
+		nValue=(int)atoi(sqlresult[0][0].c_str());
+		sValue=sqlresult[0][1];
+
+		sLastUpdate=sqlresult[0][2];
+		
+		LastUpdateTime.tm_isdst=tm1.tm_isdst;
+		LastUpdateTime.tm_year=atoi(sLastUpdate.substr(0,4).c_str())-1900;
+		LastUpdateTime.tm_mon=atoi(sLastUpdate.substr(5,2).c_str())-1;
+		LastUpdateTime.tm_mday=atoi(sLastUpdate.substr(8,2).c_str());
+		LastUpdateTime.tm_hour=atoi(sLastUpdate.substr(11,2).c_str());
+		LastUpdateTime.tm_min=atoi(sLastUpdate.substr(14,2).c_str());
+		LastUpdateTime.tm_sec=atoi(sLastUpdate.substr(17,2).c_str());
+	
+		result=true;
+	}
+	
+	return result;
+}
+
+
+//convert from farenheit to celcius if unit=farenheit
+double  CSQLHelper::ConvertTemperature(double tempcelcius)
+{
+	if (m_tempunit == TEMPUNIT_F)
+	{
+		//Convert back to celcius
+		tempcelcius = ConvertToCelsius( tempcelcius);
+	}
+	return tempcelcius;
+}
+
+//convert from  celcius to farenheit if unit=farenheit
+double  CSQLHelper::ConvertTemperatureUnit(double tempcelcius)
+{
+	if (m_tempunit == TEMPUNIT_F)
+	{
+		//Convert back to celcius
+		tempcelcius = ConvertToFahrenheit( tempcelcius);
+	}
+	return tempcelcius;
+}
+
+void LogRow (TSqlRowQuery * row)
+{
+		std::string Row;
+		for (unsigned int j=0;j<(*row).size();j++)
+			Row = Row+(*row)[j]+";";
+		_log.Log(LOG_TRACE,"DBQY:ROW %s",Row.c_str());
+}
+void LogQueryResult (TSqlQueryResult &result)
+{
+	for (unsigned int i=0;i<result.size();i++)
+	{
+		LogRow( &result[i] );
+	}
+}
 bool CSQLHelper::InsertCustomIconFromZip(const std::string &szZip, std::string &ErrorMessage)
 {
 	//write file to disk
@@ -6428,4 +6616,33 @@ bool CSQLHelper::InsertCustomIconFromZip(const std::string &szZip, std::string &
 
 	m_webservers.ReloadCustomSwitchIcons();
 	return true;
+}
+
+//update the SerialPort Name field in database with port information 
+void updateHardwareSerialName()
+{
+  bool bUseDirectPath;
+  std::vector<std::string> SerialPorts =  GetSerialPorts(bUseDirectPath);
+  std::string idx;
+  std::string SerialPortName;
+  unsigned int port;
+
+  TSqlQueryResult result=m_sql.Query("SELECT ID,Port FROM Hardware "  ) ;
+
+	//for all the hardware device 
+	for (unsigned int i=0;i<result.size();i++)
+	{
+		TSqlRowQuery * row = &result[i] ;
+
+    idx=(*row)[0];
+    port = atoi((*row)[1].c_str());    
+    //get serial string name
+    if (port<SerialPorts.size())
+      SerialPortName = SerialPorts[port]; 
+    else
+      SerialPortName ="";
+    //update serial name
+		m_sql.Query("UPDATE Hardware SET SerialPort=%s WHERE (ID == %s)",	SerialPortName.c_str(),idx.c_str());
+
+  }
 }

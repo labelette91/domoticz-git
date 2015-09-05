@@ -7,16 +7,19 @@
 
 enum _eLogLevel
 {
-	LOG_NORM=0,
-	LOG_ERROR,
-	LOG_STATUS,
+	LOG_ERROR=0,
+	LOG_STATUS=1,
+	LOG_NORM=2,
+  LOG_TRACE=3
 };
 
 enum _eLogFileVerboseLevel
 {
-	VBL_ALL=0,
-	VBL_STATUS_ERROR,
-	VBL_ERROR,
+	VBL_ERROR=0,
+	VBL_STATUS_ERROR=1,
+	VBL_ALL=2,
+ 	VBL_TRACE,
+
 };
 
 class CLogger
@@ -45,12 +48,22 @@ public:
 	void LogSequenceEnd(const _eLogLevel level);
 
 	std::list<_tLogLineStruct> GetLog();
+
+	void SetFilterString(std::string  &Filter);
+	bool isTraceEnable();
+  bool TestFilter(char * cbuffer);
+  void SetLogPreference (std::string  LogFilter, std::string  LogFileName , std::string  LogLevel );
+  void GetLogPreference ();
+
 private:
 	boost::mutex m_mutex;
 	std::ofstream m_outputfile;
 	std::deque<_tLogLineStruct> m_lastlog;
 	bool m_bInSequenceMode;
 	std::stringstream m_sequencestring;
+	std::string FilterString;
+	std::vector<std::string> FilterStringList;
+	std::vector<std::string> KeepStringList;
 	_eLogFileVerboseLevel m_verbose_level;
 };
 extern CLogger _log;

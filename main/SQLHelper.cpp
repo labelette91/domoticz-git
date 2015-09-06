@@ -63,7 +63,7 @@ const char *sqlCreateDeviceStatus =
 "[TempIdx] BIGINT DEFAULT 0 , "
 "[SwitchIdx] INTEGER DEFAULT 0 , "
 "[DeltaTemp] float DEFAULT 0, "
-"[CustomImage] INTEGER DEFAULT 0);";
+"[CustomImage] INTEGER DEFAULT 0, "
 "[Description] VARCHAR(200) DEFAULT '');";
 
 const char *sqlCreateDeviceStatusTrigger =

@@ -3756,6 +3756,33 @@ namespace http {
 						devid = id;
 					}
 				}
+                
+                // ----------- RFlink "Test Switch" Fix -----------
+                CDomoticzHardwareBase *pBaseHardware = (CDomoticzHardwareBase*)m_mainworker.GetHardware(atoi(hwdid.c_str()));
+				if (pBaseHardware != NULL)
+				{
+					if (pBaseHardware->HwdType == HTYPE_RFLINK) {
+						if (dtype == pTypeLighting1){
+							dtype = pTypeGeneralSwitch;
+						}
+						else
+							if (dtype == pTypeLighting2){
+								dtype = pTypeGeneralSwitch;
+                                if (subtype == sTypeAC){ // 0
+                                   subtype = sSwitchTypeAC;
+                                }
+                                if (subtype == sTypeHEU){ // 1
+                                   subtype = sSwitchTypeHEU;
+                                   devid = "7" + devid;
+                                }
+                                if (subtype == sTypeKambrook){ // 3
+                                   subtype = sSwitchTypeKambrook;
+                                }
+							}
+					}
+				}
+                // -----------------------------------------------
+                
 				root["status"] = "OK";
 				root["message"] = "OK";
 				root["title"] = "TestSwitch";
@@ -4170,7 +4197,17 @@ namespace http {
 						else
 							if (dtype == pTypeLighting2){
 								dtype = pTypeGeneralSwitch;
-								subtype = sSwitchTypeAC;
+                            
+                                if (subtype == sTypeAC){ // 0
+                                   subtype = sSwitchTypeAC;
+                                }
+                                if (subtype == sTypeHEU){ // 1
+                                   subtype = sSwitchTypeHEU;
+								   devid = "7" + devid;
+                                }
+                                if (subtype == sTypeKambrook){ // 3
+                                   subtype = sSwitchTypeKambrook;
+                                }
 								devid = "0" + devid;
 							}
 					}
@@ -5506,22 +5543,6 @@ namespace http {
 				s_strid >> ID;
 
 				m_mainworker.SwitchLight(ID, "Bright Down", 0, -1,false,0);
-			}
-			else if (cparam == "discomode")
-			{
-				std::string idx = m_pWebEm->FindValue("idx");
-
-				if (idx == "")
-				{
-					return;
-				}
-
-				unsigned long long ID;
-				std::stringstream s_strid;
-				s_strid << idx;
-				s_strid >> ID;
-
-				m_mainworker.SwitchLight(ID, "Disco Mode", 0, -1, false, 0);
 			}
 			else if (cparam == "discoup")
 			{

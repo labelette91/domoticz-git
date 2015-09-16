@@ -27,7 +27,7 @@
 	#include "../msbuild/WindowsHelper.h"
 #endif
 
-#define DB_VERSION 78
+#define DB_VERSION 79
 
 extern http::server::CWebServerHelper m_webservers;
 extern std::string szWWWFolder;
@@ -239,6 +239,7 @@ const char *sqlCreateHardware =
 "[SerialPort] VARCHAR(50) DEFAULT (''), "
 "[Username] VARCHAR(100), "
 "[Password] VARCHAR(100), "
+"[Extra] VARCHAR(200) DEFAULT (''),"
 "[Mode1] CHAR DEFAULT 0, "
 "[Mode2] CHAR DEFAULT 0, "
 "[Mode3] CHAR DEFAULT 0, "
@@ -1490,6 +1491,11 @@ bool CSQLHelper::OpenDatabase()
 					safe_query("UPDATE DeviceStatus SET DeviceID='%q' WHERE (ID='%q')", szTmp, idx.c_str());
 				}
 			}
+		}
+		if (dbversion < 79)
+		{
+			//MQTT filename for ca file
+			query("ALTER TABLE Hardware ADD COLUMN [Extra] VARCHAR(200) DEFAULT ('')");
 		}
 	}
 	else if (bNewInstall)
@@ -3637,7 +3643,8 @@ void CSQLHelper::UpdateMeter()
 		"(Type=%d AND SubType=%d) OR"  //pTypeGeneral,sTypeSoundLevel
 		"(Type=%d AND SubType=%d) OR " //pTypeGeneral,sTypeDistance
 		"(Type=%d AND SubType=%d) OR " //pTypeGeneral,sTypePressure
-		"(Type=%d AND SubType=%d)"     //pTypeGeneral,sTypeCounterIncremental
+		"(Type=%d AND SubType=%d) OR " //pTypeGeneral,sTypeCounterIncremental
+		"(Type=%d AND SubType=%d)"     //pTypeGeneral,sTypeKwh
 		")",
 		pTypeRFXMeter,
 		pTypeP1Gas,
@@ -3660,7 +3667,8 @@ void CSQLHelper::UpdateMeter()
 		pTypeGeneral, sTypeSoundLevel,
 		pTypeGeneral, sTypeDistance,
 		pTypeGeneral, sTypePressure,
-		pTypeGeneral, sTypeCounterIncremental
+		pTypeGeneral, sTypeCounterIncremental,
+		pTypeGeneral, sTypeKwh
 		);
 	if (result.size()>0)
 	{
@@ -3772,6 +3780,21 @@ void CSQLHelper::UpdateMeter()
 			{
 				double fValue = atof(sValue.c_str())*10.0f;
 				sprintf(szTmp, "%d", int(fValue));
+				sValue = szTmp;
+			}
+			else if ((dType == pTypeGeneral) && (dSubType == sTypeKwh))
+			{
+				std::vector<std::string> splitresults;
+				StringSplit(sValue, ";", splitresults);
+				if (splitresults.size() < 2)
+					continue;
+
+				double fValue = atof(splitresults[0].c_str())*10.0f;
+				sprintf(szTmp, "%d", int(fValue));
+				susage = szTmp;
+
+				fValue = atof(splitresults[1].c_str());
+				sprintf(szTmp, "%.0f", fValue);
 				sValue = szTmp;
 			}
 			else if (dType == pTypeLux)

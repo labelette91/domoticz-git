@@ -21,6 +21,7 @@
 #include "../hardware/Wunderground.h"
 #include "../hardware/ForecastIO.h"
 #include "../hardware/Kodi.h"
+#include "../hardware/LogitechMediaServer.h"
 #ifdef WITH_GPIO
 #include "../hardware/Gpio.h"
 #include "../hardware/GpioPin.h"
@@ -382,6 +383,10 @@ namespace http {
 			RegisterCommandCode("kodiremovenode", boost::bind(&CWebServer::Cmd_KodiRemoveNode, this, _1));
 			RegisterCommandCode("kodiclearnodes", boost::bind(&CWebServer::Cmd_KodiClearNodes, this, _1));
 			RegisterCommandCode("kodimediacommand", boost::bind(&CWebServer::Cmd_KodiMediaCommand, this, _1));
+
+			RegisterCommandCode("lmssetmode", boost::bind(&CWebServer::Cmd_LMSSetMode, this, _1));
+			RegisterCommandCode("lmsgetnodes", boost::bind(&CWebServer::Cmd_LMSGetNodes, this, _1));
+			RegisterCommandCode("lmsmediacommand", boost::bind(&CWebServer::Cmd_LMSMediaCommand, this, _1));
 
 			RegisterCommandCode("savefibarolinkconfig", boost::bind(&CWebServer::Cmd_SaveFibaroLinkConfig, this, _1));
 			RegisterCommandCode("getfibarolinkconfig", boost::bind(&CWebServer::Cmd_GetFibaroLinkConfig, this, _1));
@@ -834,6 +839,7 @@ namespace http {
 					}
 					_log.Log(LOG_STATUS, "Login successfull : user '%s'", m_users[iUser].Username.c_str());
 					root["status"] = "OK";
+					root["version"] = szAppVersion;
 					root["title"] = "logincheck";
 					m_pWebEm->m_actualuser = m_users[iUser].Username;
 					m_pWebEm->m_actualuser_rights = m_users[iUser].userrights;
@@ -946,6 +952,13 @@ namespace http {
 				//Lan
 				if (address == "")
 					return;
+
+				if (htype == HTYPE_MQTT) {
+					std::string modeqStr = m_pWebEm->FindValue("mode1");
+					if (!modeqStr.empty()) {
+						mode1 = atoi(modeqStr.c_str());
+					}
+				}
 			}
 			else if (htype == HTYPE_Domoticz) {
 				//Remote Domoticz
@@ -968,6 +981,9 @@ namespace http {
 				//all fine here!
 			}
 			else if (htype == HTYPE_Kodi) {
+				//all fine here!
+			}
+			else if (htype == HTYPE_LogitechMediaServer) {
 				//all fine here!
 			}
 			else if (htype == HTYPE_RaspberryBMP085) {
@@ -1062,6 +1078,11 @@ namespace http {
 				mode2 = 1000;
 			}
 			else if (htype == HTYPE_Kodi)
+			{
+				mode1 = 30;
+				mode2 = 1000;
+			}
+			else if (htype == HTYPE_LogitechMediaServer)
 			{
 				mode1 = 30;
 				mode2 = 1000;
@@ -1169,6 +1190,9 @@ namespace http {
 				//All fine here
 			}
 			else if (htype == HTYPE_Kodi) {
+				//All fine here
+			}
+			else if (htype == HTYPE_LogitechMediaServer) {
 				//All fine here
 			}
 			else if (htype == HTYPE_RaspberryBMP085) {
@@ -4325,6 +4349,25 @@ namespace http {
 						root["result"][ii]["ptag"] = Notification_Type_Desc(NTYPE_SWITCH_OFF, 1);
 						ii++;
 					}
+					if (switchtype == STYPE_Media)
+					{
+						root["result"][ii]["val"] = NTYPE_VIDEO;
+						root["result"][ii]["text"] = Notification_Type_Desc(NTYPE_VIDEO, 0);
+						root["result"][ii]["ptag"] = Notification_Type_Desc(NTYPE_VIDEO, 1);
+						ii++;
+						root["result"][ii]["val"] = NTYPE_AUDIO;
+						root["result"][ii]["text"] = Notification_Type_Desc(NTYPE_AUDIO, 0);
+						root["result"][ii]["ptag"] = Notification_Type_Desc(NTYPE_AUDIO, 1);
+						ii++;
+						root["result"][ii]["val"] = NTYPE_PHOTO;
+						root["result"][ii]["text"] = Notification_Type_Desc(NTYPE_PHOTO, 0);
+						root["result"][ii]["ptag"] = Notification_Type_Desc(NTYPE_PHOTO, 1);
+						ii++;
+						root["result"][ii]["val"] = NTYPE_PAUSED;
+						root["result"][ii]["text"] = Notification_Type_Desc(NTYPE_PAUSED, 0);
+						root["result"][ii]["ptag"] = Notification_Type_Desc(NTYPE_PAUSED, 1);
+						ii++;
+					}
 				}
 				if (
 					(
@@ -7173,8 +7216,7 @@ namespace http {
 						(dType == pTypeENERGY) ||
 						(dType == pTypeRFXMeter) ||
 						(dType == pTypeAirQuality) ||
-						(dType == pTypeRFXSensor) ||
-						((dType == pTypeGeneral)&&(dSubType == sTypeTextStatus))
+						(dType == pTypeRFXSensor)
 						)
 					{
 						root["result"][ii]["ID"] = szData;
@@ -7369,7 +7411,10 @@ namespace http {
 						}
 						else if (switchtype == STYPE_Media)
 						{
-							root["result"][ii]["TypeImg"] = "Media";
+							if ((pHardware != NULL) && (pHardware->HwdType == HTYPE_LogitechMediaServer))
+								root["result"][ii]["TypeImg"] = "LogitechMediaServer";
+							else
+								root["result"][ii]["TypeImg"] = "Media";
 							root["result"][ii]["Status"] = Media_Player_States((_eMediaStatus)nValue);
 							lstatus = sValue;
 						}
@@ -10841,6 +10886,9 @@ namespace http {
 					int nValue = atoi(sd[1].c_str());
 					std::string sValue = sd[2];
 
+					//skip 0-values in log for MediaPlayers
+					if ((switchtype == STYPE_Media) && (sValue == "0")) continue;
+
 					root["result"][ii]["idx"] = sd[0];
 
 					//add light details
@@ -11699,15 +11747,6 @@ namespace http {
 							method = atoi(sMethod.c_str());
 						if (bHaveUsage == false)
 							method = 0;
-
-						// Force Value graph even if device should show Value graph
-						if ((method == 1) && (
-								((dType == pTypeENERGY) && ((dSubType == sTypeELEC2) || (dSubType == sTypeELEC3))) ||
-								((dType == pTypeGeneral) && (dSubType == sTypeKwh))
-							)) {
-							//_log.Log(LOG_ERROR, "Energy/CMxxx or General/kWh device graph method should be 0!");
-							method = 0;
-						}
 
 						if (method != 0)
 						{

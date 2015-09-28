@@ -6395,6 +6395,7 @@ namespace http {
 			}
 			m_sql.UpdatePreferencesVar("DoorbellCommand", atoi(m_pWebEm->FindValue("DoorbellCommand").c_str()));
 			m_sql.UpdatePreferencesVar("SmartMeterType", atoi(m_pWebEm->FindValue("SmartMeterType").c_str()));
+			m_sql.UpdatePreferencesVar("DisplayPowerUsageInkWhGraph", atoi(m_pWebEm->FindValue("DisplayPowerUsageInkWhGraph").c_str()));
 
 			std::string EnableTabFloorplans = m_pWebEm->FindValue("EnableTabFloorplans");
 			m_sql.UpdatePreferencesVar("EnableTabFloorplans", (EnableTabFloorplans == "on" ? 1 : 0));
@@ -8468,7 +8469,7 @@ namespace http {
 							}
 							if (total > 0)
 							{
-								sprintf(szTmp, ", Total: %.3f Wh", total);
+								sprintf(szTmp, ", Total: %.3f kWh", total/1000.0f);
 								strcat(szData, szTmp);
 							}
 							root["result"][ii]["Data"] = szData;
@@ -10681,6 +10682,10 @@ namespace http {
 				{
 					root["SmartMeterType"] = nValue;
 				}
+				else if (Key == "DisplayPowerUsageInkWhGraph")
+				{
+					root["DisplayPowerUsageInkWhGraph"] = nValue;
+				}
 				else if (Key == "EnableTabFloorplans")
 				{
 					root["EnableTabFloorplans"] = nValue;
@@ -11748,6 +11753,19 @@ namespace http {
 						if (bHaveUsage == false)
 							method = 0;
 
+						int iDisplayInPower = 1;
+						m_sql.GetPreferencesVar("DisplayPowerUsageInkWhGraph", iDisplayInPower);
+						if (!iDisplayInPower)
+						{
+							// Force Value graph even if device should show Value graph
+							if ((method == 1) && (
+								((dType == pTypeENERGY) && ((dSubType == sTypeELEC2) || (dSubType == sTypeELEC3))) ||
+								((dType == pTypeGeneral) && (dSubType == sTypeKwh))
+								)) {
+								//_log.Log(LOG_ERROR, "Energy/CMxxx or General/kWh device graph method should be 0!");
+								method = 0;
+							}
+						}
 						if (method != 0)
 						{
 							//realtime graph

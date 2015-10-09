@@ -1903,17 +1903,16 @@ bool CSQLHelper::OpenDatabase()
 		nValue = 5;
 		UpdatePreferencesVar("ShortLogInterval", nValue);
 	}
+	if (nValue < 1)
+		nValue = 5;
+	m_ShortLogInterval = 5;// nValue;
 	if (!GetPreferencesVar("DisplayPowerUsageInkWhGraph", nValue))
 	{
 		UpdatePreferencesVar("DisplayPowerUsageInkWhGraph", 1);
 	}
-	if (nValue < 1)
-		nValue = 5;
-	m_ShortLogInterval = nValue;
 	//Start background thread
 	if (!StartThread())
 		return false;
-
 	return true;
 }
 
@@ -2169,7 +2168,7 @@ void CSQLHelper::SetDatabaseName(const std::string &DBName)
 	m_dbase_name=DBName;
 }
 
-bool CSQLHelper::DoesColumnExistsInTable(const std::string columnname, const std::string tablename)
+bool CSQLHelper::DoesColumnExistsInTable(const std::string &columnname, const std::string &tablename)
 {
 	if (!m_dbase)
 	{
@@ -3716,6 +3715,7 @@ void CSQLHelper::UpdateMeter()
 			ntime.tm_sec=atoi(sLastUpdate.substr(17,2).c_str());
 			time_t checktime=mktime(&ntime);
 
+			//Check for timeout, if timeout then dont add value
 			if (dType!=pTypeP1Gas)
 			{
 				if (now-checktime>=SensorTimeOut*60)
@@ -3727,6 +3727,7 @@ void CSQLHelper::UpdateMeter()
 				if (now-checktime>=3*3600)
 					continue;
 			}
+
 			if (dType==pTypeYouLess)
 			{
 				std::vector<std::string> splitresults;
@@ -3772,25 +3773,25 @@ void CSQLHelper::UpdateMeter()
 			else if ((dType==pTypeGeneral)&&(dSubType==sTypeVisibility))
 			{
 				double fValue=atof(sValue.c_str())*10.0f;
-				sprintf(szTmp,"%d",int(fValue));
+				sprintf(szTmp,"%.0f",fValue);
 				sValue=szTmp;
 			}
 			else if ((dType == pTypeGeneral) && (dSubType == sTypeDistance))
 			{
 				double fValue = atof(sValue.c_str())*10.0f;
-				sprintf(szTmp, "%d", int(fValue));
+				sprintf(szTmp, "%.0f", fValue);
 				sValue = szTmp;
 			}
 			else if ((dType == pTypeGeneral) && (dSubType == sTypeSolarRadiation))
 			{
 				double fValue=atof(sValue.c_str())*10.0f;
-				sprintf(szTmp,"%d",int(fValue));
+				sprintf(szTmp,"%.0f",fValue);
 				sValue=szTmp;
 			}
 			else if ((dType == pTypeGeneral) && (dSubType == sTypeSoundLevel))
 			{
 				double fValue = atof(sValue.c_str())*10.0f;
-				sprintf(szTmp, "%d", int(fValue));
+				sprintf(szTmp, "%.0f", fValue);
 				sValue = szTmp;
 			}
 			else if ((dType == pTypeGeneral) && (dSubType == sTypeKwh))
@@ -3801,7 +3802,7 @@ void CSQLHelper::UpdateMeter()
 					continue;
 
 				double fValue = atof(splitresults[0].c_str())*10.0f;
-				sprintf(szTmp, "%d", int(fValue));
+				sprintf(szTmp, "%.0f", fValue);
 				susage = szTmp;
 
 				fValue = atof(splitresults[1].c_str());
@@ -3817,58 +3818,58 @@ void CSQLHelper::UpdateMeter()
 			else if (dType==pTypeWEIGHT)
 			{
 				double fValue=atof(sValue.c_str())*10.0f;
-				sprintf(szTmp,"%d",int(fValue));
+				sprintf(szTmp,"%.0f",fValue);
 				sValue=szTmp;
 			}
 			else if (dType==pTypeRFXSensor)
 			{
 				double fValue=atof(sValue.c_str());
-				sprintf(szTmp,"%d",int(fValue));
+				sprintf(szTmp,"%.0f",fValue);
 				sValue=szTmp;
 			}
 			else if ((dType==pTypeGeneral) && (dSubType == sTypeCounterIncremental))
 			{
 				double fValue=atof(sValue.c_str());
-				sprintf(szTmp,"%d",int(fValue));
+				sprintf(szTmp,"%.0f",fValue);
 				sValue=szTmp;
 			}
 			else if ((dType==pTypeGeneral)&&(dSubType==sTypeVoltage))
 			{
 				double fValue=atof(sValue.c_str())*1000.0f;
-				sprintf(szTmp,"%d",int(fValue));
+				sprintf(szTmp,"%.0f",fValue);
 				sValue=szTmp;
 			}
 			else if ((dType == pTypeGeneral) && (dSubType == sTypeCurrent))
 			{
 				double fValue = atof(sValue.c_str())*1000.0f;
-				sprintf(szTmp, "%d", int(fValue));
+				sprintf(szTmp, "%.0f", fValue);
 				sValue = szTmp;
 			}
 			else if ((dType == pTypeGeneral) && (dSubType == sTypePressure))
 			{
 				double fValue=atof(sValue.c_str())*10.0f;
-				sprintf(szTmp,"%d",int(fValue));
+				sprintf(szTmp,"%.0f",fValue);
 				sValue=szTmp;
 			}
 			else if (dType == pTypeUsage)
 			{
 				double fValue=atof(sValue.c_str())*10.0f;
-				sprintf(szTmp,"%d",int(fValue));
+				sprintf(szTmp,"%.0f",fValue);
 				sValue=szTmp;
 			}
 
-			unsigned long long MeterValue;
+			long long MeterValue;
 			std::stringstream s_str2( sValue );
 			s_str2 >> MeterValue;
 
-			unsigned long long MeterUsage;
+			long long MeterUsage;
 			std::stringstream s_str3( susage );
 			s_str3 >> MeterUsage;
 
 			//insert record
 			safe_query(
 				"INSERT INTO Meter (DeviceRowID, Value, [Usage]) "
-				"VALUES ('%llu', '%llu', '%llu')",
+				"VALUES ('%llu', '%lld', '%lld')",
 				ID,
 				MeterValue,
 				MeterUsage

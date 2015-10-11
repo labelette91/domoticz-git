@@ -479,6 +479,8 @@ namespace http {
 			RegisterCommandCode("setunused", boost::bind(&CWebServer::Cmd_SetUnused, this, _1));
 
 			RegisterCommandCode("addlogmessage", boost::bind(&CWebServer::Cmd_AddLogMessage, this, _1));
+			RegisterCommandCode("clearshortlog", boost::bind(&CWebServer::Cmd_ClearShortLog, this, _1));
+			RegisterCommandCode("vacuumdatabase", boost::bind(&CWebServer::Cmd_VacuumDatabase, this, _1));
 
 			RegisterRType("graph", boost::bind(&CWebServer::RType_HandleGraph, this, _1));
 			RegisterRType("lightlog", boost::bind(&CWebServer::RType_LightLog, this, _1));
@@ -972,7 +974,11 @@ namespace http {
 				//all fine here!
 			}
 			else if (htype == HTYPE_System)	{
-				//All fine here
+				//There should be only one
+				std::vector<std::vector<std::string> > result;
+				result = m_sql.safe_query("SELECT ID FROM Hardware WHERE (Type==%d)", HTYPE_System);
+				if (!result.empty())
+					return;
 			}
 			else if (htype == HTYPE_1WIRE) {
 				//all fine here!
@@ -1175,7 +1181,16 @@ namespace http {
 					return;
 			}
 			else if (htype == HTYPE_System) {
-				//All fine here
+				//There should be only one, and with this ID
+				std::vector<std::vector<std::string> > result;
+				result = m_sql.safe_query("SELECT ID FROM Hardware WHERE (Type==%d)", HTYPE_System);
+				if (!result.empty())
+				{
+					int hID = atoi(result[0][0].c_str());
+					int aID = atoi(idx.c_str());
+					if (hID != aID)
+						return;
+				}
 			}
 			else if (htype == HTYPE_TE923) {
 				//All fine here
@@ -1305,21 +1320,9 @@ namespace http {
 					);
 			}
 
-			//Special case for internal system monitoring
-			if (htype == HTYPE_System)
-			{
-				m_mainworker.m_hardwaremonitor.StopHardwareMonitor();
-				if (bEnabled)
-				{
-					m_mainworker.m_hardwaremonitor.StartHardwareMonitor();
-				}
-			}
-			else
-			{
-				//re-add the device in our system
-				int ID = atoi(idx.c_str());
-				m_mainworker.AddHardwareFromParams(ID, name, bEnabled, htype, address, port, sport, username, password, extra, mode1, mode2, mode3, mode4, mode5, mode6, iDataTimeout, true);
-			}
+			//re-add the device in our system
+			int ID = atoi(idx.c_str());
+			m_mainworker.AddHardwareFromParams(ID, name, bEnabled, htype, address, port, sport, username, password, extra, mode1, mode2, mode3, mode4, mode5, mode6, iDataTimeout, true);
 		}
 
 		void CWebServer::Cmd_GetDeviceValueOptions(Json::Value &root)
@@ -10043,6 +10046,31 @@ namespace http {
 
 			_log.Log(LOG_STATUS, "%s", smessage.c_str());
 		}
+
+		void CWebServer::Cmd_ClearShortLog(Json::Value &root)
+		{
+			if (m_pWebEm->m_actualuser_rights != 2)
+				return;//Only admin user allowed
+			root["status"] = "OK";
+			root["title"] = "ClearShortLog";
+
+			_log.Log(LOG_STATUS, "Clearing Short Log...");
+
+			m_sql.ClearShortLog();
+
+			_log.Log(LOG_STATUS, "Short Log Cleared!");
+		}
+
+		void CWebServer::Cmd_VacuumDatabase(Json::Value &root)
+		{
+			if (m_pWebEm->m_actualuser_rights != 2)
+				return;//Only admin user allowed
+			root["status"] = "OK";
+			root["title"] = "VacuumDatabase";
+
+			m_sql.VacuumDatabase();
+		}
+		
 		
 
 		void CWebServer::RType_GetTransfers(Json::Value &root)

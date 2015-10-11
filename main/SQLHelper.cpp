@@ -27,7 +27,7 @@
 	#include "../msbuild/WindowsHelper.h"
 #endif
 
-#define DB_VERSION 82
+#define DB_VERSION 83
 
 extern http::server::CWebServerHelper m_webservers;
 extern std::string szWWWFolder;
@@ -681,6 +681,24 @@ bool CSQLHelper::OpenDatabase()
 	query(sqlCreateMySensorsVariables);
 	query(sqlCreateMySensorsChilds);
 	query(sqlCreateToonDevices);
+	//Add indexes to log tables
+	query("create index if not exists f_idx on Fan(DeviceRowID);");
+	query("create index if not exists fc_idx on Fan_Calendar(DeviceRowID);");
+	query("create index if not exists l_idx on LightingLog(DeviceRowID);");
+	query("create index if not exists m_idx on Meter(DeviceRowID);");
+	query("create index if not exists mc_idx on Meter_Calendar(DeviceRowID);");
+	query("create index if not exists mm_idx on MultiMeter(DeviceRowID);");
+	query("create index if not exists mmc_idx on MultiMeter_Calendar(DeviceRowID);");
+	query("create index if not exists p_idx on Percentage(DeviceRowID);");
+	query("create index if not exists pc_idx on Percentage_Calendar(DeviceRowID);");
+	query("create index if not exists r_idx on Rain(DeviceRowID);");
+	query("create index if not exists rc_idx on Rain_Calendar(DeviceRowID);");
+	query("create index if not exists t_idx on Temperature(DeviceRowID);");
+	query("create index if not exists tc_idx on Temperature_Calendar(DeviceRowID);");
+	query("create index if not exists u_idx on UV(DeviceRowID);");
+	query("create index if not exists uv_idx on UV_Calendar(DeviceRowID);");
+	query("create index if not exists w_idx on Wind(DeviceRowID);");
+	query("create index if not exists wc_idx on Wind_Calendar(DeviceRowID);");
 
 	if ((!bNewInstall) && (dbversion < DB_VERSION))
 	{
@@ -1525,6 +1543,16 @@ bool CSQLHelper::OpenDatabase()
 				safe_query("UPDATE Meter SET Value=Value/100, Usage=Usage*10 WHERE DeviceRowID=%s", sd2[0].c_str());
 				//meter_calendar table
 				safe_query("UPDATE Meter_Calendar SET Value=Value/100, Counter=Counter/100 WHERE (DeviceRowID==%s)", sd2[0].c_str());
+			}
+		}
+		if (dbversion < 83)
+		{
+			//Add hardware monitor as normal hardware class (if not already added)
+			std::vector<std::vector<std::string> > result;
+			result = safe_query("SELECT ID FROM Hardware WHERE (Type==%d)", HTYPE_System);
+			if (result.size() < 1)
+			{
+				m_sql.safe_query("INSERT INTO Hardware (Name, Enabled, Type, Address, Port, Username, Password, Mode1, Mode2, Mode3, Mode4, Mode5, Mode6) VALUES ('Motherboard',1, %d,'',1,'','',0,0,0,0,0,0)", HTYPE_System);
 			}
 		}
 	}
@@ -3155,6 +3183,8 @@ void CSQLHelper::ScheduleShortlog()
 		_log.Log(LOG_ERROR, "Domoticz: Error running the 5 minute schedule script!");
 #ifdef _DEBUG
 		_log.Log(LOG_ERROR, "-----------------\n%s\n----------------", boost::diagnostic_information(e).c_str());
+#else
+		(void)e;
 #endif
 		return;
 	}
@@ -3185,6 +3215,8 @@ void CSQLHelper::ScheduleDay()
 		_log.Log(LOG_ERROR, "Domoticz: Error running the daily minute schedule script!");
 #ifdef _DEBUG
 		_log.Log(LOG_ERROR, "-----------------\n%s\n----------------", boost::diagnostic_information(e).c_str());
+#else
+		(void)e;
 #endif
 		return;
 	}
@@ -4974,7 +5006,6 @@ void CSQLHelper::AddCalendarUpdateFan()
 	}
 }
 
-
 void CSQLHelper::CleanupShortLog()
 {
 	int n5MinuteHistoryDays=1;
@@ -5022,6 +5053,24 @@ void CSQLHelper::CleanupShortLog()
 		sprintf(szQuery, "DELETE FROM Fan WHERE %s", szQueryFilter.c_str());
 		query(szQuery);
 	}
+}
+
+void CSQLHelper::ClearShortLog()
+{
+	query("DELETE FROM Temperature");
+	query("DELETE FROM Rain");
+	query("DELETE FROM Wind");
+	query("DELETE FROM UV");
+	query("DELETE FROM Meter");
+	query("DELETE FROM MultiMeter");
+	query("DELETE FROM Percentage");
+	query("DELETE FROM Fan");
+	VacuumDatabase();
+}
+
+void CSQLHelper::VacuumDatabase()
+{
+	query("VACUUM");
 }
 
 void CSQLHelper::DeleteHardware(const std::string &idx)
@@ -5089,6 +5138,7 @@ void CSQLHelper::DeleteDevice(const std::string &idx)
 	safe_query("DELETE FROM DeviceToPlansMap WHERE (DeviceRowID == '%q')",idx.c_str());
 	safe_query("DELETE FROM CamerasActiveDevices WHERE (DevSceneType==0) AND (DevSceneRowID == '%q')",idx.c_str());
 	safe_query("DELETE FROM SharedDevices WHERE (DeviceRowID== '%q')",idx.c_str());
+	m_notifications.ReloadNotifications();
 
 
     //notify eventsystem device is no longer present
@@ -5464,6 +5514,7 @@ void CSQLHelper::EventsGetTaskItems(std::vector<_tTaskItem> &currentTasks)
 
 bool CSQLHelper::RestoreDatabase(const std::string &dbase)
 {
+	_log.Log(LOG_STATUS, "Restore Database: Starting...");
 	//write file to disk
 	std::string fpath("");
 #ifdef WIN32
@@ -5477,7 +5528,10 @@ bool CSQLHelper::RestoreDatabase(const std::string &dbase)
 	std::ofstream outfile;
 	outfile.open(outputfile.c_str(),std::ios::out|std::ios::binary|std::ios::trunc);
 	if (!outfile.is_open())
+	{
+		_log.Log(LOG_ERROR, "Restore Database: Could not open backup file for writing!");
 		return false;
+	}
 	outfile << dbase;
 	outfile.flush();
 	outfile.close();
@@ -5486,7 +5540,7 @@ bool CSQLHelper::RestoreDatabase(const std::string &dbase)
 	int rc = sqlite3_open(outputfile.c_str(), &dbase_restore);
 	if (rc)
 	{
-		_log.Log(LOG_ERROR,"Error opening SQLite3 database: %s", sqlite3_errmsg(dbase_restore));
+		_log.Log(LOG_ERROR,"Restore Database: Could not open SQLite3 database: %s", sqlite3_errmsg(dbase_restore));
 		sqlite3_close(dbase_restore);
 		return false;
 	}
@@ -5498,6 +5552,7 @@ bool CSQLHelper::RestoreDatabase(const std::string &dbase)
 	sqlite3_stmt *statement;
 	if(sqlite3_prepare_v2(dbase_restore, ss.str().c_str(), -1, &statement, 0) != SQLITE_OK)
 	{
+		_log.Log(LOG_ERROR, "Restore Database: Seems this is not our database, or it is corrupted!");
 		sqlite3_close(dbase_restore);
 		return false;
 	}
@@ -5510,7 +5565,10 @@ bool CSQLHelper::RestoreDatabase(const std::string &dbase)
 	std::ofstream outfile2;
 	outfile2.open(m_dbase_name.c_str(),std::ios::out|std::ios::binary|std::ios::trunc);
 	if (!outfile2.is_open())
+	{
+		_log.Log(LOG_ERROR, "Restore Database: Could not open backup file for writing!");
 		return false;
+	}
 	outfile2 << dbase;
 	outfile2.flush();
 	outfile2.close();
@@ -5523,17 +5581,28 @@ bool CSQLHelper::RestoreDatabase(const std::string &dbase)
 		int ret=chown(m_dbase_name.c_str(),pw->pw_uid,pw->pw_gid);
 		if (ret!=0)
 		{
-			_log.Log(LOG_ERROR, "Error setting database ownership (chown returned an error!)");
+			_log.Log(LOG_ERROR, "Restore Database: Could not set database ownership (chown returned an error!)");
 		}
 	}
 #endif
-	return OpenDatabase();
+	if (!OpenDatabase())
+	{
+		_log.Log(LOG_ERROR, "Restore Database: Error opening new database!");
+		return false;
+	}
+	//Cleanup the database
+	VacuumDatabase();
+	_log.Log(LOG_STATUS, "Restore Database: Succeeded!");
+	return true;
 }
 
 bool CSQLHelper::BackupDatabase(const std::string &OutputFile)
 {
 	if (!m_dbase)
 		return false; //database not open!
+
+	//First cleanup the database
+	VacuumDatabase();
 
 	boost::lock_guard<boost::mutex> l(m_sqlQueryMutex);
 

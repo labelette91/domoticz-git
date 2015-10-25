@@ -194,7 +194,7 @@ void CKodiNode::handleMessage(std::string& pMessage)
 		}
 		else if (root["error"].empty() != true)
 		{
-			/* e.g {"error":{"code":-32100,"message":"Failed to execute method."},"id":1,"jsonrpc":"2.0"}	*/
+			/* e.g {"error":{"code":-32100,"message":"Failed to execute method."},"id":1001,"jsonrpc":"2.0"}	*/
 			_log.Log(LOG_ERROR, "Kodi: (%s) Code %d Text '%s' ID '%d' Request '%s'", m_Name.c_str(), root["error"]["code"].asInt(), root["error"]["message"].asCString(), root["id"].asInt(), m_sLastMessage.c_str());
 		}
 		else
@@ -235,7 +235,7 @@ void CKodiNode::handleMessage(std::string& pMessage)
 
 								if (m_CurrentStatus.PlayerID() != "")  // if we now have a player id then request more details
 								{
-									sMessage = "{\"jsonrpc\":\"2.0\",\"method\":\"Player.GetItem\",\"id\":3,\"params\":{\"playerid\":" + m_CurrentStatus.PlayerID() + ",\"properties\":[\"artist\",\"album\",\"year\",\"channel\",\"showtitle\",\"season\",\"episode\",\"title\"]}}";
+									sMessage = "{\"jsonrpc\":\"2.0\",\"method\":\"Player.GetItem\",\"id\":1003,\"params\":{\"playerid\":" + m_CurrentStatus.PlayerID() + ",\"properties\":[\"artist\",\"album\",\"year\",\"channel\",\"showtitle\",\"season\",\"episode\",\"title\"]}}";
 									handleWrite(sMessage);
 								}
 							}
@@ -247,9 +247,9 @@ void CKodiNode::handleMessage(std::string& pMessage)
 							else if (root["method"] == "Player.OnSeek")
 							{
 								if (m_CurrentStatus.PlayerID() != "")
-									sMessage = "{\"jsonrpc\":\"2.0\",\"method\":\"Player.GetProperties\",\"id\":2,\"params\":{\"playerid\":" + m_CurrentStatus.PlayerID() + ",\"properties\":[\"live\",\"percentage\",\"speed\"]}}";
+									sMessage = "{\"jsonrpc\":\"2.0\",\"method\":\"Player.GetProperties\",\"id\":1002,\"params\":{\"playerid\":" + m_CurrentStatus.PlayerID() + ",\"properties\":[\"live\",\"percentage\",\"speed\"]}}";
 								else
-									sMessage = "{\"jsonrpc\":\"2.0\",\"method\":\"Player.GetActivePlayers\",\"id\":5}";
+									sMessage = "{\"jsonrpc\":\"2.0\",\"method\":\"Player.GetActivePlayers\",\"id\":1005}";
 								handleWrite(sMessage);
 							}
 							else if ((root["method"] == "Player.OnQuit") || (root["method"] == "Player.OnSleep"))
@@ -257,6 +257,15 @@ void CKodiNode::handleMessage(std::string& pMessage)
 								m_CurrentStatus.Clear();
 								m_CurrentStatus.Status(MSTAT_OFF);
 								UpdateStatus();
+							}
+							else if (root["method"] == "Application.OnVolumeChanged")
+							{
+								if (DEBUG_LOGGING)
+								{
+									float		iVolume = root["params"]["data"]["volume"].asFloat();
+									bool		bMuted = root["params"]["data"]["muted"].asBool();
+									_log.Log(LOG_NORM, "Kodi: (%s) Volume changed to %3.5f, Muted: %s.", m_Name.c_str(), iVolume, bMuted?"true":"false");
+								}
 							}
 							else if (DEBUG_LOGGING) _log.Log(LOG_NORM, "Kodi: (%s) Message warning, unhandled method: '%s'", m_Name.c_str(), root["method"].asCString());
 						}
@@ -276,7 +285,7 @@ void CKodiNode::handleMessage(std::string& pMessage)
 					int		iMessageID = root["id"].asInt();
 					switch (iMessageID)
 					{
-					case 1:		//Ping response
+					case 1001:		//Ping response
 						if (root["result"] == "pong")
 						{
 							m_iMissedPongs = 0;
@@ -285,7 +294,7 @@ void CKodiNode::handleMessage(std::string& pMessage)
 							UpdateStatus();
 						}
 						break;
-					case 2:		//Poll response
+					case 1002:		//Poll response
 						if (root["result"].isMember("live"))
 						{
 							m_CurrentStatus.Live(root["result"]["live"].asBool());
@@ -301,7 +310,7 @@ void CKodiNode::handleMessage(std::string& pMessage)
 						}
 						UpdateStatus();
 						break;
-					case 3:		//OnPlay media details response
+					case 1003:		//OnPlay media details response
 						if (root["result"].isMember("item"))
 						{
 							if (root["result"]["item"].isMember("type"))			m_CurrentStatus.Type(root["result"]["item"]["type"].asCString());
@@ -344,12 +353,12 @@ void CKodiNode::handleMessage(std::string& pMessage)
 							if ((m_CurrentStatus.PlayerID() != "") && (m_CurrentStatus.Type() != "picture")) // request final details
 							{
 								std::string	sMessage;
-								sMessage = "{\"jsonrpc\":\"2.0\",\"method\":\"Player.GetProperties\",\"id\":2,\"params\":{\"playerid\":" + m_CurrentStatus.PlayerID() + ",\"properties\":[\"live\",\"percentage\",\"speed\"]}}";
+								sMessage = "{\"jsonrpc\":\"2.0\",\"method\":\"Player.GetProperties\",\"id\":1002,\"params\":{\"playerid\":" + m_CurrentStatus.PlayerID() + ",\"properties\":[\"live\",\"percentage\",\"speed\"]}}";
 								handleWrite(sMessage);
 							}
 						}
 						break;
-					case 4:		//Shutdown details response
+					case 1004:		//Shutdown details response
 						{
 							m_Stoppable = false;
 							std::string	sAction = "Nothing";
@@ -374,25 +383,25 @@ void CKodiNode::handleMessage(std::string& pMessage)
 							if (sAction != "Nothing")
 							{
 								m_Stoppable = true;
-								std::string	sMessage = "{\"jsonrpc\":\"2.0\",\"method\":\"System." + sAction + "\",\"id\":8}";
+								std::string	sMessage = "{\"jsonrpc\":\"2.0\",\"method\":\"System." + sAction + "\",\"id\":1008}";
 								handleWrite(sMessage);
 							}
 						}
 						break;
-					case 5:		//GetPlayers response, normally requried when Domoticz starts up and media is already streaming
+					case 1005:		//GetPlayers response, normally requried when Domoticz starts up and media is already streaming
 						if (root["result"][0].isMember("playerid"))
 						{
 							m_CurrentStatus.PlayerID(root["result"][0]["playerid"].asInt());
-							sMessage = "{\"jsonrpc\":\"2.0\",\"method\":\"Player.GetItem\",\"id\":3,\"params\":{\"playerid\":" + m_CurrentStatus.PlayerID() + ",\"properties\":[\"artist\",\"album\",\"year\",\"channel\",\"showtitle\",\"season\",\"episode\",\"title\"]}}";
+							sMessage = "{\"jsonrpc\":\"2.0\",\"method\":\"Player.GetItem\",\"id\":1003,\"params\":{\"playerid\":" + m_CurrentStatus.PlayerID() + ",\"properties\":[\"artist\",\"album\",\"year\",\"channel\",\"showtitle\",\"season\",\"episode\",\"title\"]}}";
 							handleWrite(sMessage);
 						}
 						break;
-					case 6:		//Remote Control response
+					case 1006:		//Remote Control response
 						if (root["result"] != "OK")
 							_log.Log(LOG_ERROR, "Kodi: (%s) Send Command Failed: '%s'", m_Name.c_str(), root["result"].asCString());
 						break;
-					case 7:		//Can Shutdown response (after connect)
-						handleWrite(std::string("{\"jsonrpc\":\"2.0\",\"method\":\"Player.GetActivePlayers\",\"id\":5}"));
+					case 1007:		//Can Shutdown response (after connect)
+						handleWrite(std::string("{\"jsonrpc\":\"2.0\",\"method\":\"Player.GetActivePlayers\",\"id\":1005}"));
 						if (root["result"].isMember("canshutdown"))
 						{
 							bCanShutdown = root["result"]["canshutdown"].asBool();
@@ -407,9 +416,12 @@ void CKodiNode::handleMessage(std::string& pMessage)
 						}
 						m_Stoppable = (bCanShutdown || bCanHibernate || bCanSuspend);
 						break;
-					case 8:		//Shutdown response
+					case 1008:		//Shutdown response
 						if (root["result"] == "OK")
 							_log.Log(LOG_NORM, "Kodi: (%s) Shutdown command accepted.", m_Name.c_str());
+						break;
+					case 1009:		//SetVolume response
+						_log.Log(LOG_NORM, "Kodi: (%s) Volume set to %d.", m_Name.c_str(), root["result"].asInt());
 						break;
 					default:
 						_log.Log(LOG_ERROR, "Kodi: (%s) Message error, unknown ID found: '%s'", m_Name.c_str(), pMessage.c_str());
@@ -485,7 +497,7 @@ void CKodiNode::handleConnect()
 			}
 			m_Socket->async_read_some(boost::asio::buffer(m_Buffer, sizeof m_Buffer),
 				boost::bind(&CKodiNode::handleRead, shared_from_this(), boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
-			handleWrite(std::string("{\"jsonrpc\":\"2.0\",\"method\":\"System.GetProperties\",\"params\":{\"properties\":[\"canhibernate\",\"cansuspend\",\"canshutdown\"]},\"id\":7}"));
+			handleWrite(std::string("{\"jsonrpc\":\"2.0\",\"method\":\"System.GetProperties\",\"params\":{\"properties\":[\"canhibernate\",\"cansuspend\",\"canshutdown\"]},\"id\":1007}"));
 		}
 		else
 		{
@@ -592,13 +604,13 @@ void CKodiNode::Do_Work()
 				if (m_CurrentStatus.IsStreaming())
 				{	// Update percentage if playing media (required because Player.OnPropertyChanged never get received as of Kodi 'Helix')
 					if (m_CurrentStatus.PlayerID() != "")
-						sMessage = "{\"jsonrpc\":\"2.0\",\"method\":\"Player.GetProperties\",\"id\":2,\"params\":{\"playerid\":" + m_CurrentStatus.PlayerID() + ",\"properties\":[\"live\",\"percentage\",\"speed\"]}}";
+						sMessage = "{\"jsonrpc\":\"2.0\",\"method\":\"Player.GetProperties\",\"id\":1002,\"params\":{\"playerid\":" + m_CurrentStatus.PlayerID() + ",\"properties\":[\"live\",\"percentage\",\"speed\"]}}";
 					else
-						sMessage = "{\"jsonrpc\":\"2.0\",\"method\":\"Player.GetActivePlayers\",\"id\":5}";
+						sMessage = "{\"jsonrpc\":\"2.0\",\"method\":\"Player.GetActivePlayers\",\"id\":1005}";
 				}
 				else
 				{
-					sMessage = "{\"jsonrpc\":\"2.0\",\"method\":\"JSONRPC.Ping\",\"id\":1}";
+					sMessage = "{\"jsonrpc\":\"2.0\",\"method\":\"JSONRPC.Ping\",\"id\":1001}";
 					if (m_iMissedPongs++ > m_iTimeoutCnt)
 					{
 						_log.Log(LOG_NORM, "Kodi: (%s) Missed %d pings, assumed off.", m_Name.c_str(), m_iTimeoutCnt);
@@ -657,10 +669,10 @@ void CKodiNode::SendCommand(const std::string &command)
 	if (sKodiCall.length())
 	{
 		//		http://kodi.wiki/view/JSON-RPC_API/v6#Input.Action
-		//		{ "jsonrpc": "2.0", "method": "Input.ExecuteAction", "params": { "action": "stop" }, "id": 6 }
+		//		{ "jsonrpc": "2.0", "method": "Input.ExecuteAction", "params": { "action": "stop" }, "id": 1006 }
 		std::string	sMessage = "{\"jsonrpc\":\"2.0\",\"method\":\"" + sKodiCall + "\",\"params\":{";
 		if (sKodiParam.length()) sMessage += "\"action\":\"" + sKodiParam + "\"";
-		sMessage += "},\"id\":6}";
+		sMessage += "},\"id\":1006}";
 		
 		if (m_Socket != NULL)
 		{
@@ -678,9 +690,39 @@ void CKodiNode::SendCommand(const std::string &command)
 	}
 }
 
+void CKodiNode::SendCommand(const std::string &command, const int iValue)
+{
+	std::stringstream ssMessage;
+	std::string	sMessage;
+	std::string	sKodiCall;
+	if (command == "setvolume")
+	{
+		sKodiCall = "Set Volume";
+		ssMessage << "{\"jsonrpc\":\"2.0\",\"method\":\"Application.SetVolume\",\"params\":{\"volume\":" << iValue << "},\"id\":1009}";
+		sMessage = ssMessage.str();
+	}
+
+	if (sMessage.length())
+	{
+		if (m_Socket != NULL)
+		{
+			handleWrite(sMessage);
+			_log.Log(LOG_NORM, "Kodi: (%s) Sent command: '%s'.", m_Name.c_str(), sKodiCall.c_str());
+		}
+		else
+		{
+			_log.Log(LOG_NORM, "Kodi: (%s) Command not sent, Kodi is not connected: '%s'.", m_Name.c_str(), sKodiCall.c_str());
+		}
+	}
+	else
+	{
+		_log.Log(LOG_ERROR, "Kodi: (%s) Command: '%s'. Unknown command.", m_Name.c_str(), command.c_str());
+	}
+}
+
 bool CKodiNode::SendShutdown()
 {
-	std::string	sMessage = "{\"jsonrpc\":\"2.0\",\"method\":\"System.GetProperties\",\"params\":{\"properties\":[\"canhibernate\",\"cansuspend\",\"canshutdown\"]},\"id\":4}";
+	std::string	sMessage = "{\"jsonrpc\":\"2.0\",\"method\":\"System.GetProperties\",\"params\":{\"properties\":[\"canhibernate\",\"cansuspend\",\"canshutdown\"]},\"id\":1004}";
 	handleWrite(sMessage);
 
 	if (m_Stoppable) _log.Log(LOG_NORM, "Kodi: (%s) Shutdown requested and is supported.", m_Name.c_str());
@@ -806,9 +848,6 @@ void CKodi::Restart()
 
 bool CKodi::WriteToHardware(const char *pdata, const unsigned char length)
 {
-	//	http://<ip_address>:8080/jsonrpc?request={%22jsonrpc%22:%222.0%22,%22method%22:%22System.GetProperties%22,%22params%22:{%22properties%22:[%22canreboot%22,%22canhibernate%22,%22cansuspend%22,%22canshutdown%22]},%22id%22:1}
-	//		{"id":1,"jsonrpc":"2.0","result":{"canhibernate":false,"canreboot":false,"canshutdown":false,"cansuspend":false}}
-
 	tRBUF *pSen = (tRBUF*)pdata;
 
 	unsigned char packettype = pSen->ICMND.packettype;
@@ -823,6 +862,7 @@ bool CKodi::WriteToHardware(const char *pdata, const unsigned char length)
 	{
 		if ((*itt)->m_DevID == DevID)
 		{
+			int iParam = pSen->LIGHTING2.level;
 			switch (pSen->LIGHTING2.cmnd)
 			{
 			case light2_sOff:
@@ -834,6 +874,14 @@ bool CKodi::WriteToHardware(const char *pdata, const unsigned char length)
 			case gswitch_sPause:
 				(*itt)->SendCommand("playpause");
 				return true;
+			case gswitch_sSetVolume:
+				(*itt)->SendCommand("setvolume", iParam);
+				return true;
+/*
+			case gswitch_sPlayPlaylist:
+				sParam = GetPlaylistByRefID(iParam);
+				return SendCommand(itt->ID, "PlayPlaylist", sParam);
+*/
 			default:
 				return true;
 			}
@@ -992,9 +1040,9 @@ void CKodi::SendCommand(const int ID, const std::string &command)
 //Webserver helpers
 namespace http {
 	namespace server {
-		void CWebServer::Cmd_KodiGetNodes(Json::Value &root)
+		void CWebServer::Cmd_KodiGetNodes(WebEmSession & session, const request& req, Json::Value &root)
 		{
-			std::string hwid = m_pWebEm->FindValue("idx");
+			std::string hwid = request::findValue(&req, "idx");
 			if (hwid == "")
 				return;
 			int iHardwareID = atoi(hwid.c_str());
@@ -1026,16 +1074,16 @@ namespace http {
 			}
 		}
 
-		void CWebServer::Cmd_KodiSetMode(Json::Value &root)
+		void CWebServer::Cmd_KodiSetMode(WebEmSession & session, const request& req, Json::Value &root)
 		{
-			if (m_pWebEm->m_actualuser_rights != 2)
+			if (session.rights != 2)
 			{
 				//No admin user, and not allowed to be here
 				return;
 			}
-			std::string hwid = m_pWebEm->FindValue("idx");
-			std::string mode1 = m_pWebEm->FindValue("mode1");
-			std::string mode2 = m_pWebEm->FindValue("mode2");
+			std::string hwid = request::findValue(&req, "idx");
+			std::string mode1 = request::findValue(&req, "mode1");
+			std::string mode2 = request::findValue(&req, "mode2");
 			if (
 				(hwid == "") ||
 				(mode1 == "") ||
@@ -1061,18 +1109,18 @@ namespace http {
 			pHardware->Restart();
 		}
 
-		void CWebServer::Cmd_KodiAddNode(Json::Value &root)
+		void CWebServer::Cmd_KodiAddNode(WebEmSession & session, const request& req, Json::Value &root)
 		{
-			if (m_pWebEm->m_actualuser_rights != 2)
+			if (session.rights != 2)
 			{
 				//No admin user, and not allowed to be here
 				return;
 			}
 
-			std::string hwid = m_pWebEm->FindValue("idx");
-			std::string name = m_pWebEm->FindValue("name");
-			std::string ip = m_pWebEm->FindValue("ip");
-			int Port = atoi(m_pWebEm->FindValue("port").c_str());
+			std::string hwid = request::findValue(&req, "idx");
+			std::string name = request::findValue(&req, "name");
+			std::string ip = request::findValue(&req, "ip");
+			int Port = atoi(request::findValue(&req, "port").c_str());
 			if (
 				(hwid == "") ||
 				(name == "") ||
@@ -1093,19 +1141,19 @@ namespace http {
 			pHardware->AddNode(name, ip, Port);
 		}
 
-		void CWebServer::Cmd_KodiUpdateNode(Json::Value &root)
+		void CWebServer::Cmd_KodiUpdateNode(WebEmSession & session, const request& req, Json::Value &root)
 		{
-			if (m_pWebEm->m_actualuser_rights != 2)
+			if (session.rights != 2)
 			{
 				//No admin user, and not allowed to be here
 				return;
 			}
 
-			std::string hwid = m_pWebEm->FindValue("idx");
-			std::string nodeid = m_pWebEm->FindValue("nodeid");
-			std::string name = m_pWebEm->FindValue("name");
-			std::string ip = m_pWebEm->FindValue("ip");
-			int Port = atoi(m_pWebEm->FindValue("port").c_str());
+			std::string hwid = request::findValue(&req, "idx");
+			std::string nodeid = request::findValue(&req, "nodeid");
+			std::string name = request::findValue(&req, "name");
+			std::string ip = request::findValue(&req, "ip");
+			int Port = atoi(request::findValue(&req, "port").c_str());
 			if (
 				(hwid == "") ||
 				(nodeid == "") ||
@@ -1128,16 +1176,16 @@ namespace http {
 			pHardware->UpdateNode(NodeID, name, ip, Port);
 		}
 
-		void CWebServer::Cmd_KodiRemoveNode(Json::Value &root)
+		void CWebServer::Cmd_KodiRemoveNode(WebEmSession & session, const request& req, Json::Value &root)
 		{
-			if (m_pWebEm->m_actualuser_rights != 2)
+			if (session.rights != 2)
 			{
 				//No admin user, and not allowed to be here
 				return;
 			}
 
-			std::string hwid = m_pWebEm->FindValue("idx");
-			std::string nodeid = m_pWebEm->FindValue("nodeid");
+			std::string hwid = request::findValue(&req, "idx");
+			std::string nodeid = request::findValue(&req, "nodeid");
 			if (
 				(hwid == "") ||
 				(nodeid == "")
@@ -1157,15 +1205,15 @@ namespace http {
 			pHardware->RemoveNode(NodeID);
 		}
 
-		void CWebServer::Cmd_KodiClearNodes(Json::Value &root)
+		void CWebServer::Cmd_KodiClearNodes(WebEmSession & session, const request& req, Json::Value &root)
 		{
-			if (m_pWebEm->m_actualuser_rights != 2)
+			if (session.rights != 2)
 			{
 				//No admin user, and not allowed to be here
 				return;
 			}
 
-			std::string hwid = m_pWebEm->FindValue("idx");
+			std::string hwid = request::findValue(&req, "idx");
 			if (hwid == "")
 				return;
 			int iHardwareID = atoi(hwid.c_str());
@@ -1181,10 +1229,10 @@ namespace http {
 			pHardware->RemoveAllNodes();
 		}
 
-		void CWebServer::Cmd_KodiMediaCommand(Json::Value &root)
+		void CWebServer::Cmd_KodiMediaCommand(WebEmSession & session, const request& req, Json::Value &root)
 		{
-			std::string sIdx = m_pWebEm->FindValue("idx");
-			std::string sAction = m_pWebEm->FindValue("action");
+			std::string sIdx = request::findValue(&req, "idx");
+			std::string sAction = request::findValue(&req, "action");
 			if (sIdx.empty())
 				return;
 			int idx = atoi(sIdx.c_str());

@@ -1226,6 +1226,12 @@
     <ClCompile Include="..\hardware\openzwave\control_panel\zwavelib.cpp">
       <Filter>Devices\ZWave\OpenZWave\Control Panel</Filter>
     </ClCompile>
+    <ClCompile Include="..\main\Imperihome.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\VirtualThermostat.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="domoticz.rc">

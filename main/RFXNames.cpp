@@ -721,6 +721,7 @@ const char *RFX_Type_SubType_Desc(const unsigned char dType, const unsigned char
 		{ pTypeGeneralSwitch, sSwitchTypeAster, "Aster" },
 		{ pTypeGeneralSwitch, sSwitchTypeSartano, "Sartano" },
 		{ pTypeGeneralSwitch, sSwitchTypeEurope, "Europe" },
+		{ pTypeGeneralSwitch, sSwitchTypeAvidsen, "Avidsen" },
 		{  0,0,NULL }
 	};
 	return findTableID1ID2(Table, dType, sType);
@@ -2012,6 +2013,16 @@ bool GetLightCommand(
 		else if ((switchcmd == "Playing") || (switchcmd == "Play"))
 		{
 			cmd = gswitch_sPlay;
+			return true;
+		}
+		else if (switchcmd == "Play Playlist")
+		{
+			cmd = gswitch_sPlayPlaylist;
+			return true;
+		}
+		else if (switchcmd == "Play Favorites")
+		{
+			cmd = gswitch_sPlayFavorites;
 			return true;
 		}
 		else if (switchcmd == "Set Volume")

@@ -78,25 +78,28 @@ namespace http {
 		}
 		void CWebServerHelper::RType_Scenes(Json::Value &root)//called from imperihome
 		{
+			request request_;
+			WebEmSession session ;
+
 			if (plainServer_) { // assert
-				plainServer_->RType_Scenes(root);
+				plainServer_->RType_Scenes(session,request_,root);
 			}
 #ifdef NS_ENABLE_SSL
 			else if (secureServer_) {
-				secureServer_->RType_Scenes(root);
+				secureServer_->RType_Scenes(session,request_,root);
 			}
 #endif
 		}
 
 		//JSon
-		void CWebServerHelper::	GetJSonDevices(Json::Value &root, const std::string &rused, const std::string &rfilter, const std::string &order, const std::string &rowid, const std::string &planID, const std::string &floorID, const bool bDisplayHidden, const time_t LastUpdate, const bool bSkipUserCheck)
+		void CWebServerHelper::	GetJSonDevices(Json::Value &root, const std::string &rused, const std::string &rfilter, const std::string &order, const std::string &rowid, const std::string &planID, const std::string &floorID, const bool bDisplayHidden, const time_t LastUpdate, const std::string &username)
 		{
 			if (plainServer_) { // assert
-				plainServer_->GetJSonDevices(root, rused, rfilter, order, rowid, planID, floorID, bDisplayHidden, LastUpdate, bSkipUserCheck);
+				plainServer_->GetJSonDevices(root, rused, rfilter, order, rowid, planID, floorID, bDisplayHidden, LastUpdate, username);
 			}
 #ifdef NS_ENABLE_SSL
 			else if (secureServer_) {
-				secureServer_->GetJSonDevices(root, rused, rfilter, order, rowid, planID, floorID, bDisplayHidden, LastUpdate, bSkipUserCheck);
+				secureServer_->GetJSonDevices(root, rused, rfilter, order, rowid, planID, floorID, bDisplayHidden, LastUpdate, username);
 			}
 #endif
 		}

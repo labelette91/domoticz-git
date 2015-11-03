@@ -6,6 +6,7 @@
 #include "SQLHelper.h"
 #include "Logger.h"
 #include "../hardware/hardwaretypes.h"
+#include "../hardware/Kodi.h"
 #include "../hardware/LogitechMediaServer.h"
 #include <iostream>
 #include "../httpclient/HTTPClient.h"
@@ -344,9 +345,6 @@ void CEventSystem::GetCurrentMeasurementStates()
 		std::vector<std::string> splitresults;
 		StringSplit(sitem.sValue, ";", splitresults);
 
-		if (splitresults.size()==0)
-			continue;
-
 		float temp = 0;
 		float chill = 0;
 		unsigned char humidity = 0;
@@ -381,36 +379,51 @@ void CEventSystem::GetCurrentMeasurementStates()
 		{
 		case pTypeRego6XXTemp:
 		case pTypeTEMP:
-			temp = static_cast<float>(atof(splitresults[0].c_str()));
-			isTemp = true;
-			break;
-		case pTypeThermostat:
-			if (sitem.subType == sTypeThermTemperature)
+			if (!splitresults.empty())
 			{
 				temp = static_cast<float>(atof(splitresults[0].c_str()));
 				isTemp = true;
 			}
+			break;
+		case pTypeThermostat:
+			if (sitem.subType == sTypeThermTemperature)
+			{
+				if (!splitresults.empty())
+				{
+					temp = static_cast<float>(atof(splitresults[0].c_str()));
+					isTemp = true;
+				}
+			}
 			else
 			{
-				utilityval = static_cast<float>(atof(splitresults[0].c_str()));
-				isUtility = true;
+				if (!splitresults.empty())
+				{
+					utilityval = static_cast<float>(atof(splitresults[0].c_str()));
+					isUtility = true;
+				}
 			}
 			break;
 		case pTypeThermostat1:
-			temp = static_cast<float>(atof(splitresults[0].c_str()));
-			isTemp = true;
+			if (!splitresults.empty())
+			{
+				temp = static_cast<float>(atof(splitresults[0].c_str()));
+				isTemp = true;
+			}
 			break;
 		case pTypeHUM:
 			humidity = (unsigned char)sitem.nValue;
 			isHum = true;
 			break;
 		case pTypeTEMP_HUM:
-			temp = static_cast<float>(atof(splitresults[0].c_str()));
-			humidity = atoi(splitresults[1].c_str());
-			dewpoint = (float)CalculateDewPoint(temp, humidity);
-			isTemp = true;
-			isHum = true;
-			isDew = true;
+			if (splitresults.size() > 1)
+			{
+				temp = static_cast<float>(atof(splitresults[0].c_str()));
+				humidity = atoi(splitresults[1].c_str());
+				dewpoint = (float)CalculateDewPoint(temp, humidity);
+				isTemp = true;
+				isHum = true;
+				isDew = true;
+			}
 			break;
 		case pTypeTEMP_HUM_BARO:
 			if (splitresults.size() < 5) {
@@ -435,10 +448,13 @@ void CEventSystem::GetCurrentMeasurementStates()
 			isDew = true;
 			break;
 		case pTypeTEMP_BARO:
-			temp = static_cast<float>(atof(splitresults[0].c_str()));
-			barometer = static_cast<float>(atof(splitresults[1].c_str()));
-			isTemp = true;
-			isBaro = true;
+			if (splitresults.size() > 1)
+			{
+				temp = static_cast<float>(atof(splitresults[0].c_str()));
+				barometer = static_cast<float>(atof(splitresults[1].c_str()));
+				isTemp = true;
+				isBaro = true;
+			}
 			break;
 		case pTypeRadiator1:
 			if (sitem.subType == sTypeSmartwares)
@@ -499,8 +515,11 @@ void CEventSystem::GetCurrentMeasurementStates()
 		case pTypeRFXSensor:
 			if (sitem.subType == sTypeRFXSensorTemp)
 			{
-				temp = static_cast<float>(atof(splitresults[0].c_str()));
-				isTemp = true;
+				if (!splitresults.empty())
+				{
+					temp = static_cast<float>(atof(splitresults[0].c_str()));
+					isTemp = true;
+				}
 			}
 			else if ((sitem.subType == sTypeRFXSensorVolt) || (sitem.subType == sTypeRFXSensorAD))
 			{
@@ -513,134 +532,155 @@ void CEventSystem::GetCurrentMeasurementStates()
 			isUtility = true;
 			break;
 		case pTypeENERGY:
-			if (splitresults.size() == 2)
-				utilityval = static_cast<float>(atof(splitresults[1].c_str()));
-			else
-				utilityval = static_cast<float>(atof(splitresults[0].c_str()));
-			isUtility = true;
+			if (!splitresults.empty())
+			{
+				if (splitresults.size() == 2)
+					utilityval = static_cast<float>(atof(splitresults[1].c_str()));
+				else
+					utilityval = static_cast<float>(atof(splitresults[0].c_str()));
+				isUtility = true;
+			}
 			break;
 		case pTypePOWER:
-			utilityval = static_cast<float>(atof(splitresults[0].c_str()));
-			isUtility = true;
+			if (!splitresults.empty())
+			{
+				utilityval = static_cast<float>(atof(splitresults[0].c_str()));
+				isUtility = true;
+			}
 			break;
 		case pTypeUsage:
-			utilityval = static_cast<float>(atof(splitresults[0].c_str()));
-			isUtility = true;
+			if (!splitresults.empty())
+			{
+				utilityval = static_cast<float>(atof(splitresults[0].c_str()));
+				isUtility = true;
+			}
 			break;
 		case pTypeP1Power:
-			utilityval = static_cast<float>(atof(splitresults[4].c_str()));
-			isUtility = true;
+			if (!splitresults.empty())
+			{
+				utilityval = static_cast<float>(atof(splitresults[4].c_str()));
+				isUtility = true;
+			}
 			break;
 		case pTypeLux:
-			utilityval = static_cast<float>(atof(splitresults[0].c_str()));
-			isUtility = true;
+			if (!splitresults.empty())
+			{
+				utilityval = static_cast<float>(atof(splitresults[0].c_str()));
+				isUtility = true;
+			}
 			break;
 		case pTypeGeneral:
 		{
-			if (sitem.subType == sTypeVisibility)
+			if (!splitresults.empty())
 			{
-				utilityval = static_cast<float>(atof(splitresults[0].c_str()));
-				isUtility = true;
-				weatherval = utilityval;
-				isWeather = true;
-			}
-			else if (sitem.subType == sTypeAlert)
-			{
-				utilityval = static_cast<float>(atof(splitresults[0].c_str()));
-				isUtility = true;
-			}
-			else if (sitem.subType == sTypeDistance)
-			{
-				utilityval = static_cast<float>(atof(splitresults[0].c_str()));
-				isUtility = true;
-			}
-			else if (sitem.subType == sTypeSolarRadiation)
-			{
-				utilityval = static_cast<float>(atof(splitresults[0].c_str()));
-				isUtility = true;
-				weatherval = utilityval;
-				isWeather = true;
-			}
-			else if (sitem.subType == sTypePercentage)
-			{
-				utilityval = static_cast<float>(atof(splitresults[0].c_str()));
-				isUtility = true;
-			}
-			else if (sitem.subType == sTypeVoltage)
-			{
-				utilityval = static_cast<float>(atof(splitresults[0].c_str()));
-				isUtility = true;
-			}
-			else if (sitem.subType == sTypeCurrent)
-			{
-				utilityval = static_cast<float>(atof(splitresults[0].c_str()));
-				isUtility = true;
-			}
-			else if (sitem.subType == sTypeSetPoint)
-			{
-				utilityval = static_cast<float>(atof(splitresults[0].c_str()));
-				isUtility = true;
-			}
-			else if (sitem.subType == sTypeCounterIncremental)
-			{
-				//get value of today
-				time_t now = mytime(NULL);
-				struct tm tm1;
-				localtime_r(&now, &tm1);
-
-				struct tm ltime;
-				ltime.tm_isdst = tm1.tm_isdst;
-				ltime.tm_hour = 0;
-				ltime.tm_min = 0;
-				ltime.tm_sec = 0;
-				ltime.tm_year = tm1.tm_year;
-				ltime.tm_mon = tm1.tm_mon;
-				ltime.tm_mday = tm1.tm_mday;
-
-				char szDate[40];
-				sprintf(szDate, "%04d-%02d-%02d", ltime.tm_year + 1900, ltime.tm_mon + 1, ltime.tm_mday);
-
-				std::vector<std::vector<std::string> > result2;
-				result2 = m_sql.safe_query("SELECT MIN(Value), MAX(Value) FROM Meter WHERE (DeviceRowID=%llu AND Date>='%q')",
-					sitem.ID, szDate);
-				if (result2.size() > 0)
+				if (sitem.subType == sTypeVisibility)
 				{
-					std::vector<std::string> sd2 = result2[0];
-
-					unsigned long long total_min, total_max, total_real;
-
-					std::stringstream s_str1(sd2[0]);
-					s_str1 >> total_min;
-					std::stringstream s_str2(sd2[1]);
-					s_str2 >> total_max;
-					total_real = total_max - total_min;
-
-					char szTmp[100];
-					sprintf(szTmp, "%llu", total_real);
-
-					float musage = 0;
-					_eMeterType metertype = (_eMeterType)sitem.switchtype;
-					switch (metertype)
-					{
-					case MTYPE_ENERGY:
-					case MTYPE_ENERGY_GENERATED:
-						musage = float(total_real) / EnergyDivider;
-						sprintf(szTmp, "%.03f kWh", musage);
-						break;
-					case MTYPE_GAS:
-						musage = float(total_real) / GasDivider;
-						sprintf(szTmp, "%.02f m3", musage);
-						break;
-					case MTYPE_WATER:
-						musage = float(total_real) / WaterDivider;
-						sprintf(szTmp, "%.02f m3", musage);
-						break;
-					case MTYPE_COUNTER:
-						sprintf(szTmp, "%llu", total_real);
-						break;
-					}
-					utilityval = static_cast<float>(atof(szTmp));
+					utilityval = static_cast<float>(atof(splitresults[0].c_str()));
 					isUtility = true;
+					weatherval = utilityval;
+					isWeather = true;
+				}
+				else if (sitem.subType == sTypeAlert)
+				{
+					utilityval = static_cast<float>(atof(splitresults[0].c_str()));
+					isUtility = true;
+				}
+				else if (sitem.subType == sTypeDistance)
+				{
+					utilityval = static_cast<float>(atof(splitresults[0].c_str()));
+					isUtility = true;
+				}
+				else if (sitem.subType == sTypeSolarRadiation)
+				{
+					utilityval = static_cast<float>(atof(splitresults[0].c_str()));
+					isUtility = true;
+					weatherval = utilityval;
+					isWeather = true;
+				}
+				else if (sitem.subType == sTypePercentage)
+				{
+					utilityval = static_cast<float>(atof(splitresults[0].c_str()));
+					isUtility = true;
+				}
+				else if (sitem.subType == sTypeVoltage)
+				{
+					utilityval = static_cast<float>(atof(splitresults[0].c_str()));
+					isUtility = true;
+				}
+				else if (sitem.subType == sTypeCurrent)
+				{
+					utilityval = static_cast<float>(atof(splitresults[0].c_str()));
+					isUtility = true;
+				}
+				else if (sitem.subType == sTypeSetPoint)
+				{
+					utilityval = static_cast<float>(atof(splitresults[0].c_str()));
+					isUtility = true;
+				}
+			}
+			else
+			{
+				if (sitem.subType == sTypeCounterIncremental)
+				{
+					//get value of today
+					time_t now = mytime(NULL);
+					struct tm tm1;
+					localtime_r(&now, &tm1);
+
+					struct tm ltime;
+					ltime.tm_isdst = tm1.tm_isdst;
+					ltime.tm_hour = 0;
+					ltime.tm_min = 0;
+					ltime.tm_sec = 0;
+					ltime.tm_year = tm1.tm_year;
+					ltime.tm_mon = tm1.tm_mon;
+					ltime.tm_mday = tm1.tm_mday;
+
+					char szDate[40];
+					sprintf(szDate, "%04d-%02d-%02d", ltime.tm_year + 1900, ltime.tm_mon + 1, ltime.tm_mday);
+
+					std::vector<std::vector<std::string> > result2;
+					result2 = m_sql.safe_query("SELECT MIN(Value), MAX(Value) FROM Meter WHERE (DeviceRowID=%llu AND Date>='%q')",
+						sitem.ID, szDate);
+					if (result2.size() > 0)
+					{
+						std::vector<std::string> sd2 = result2[0];
+
+						unsigned long long total_min, total_max, total_real;
+
+						std::stringstream s_str1(sd2[0]);
+						s_str1 >> total_min;
+						std::stringstream s_str2(sd2[1]);
+						s_str2 >> total_max;
+						total_real = total_max - total_min;
+
+						char szTmp[100];
+						sprintf(szTmp, "%llu", total_real);
+
+						float musage = 0;
+						_eMeterType metertype = (_eMeterType)sitem.switchtype;
+						switch (metertype)
+						{
+						case MTYPE_ENERGY:
+						case MTYPE_ENERGY_GENERATED:
+							musage = float(total_real) / EnergyDivider;
+							sprintf(szTmp, "%.03f kWh", musage);
+							break;
+						case MTYPE_GAS:
+							musage = float(total_real) / GasDivider;
+							sprintf(szTmp, "%.02f m3", musage);
+							break;
+						case MTYPE_WATER:
+							musage = float(total_real) / WaterDivider;
+							sprintf(szTmp, "%.02f m3", musage);
+							break;
+						case MTYPE_COUNTER:
+							sprintf(szTmp, "%llu", total_real);
+							break;
+						}
+						utilityval = static_cast<float>(atof(szTmp));
+						isUtility = true;
+					}
 				}
 			}
 		}
@@ -2866,27 +2906,67 @@ void CEventSystem::UpdateDevice(const std::string &DevParams)
 		std::stringstream s_str(idx);
 		s_str >> ulIdx;
 
-		int idtype = atoi(dtype.c_str());
-		int idsubtype = atoi(dsubtype.c_str());
+		int devType = atoi(dtype.c_str());
+		int subType = atoi(dsubtype.c_str());
 
-		UpdateSingleState(ulIdx, dname, atoi(nvalue.c_str()), svalue.c_str(), idtype, idsubtype, dswitchtype, szLastUpdate, dlastlevel);
+		UpdateSingleState(ulIdx, dname, atoi(nvalue.c_str()), svalue.c_str(), devType, subType, dswitchtype, szLastUpdate, dlastlevel);
+
+		//Check if we need to log this event
+		switch (devType)
+		{
+		case pTypeRego6XXValue:
+			if (subType != sTypeRego6XXStatus)
+			{
+				break;
+			}
+		case pTypeGeneral:
+			if ((devType == pTypeGeneral) && (subType != sTypeTextStatus) && (subType != sTypeAlert))
+			{
+				break;
+			}
+		case pTypeLighting1:
+		case pTypeLighting2:
+		case pTypeLighting3:
+		case pTypeLighting4:
+		case pTypeLighting5:
+		case pTypeLighting6:
+		case pTypeLimitlessLights:
+		case pTypeSecurity1:
+		case pTypeSecurity2:
+		case pTypeEvohome:
+		case pTypeEvohomeRelay:
+		case pTypeCurtain:
+		case pTypeBlinds:
+		case pTypeRFY:
+		case pTypeChime:
+		case pTypeThermostat2:
+		case pTypeThermostat3:
+		case pTypeRemote:
+		case pTypeGeneralSwitch:
+		case pTypeHomeConfort:
+		case pTypeRadiator1:
+			if ((devType == pTypeRadiator1) && (subType != sTypeSmartwaresSwitchRadiator))
+				break;
+			//Add Lighting log
+			m_sql.safe_query("INSERT INTO LightingLog (DeviceRowID, nValue, sValue) VALUES ('%llu', '%d', '%q')", ulIdx, atoi(nvalue.c_str()), svalue.c_str());
+			break;
+		}
 
 		//Check if it's a setpoint device, and if so, set the actual setpoint
-
 		if (
-			((idtype == pTypeThermostat) && (idsubtype == sTypeThermSetpoint)) ||
-			(idtype == pTypeRadiator1)
+			((devType == pTypeThermostat) && (subType == sTypeThermSetpoint)) ||
+			(devType == pTypeRadiator1)
 			)
 		{
 			_log.Log(LOG_NORM, "EventSystem: Sending SetPoint to device....");
 			m_mainworker.SetSetPoint(idx, static_cast<float>(atof(svalue.c_str())));
 		}
-		else if ((idtype == pTypeGeneral) && (idsubtype == sTypeZWaveThermostatMode))
+		else if ((devType == pTypeGeneral) && (subType == sTypeZWaveThermostatMode))
 		{
 			_log.Log(LOG_NORM, "EventSystem: Sending Thermostat Mode to device....");
 			m_mainworker.SetZWaveThermostatMode(idx, atoi(nvalue.c_str()));
 		}
-		else if ((idtype == pTypeGeneral) && (idsubtype == sTypeZWaveThermostatFanMode))
+		else if ((devType == pTypeGeneral) && (subType == sTypeZWaveThermostatFanMode))
 		{
 			_log.Log(LOG_NORM, "EventSystem: Sending Thermostat Fan Mode to device....");
 			m_mainworker.SetZWaveThermostatFanMode(idx, atoi(nvalue.c_str()));
@@ -3022,17 +3102,39 @@ bool CEventSystem::ScheduleEvent(int deviceID, std::string Action, bool isScene,
 
 	if (Action.find("Play Playlist") == 0)
 	{
-		CDomoticzHardwareBase *pBaseHardware = m_mainworker.GetHardwareByType(HTYPE_LogitechMediaServer);
-		if (pBaseHardware == NULL) return false;
-		CLogitechMediaServer *pHardware = (CLogitechMediaServer*)pBaseHardware;
+		std::string	sParams = Action.substr(14);
+		CDomoticzHardwareBase *pBaseHardware = m_mainworker.GetHardwareByType(HTYPE_Kodi);
+		if (pBaseHardware != NULL)
+		{
+			CKodi			*pHardware = (CKodi*)pBaseHardware;
+			std::string		sPlayList = sParams;
+			size_t			iLastSpace = sParams.find_last_of(' ', sParams.length());
 
-		int iPlaylistID = pHardware->GetPlaylistRefID(Action.substr(14).c_str());
-		if (iPlaylistID == 0) return false;
+			if (iLastSpace != std::string::npos)
+			{
+				sPlayList = sParams.substr(0, iLastSpace);
+				_level = atoi(sParams.substr(iLastSpace).c_str());
+			}
+			if (!pHardware->SetPlaylist(deviceID, sPlayList.c_str()))
+			{
+				pBaseHardware = NULL; // Kodi hardware exists, but the device for the event is not a Kodi
+			}
+		}
 
-		_level = iPlaylistID;
+		if (pBaseHardware == NULL)  // if not handled try Logitech
+		{
+			pBaseHardware = m_mainworker.GetHardwareByType(HTYPE_LogitechMediaServer);
+			if (pBaseHardware == NULL) return false;
+			CLogitechMediaServer *pHardware = (CLogitechMediaServer*)pBaseHardware;
+
+			int iPlaylistID = pHardware->GetPlaylistRefID(Action.substr(14).c_str());
+			if (iPlaylistID == 0) return false;
+
+			_level = iPlaylistID;
+		}
+
 		Action = Action.substr(0, 13);
 	}
-
 	int DelayTime = 1;
 
 	if (randomTimer > 0) {

@@ -2,7 +2,6 @@
 #include "WebServer.h"
 #include "WebServerHelper.h"
 #include <boost/bind.hpp>
-#include <boost/algorithm/string/join.hpp>
 #include <iostream>
 #include <fstream>
 #include "mainworker.h"
@@ -61,6 +60,8 @@ extern std::string szWWWFolder;
 extern std::string szAppVersion;
 extern std::string szAppHash;
 extern std::string szAppDate;
+
+extern time_t m_StartTime;
 
 extern bool g_bDontCacheWWW;
 
@@ -359,6 +360,7 @@ namespace http {
 			RegisterCommandCode("getversion", boost::bind(&CWebServer::Cmd_GetVersion, this, _1, _2, _3), true);
 			RegisterCommandCode("getlog", boost::bind(&CWebServer::Cmd_GetLog, this, _1, _2, _3));
 			RegisterCommandCode("getauth", boost::bind(&CWebServer::Cmd_GetAuth, this, _1, _2, _3), true);
+			RegisterCommandCode("getuptime", boost::bind(&CWebServer::Cmd_GetUptime, this, _1, _2, _3), true);
 
 			
 			RegisterCommandCode("gethardwaretypes", boost::bind(&CWebServer::Cmd_GetHardwareTypes, this, _1, _2, _3));
@@ -841,15 +843,15 @@ namespace http {
 					iUser = FindUser(usrname.c_str());
 					if (iUser == -1) {
 						// log brute force attack
-						_log.Log(LOG_ERROR, "Failed login attempt for '%s' !", usrname.c_str());
+						_log.Log(LOG_ERROR, "Failed login attempt from %s for user '%s' !", session.remote_host.c_str(), usrname.c_str());
 						return;
 					}
 					if (m_users[iUser].Password != usrpass) {
 						// log brute force attack
-						_log.Log(LOG_ERROR, "Failed login attempt for '%s' !", m_users[iUser].Username.c_str());
+						_log.Log(LOG_ERROR, "Failed login attempt from %s for '%s' !", session.remote_host.c_str(), m_users[iUser].Username.c_str());
 						return;
 					}
-					_log.Log(LOG_STATUS, "Login successfull : user '%s'", m_users[iUser].Username.c_str());
+					_log.Log(LOG_STATUS, "Login successful from %s for user '%s'", session.remote_host.c_str(), m_users[iUser].Username.c_str());
 					root["status"] = "OK";
 					root["version"] = szAppVersion;
 					root["title"] = "logincheck";
@@ -1930,6 +1932,29 @@ namespace http {
 			root["rights"] = session.rights;
 		}
 
+		void CWebServer::Cmd_GetUptime(WebEmSession & session, const request& req, Json::Value &root)
+		{
+			//this is used in the about page, we are going to round the seconds a bit to display nicer
+			time_t atime = mytime(NULL);
+			time_t tuptime = atime - m_StartTime;
+			//round to 5 seconds (nicer in about page)
+			tuptime = ((tuptime / 5) * 5) + 5;
+			int days, hours, minutes, seconds;
+			days = (int)(tuptime / 86400);
+			tuptime -= (days * 86400);
+			hours = (int)(tuptime / 3600);
+			tuptime -= (hours * 3600);
+			minutes = (int)(tuptime / 60);
+			tuptime -= (minutes * 60);
+			seconds = (int)tuptime;
+			root["status"] = "OK";
+			root["title"] = "GetUptime";
+			root["days"] = days;
+			root["hours"] = hours;
+			root["minutes"] = minutes;
+			root["seconds"] = seconds;
+		}
+
 		void CWebServer::Cmd_GetActualHistory(WebEmSession & session, const request& req, Json::Value &root)
 		{
 			root["status"] = "OK";
@@ -2038,6 +2063,10 @@ namespace http {
 			if (m_sql.GetPreferencesVar("Language", sValue))
 			{
 				root["language"] = sValue;
+			}
+			if (m_sql.GetPreferencesVar("DegreeDaysBaseTemperature", sValue))
+			{
+				root["DegreeDaysBaseTemperature"] = atof(sValue.c_str());
 			}
 
 			nValue = 0;
@@ -2219,7 +2248,7 @@ namespace http {
 			{
 				// Supported format ares :
 				// - idx (integer), svalue (string), nvalue (string), [rssi(integer)], [battery(integer)]
-				// - idx (integer), svalue (string,) nvalue (integer), [rssi(integer)], [battery(integer)]
+				// - idx (integer), svalue (string), nvalue (integer), [rssi(integer)], [battery(integer)]
 				if (lua_isnumber(lua_state, 1) && (lua_isstring(lua_state, 2) || lua_isnumber(lua_state, 2)) && lua_isstring(lua_state, 3))
 				{
 					// Extract the parameters from the lua 'updateDevice' function	
@@ -2333,8 +2362,34 @@ namespace http {
 			lua_rawset(lua_state, -3);
 			lua_setglobal(lua_state, "request");
 
-			std::string fullfilename = lua_Dir + script;
+			// Keep the url content on the right of the '?'
+			std::vector<std::string> allParts;
+			StringSplit(req.uri, "?", allParts);
+			if (!allParts.empty())
+			{
+				// Split all url parts separated by a '&'
+				std::vector<std::string> allParameters;
+				StringSplit(allParts[1], "&", allParameters);
 
+				// Push all url parameters as a map indexed by the parameter name
+				// Each entry will be uri[<param name>] = <param value>
+				int totParameters = (int)allParameters.size();
+				lua_createtable(lua_state, totParameters, 0);
+				for (int i = 0; i < totParameters; i++)
+				{
+					std::vector<std::string> parameterCouple;
+					StringSplit(allParameters[i], "=", parameterCouple);
+					if (parameterCouple.size() == 2) {
+						// Add an url parameter after 'url' decoding it
+						lua_pushstring(lua_state, CURLEncode::URLDecode(parameterCouple[0]).c_str());
+						lua_pushstring(lua_state, CURLEncode::URLDecode(parameterCouple[1]).c_str());
+						lua_rawset(lua_state, -3);
+					}
+				}
+				lua_setglobal(lua_state, "uri");
+			}
+
+			std::string fullfilename = lua_Dir + script;
 			int status = luaL_loadfile(lua_state, fullfilename.c_str());
 			if (status == 0)
 			{
@@ -3272,6 +3327,7 @@ namespace http {
 						case pTypeRemote:
 						case pTypeRadiator1:
 						case pTypeGeneralSwitch:
+						case pTypeHomeConfort:
 							bdoAdd = true;
 							if (!used)
 							{
@@ -3348,6 +3404,7 @@ namespace http {
 							case pTypeThermostat3:
 							case pTypeRemote:
 							case pTypeGeneralSwitch:
+							case pTypeHomeConfort:
 								root["result"][ii]["type"] = 0;
 								root["result"][ii]["idx"] = ID;
 								root["result"][ii]["Name"] = "[Light/Switch] " + Name;
@@ -3844,6 +3901,29 @@ namespace http {
 							return;
 						devid = id;
 					}
+					else if (lighttype == 302)
+					{
+						//Home Confort
+						dtype = pTypeHomeConfort;
+						subtype = sTypeHomeConfortTEL010;
+						std::string id = request::findValue(&req, "id");
+
+						std::string shousecode = request::findValue(&req, "housecode");
+						sunitcode = request::findValue(&req, "unitcode");
+						if (
+							(id.empty()) ||
+							(shousecode.empty()) ||
+							(sunitcode.empty())
+							)
+							return;
+
+						int iUnitCode = atoi(sunitcode.c_str());
+						sprintf(szTmp, "%d", iUnitCode);
+						sunitcode = szTmp;
+						sprintf(szTmp, "%02X", atoi(shousecode.c_str()));
+						shousecode = szTmp;
+						devid = id + shousecode;
+					}
 				}
                 
                 // ----------- RFlink "Test Switch" Fix -----------
@@ -3851,27 +3931,26 @@ namespace http {
 				if (pBaseHardware != NULL)
 				{
 					if ((pBaseHardware->HwdType == HTYPE_RFLINKUSB)|| (pBaseHardware->HwdType == HTYPE_RFLINKTCP)) {
-						if (dtype == pTypeLighting1){
+						if (dtype == pTypeLighting1) {
 							dtype = pTypeGeneralSwitch;
 							std::stringstream s_strid;
 							s_strid << std::hex << atoi(devid.c_str());
 							devid = s_strid.str();
-							devid = "000000" + devid;                            
+							devid = "000000" + devid;
 						}
-						else
-							if (dtype == pTypeLighting2){
-								dtype = pTypeGeneralSwitch;
-                                if (subtype == sTypeAC){ // 0
-                                   subtype = sSwitchTypeAC;
-                                }
-                                if (subtype == sTypeHEU){ // 1
-                                   subtype = sSwitchTypeHEU;
-                                   devid = "7" + devid;
-                                }
-                                if (subtype == sTypeKambrook){ // 3
-                                   subtype = sSwitchTypeKambrook;
-                                }
+						else if (dtype == pTypeLighting2) {
+							dtype = pTypeGeneralSwitch;
+							if (subtype == sTypeAC) { // 0
+								subtype = sSwitchTypeAC;
 							}
+							if (subtype == sTypeHEU) { // 1
+								subtype = sSwitchTypeHEU;
+								devid = "7" + devid;
+							}
+							if (subtype == sTypeKambrook) { // 3
+								subtype = sSwitchTypeKambrook;
+							}
+						}
 					}
 				}
                 // -----------------------------------------------
@@ -4262,7 +4341,29 @@ namespace http {
 						//Now continue to insert the switch
 						dtype = pTypeRadiator1;
 						subtype = sTypeSmartwaresSwitchRadiator;
+					}
+					else if (lighttype == 302)
+					{
+						//Home Confort
+						dtype = pTypeHomeConfort;
+						subtype = sTypeHomeConfortTEL010;
+						std::string id = request::findValue(&req, "id");
 
+						std::string shousecode = request::findValue(&req, "housecode");
+						sunitcode = request::findValue(&req, "unitcode");
+						if (
+							(id.empty()) ||
+							(shousecode.empty()) ||
+							(sunitcode.empty())
+							)
+							return;
+
+						int iUnitCode = atoi(sunitcode.c_str());
+						sprintf(szTmp, "%d", iUnitCode);
+						sunitcode = szTmp;
+						sprintf(szTmp, "%02X", atoi(shousecode.c_str()));
+						shousecode = szTmp;
+						devid = id + shousecode;
 					}
 				}
 
@@ -4396,6 +4497,7 @@ namespace http {
 					(dType == pTypeThermostat3) ||
 					(dType == pTypeRemote) ||
 					(dType == pTypeGeneralSwitch) ||
+					(dType == pTypeHomeConfort) ||
 					((dType == pTypeRadiator1) && (dSubType == sTypeSmartwaresSwitchRadiator))
 					)
 				{
@@ -5265,6 +5367,7 @@ namespace http {
 					(dType != pTypeThermostat3) &&
 					(dType != pTypeRemote) &&
 					(dType != pTypeGeneralSwitch) &&
+					(dType != pTypeHomeConfort) &&
 					(!((dType == pTypeRadiator1) && (dSubType == sTypeSmartwaresSwitchRadiator)))&&
 					(!((dType == pTypeGeneral) && (dSubType == sTypeTextStatus))) &&
 					(!((dType == pTypeGeneral) && (dSubType == sTypeAlert)))
@@ -6329,6 +6432,12 @@ namespace http {
 			std::string s5MinuteHistoryDays = request::findValue(&req, "ShortLogDays");
 			m_sql.UpdatePreferencesVar("5MinuteHistoryDays", atoi(s5MinuteHistoryDays.c_str()));
 
+			int iShortLogInterval = atoi(request::findValue(&req, "ShortLogInterval").c_str());
+			if (iShortLogInterval < 1)
+				iShortLogInterval = 5;
+			m_sql.UpdatePreferencesVar("ShortLogInterval", iShortLogInterval);
+			m_sql.m_ShortLogInterval = iShortLogInterval;
+
 			std::string sElectricVoltage = request::findValue(&req, "ElectricVoltage");
 			m_sql.UpdatePreferencesVar("ElectricVoltage", atoi(sElectricVoltage.c_str()));
 
@@ -6472,6 +6581,9 @@ namespace http {
 			std::string ShowUpdateEffect = request::findValue(&req, "ShowUpdateEffect");
 			int iShowUpdateEffect = (ShowUpdateEffect == "on" ? 1 : 0);
 			m_sql.UpdatePreferencesVar("ShowUpdateEffect", iShowUpdateEffect);
+
+			std::string DegreeDaysBaseTemperature = request::findValue(&req, "DegreeDaysBaseTemperature");
+			m_sql.UpdatePreferencesVar("ShowUpdateEffect", DegreeDaysBaseTemperature);
 
 			rnOldvalue = 0;
 			m_sql.GetPreferencesVar("DisableEventScriptSystem", rnOldvalue);
@@ -7092,6 +7204,7 @@ namespace http {
 								(dType != pTypeThermostat3) &&
 								(dType != pTypeRemote) &&
 								(dType != pTypeGeneralSwitch) &&
+								(dType != pTypeHomeConfort) &&
 								(dType != pTypeChime) &&
 								(!((dType == pTypeRego6XXValue) && (dSubType == sTypeRego6XXStatus))) &&
 								(!((dType == pTypeRadiator1) && (dSubType == sTypeSmartwaresSwitchRadiator)))
@@ -7329,6 +7442,7 @@ namespace http {
 						(dType == pTypeThermostat3) ||
 						(dType == pTypeRemote)||
 						(dType == pTypeGeneralSwitch) ||
+						(dType == pTypeHomeConfort) ||
 						((dType == pTypeRadiator1) && (dSubType == sTypeSmartwaresSwitchRadiator)) ||
 						((dType == pTypeRego6XXValue) && (dSubType == sTypeRego6XXStatus))
 						)
@@ -8808,7 +8922,10 @@ namespace http {
 						{
 							sprintf(szData, "Level: %d", nValue);
 							root["result"][ii]["Data"] = szData;
-							root["result"][ii]["Desc"] = Get_Alert_Desc(nValue);
+							if (!sValue.empty())
+								root["result"][ii]["Desc"] = sValue;
+							else
+								root["result"][ii]["Desc"] = Get_Alert_Desc(nValue);
 							root["result"][ii]["TypeImg"] = "Alert";
 							root["result"][ii]["Level"] = nValue;
 							root["result"][ii]["HaveTimeout"] = false;
@@ -10686,6 +10803,10 @@ namespace http {
 				{
 					root["ShortLogDays"] = nValue;
 				}
+				else if (Key == "ShortLogInterval")
+				{
+					root["ShortLogInterval"] = nValue;
+				}
 				else if (Key == "WebUserName")
 				{
 					root["WebUserName"] = base64_decode(sValue);
@@ -10858,6 +10979,10 @@ namespace http {
 				{
 					root["ShowUpdateEffect"] = nValue;
 				}
+				else if (Key == "DegreeDaysBaseTemperature")
+				{
+					root["DegreeDaysBaseTemperature"] = sValue;
+				}
 				else if (Key == "DisableEventScriptSystem")
 				{
 					root["DisableEventScriptSystem"] = nValue;
@@ -10963,6 +11088,7 @@ namespace http {
 				(dType != pTypeThermostat3) &&
 				(dType != pTypeRemote)&&
 				(dType != pTypeGeneralSwitch) &&
+				(dType != pTypeHomeConfort) &&
 				(!((dType == pTypeRadiator1) && (dSubType == sTypeSmartwaresSwitchRadiator)))
 				)
 				return; //no light device! we should not be here!
@@ -12362,7 +12488,7 @@ namespace http {
 						{
 							std::vector<std::string> sd = *itt;
 							float fdirection = static_cast<float>(atof(sd[0].c_str()));
-							if (fdirection == 360)
+							if (fdirection >= 360)
 								fdirection = 0;
 							int direction = int(fdirection);
 							float speed = static_cast<float>(atof(sd[1].c_str())) * m_sql.m_windscale;

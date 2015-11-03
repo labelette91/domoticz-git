@@ -84,7 +84,7 @@ int request_handler::do_extract_currentfile(unzFile uf, const char* password, st
 }
 #endif
 
-void request_handler::handle_request(const std::string &sHost, const request& req, reply& rep)
+void request_handler::handle_request(const request& req, reply& rep)
 {
   // Decode url to path.
   if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"WEB : Host:%s Uri;%s", sHost.c_str(),req.uri.c_str());

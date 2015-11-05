@@ -27,8 +27,9 @@ CLogger::_tLogLineStruct::_tLogLineStruct(const _eLogLevel nlevel, const std::st
 
 CLogger::CLogger(void)
 {
-	m_bInSequenceMode=false;
 	FilterString="";
+	m_bInSequenceMode=false;
+	m_bEnableLogTimestamps=true;
 	m_verbose_level=VBL_ALL;
 }
 
@@ -94,35 +95,40 @@ void CLogger::Log(const _eLogLevel level, const char* logline, ...)
     //test if log contain a string to be filtered from LOG content
     if (TestFilter(cbuffer) ) return ;
 
-	char szDate[100];
-#if !defined WIN32
-	// Get a timestamp
-	struct timeval tv;
-	gettimeofday(&tv, NULL);
-
-	struct tm timeinfo;
-	localtime_r(&tv.tv_sec, &timeinfo);
-
-	// create a time stamp string for the log message
-	snprintf(szDate, sizeof(szDate), "%04d-%02d-%02d %02d:%02d:%02d.%03d ",
-		timeinfo.tm_year + 1900, timeinfo.tm_mon + 1, timeinfo.tm_mday,
-		timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec, (int)tv.tv_usec / 1000);
-#else
-	// Get a timestamp
-	SYSTEMTIME time;
-	::GetLocalTime(&time);
-	// create a time stamp string for the log message
-	sprintf_s(szDate, sizeof(szDate), "%04d-%02d-%02d %02d:%02d:%02d.%03d ", time.wYear, time.wMonth, time.wDay, time.wHour, time.wMinute, time.wSecond, time.wMilliseconds);
-#endif
-
 	std::stringstream sstr;
-	
+	if (m_bEnableLogTimestamps)
+	{
+		char szDate[100];
+#if !defined WIN32
+		// Get a timestamp
+		struct timeval tv;
+		gettimeofday(&tv, NULL);
+
+		struct tm timeinfo;
+		localtime_r(&tv.tv_sec, &timeinfo);
+
+		// create a time stamp string for the log message
+		snprintf(szDate, sizeof(szDate), "%04d-%02d-%02d %02d:%02d:%02d.%03d ",
+			timeinfo.tm_year + 1900, timeinfo.tm_mon + 1, timeinfo.tm_mday,
+			timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec, (int)tv.tv_usec / 1000);
+#else
+		// Get a timestamp
+		SYSTEMTIME time;
+		::GetLocalTime(&time);
+		// create a time stamp string for the log message
+		sprintf_s(szDate, sizeof(szDate), "%04d-%02d-%02d %02d:%02d:%02d.%03d ", time.wYear, time.wMonth, time.wDay, time.wHour, time.wMinute, time.wSecond, time.wMilliseconds);
+#endif
+		sstr << szDate << " ";
+	}
+
+
 	if ((level!=LOG_ERROR))
 	{
-		sstr << szDate << " " << cbuffer;
+		sstr << cbuffer;
 	}
-	else {
-		sstr << szDate << " Error: " << cbuffer;
+	else
+	{
+		sstr << "Error: " << cbuffer;
 	}
 	if (m_lastlog.size()>=MAX_LOG_LINE_BUFFER)
 		m_lastlog.erase(m_lastlog.begin());
@@ -252,6 +258,11 @@ void CLogger::LogSequenceAdd(const char* logline)
 void CLogger::LogSequenceAddNoLF(const char* logline)
 {
 	m_sequencestring << logline;
+}
+
+void CLogger::EnableLogTimestamps(const bool bEnableTimestamps)
+{
+	m_bEnableLogTimestamps = bEnableTimestamps;
 }
 
 std::list<CLogger::_tLogLineStruct> CLogger::GetLog()

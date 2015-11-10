@@ -27,7 +27,7 @@
 	#include "../msbuild/WindowsHelper.h"
 #endif
 
-#define DB_VERSION 84
+#define DB_VERSION 86
 
 extern http::server::CWebServerHelper m_webservers;
 extern std::string szWWWFolder;
@@ -536,6 +536,7 @@ const char *sqlCreateMySensors =
 	"CREATE TABLE IF NOT EXISTS [MySensors]("
 	" [HardwareID] INTEGER NOT NULL,"
 	" [ID] INTEGER NOT NULL,"
+	" [Name] VARCHAR(100) DEFAULT Unknown,"
 	" [SketchName] VARCHAR(100) DEFAULT Unknown,"
 	" [SketchVersion] VARCHAR(40) DEFAULT(1.0));";
 
@@ -1565,6 +1566,17 @@ bool CSQLHelper::OpenDatabase()
 			{
 				m_sql.safe_query("INSERT INTO Hardware (Name, Enabled, Type, Address, Port, Username, Password, Mode1, Mode2, Mode3, Mode4, Mode5, Mode6) VALUES ('Motherboard',1, %d,'',1,'','',0,0,0,0,0,0)", HTYPE_System);
 			}
+		}
+		if (dbversion < 85)
+		{
+			//MySensors, default use ACK for Childs
+			safe_query("UPDATE MySensorsChilds SET[UseAck] = 1 WHERE(ChildID != 255)");
+		}
+		if (dbversion < 86)
+		{
+			//MySensors add Name field
+			query("ALTER TABLE MySensors ADD COLUMN [Name] VARCHAR(100) DEFAULT ''");
+			safe_query("UPDATE MySensors SET [Name] = [SketchName]");
 		}
 	}
 	else if (bNewInstall)
@@ -2602,9 +2614,9 @@ unsigned long long CSQLHelper::UpdateValueInt(const int HardwareID, const char* 
 		return -1;
 
 	unsigned long long ulID=0;
-
+	bool bDeviceUsed = false;
 	std::vector<std::vector<std::string> > result;
-	result = safe_query("SELECT ID,Name FROM DeviceStatus WHERE (HardwareID=%d AND DeviceID='%q' AND Unit=%d AND Type=%d AND SubType=%d)",HardwareID, ID, unit, devType, subType);
+	result = safe_query("SELECT ID,Name, Used FROM DeviceStatus WHERE (HardwareID=%d AND DeviceID='%q' AND Unit=%d AND Type=%d AND SubType=%d)",HardwareID, ID, unit, devType, subType);
 	if (result.size()==0)
 	{
 		//Insert
@@ -2643,6 +2655,7 @@ unsigned long long CSQLHelper::UpdateValueInt(const int HardwareID, const char* 
 		s_str >> ulID;
 
 		devname=result[0][1];
+		bDeviceUsed= atoi(result[0][2].c_str())!=0;
 
 		time_t now = time(0);
 		struct tm ltime;
@@ -2715,6 +2728,8 @@ unsigned long long CSQLHelper::UpdateValueInt(const int HardwareID, const char* 
 			ulID,
 			nValue,sValue);
 
+		if (!bDeviceUsed)
+			return ulID;	//don't process further as the device is not used
 		std::string lstatus="";
 		int llevel=0;
 		bool bHaveDimmer=false;
@@ -2932,7 +2947,8 @@ unsigned long long CSQLHelper::UpdateValueInt(const int HardwareID, const char* 
 
 	if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"SQL :UpdateValueInt %s HwID:%d  DevID:%s Type:%d  sType:%d nValue:%d sValue:%s ", devname.c_str(),HardwareID, ID, devType, subType, nValue, sValue );
 
-	m_mainworker.m_eventsystem.ProcessDevice(HardwareID, ulID, unit, devType, subType, signallevel, batterylevel, nValue, sValue, devname, 0);
+	if (bDeviceUsed)
+		m_mainworker.m_eventsystem.ProcessDevice(HardwareID, ulID, unit, devType, subType, signallevel, batterylevel, nValue, sValue, devname, 0);
 	return ulID;
 }
 

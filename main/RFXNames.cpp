@@ -17,7 +17,7 @@ typedef struct _STR_TABLE_ID1_ID2 {
 	const char   *str1;
 } STR_TABLE_ID1_ID2;
 
-const char *findTableIDSingle1 (STR_TABLE_SINGLE *t, unsigned long id)
+const char *findTableIDSingle1 (const STR_TABLE_SINGLE *t, const unsigned long id)
 {
 	while (t->str1) {
 		if (t->id == id)
@@ -27,7 +27,7 @@ const char *findTableIDSingle1 (STR_TABLE_SINGLE *t, unsigned long id)
 	return "Unknown";
 }
 
-const char *findTableIDSingle2 (STR_TABLE_SINGLE *t, unsigned long id)
+const char *findTableIDSingle2 (const STR_TABLE_SINGLE *t, const unsigned long id)
 {
 	while (t->str2) {
 		if (t->id == id)
@@ -37,7 +37,7 @@ const char *findTableIDSingle2 (STR_TABLE_SINGLE *t, unsigned long id)
 	return "Unknown";
 }
 
-const char *findTableID1ID2 (_STR_TABLE_ID1_ID2 *t, unsigned long id1, unsigned long id2)
+const char *findTableID1ID2 (const _STR_TABLE_ID1_ID2 *t, const unsigned long id1, const unsigned long id2)
 {
 	while (t->str1) {
 		if ( (t->id1 == id1) && (t->id2 == id2) )
@@ -49,7 +49,7 @@ const char *findTableID1ID2 (_STR_TABLE_ID1_ID2 *t, unsigned long id1, unsigned 
 
 const char *RFX_Humidity_Status_Desc(const unsigned char status)
 {
-	STR_TABLE_SINGLE	Table[] =
+	static const STR_TABLE_SINGLE	Table[] =
 	{
 		{ humstat_normal, "Normal" },
 		{ humstat_comfort, "Comfortable" },
@@ -73,7 +73,7 @@ unsigned char Get_Humidity_Level(const unsigned char hlevel)
 
 const char *Security_Status_Desc(const unsigned char status)
 {
-	STR_TABLE_SINGLE	Table[] =
+	static const STR_TABLE_SINGLE	Table[] =
 	{
 		{ sStatusNormal, "Normal" },
 		{ sStatusNormalDelayed, "Normal Delayed" },
@@ -109,7 +109,7 @@ const char *Security_Status_Desc(const unsigned char status)
 
 const char *Timer_Type_Desc(const int tType)
 {
-	STR_TABLE_SINGLE	Table[] =
+	static const STR_TABLE_SINGLE	Table[] =
 	{
 		{ TTYPE_BEFORESUNRISE, "Before Sunrise" },
 		{ TTYPE_AFTERSUNRISE, "After Sunrise" },
@@ -124,7 +124,7 @@ const char *Timer_Type_Desc(const int tType)
 
 const char *Timer_Cmd_Desc(const int tType)
 {
-	STR_TABLE_SINGLE	Table[] =
+	static const STR_TABLE_SINGLE	Table[] =
 	{
 		{ TCMD_ON, "On" },
 		{ TCMD_OFF, "Off" },
@@ -135,7 +135,7 @@ const char *Timer_Cmd_Desc(const int tType)
 
 const char *Hardware_Type_Desc(int hType)
 {
-	STR_TABLE_SINGLE	Table[] =
+	static const STR_TABLE_SINGLE	Table[] =
 	{
 		{ HTYPE_RFXtrx315, "RFXCOM - RFXtrx315 USB 315MHz Transceiver" },
 		{ HTYPE_RFXtrx433, "RFXCOM - RFXtrx433 USB 433.92MHz Transceiver" },
@@ -200,6 +200,7 @@ const char *Hardware_Type_Desc(int hType)
 		{ HTYPE_LogitechMediaServer, "Logitech Media Server" },
 		{ HTYPE_RFXtrx868, "RFXCOM - RFXtrx868 USB 868MHz Transceiver" },
 		{ HTYPE_RFLINKTCP, "RFLink Gateway with LAN interface" },
+		{ HTYPE_Comm5TCP, "Comm5 MA-5XXX with LAN interface"},
 		{ 0, NULL, NULL }
 	};
 	return findTableIDSingle1 (Table, hType);
@@ -207,7 +208,7 @@ const char *Hardware_Type_Desc(int hType)
 
 const char *Switch_Type_Desc(const _eSwitchType sType)
 {
-	STR_TABLE_SINGLE	Table[] =
+	static const STR_TABLE_SINGLE	Table[] =
 	{
 		{ STYPE_OnOff, "On/Off" },
 		{ STYPE_Doorbell, "Doorbell" },
@@ -234,7 +235,7 @@ const char *Switch_Type_Desc(const _eSwitchType sType)
 
 const char *Meter_Type_Desc(const _eMeterType sType)
 {
-	STR_TABLE_SINGLE	Table[] =
+	static const STR_TABLE_SINGLE	Table[] =
 	{
 		{ MTYPE_ENERGY, "Energy" },
 		{ MTYPE_GAS, "Gas" },
@@ -248,7 +249,7 @@ const char *Meter_Type_Desc(const _eMeterType sType)
 
 const char *Notification_Type_Desc(const int nType, const unsigned char snum)
 {
-	STR_TABLE_SINGLE	Table[] =
+	static const STR_TABLE_SINGLE	Table[] =
 	{
 		{ NTYPE_TEMPERATURE, "Temperature","T" },
 		{ NTYPE_HUMIDITY, "Humidity","H" },
@@ -286,7 +287,7 @@ const char *Notification_Type_Desc(const int nType, const unsigned char snum)
 
 const char *Notification_Type_Label(const int nType)
 {
-	STR_TABLE_SINGLE	Table[] =
+	static const STR_TABLE_SINGLE	Table[] =
 	{
 		{ NTYPE_TEMPERATURE, "degrees" },
 		{ NTYPE_HUMIDITY, "%%" },
@@ -321,7 +322,7 @@ const char *Notification_Type_Label(const int nType)
 
 const char *RFX_Forecast_Desc(const unsigned char Forecast)
 {
-	STR_TABLE_SINGLE	Table[] =
+	static const STR_TABLE_SINGLE	Table[] =
 	{
 		{ baroForecastNoInfo, "No Info" },
 		{ baroForecastSunny, "Sunny" },
@@ -335,7 +336,7 @@ const char *RFX_Forecast_Desc(const unsigned char Forecast)
 
 const char *RFX_WSForecast_Desc(const unsigned char Forecast)
 {
-	STR_TABLE_SINGLE	Table[] =
+	static const STR_TABLE_SINGLE	Table[] =
 	{
 		{ wsbaroforcast_heavy_snow,"Heavy Snow" },
 		{ wsbaroforcast_snow, "Snow" },
@@ -354,7 +355,7 @@ const char *RFX_WSForecast_Desc(const unsigned char Forecast)
 
 const char *BMP_Forecast_Desc(const unsigned char Forecast)
 {
-	STR_TABLE_SINGLE	Table[] =
+	static const STR_TABLE_SINGLE	Table[] =
 	{
 		{ bmpbaroforecast_stable, "Stable" },
 		{ bmpbaroforecast_sunny, "Sunny" },
@@ -370,7 +371,7 @@ const char *BMP_Forecast_Desc(const unsigned char Forecast)
 
 const char *RFX_Type_Desc(const unsigned char i, const unsigned char snum)
 {
-	STR_TABLE_SINGLE	Table[] =
+	static const STR_TABLE_SINGLE	Table[] =
 	{
 		{ pTypeInterfaceControl, "Interface Control", "unknown" },
 		{ pTypeInterfaceMessage, "Interface Message", "unknown" },
@@ -443,7 +444,7 @@ const char *RFX_Type_Desc(const unsigned char i, const unsigned char snum)
 
 const char *RFX_Type_SubType_Desc(const unsigned char dType, const unsigned char sType)
 {
-	STR_TABLE_ID1_ID2	Table[] =
+	static const STR_TABLE_ID1_ID2	Table[] =
 	{
 		{ pTypeTEMP, sTypeTEMP1, "THR128/138, THC138" },
 		{ pTypeTEMP, sTypeTEMP2, "THC238/268, THN132, THWR288, THRN122, THN122, AW129/131" },
@@ -740,7 +741,7 @@ const char *RFX_Type_SubType_Desc(const unsigned char dType, const unsigned char
 
 const char *RFX_Type_SubType_Values(const unsigned char dType, const unsigned char sType)
 {
-	STR_TABLE_ID1_ID2	Table[] =
+	static const STR_TABLE_ID1_ID2	Table[] =
 	{
 		{ pTypeTEMP, sTypeTEMP1, "Temperature" },
 		{ pTypeTEMP, sTypeTEMP2, "Temperature" },
@@ -1016,7 +1017,7 @@ const char *RFX_Type_SubType_Values(const unsigned char dType, const unsigned ch
 
 const char *Media_Player_States(const _eMediaStatus Status)
 {
-	STR_TABLE_SINGLE	Table[] =
+	static const STR_TABLE_SINGLE	Table[] =
 	{
 		{ MSTAT_OFF, "Off" },
 		{ MSTAT_ON, "On" },
@@ -1035,7 +1036,7 @@ const char *Media_Player_States(const _eMediaStatus Status)
 
 const char *ZWave_Clock_Days(const unsigned char Day)
 {
-	STR_TABLE_SINGLE	Table[] =
+	static const STR_TABLE_SINGLE	Table[] =
 	{
 		{ 0, "Monday" },
 		{ 1, "Tuesday" },

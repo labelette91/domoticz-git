@@ -780,12 +780,11 @@ namespace http {
 						goto exitjson;
 					}
 				}
-				if (cparam == "logout")
+				if (cparam == "dologout")
 				{
 					root["status"] = "OK";
 					root["title"] = "Logout";
-					m_retstr = "authorize";
-					return m_retstr;
+					goto exitjson;
 
 				}
 				HandleCommand(cparam, session, req, root);
@@ -4854,6 +4853,13 @@ namespace http {
 					root["result"][ii]["ptag"] = Notification_Type_Desc(NTYPE_PERCENTAGE, 1);
 					ii++;
 				}
+				if ((dType == pTypeGeneral) && (dSubType == sTypeWaterflow))
+				{
+					root["result"][ii]["val"] = NTYPE_USAGE;
+					root["result"][ii]["text"] = Notification_Type_Desc(NTYPE_USAGE, 0);
+					root["result"][ii]["ptag"] = Notification_Type_Desc(NTYPE_USAGE, 1);
+					ii++;
+				}
 				if ((dType == pTypeGeneral) && (dSubType == sTypeFan))
 				{
 					root["result"][ii]["val"] = NTYPE_RPM;
@@ -7254,6 +7260,7 @@ namespace http {
 								(!((dType == pTypeGeneral) && (dSubType == sTypeSoilMoisture))) &&
 								(!((dType == pTypeGeneral) && (dSubType == sTypeLeafWetness))) &&
 								(!((dType == pTypeGeneral) && (dSubType == sTypePercentage))) &&
+								(!((dType == pTypeGeneral) && (dSubType == sTypeWaterflow))) &&
 								(!((dType == pTypeGeneral) && (dSubType == sTypeFan))) &&
 								(!((dType == pTypeGeneral) && (dSubType == sTypeSoundLevel))) &&
 								(!((dType == pTypeGeneral) && (dSubType == sTypeZWaveClock))) &&
@@ -8889,6 +8896,14 @@ namespace http {
 							root["result"][ii]["HaveTimeout"] = bHaveTimeout;
 							root["result"][ii]["Image"] = "Computer";
 							root["result"][ii]["TypeImg"] = "hardware";
+						}
+						else if (dSubType == sTypeWaterflow)
+						{
+							sprintf(szData, "%.2f l/min", atof(sValue.c_str()));
+							root["result"][ii]["Data"] = szData;
+							root["result"][ii]["HaveTimeout"] = bHaveTimeout;
+							root["result"][ii]["Image"] = "Moisture";
+							root["result"][ii]["TypeImg"] = "moisture";
 						}
 						else if (dSubType == sTypeFan)
 						{

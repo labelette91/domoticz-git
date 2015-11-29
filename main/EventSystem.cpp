@@ -607,6 +607,11 @@ void CEventSystem::GetCurrentMeasurementStates()
 					utilityval = static_cast<float>(atof(splitresults[0].c_str()));
 					isUtility = true;
 				}
+				else if (sitem.subType == sTypeWaterflow)
+				{
+					utilityval = static_cast<float>(atof(splitresults[0].c_str()));
+					isUtility = true;
+				}
 				else if (sitem.subType == sTypeVoltage)
 				{
 					utilityval = static_cast<float>(atof(splitresults[0].c_str()));
@@ -1789,7 +1794,11 @@ bool CEventSystem::parseBlocklyActions(const std::string &Actions, const std::st
 		}
 		size_t eQPos = csubstr.find_first_of("=") + 1;
 		std::string doWhat = csubstr.substr(eQPos);
-		doWhat = doWhat.substr(1, doWhat.size() - 2);
+		if (doWhat.find('"') == 0)
+		{
+			//Strip quotes
+			doWhat = doWhat.substr(1, doWhat.size() - 2);
+		}
 
 		size_t sPos = csubstr.find_first_of("[") + 1;
 		size_t ePos = csubstr.find_first_of("]");

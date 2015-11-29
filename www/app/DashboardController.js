@@ -1196,6 +1196,7 @@ define(['app'], function (app) {
 							(item.SubType=="Thermostat Mode")||
 							(item.SubType=="Thermostat Fan Mode")||
 							(item.SubType=="Smartwares")||
+							(item.SubType=="Waterflow")||
 							(item.SubType=="Sound Level")
 						) &&
 						(item.Favorite!=0)
@@ -1239,6 +1240,7 @@ define(['app'], function (app) {
 											(item.SubType=="Text")||
 											(item.SubType=="Pressure")||
 											(item.SubType=="A/D")||
+											(item.SubType == "Waterflow")||
 											(item.SubType=="Sound Level")
 										) {
 											if (typeof item.CounterToday != 'undefined') {
@@ -1367,6 +1369,10 @@ define(['app'], function (app) {
 									bigtext=item.Data + '\u00B0 ' + $scope.config.TempSign;
 								}
 								else if ((item.SubType=="Thermostat Mode")||(item.SubType=="Thermostat Fan Mode")) {
+									status=item.Data;
+									bigtext=item.Data;
+								}
+								else if (item.SubType == "Waterflow") {
 									status=item.Data;
 									bigtext=item.Data;
 								}
@@ -2912,6 +2918,7 @@ define(['app'], function (app) {
 							(item.SubType=="Thermostat Mode")||
 							(item.SubType=="Thermostat Fan Mode")||
 							(item.SubType=="Smartwares")||
+							(item.SubType == "Waterflow")||	
 							(item.SubType=="Sound Level")
 						) &&
 						(item.Favorite!=0)
@@ -3015,6 +3022,9 @@ define(['app'], function (app) {
 						else if (item.SubType=="Sound Level") {
 							vname='<img src="images/next.png" onclick="ShowGeneralGraph(\'#dashcontent\',\'ShowFavorites\',' + item.idx + ',\'' + escape(item.Name) + '\',' + item.SwitchTypeVal +', \'' + item.SubType + '\');" height="16" width="16">' + " " + item.Name;
 						}
+						else if (item.SubType=="Waterflow") {
+							vname='<img src="images/next.png" onclick="ShowGeneralGraph(\'#dashcontent\',\'ShowFavorites\',' + item.idx + ',\'' + escape(item.Name) + '\', ' + item.SwitchTypeVal +', \'' + item.SubType + '\');" height="16" width="16">' + " " + item.Name;
+						}
 
 						var status="";
 						if (typeof item.Counter != 'undefined') {
@@ -3051,6 +3061,7 @@ define(['app'], function (app) {
 									(item.SubType=="Text")||
 									(item.SubType=="Pressure")||
 									(item.SubType=="A/D")||
+									(item.SubType == "Waterflow")||
 									(item.SubType=="Sound Level")
 								) {
 									if (typeof item.CounterToday != 'undefined') {
@@ -3164,6 +3175,7 @@ define(['app'], function (app) {
 								(item.SubType=="Pressure")||
 								(item.SubType=="A/D")||
 								(item.SubType=="Sound Level")||
+								(item.SubType == "Waterflow")||
 								(item.Type == "Current")
 							) {
 							xhtm+=item.Data;
@@ -3263,7 +3275,11 @@ define(['app'], function (app) {
 							xhtm+='moisture48.png" class="lcursor" onclick="ShowGeneralGraph(\'#dashcontent\',\'ShowFavorites\',' + item.idx + ',\'' + escape(item.Name) + '\',' + item.SwitchTypeVal +', \'' + item.SubType + '\');" height="40" width="40"></td>\n';
 							status=item.Data;
 						}
-							else if (item.SubType=="Leaf Wetness") {
+						else if (item.SubType=="Waterflow") {
+							xhtm+='moisture48.png" class="lcursor" onclick="ShowGeneralGraph(\'#dashcontent\',\'ShowFavorites\',' + item.idx + ',\'' + escape(item.Name) + '\',' + item.SwitchTypeVal +', \'' + item.SubType + '\');" height="40" width="40"></td>\n';
+							status=item.Data;
+						}
+						else if (item.SubType=="Leaf Wetness") {
 							xhtm+='leaf48.png" height="40" width="40"></td>\n';
 							status=item.Data;
 						}

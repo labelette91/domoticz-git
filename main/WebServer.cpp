@@ -357,6 +357,7 @@ namespace http {
 			m_pWebEm->RegisterActionCode("setlimitlesstype", boost::bind(&CWebServer::SetLimitlessType, this, _1, _2));
 			m_pWebEm->RegisterActionCode("setopenthermsettings", boost::bind(&CWebServer::SetOpenThermSettings, this, _1, _2));
 			m_pWebEm->RegisterActionCode("setp1usbtype", boost::bind(&CWebServer::SetP1USBType, this, _1, _2));
+			m_pWebEm->RegisterActionCode("setcurrentcostmetertype", boost::bind(&CWebServer::SetCurrentCostUSBType, this, _1, _2));
 			m_pWebEm->RegisterActionCode("restoredatabase", boost::bind(&CWebServer::RestoreDatabase, this, _1, _2));
 			m_pWebEm->RegisterActionCode("sbfspotimportolddata", boost::bind(&CWebServer::SBFSpotImportOldData, this, _1, _2));
 
@@ -969,7 +970,7 @@ namespace http {
 			else if (
 				(htype == HTYPE_RFXLAN) || (htype == HTYPE_P1SmartMeterLAN) || (htype == HTYPE_YouLess) || (htype == HTYPE_RazberryZWave) || (htype == HTYPE_OpenThermGatewayTCP) || (htype == HTYPE_LimitlessLights) ||
 				(htype == HTYPE_SolarEdgeTCP) || (htype == HTYPE_WOL) || (htype == HTYPE_ECODEVICES) || (htype == HTYPE_Mochad) || (htype == HTYPE_MySensorsTCP) || (htype == HTYPE_MQTT) || (htype == HTYPE_FRITZBOX) ||
-				(htype == HTYPE_ETH8020) || (htype == HTYPE_KMTronicTCP) || (htype == HTYPE_SOLARMAXTCP) || (htype == HTYPE_SatelIntegra) || (htype == HTYPE_RFLINKTCP) || (htype == HTYPE_Comm5TCP)
+				(htype == HTYPE_ETH8020) || (htype == HTYPE_KMTronicTCP) || (htype == HTYPE_SOLARMAXTCP) || (htype == HTYPE_SatelIntegra) || (htype == HTYPE_RFLINKTCP) || (htype == HTYPE_Comm5TCP) || (htype == HTYPE_CurrentCostMeterLAN)
 				) {
 				//Lan
 				if (address == "")
@@ -1202,7 +1203,7 @@ namespace http {
 				(htype == HTYPE_SolarEdgeTCP) || (htype == HTYPE_WOL) || (htype == HTYPE_ECODEVICES) || (htype == HTYPE_Mochad) || 
 				(htype == HTYPE_MySensorsTCP) || (htype == HTYPE_MQTT) || (htype == HTYPE_FRITZBOX) || (htype == HTYPE_ETH8020) || 
 				(htype == HTYPE_KMTronicTCP) || (htype == HTYPE_SOLARMAXTCP) || (htype == HTYPE_SatelIntegra) || (htype == HTYPE_RFLINKTCP) ||
-				(htype == HTYPE_Comm5TCP)
+				(htype == HTYPE_Comm5TCP || (htype == HTYPE_CurrentCostMeterLAN))
 				){
 				//Lan
 				if (address == "")
@@ -1546,7 +1547,14 @@ namespace http {
 				s_str >> lastlogtime;
 			}
 
-			std::list<CLogger::_tLogLineStruct> logmessages = _log.GetLog();
+			_eLogLevel lLevel = LOG_NORM;
+			std::string sloglevel = request::findValue(&req, "loglevel");
+			if (!sloglevel.empty())
+			{
+				lLevel = (_eLogLevel)atoi(sloglevel.c_str());
+			}
+
+			std::list<CLogger::_tLogLineStruct> logmessages = _log.GetLog(lLevel);
 			std::list<CLogger::_tLogLineStruct>::const_iterator itt;
 			int ii = 0;
 			for (itt = logmessages.begin(); itt != logmessages.end(); ++itt)
@@ -4141,7 +4149,7 @@ namespace http {
 						(sunitcode == "")
 						)
 						return;
-					if ((subtype != sTypeEMW100) && (subtype != sTypeLivolo) && (subtype != sTypeLivoloAppliance) && (subtype != sTypeRGB432W))
+					if ((subtype != sTypeEMW100) && (subtype != sTypeLivolo) && (subtype != sTypeLivoloAppliance) && (subtype != sTypeRGB432W) && (subtype != sTypeLightwaveRF))
 						devid = "00" + id;
 					else
 					devid = id;
@@ -7377,7 +7385,12 @@ namespace http {
 					CDomoticzHardwareBase *pHardware = m_mainworker.GetHardware(hardwareID);
 					if (pHardware != NULL)
 					{
-						if (pHardware->HwdType == HTYPE_Wunderground)
+						if (pHardware->HwdType == HTYPE_SolarEdgeAPI)
+						{
+							int seSensorTimeOut = 60 * 24 * 60;
+							bHaveTimeout = (now - checktime >= seSensorTimeOut * 60);
+						}
+						else if (pHardware->HwdType == HTYPE_Wunderground)
 						{
 							CWunderground *pWHardware = (CWunderground *)pHardware;
 							std::string forecast_url = pWHardware->GetForecastURL();

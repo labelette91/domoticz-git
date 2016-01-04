@@ -2162,6 +2162,11 @@ namespace http {
 			root["Latitude"] = Latitude;
 			root["Longitude"] = Longitude;
 
+#ifndef NOCLOUD
+			bool bEnableTabProxy = request::get_req_header(&req, "X-From-MyDomoticz") != NULL;
+#else
+			bool bEnableTabProxy = false;
+#endif
 			int bEnableTabDashboard = 1;
 			int bEnableTabFloorplans = 1;
 			int bEnableTabLight = 1;
@@ -2204,6 +2209,7 @@ namespace http {
 				//Floorplan , no need to show a tab floorplan
 				bEnableTabFloorplans = 0;
 			}
+			root["result"]["EnableTabProxy"] = bEnableTabProxy;
 			root["result"]["EnableTabDashboard"] = bEnableTabDashboard != 0;
 			root["result"]["EnableTabFloorplans"] = bEnableTabFloorplans != 0;
 			root["result"]["EnableTabLights"] = bEnableTabLight != 0;
@@ -3074,7 +3080,7 @@ namespace http {
 				root["status"] = "OK";
 				root["title"] = "GetTimerList";
 				std::vector<std::vector<std::string> > result;
-				result = m_sql.safe_query("SELECT t.ID, t.Active, d.[Name], t.DeviceRowID, t.[Date], t.Time, t.Type, t.Cmd, t.Level, t.Days FROM Timers as t, DeviceStatus as d WHERE (d.ID == t.DeviceRowID) AND (t.TimerPlan==%d) ORDER BY d.[Name], t.Time",
+				result = m_sql.safe_query("SELECT t.ID, t.Active, d.[Name], t.DeviceRowID, t.[Date], t.Time, t.Type, t.Cmd, t.Level, t.Hue, t.Days, t.UseRandomness FROM Timers as t, DeviceStatus as d WHERE (d.ID == t.DeviceRowID) AND (t.TimerPlan==%d) ORDER BY d.[Name], t.Time",
 					m_sql.m_ActiveTimerPlan);
 				if (result.size() > 0)
 				{
@@ -3083,6 +3089,10 @@ namespace http {
 					for (itt = result.begin(); itt != result.end(); ++itt)
 					{
 						std::vector<std::string> sd = *itt;
+
+						unsigned char iLevel = atoi(sd[8].c_str());
+						if (iLevel == 0)
+							iLevel = 100;
 
 						int iTimerType = atoi(sd[6].c_str());
 						std::string sdate = sd[4];
@@ -3097,16 +3107,18 @@ namespace http {
 						else
 							sdate = "";
 
-						root["result"][ii]["ID"] = sd[0];
-						root["result"][ii]["Active"] = sd[1];
+						root["result"][ii]["idx"] = sd[0];
+						root["result"][ii]["Active"] = (atoi(sd[1].c_str()) == 0) ? "false" : "true";
 						root["result"][ii]["Name"] = sd[2];
 						root["result"][ii]["DeviceRowID"] = sd[3];
 						root["result"][ii]["Date"] = sdate;
 						root["result"][ii]["Time"] = sd[5];
 						root["result"][ii]["Type"] = iTimerType;
-						root["result"][ii]["Cmd"] = sd[7];
-						root["result"][ii]["Level"] = sd[8];
-						root["result"][ii]["Days"] = sd[9];
+						root["result"][ii]["Cmd"] = atoi(sd[7].c_str());
+						root["result"][ii]["Level"] = iLevel;
+						root["result"][ii]["Hue"] = atoi(sd[9].c_str());
+						root["result"][ii]["Days"] = atoi(sd[10].c_str());
+						root["result"][ii]["Randomness"] = (atoi(sd[11].c_str()) == 0) ? "false" : "true";
 						ii++;
 					}
 				}
@@ -3116,7 +3128,7 @@ namespace http {
 				root["status"] = "OK";
 				root["title"] = "GetSceneTimerList";
 				std::vector<std::vector<std::string> > result;
-				result = m_sql.safe_query("SELECT t.ID, t.Active, s.[Name], t.SceneRowID, t.[Date], t.Time, t.Type, t.Cmd, t.Level, t.Days FROM SceneTimers as t, Scenes as s WHERE (s.ID == t.SceneRowID) AND (t.TimerPlan==%d) ORDER BY s.[Name], t.Time",
+				result = m_sql.safe_query("SELECT t.ID, t.Active, s.[Name], t.SceneRowID, t.[Date], t.Time, t.Type, t.Cmd, t.Level, t.Hue, t.Days, t.UseRandomness FROM SceneTimers as t, Scenes as s WHERE (s.ID == t.SceneRowID) AND (t.TimerPlan==%d) ORDER BY s.[Name], t.Time",
 					m_sql.m_ActiveTimerPlan);
 				if (result.size() > 0)
 				{
@@ -3125,6 +3137,10 @@ namespace http {
 					for (itt = result.begin(); itt != result.end(); ++itt)
 					{
 						std::vector<std::string> sd = *itt;
+
+						unsigned char iLevel = atoi(sd[8].c_str());
+						if (iLevel == 0)
+							iLevel = 100;
 
 						int iTimerType = atoi(sd[6].c_str());
 						std::string sdate = sd[4];
@@ -3139,16 +3155,18 @@ namespace http {
 						else
 							sdate = "";
 
-						root["result"][ii]["ID"] = sd[0];
-						root["result"][ii]["Active"] = sd[1];
+						root["result"][ii]["idx"] = sd[0];
+						root["result"][ii]["Active"] = (atoi(sd[1].c_str()) == 0) ? "false" : "true";
 						root["result"][ii]["Name"] = sd[2];
 						root["result"][ii]["SceneRowID"] = sd[3];
 						root["result"][ii]["Date"] = sdate;
 						root["result"][ii]["Time"] = sd[5];
 						root["result"][ii]["Type"] = iTimerType;
-						root["result"][ii]["Cmd"] = sd[7];
-						root["result"][ii]["Level"] = sd[8];
-						root["result"][ii]["Days"] = sd[9];
+						root["result"][ii]["Cmd"] = atoi(sd[7].c_str());
+						root["result"][ii]["Level"] = iLevel;
+						root["result"][ii]["Hue"] = atoi(sd[9].c_str());
+						root["result"][ii]["Days"] = atoi(sd[10].c_str());
+						root["result"][ii]["Randomness"] = (atoi(sd[11].c_str()) == 0) ? "false" : "true";
 						ii++;
 					}
 				}
@@ -6772,6 +6790,25 @@ namespace http {
 			m_sql.UpdatePreferencesVar("FloorplanActiveOpacity", atoi(request::findValue(&req, "FloorplanActiveOpacity").c_str()));
 			m_sql.UpdatePreferencesVar("FloorplanInactiveOpacity", atoi(request::findValue(&req, "FloorplanInactiveOpacity").c_str()));
 
+#ifndef NOCLOUD
+			std::string md_userid, md_password, pf_userid, pf_password;
+			int md_subsystems, pf_subsystems;
+			m_sql.GetPreferencesVar("MyDomoticzUserId", pf_userid);
+			m_sql.GetPreferencesVar("MyDomoticzPassword", pf_password);
+			m_sql.GetPreferencesVar("MyDomoticzSubsystems", pf_subsystems);
+			md_userid = CURLEncode::URLDecode(request::findValue(&req, "MyDomoticzUserId"));
+			md_password = CURLEncode::URLDecode(request::findValue(&req, "MyDomoticzPassword"));
+			md_subsystems = (request::findValue(&req, "SubsystemHttp").empty() ? 0 : 1) + (request::findValue(&req, "SubsystemShared").empty() ? 0 : 2) + (request::findValue(&req, "SubsystemApps").empty() ? 0 : 4);
+			if (md_userid != pf_userid || md_password != pf_password || md_subsystems != pf_subsystems) {
+				m_sql.UpdatePreferencesVar("MyDomoticzUserId", md_userid);
+				if (md_password != pf_password) {
+					md_password = base64_encode((unsigned char const*)md_password.c_str(), md_password.size());
+					m_sql.UpdatePreferencesVar("MyDomoticzPassword", md_password);
+				}
+				m_sql.UpdatePreferencesVar("MyDomoticzSubsystems", md_subsystems);
+				m_webservers.RestartProxy();
+			}
+#endif
 
 			m_notifications.LoadConfig();
 
@@ -10925,6 +10962,11 @@ namespace http {
 				return;
 			root["status"] = "OK";
 			root["title"] = "settings";
+#ifndef NOCLOUD
+			root["cloudenabled"] = true;
+#else
+			root["cloudenabled"] = false;
+#endif
 
 			std::vector<std::vector<std::string> >::const_iterator itt;
 			for (itt = result.begin(); itt != result.end(); ++itt)
@@ -11210,6 +11252,20 @@ namespace http {
 				{
 					root["WebTheme"] = sValue;
 				}
+#ifndef NOCLOUD
+				else if (Key == "MyDomoticzInstanceId") {
+					root["MyDomoticzInstanceId"] = sValue;
+				}
+				else if (Key == "MyDomoticzUserId") {
+					root["MyDomoticzUserId"] = sValue;
+				}
+				else if (Key == "MyDomoticzPassword") {
+					root["MyDomoticzPassword"] = sValue;
+				}
+				else if (Key == "MyDomoticzSubsystems") {
+					root["MyDomoticzSubsystems"] = nValue;
+				}
+#endif
 				else 
 					root[Key]=sValue;
 			}

@@ -852,7 +852,7 @@ define(['app'], function (app) {
 							if (item.CounterDeliv!=0) {
 								status+='<br>' + $.t("Return") + ': ' + item.CounterDeliv + ', ' + $.t("Today") + ': ' + item.CounterDelivToday;
 								if (item.UsageDeliv.charAt(0) != 0) {
-									bigtext='-' + item.UsageDeliv;
+									bigtext+='-' + item.UsageDeliv;
 								}
 							}
 						}

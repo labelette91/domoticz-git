@@ -75,6 +75,8 @@ public:
 std::string GenerateMD5Hash(const std::string &InputString, const std::string &Salt="");
 
 void hue2rgb(const float hue, int &outR, int &outG, int &outB, const double maxValue = 100.0);
+void rgb2hsb(const int r, const int g, const int b, float hsbvals[3]);
+
 bool is_number(const std::string& s);
 void padLeft(std::string &str, const size_t num, const char paddingChar = '0');
 

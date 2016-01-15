@@ -91,6 +91,7 @@ static const _tGuiLanguage guiLanguage[] =
 	{ "fi", "Finnish" },
 	{ "he", "Hebrew" },
 	{ "hu", "Hungarian" },
+	{ "is", "Icelandic" },
 	{ "it", "Italian" },
 	{ "lt", "Lithuanian" },
 	{ "mk", "Macedonian" },
@@ -511,7 +512,7 @@ namespace http {
 			RegisterCommandCode("devices_list", boost::bind(&CWebServer::Cmd_GetDevicesList, this, _1, _2, _3));
 			RegisterCommandCode("devices_list_onoff", boost::bind(&CWebServer::Cmd_GetDevicesListOnOff, this, _1, _2, _3));
 
-			RegisterCommandCode("registerhue", boost::bind(&CWebServer::Cmd_RegisterWithPhilipsHue, this, _1, _2, _3));
+			RegisterCommandCode("registerhue", boost::bind(&CWebServer::Cmd_PhilipsHueRegister, this, _1, _2, _3));
 
 			RegisterCommandCode("getcustomiconset", boost::bind(&CWebServer::Cmd_GetCustomIconSet, this, _1, _2, _3));
 			RegisterCommandCode("deletecustomicon", boost::bind(&CWebServer::Cmd_DeleteCustomIcon, this, _1, _2, _3));
@@ -637,11 +638,19 @@ namespace http {
 				return;
 			m_pWebEm->SetAuthenticationMethod((_eAuthenticationMethod)amethod);
 		}
+
 		void CWebServer::SetWebTheme(const std::string &themename)
 		{
 			if (m_pWebEm == NULL)
 				return;
 			m_pWebEm->SetWebTheme(themename);
+		}
+
+		void CWebServer::SetWebRoot(const std::string &webRoot)
+		{
+			if (m_pWebEm == NULL)
+				return;
+			m_pWebEm->SetWebRoot(webRoot);
 		}
 
 		void CWebServer::RegisterCommandCode(const char* idname, webserver_response_function ResponseFunction, bool bypassAuthentication)
@@ -1004,6 +1013,10 @@ namespace http {
 					}
 				}
 			}
+			else if (htype == HTYPE_DomoticzInternal)	{
+				// DomoticzInternal cannot be added manually
+				return;
+			}
 			else if (htype == HTYPE_Domoticz) {
 				//Remote Domoticz
 				if (address == "")
@@ -1229,6 +1242,10 @@ namespace http {
 				//Lan
 				if (address == "")
 					return;
+			}
+			else if (htype == HTYPE_DomoticzInternal) {
+				// DomoticzInternal cannot be updated
+				return;
 			}
 			else if (htype == HTYPE_Domoticz) {
 				//Remote Domoticz
@@ -1547,6 +1564,12 @@ namespace http {
 			if (idx == "")
 				return;
 			int hwID = atoi(idx.c_str());
+
+			CDomoticzHardwareBase *pBaseHardware = m_mainworker.GetHardware(hwID);
+			if ((pBaseHardware != NULL) && (pBaseHardware->HwdType == HTYPE_DomoticzInternal)) {
+				// DomoticzInternal cannot be removed
+				return;
+			}
 
 			root["status"] = "OK";
 			root["title"] = "DeleteHardware";
@@ -5858,19 +5881,48 @@ namespace http {
 			else if (cparam == "setcolbrightnessvalue")
 			{
 				std::string idx = request::findValue(&req, "idx");
-				std::string hue = request::findValue(&req, "hue");
-				std::string brightness = request::findValue(&req, "brightness");
-				std::string iswhite = request::findValue(&req, "iswhite");
 
-				if ((idx == "") || (hue == "") || (brightness == "") || (iswhite == ""))
+				if (idx.empty())
 				{
 					return;
 				}
-
 				unsigned long long ID;
 				std::stringstream s_strid;
 				s_strid << idx;
 				s_strid >> ID;
+
+				std::string hex = request::findValue(&req, "hex");
+				std::string hue = request::findValue(&req, "hue");
+				std::string brightness = request::findValue(&req, "brightness");
+				std::string iswhite = request::findValue(&req, "iswhite");
+
+				if (!hex.empty())
+				{
+					std::stringstream sstr;
+					sstr << hex;
+					int ihex;
+					sstr >> std::hex >> ihex;
+					unsigned char r = (unsigned char)((ihex & 0xFF0000) >> 16);
+					unsigned char g = (unsigned char)((ihex & 0x00FF00) >> 8);
+					unsigned char b = (unsigned char)ihex & 0xFF;
+					float hsb[3];
+					rgb2hsb(r, g, b, hsb);
+					hsb[0] *= 360.0;
+					hsb[1] *= 255.0;
+					hsb[2] *= 100.0;
+					char szConv[20];
+					sprintf(szConv, "%d", (int)hsb[0]);
+					hue = szConv;
+					//sprintf(szConv, "%d", (int)hsb[1]);
+					//sat = szConv;
+					iswhite = (hsb[1] < 20.0) ? "true" : "false";
+					sprintf(szConv, "%d", (int)hsb[2]);
+					brightness = szConv;
+				}
+				if (hue.empty() || brightness.empty() || iswhite.empty())
+				{
+					return;
+				}
 
 				if (iswhite != "true")
 				{

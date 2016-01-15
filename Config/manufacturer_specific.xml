@@ -223,7 +223,7 @@
 		<Product type="0002" id="0001" name="EUR_COMETZ Wall Radiator Thermostat Valve Control" config="eurotronic/eur_cometz.xml"/>
 	</Manufacturer>
 	<Manufacturer id="0128" name="Eneco">
-		<Product type="0000" id="0000" name="ED2.0 Meter Adapter"/>
+		<Product type="0000" id="0000" name="ED2.0 Meter Adapter" config="eneco/ed20.xml"/>
 		<Product type="0128" id="0000" name="ED2.0 Display"/>
 	</Manufacturer>
 	<Manufacturer id="011a" name="Enerwave">
@@ -591,6 +591,7 @@
 		<Product type="0003" id="0002" name="ZMNHCA2 Flush Shutter" config="qubino/ZMNHCA2.xml"/>
                 <Product type="0003" id="0052" name="ZMNHCD Flush Shutter" config="qubino/ZMNHCD.xml"/>
 		<Product type="0004" id="0001" name="ZMNHJA2 Flush Dimmer Fil Pilote" config="qubino/ZMNHJA2.xml"/>
+		<Product type="0004" id="0051" name="ZMNHJD1 Flush Pilot Wire Dimmer" config="qubino/ZMNHJD1.xml"/>
 		<Product type="0005" id="0001" name="ZMNHIA2 Flush on/off thermostat" config="qubino/ZMNHIA2.xml"/>
 	</Manufacturer>
 	<Manufacturer id="0130" name="Quby">

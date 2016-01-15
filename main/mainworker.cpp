@@ -86,6 +86,7 @@
 #include "../hardware/CurrentCostMeterTCP.h"
 #include "../hardware/SolarEdgeAPI.h"
 #include "../hardware/DomoticzInternal.h"
+#include "../hardware/NefitEasy.h"
 
 // load notifications configuration
 #include "../notifications/NotificationHelper.h"
@@ -756,6 +757,9 @@ bool MainWorker::AddHardwareFromParams(
 	case HTYPE_KMTronicTCP:
 		//LAN
 		pHardware = new KMTronicTCP(ID, Address, Port, Username, Password);
+		break;
+	case HTYPE_NefitEastLAN:
+		pHardware = new CNefitEasy(ID, Address, Port);
 		break;
 	case HTYPE_ECODEVICES:
 		//LAN
@@ -1986,11 +1990,12 @@ void MainWorker::ProcessRXMessage(const CDomoticzHardwareBase *pHardware, const 
 		}
 	}
 
+	_tRxMessageProcessingResult procResult;
+	procResult.DeviceName = "";
+	procResult.DeviceRowIdx = -1;
+	procResult.bProcessBatteryValue = true;
 	if (DeviceRowIdx == -1)
 	{
-		_tRxMessageProcessingResult procResult;
-		procResult.DeviceName = "";
-		procResult.DeviceRowIdx = -1;
 		switch (pRXCommand[1])
 		{
 		case pTypeInterfaceMessage:
@@ -2185,15 +2190,18 @@ void MainWorker::ProcessRXMessage(const CDomoticzHardwareBase *pHardware, const 
 	if (DeviceRowIdx == -1)
 		return;
 
-	if (BatteryLevel != -1)
+	if ((BatteryLevel != -1) && (procResult.bProcessBatteryValue))
 	{
 		m_sql.safe_query("UPDATE DeviceStatus SET BatteryLevel=%d WHERE (ID==%llu)", BatteryLevel, DeviceRowIdx);
 	}
 
 	if ((defaultName != NULL) && ((DeviceName == "Unknown") || (DeviceName.empty())))
 	{
-		DeviceName = defaultName;
-		m_sql.safe_query("UPDATE DeviceStatus SET Name='%q' WHERE (ID==%llu)", defaultName, DeviceRowIdx);
+		if (strlen(defaultName) > 0)
+		{
+			DeviceName = defaultName;
+			m_sql.safe_query("UPDATE DeviceStatus SET Name='%q' WHERE (ID==%llu)", defaultName, DeviceRowIdx);
+		}
 	}
 
 	if (pHardware->m_bOutputLog)
@@ -7854,7 +7862,8 @@ void MainWorker::decode_Energy(const int HwdID, const _eHardwareTypes HwdType, c
 	gdevice.subtype = sTypeKwh;
 	gdevice.floatval1 = (float)instant;
 	gdevice.floatval2 = (float)total;
-	decode_General(HwdID, HwdType, (const tRBUF*)&gdevice, procResult);
+	decode_General(HwdID, HwdType, (const tRBUF*)&gdevice, procResult, SignalLevel, BatteryLevel);
+	procResult.bProcessBatteryValue = false;
 }
 
 void MainWorker::decode_Power(const int HwdID, const _eHardwareTypes HwdType, const tRBUF *pResponse, _tRxMessageProcessingResult & procResult)
@@ -8965,7 +8974,7 @@ void MainWorker::decode_Thermostat(const int HwdID, const _eHardwareTypes HwdTyp
 	procResult.DeviceRowIdx = DevRowIdx;
 }
 
-void MainWorker::decode_General(const int HwdID, const _eHardwareTypes HwdType, const tRBUF *pResponse, _tRxMessageProcessingResult & procResult)
+void MainWorker::decode_General(const int HwdID, const _eHardwareTypes HwdType, const tRBUF *pResponse, _tRxMessageProcessingResult & procResult, const unsigned char SignalLevel, const unsigned char BatteryLevel)
 {
 	char szTmp[200];
 	const _tGeneralDevice *pMeter=(const _tGeneralDevice*)pResponse;
@@ -8999,8 +9008,6 @@ void MainWorker::decode_General(const int HwdID, const _eHardwareTypes HwdType, 
 	std::string ID=szTmp;
 	unsigned char Unit=1;
 	unsigned char cmnd=0;
-	unsigned char SignalLevel=12;
-	unsigned char BatteryLevel = 255;
 
 	unsigned long long DevRowIdx=-1;
 
@@ -9141,7 +9148,6 @@ void MainWorker::decode_General(const int HwdID, const _eHardwareTypes HwdType, 
 		sprintf(szTmp, "%.3f;%.3f", pMeter->floatval1, pMeter->floatval2);
 		DevRowIdx = m_sql.UpdateValue(HwdID, ID.c_str(), Unit, devType, subType, SignalLevel, BatteryLevel, cmnd, szTmp, procResult.DeviceName);
 		m_notifications.CheckAndHandleNotification(DevRowIdx, procResult.DeviceName, devType, subType, NTYPE_USAGE, pMeter->floatval1);
-
 	}
 	else if (subType == sTypeAlert)
 	{
@@ -10909,8 +10915,8 @@ bool MainWorker::SetSetPointInt(const std::vector<std::string> &sd, const float 
 	if (pHardware==NULL)
 		return false;
 	if (
-		(pHardware->HwdType==HTYPE_OpenThermGateway)||
-		(pHardware->HwdType==HTYPE_OpenThermGatewayTCP)||
+		(pHardware->HwdType == HTYPE_OpenThermGateway) ||
+		(pHardware->HwdType == HTYPE_OpenThermGatewayTCP) ||
 		(pHardware->HwdType == HTYPE_ICYTHERMOSTAT) ||
 		(pHardware->HwdType == HTYPE_TOONTHERMOSTAT) ||
 		(pHardware->HwdType == HTYPE_NEST) ||
@@ -10918,23 +10924,24 @@ bool MainWorker::SetSetPointInt(const std::vector<std::string> &sd, const float 
 		(pHardware->HwdType == HTYPE_THERMOSMART) ||
 		(pHardware->HwdType == HTYPE_EVOHOME_SCRIPT) ||
 		(pHardware->HwdType == HTYPE_EVOHOME_SERIAL) ||
-		(pHardware->HwdType == HTYPE_Netatmo)
+		(pHardware->HwdType == HTYPE_Netatmo) ||
+		(pHardware->HwdType == HTYPE_NefitEastLAN)
 		)
 	{
-		if (pHardware->HwdType==HTYPE_OpenThermGateway)
+		if (pHardware->HwdType == HTYPE_OpenThermGateway)
 		{
-			OTGWSerial *pGateway=(OTGWSerial*)pHardware;
-			pGateway->SetSetpoint(ID4,TempValue);
+			OTGWSerial *pGateway = (OTGWSerial*)pHardware;
+			pGateway->SetSetpoint(ID4, TempValue);
 		}
-		else if (pHardware->HwdType==HTYPE_OpenThermGatewayTCP)
+		else if (pHardware->HwdType == HTYPE_OpenThermGatewayTCP)
 		{
-			OTGWTCP *pGateway=(OTGWTCP*)pHardware;
-			pGateway->SetSetpoint(ID4,TempValue);
+			OTGWTCP *pGateway = (OTGWTCP*)pHardware;
+			pGateway->SetSetpoint(ID4, TempValue);
 		}
-		else if (pHardware->HwdType==HTYPE_ICYTHERMOSTAT)
+		else if (pHardware->HwdType == HTYPE_ICYTHERMOSTAT)
 		{
-			CICYThermostat *pGateway=(CICYThermostat*)pHardware;
-			pGateway->SetSetpoint(ID4,TempValue);
+			CICYThermostat *pGateway = (CICYThermostat*)pHardware;
+			pGateway->SetSetpoint(ID4, TempValue);
 		}
 		else if (pHardware->HwdType == HTYPE_TOONTHERMOSTAT)
 		{
@@ -10961,9 +10968,14 @@ bool MainWorker::SetSetPointInt(const std::vector<std::string> &sd, const float 
 			CNetatmo *pGateway = (CNetatmo*)pHardware;
 			pGateway->SetSetpoint(ID2, TempValue);
 		}
+		else if (pHardware->HwdType == HTYPE_NefitEastLAN)
+		{
+			CNefitEasy *pGateway = (CNefitEasy*)pHardware;
+			pGateway->SetSetpoint(ID2, TempValue);
+		}
 		else if (pHardware->HwdType == HTYPE_EVOHOME_SCRIPT || pHardware->HwdType == HTYPE_EVOHOME_SERIAL)
 		{
-			SetSetPoint(sd[7],TempValue,CEvohome::zmPerm,"");
+			SetSetPoint(sd[7], TempValue, CEvohome::zmPerm, "");
 		}
 	}
 	else
@@ -10997,12 +11009,14 @@ bool MainWorker::SetSetPointInt(const std::vector<std::string> &sd, const float 
 		else
 		{
 			float tempDest = TempValue;
-			unsigned char tSign = m_sql.m_tempsign[0];
-			if (tSign == 'F')
+			//if ((pHardware->HwdType != HTYPE_OpenZWave) && (pHardware->HwdType != HTYPE_RazberryZWave))
 			{
-				//Maybe this should be done in the main app, so all other devices will also do this
-				//Convert to Celsius
-				tempDest = (tempDest - 32.0f) / 1.8f;
+				unsigned char tSign = m_sql.m_tempsign[0];
+				if (tSign == 'F')
+				{
+					//Convert to Celsius
+					tempDest = (tempDest - 32.0f) / 1.8f;
+				}
 			}
 
 			_tThermostat tmeter;
@@ -11792,7 +11806,7 @@ int MainWorker::ConvertPercentLevel(int dType,int dSubType,_eSwitchType switchty
   return iLevel ;
 }
 
-bool MainWorker::UpdateDevice(const int HardwareID, const std::string &DeviceID, const int unit, const int devType, const int subType, const int nValue, const std::string &sValue, const int signallevel, const int batterylevel)
+bool MainWorker::UpdateDevice(const int HardwareID, const std::string &DeviceID, const int unit, const int devType, const int subType, const int nValue, const std::string &sValue, const int signallevel, const int batterylevel, const bool parseTrigger)
 {
 	CDomoticzHardwareBase *pHardware = GetHardware(HardwareID);
 	if (pHardware)
@@ -11874,7 +11888,7 @@ bool MainWorker::UpdateDevice(const int HardwareID, const std::string &DeviceID,
 		return false;
 
 	// signal connected devices (MQTT, fibaro, http push ... ) about the web update
-	if (pHardware)
+	if ((pHardware)&&(parseTrigger))
 	{
 		sOnDeviceReceived(pHardware->m_HwdID, devidx, devname, NULL);
 	}

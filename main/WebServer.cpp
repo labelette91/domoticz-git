@@ -360,6 +360,7 @@ namespace http {
 			m_pWebEm->RegisterIncludeCode("switchtypes", boost::bind(&CWebServer::DisplaySwitchTypesCombo, this));
 			m_pWebEm->RegisterIncludeCode("metertypes", boost::bind(&CWebServer::DisplayMeterTypesCombo, this));
 			m_pWebEm->RegisterIncludeCode("timertypes", boost::bind(&CWebServer::DisplayTimerTypesCombo, this));
+			m_pWebEm->RegisterIncludeCode("timertypesextended", boost::bind(&CWebServer::DisplayTimerTypesComboExtendend, this));
 			m_pWebEm->RegisterIncludeCode("combolanguage", boost::bind(&CWebServer::DisplayLanguageCombo, this));
 
 			m_pWebEm->RegisterPageCode("/json.htm", boost::bind(&CWebServer::GetJSonPage, this, _1, _2));
@@ -1000,7 +1001,8 @@ namespace http {
 			else if (
 				(htype == HTYPE_RFXLAN) || (htype == HTYPE_P1SmartMeterLAN) || (htype == HTYPE_YouLess) || (htype == HTYPE_RazberryZWave) || (htype == HTYPE_OpenThermGatewayTCP) || (htype == HTYPE_LimitlessLights) ||
 				(htype == HTYPE_SolarEdgeTCP) || (htype == HTYPE_WOL) || (htype == HTYPE_ECODEVICES) || (htype == HTYPE_Mochad) || (htype == HTYPE_MySensorsTCP) || (htype == HTYPE_MQTT) || (htype == HTYPE_FRITZBOX) ||
-				(htype == HTYPE_ETH8020) || (htype == HTYPE_KMTronicTCP) || (htype == HTYPE_SOLARMAXTCP) || (htype == HTYPE_SatelIntegra) || (htype == HTYPE_RFLINKTCP) || (htype == HTYPE_Comm5TCP) || (htype == HTYPE_CurrentCostMeterLAN)
+				(htype == HTYPE_ETH8020) || (htype == HTYPE_KMTronicTCP) || (htype == HTYPE_SOLARMAXTCP) || (htype == HTYPE_SatelIntegra) || (htype == HTYPE_RFLINKTCP) || (htype == HTYPE_Comm5TCP) || (htype == HTYPE_CurrentCostMeterLAN) ||
+				(htype == HTYPE_NefitEastLAN)
 				) {
 				//Lan
 				if (address == "")
@@ -1237,7 +1239,8 @@ namespace http {
 				(htype == HTYPE_SolarEdgeTCP) || (htype == HTYPE_WOL) || (htype == HTYPE_ECODEVICES) || (htype == HTYPE_Mochad) || 
 				(htype == HTYPE_MySensorsTCP) || (htype == HTYPE_MQTT) || (htype == HTYPE_FRITZBOX) || (htype == HTYPE_ETH8020) || 
 				(htype == HTYPE_KMTronicTCP) || (htype == HTYPE_SOLARMAXTCP) || (htype == HTYPE_SatelIntegra) || (htype == HTYPE_RFLINKTCP) ||
-				(htype == HTYPE_Comm5TCP || (htype == HTYPE_CurrentCostMeterLAN))
+				(htype == HTYPE_Comm5TCP || (htype == HTYPE_CurrentCostMeterLAN)) ||
+				(htype == HTYPE_NefitEastLAN)
 				){
 				//Lan
 				if (address == "")
@@ -2325,6 +2328,134 @@ namespace http {
 			}
 		}
 
+		static int l_domoticz_applyJsonPath(lua_State* lua_state)
+		{
+			int nargs = lua_gettop(lua_state);
+			if (nargs >= 2)
+			{
+				if (lua_isstring(lua_state, 1) && lua_isstring(lua_state, 2))
+				{
+					std::string buffer = lua_tostring(lua_state, 1);
+					std::string jsonpath = lua_tostring(lua_state, 2);
+
+					Json::Value root;
+					Json::Reader jReader;
+					if (!jReader.parse(buffer, root))
+					{
+						_log.Log(LOG_ERROR, "WebServer (applyJsonPath from LUA) : Invalid Json data received");
+						return 0;
+					}
+
+					// Grab optional arguments
+					Json::PathArgument arg1;
+					Json::PathArgument arg2;
+					Json::PathArgument arg3;
+					Json::PathArgument arg4;
+					Json::PathArgument arg5;
+					if (nargs >= 3)
+					{
+						if (lua_isstring(lua_state, 3))
+						{
+							arg1 = Json::PathArgument(lua_tostring(lua_state, 3));
+						}
+						else
+						{
+							_log.Log(LOG_ERROR, "WebServer (applyJsonPath from LUA) : Invalid extra argument #1 for domoticz_applyJsonPath");
+							return 0;
+						}
+						if (nargs >= 4)
+						{
+							if (lua_isstring(lua_state, 4))
+							{
+								arg2 = Json::PathArgument(lua_tostring(lua_state, 4));
+							}
+							else
+							{
+								_log.Log(LOG_ERROR, "WebServer (applyJsonPath from LUA) : Invalid extra argument #2 for domoticz_applyJsonPath");
+								return 0;
+							}
+							if (nargs >= 5)
+							{
+								if (lua_isstring(lua_state, 5))
+								{
+									arg3 = Json::PathArgument(lua_tostring(lua_state, 5));
+								}
+								else
+								{
+									_log.Log(LOG_ERROR, "WebServer (applyJsonPath from LUA) : Invalid extra argument #3 for domoticz_applyJsonPath");
+									return 0;
+								}
+								if (nargs >= 6)
+								{
+									if (lua_isstring(lua_state, 6))
+									{
+										arg2 = Json::PathArgument(lua_tostring(lua_state, 6));
+									}
+									else
+									{
+										_log.Log(LOG_ERROR, "WebServer (applyJsonPath from LUA) : Invalid extra argument #4 for domoticz_applyJsonPath");
+										return 0;
+									}
+									if (nargs >= 7)
+									{
+										if (lua_isstring(lua_state, 7))
+										{
+											arg5 = Json::PathArgument(lua_tostring(lua_state, 7));
+										}
+										else
+										{
+											_log.Log(LOG_ERROR, "WebServer (applyJsonPath from LUA) : Invalid extra argument #5 for domoticz_applyJsonPath");
+											return 0;
+										}
+									}
+								}
+							}
+						}
+					}
+
+					// Apply the JsonPath to the Json
+					Json::Path path(jsonpath, arg1, arg2, arg3, arg4, arg5);
+					Json::Value& node = path.make(root);
+
+					// Check if some data has been found
+					if (!node.isNull())
+					{
+						if (node.isDouble())
+						{
+							lua_pushnumber(lua_state, node.asDouble());
+							return 1;
+						}
+						if (node.isInt())
+						{
+							lua_pushnumber(lua_state, (double)node.asInt());
+							return 1;
+						}
+						if (node.isInt64())
+						{
+							lua_pushnumber(lua_state, (double)node.asInt64());
+							return 1;
+						}
+						if (node.isString())
+						{
+							lua_pushstring(lua_state, node.asCString());
+							return 1;
+						}
+						lua_pushnil(lua_state);
+						return 1;
+					}
+				}
+				else
+				{
+					_log.Log(LOG_ERROR, "WebServer (applyJsonPath from LUA) : Incorrect parameters type");
+				}
+			}
+			else
+			{
+				_log.Log(LOG_ERROR, "WebServer (applyJsonPath from LUA) : Incorrect parameters count");
+			}
+			return 0;
+		}
+
 		static int l_domoticz_updateDevice(lua_State* lua_state)
 		{
 			int nargs = lua_gettop(lua_state);
@@ -2439,6 +2570,9 @@ namespace http {
 
 			lua_pushcfunction(lua_state, l_domoticz_updateDevice);
 			lua_setglobal(lua_state, "domoticz_updateDevice");
+
+			lua_pushcfunction(lua_state, l_domoticz_applyJsonPath);
+			lua_setglobal(lua_state, "domoticz_applyJsonPath");
 
 			lua_createtable(lua_state, 1, 0);
 			lua_pushstring(lua_state, "content");
@@ -3103,7 +3237,7 @@ namespace http {
 				root["status"] = "OK";
 				root["title"] = "GetTimerList";
 				std::vector<std::vector<std::string> > result;
-				result = m_sql.safe_query("SELECT t.ID, t.Active, d.[Name], t.DeviceRowID, t.[Date], t.Time, t.Type, t.Cmd, t.Level, t.Hue, t.Days, t.UseRandomness FROM Timers as t, DeviceStatus as d WHERE (d.ID == t.DeviceRowID) AND (t.TimerPlan==%d) ORDER BY d.[Name], t.Time",
+				result = m_sql.safe_query("SELECT t.ID, t.Active, d.[Name], t.DeviceRowID, t.[Date], t.Time, t.Type, t.Cmd, t.Level, t.Hue, t.Days, t.UseRandomness, t.MDay, t.Month, t.Occurence FROM Timers as t, DeviceStatus as d WHERE (d.ID == t.DeviceRowID) AND (t.TimerPlan==%d) ORDER BY d.[Name], t.Time",
 					m_sql.m_ActiveTimerPlan);
 				if (result.size() > 0)
 				{
@@ -3142,6 +3276,9 @@ namespace http {
 						root["result"][ii]["Hue"] = atoi(sd[9].c_str());
 						root["result"][ii]["Days"] = atoi(sd[10].c_str());
 						root["result"][ii]["Randomness"] = (atoi(sd[11].c_str()) == 0) ? "false" : "true";
+						root["result"][ii]["MDay"] = atoi(sd[12].c_str());
+						root["result"][ii]["Month"] = atoi(sd[13].c_str());
+						root["result"][ii]["Occurence"] = atoi(sd[14].c_str());
 						ii++;
 					}
 				}
@@ -3151,7 +3288,7 @@ namespace http {
 				root["status"] = "OK";
 				root["title"] = "GetSceneTimerList";
 				std::vector<std::vector<std::string> > result;
-				result = m_sql.safe_query("SELECT t.ID, t.Active, s.[Name], t.SceneRowID, t.[Date], t.Time, t.Type, t.Cmd, t.Level, t.Hue, t.Days, t.UseRandomness FROM SceneTimers as t, Scenes as s WHERE (s.ID == t.SceneRowID) AND (t.TimerPlan==%d) ORDER BY s.[Name], t.Time",
+				result = m_sql.safe_query("SELECT t.ID, t.Active, s.[Name], t.SceneRowID, t.[Date], t.Time, t.Type, t.Cmd, t.Level, t.Hue, t.Days, t.UseRandomness, t.MDay, T.Month, t.Occurence FROM SceneTimers as t, Scenes as s WHERE (s.ID == t.SceneRowID) AND (t.TimerPlan==%d) ORDER BY s.[Name], t.Time",
 					m_sql.m_ActiveTimerPlan);
 				if (result.size() > 0)
 				{
@@ -3190,6 +3327,9 @@ namespace http {
 						root["result"][ii]["Hue"] = atoi(sd[9].c_str());
 						root["result"][ii]["Days"] = atoi(sd[10].c_str());
 						root["result"][ii]["Randomness"] = (atoi(sd[11].c_str()) == 0) ? "false" : "true";
+						root["result"][ii]["MDay"] = atoi(sd[12].c_str());
+						root["result"][ii]["Month"] = atoi(sd[13].c_str());
+						root["result"][ii]["Occurence"] = atoi(sd[14].c_str());
 						ii++;
 					}
 				}
@@ -4045,6 +4185,9 @@ namespace http {
 					if ((pBaseHardware->HwdType == HTYPE_RFLINKUSB)|| (pBaseHardware->HwdType == HTYPE_RFLINKTCP)) {
 						if (dtype == pTypeLighting1) {
 							dtype = pTypeGeneralSwitch;
+							if (subtype == sTypeIMPULS) subtype = sSwitchTypeTriState;
+							if (subtype == sTypeAB400D) subtype = sSwitchTypeAB400D;
+							if (subtype == sTypeIMPULS) subtype = sSwitchTypeTriState;
 							std::stringstream s_strid;
 							s_strid << std::hex << atoi(devid.c_str());
 							devid = s_strid.str();
@@ -4052,16 +4195,75 @@ namespace http {
 						}
 						else if (dtype == pTypeLighting2) {
 							dtype = pTypeGeneralSwitch;
-							if (subtype == sTypeAC) { // 0
-								subtype = sSwitchTypeAC;
-							}
-							if (subtype == sTypeHEU) { // 1
-								subtype = sSwitchTypeHEU;
-								devid = "7" + devid;
-							}
-							if (subtype == sTypeKambrook) { // 3
-								subtype = sSwitchTypeKambrook;
-							}
+							if (subtype == sTypeAC) subtype = sSwitchTypeAC;
+							if (subtype == sTypeHEU) { subtype = sSwitchTypeHEU; devid = "7" + devid; }
+							if (subtype == sTypeKambrook) subtype = sSwitchTypeKambrook;
+							devid = "0" + devid;
+						}
+						if (dtype == pTypeLighting3) {
+							dtype = pTypeGeneralSwitch;
+							if (subtype == sTypeKoppla) subtype = sSwitchTypeKoppla;
+						}
+						else
+						if (dtype == pTypeLighting4) {
+							dtype = pTypeGeneralSwitch;
+							subtype = sSwitchTypeTriState;
+						}
+						else
+						if (dtype == pTypeLighting5) {
+							dtype = pTypeGeneralSwitch;
+							if (subtype == sTypeEMW100) { subtype = sSwitchTypeEMW100; devid = "00" + devid; }
+							if (subtype == sTypeLivolo) { subtype = sSwitchTypeLivolo; devid = "00" + devid; }
+							if (subtype == sTypeLightwaveRF) { subtype = sSwitchTypeLightwaveRF; devid = "00" + devid; }
+							if (subtype == sTypeLivoloAppliance) { subtype = sSwitchTypeLivoloAppliance; devid = "00" + devid; }
+							if (subtype == sTypeEurodomest) subtype = sSwitchTypeEurodomest;
+						}
+						else
+						if (dtype == pTypeLighting6) {
+							dtype = pTypeGeneralSwitch;
+							subtype = sSwitchTypeBlyss;
+						}
+						else
+						if (dtype == pTypeChime) {
+							dtype = pTypeGeneralSwitch;
+							if (subtype == sTypeByronSX) subtype = sSwitchTypeByronSX;
+							if (subtype == sTypeSelectPlus) subtype = sSwitchTypeSelectPlus;
+							if (subtype == sTypeSelectPlus3) subtype = sSwitchTypeSelectPlus3;
+							if (subtype == sTypeByronMP001) subtype = sSwitchTypeByronMP001;
+						}
+						else
+						if (dtype == pTypeSecurity1) {
+							dtype = pTypeGeneralSwitch;
+							if (subtype == sTypeSecX10) subtype = sSwitchTypeX10secu;
+							if (subtype == sTypeSecX10M) subtype = sSwitchTypeX10secu;
+							if (subtype == sTypeSecX10R) subtype = sSwitchTypeX10secu;
+						}
+						else
+						if (dtype == pTypeHomeConfort) {
+							dtype = pTypeGeneralSwitch;
+							subtype = sSwitchTypeHomeConfort;
+						}
+						else
+						if (dtype == pTypeBlinds) {
+							dtype = pTypeGeneralSwitch;
+							if (subtype == sTypeBlindsT5) subtype = sSwitchTypeBofu;
+							if (subtype == sTypeBlindsT6) subtype = sSwitchTypeBrel;
+							if (subtype == sTypeBlindsT7) subtype = sSwitchTypeAOK;
+							if (subtype == sTypeBlindsT8) subtype = sSwitchTypeBofu;
+							if (subtype == sTypeBlindsT9) subtype = sSwitchTypeBrel;
+							if (subtype == sTypeBlindsT10) subtype = sSwitchTypeAOK;
+							std::stringstream s_strid;
+							s_strid << std::hex << strtoul(devid.c_str(), NULL, 16);
+							unsigned long deviceid = 0;
+							s_strid >> deviceid;
+							deviceid = (unsigned long)((deviceid & 0xffffff00) >> 8);
+							sprintf(szTmp, "%x", deviceid);
+							//_log.Log(LOG_ERROR, "RFLink: deviceid: %x", deviceid);
+							devid = szTmp;
+						}
+						if (dtype == pTypeRFY) {
+							dtype = pTypeGeneralSwitch;
+							subtype = sSwitchTypeRTS;
 						}
 					}
 				}
@@ -4504,27 +4706,90 @@ namespace http {
 						if (dtype == pTypeLighting1){
 							dtype = pTypeGeneralSwitch;
 
+							if (subtype == sTypeIMPULS) subtype = sSwitchTypeTriState;
+							if (subtype == sTypeAB400D) subtype = sSwitchTypeAB400D;
+							if (subtype == sTypeIMPULS) subtype = sSwitchTypeTriState;
+
 							std::stringstream s_strid;
 							s_strid << std::hex << atoi(devid.c_str());
 							devid = s_strid.str();
 							devid = "000000" + devid;
 						}
 						else
-							if (dtype == pTypeLighting2){
-								dtype = pTypeGeneralSwitch;
-                            
-                                if (subtype == sTypeAC){ // 0
-                                   subtype = sSwitchTypeAC;
-                                }
-                                if (subtype == sTypeHEU){ // 1
-                                   subtype = sSwitchTypeHEU;
-								   devid = "7" + devid;
-                                }
-                                if (subtype == sTypeKambrook){ // 3
-                                   subtype = sSwitchTypeKambrook;
-                                }
-								devid = "0" + devid;
-							}
+						if (dtype == pTypeLighting2) {
+							dtype = pTypeGeneralSwitch;
+
+							if (subtype == sTypeAC) subtype = sSwitchTypeAC;
+							if (subtype == sTypeHEU) { subtype = sSwitchTypeHEU; devid = "7" + devid;}
+							if (subtype == sTypeKambrook) subtype = sSwitchTypeKambrook;
+							devid = "0" + devid;
+						}
+						else
+						if (dtype == pTypeLighting3) {
+							dtype = pTypeGeneralSwitch;
+							if (subtype == sTypeKoppla) subtype = sSwitchTypeKoppla;
+						}
+						else	
+						if (dtype == pTypeLighting4) {
+							dtype = pTypeGeneralSwitch;
+							subtype = sSwitchTypeTriState;
+						}
+						else
+						if (dtype == pTypeLighting5) {
+							dtype = pTypeGeneralSwitch;
+							if (subtype == sTypeEMW100) { subtype = sSwitchTypeEMW100; devid = "00" + devid; }
+							if (subtype == sTypeLivolo) { subtype = sSwitchTypeLivolo; devid = "00" + devid;}
+							if (subtype == sTypeLightwaveRF) {subtype = sSwitchTypeLightwaveRF; devid = "00" + devid;}
+							if (subtype == sTypeLivoloAppliance) {subtype = sSwitchTypeLivoloAppliance; devid = "00" + devid;}
+							if (subtype == sTypeEurodomest) subtype = sSwitchTypeEurodomest; 
+						}
+						else
+						if (dtype == pTypeLighting6) {
+							dtype = pTypeGeneralSwitch;
+							subtype = sSwitchTypeBlyss;
+						}
+						else
+						if (dtype == pTypeChime) {
+							dtype = pTypeGeneralSwitch;
+							if (subtype == sTypeByronSX) subtype = sSwitchTypeByronSX;
+							if (subtype == sTypeSelectPlus) subtype = sSwitchTypeSelectPlus;
+							if (subtype == sTypeSelectPlus3) subtype = sSwitchTypeSelectPlus3;
+							if (subtype == sTypeByronMP001) subtype = sSwitchTypeByronMP001;
+						}
+						else
+						if (dtype == pTypeSecurity1) {
+							dtype = pTypeGeneralSwitch;
+							if (subtype == sTypeSecX10) subtype = sSwitchTypeX10secu;
+							if (subtype == sTypeSecX10M) subtype = sSwitchTypeX10secu;
+							if (subtype == sTypeSecX10R) subtype = sSwitchTypeX10secu;
+						}
+						else
+						if (dtype == pTypeHomeConfort) {
+							dtype = pTypeGeneralSwitch;
+							subtype = sSwitchTypeHomeConfort;
+						}
+						else
+						if (dtype == pTypeBlinds) {
+							dtype = pTypeGeneralSwitch;
+							if (subtype == sTypeBlindsT5) subtype = sSwitchTypeBofu;
+							if (subtype == sTypeBlindsT6) subtype = sSwitchTypeBrel;
+							if (subtype == sTypeBlindsT7) subtype = sSwitchTypeAOK;
+							if (subtype == sTypeBlindsT8) subtype = sSwitchTypeBofu;
+							if (subtype == sTypeBlindsT9) subtype = sSwitchTypeBrel;
+							if (subtype == sTypeBlindsT10) subtype = sSwitchTypeAOK;
+							std::stringstream s_strid;
+							s_strid << std::hex << strtoul(devid.c_str(), NULL, 16);
+							unsigned long deviceid = 0;
+							s_strid >> deviceid;
+							deviceid = (unsigned long)((deviceid & 0xffffff00) >> 8);
+							sprintf(szTmp, "%x", deviceid);
+							//_log.Log(LOG_ERROR, "RFLink: deviceid: %x", deviceid);
+							devid = szTmp;
+						}
+						if (dtype == pTypeRFY) {
+							dtype = pTypeGeneralSwitch;
+							subtype = sSwitchTypeRTS;
+						}
 					}
 				}
                 // -----------------------------------------------
@@ -6483,6 +6748,18 @@ namespace http {
 		{
 			m_retstr = "";
 			char szTmp[200];
+			for (int ii = 0; ii <= TTYPE_FIXEDDATETIME; ii++)
+			{
+				sprintf(szTmp, "<option data-i18n=\"%s\" value=\"%d\">%s</option>\n", Timer_Type_Desc(ii), ii, Timer_Type_Desc(ii));
+				m_retstr += szTmp;
+			}
+			return (char*)m_retstr.c_str();
+		}
+
+		char * CWebServer::DisplayTimerTypesComboExtendend()
+		{
+			m_retstr = "";
+			char szTmp[200];
 			for (int ii = 0; ii < TTYPE_END; ii++)
 			{
 				sprintf(szTmp, "<option data-i18n=\"%s\" value=\"%d\">%s</option>\n", Timer_Type_Desc(ii), ii, Timer_Type_Desc(ii));
@@ -6980,10 +7257,10 @@ namespace http {
 
 			char szOrderBy[50];
 			if (order == "")
-				strcpy(szOrderBy, "LastUpdate DESC");
+				strcpy(szOrderBy, "A.[Order],A.LastUpdate DESC");
 			else
 			{
-				sprintf(szOrderBy, "[Order],%s ASC", order.c_str());
+				sprintf(szOrderBy, "A.[Order],A.%s ASC", order.c_str());
 			}
 
 			unsigned char tempsign = m_sql.m_tempsign[0];
@@ -7023,19 +7300,34 @@ namespace http {
 					//add scenes
 					if (rowid != "")
 						result = m_sql.safe_query(
-							"SELECT ID, Name, nValue, LastUpdate, Favorite, SceneType, Protected, 0 as XOffset, 0 as YOffset, 0 as PlanID, Description FROM Scenes WHERE (ID=='%q')",
+							"SELECT A.ID, A.Name, A.nValue, A.LastUpdate, A.Favorite, A.SceneType,"
+							" A.Protected, B.XOffset, B.YOffset, B.PlanID, A.Description"
+							" FROM Scenes as A, DeviceToPlansMap as B, Plans as C"
+							" WHERE (A.ID=='%q') AND (C.ID==B.PlanID) AND (B.DeviceRowID==a.ID)"
+							" AND (B.DevSceneType==1)",
 							rowid.c_str());
 					else if ((planID != "") && (planID != "0"))
 						result = m_sql.safe_query(
-							"SELECT A.ID, A.Name, A.nValue, A.LastUpdate, A.Favorite, A.SceneType, A.Protected, B.XOffset, B.YOffset, B.PlanID, A.Description FROM Scenes as A, DeviceToPlansMap as B WHERE (B.PlanID=='%q') AND (B.DeviceRowID==a.ID) AND (B.DevSceneType==1) ORDER BY B.[Order]",
+							"SELECT A.ID, A.Name, A.nValue, A.LastUpdate, A.Favorite, A.SceneType,"
+							" A.Protected, B.XOffset, B.YOffset, B.PlanID, A.Description"
+							" FROM Scenes as A, DeviceToPlansMap as B WHERE (B.PlanID=='%q')"
+							" AND (B.DeviceRowID==a.ID) AND (B.DevSceneType==1) ORDER BY B.[Order]",
 							planID.c_str());
 					else if ((floorID != "") && (floorID != "0"))
 						result = m_sql.safe_query(
-								"SELECT A.ID, A.Name, A.nValue, A.LastUpdate, A.Favorite, A.SceneType, A.Protected, B.XOffset, B.YOffset, B.PlanID, A.Description FROM Scenes as A, DeviceToPlansMap as B, Plans as C WHERE (C.FloorplanID=='%q') AND (C.ID==B.PlanID) AND(B.DeviceRowID==a.ID) AND (B.DevSceneType==1) ORDER BY B.[Order]",
-								floorID.c_str());
+							"SELECT A.ID, A.Name, A.nValue, A.LastUpdate, A.Favorite, A.SceneType,"
+							" A.Protected, B.XOffset, B.YOffset, B.PlanID, A.Description"
+							" FROM Scenes as A, DeviceToPlansMap as B, Plans as C"
+							" WHERE (C.FloorplanID=='%q') AND (C.ID==B.PlanID) AND (B.DeviceRowID==a.ID)"
+							" AND (B.DevSceneType==1) ORDER BY B.[Order]",
+							floorID.c_str());
 					else
 						result = m_sql.safe_query(
-							"SELECT ID, Name, nValue, LastUpdate, Favorite, SceneType, Protected, 0 as XOffset, 0 as YOffset, 0 as PlanID, Description FROM Scenes ORDER BY %s",
+							"SELECT A.ID, A.Name, A.nValue, A.LastUpdate, A.Favorite, A.SceneType,"
+							" A.Protected, B.XOffset, B.YOffset, B.PlanID, A.Description"
+							" FROM Scenes as A, DeviceToPlansMap as B, Plans as C"
+							" WHERE (C.ID==B.PlanID) AND (B.DeviceRowID==a.ID) AND (B.DevSceneType==1)"
+							" ORDER BY %s",
 							szOrderBy);
 
 					if (result.size() > 0)
@@ -7081,12 +7373,30 @@ namespace http {
 								root["result"][ii]["Type"] = "Group";
 								root["result"][ii]["TypeImg"] = "group";
 							}
+
+							// has this scene/group already been seen, now with different plan?
+							// assume results are ordered such that same device is adjacent
+							// if the idx and the Type are equal (type to prevent matching against Scene with same idx)
+							std::string thisIdx = sd[0];
+							if ((ii > 0) && thisIdx == root["result"][ii - 1]["idx"].asString()) {
+								std::string typeOfThisOne = root["result"][ii]["Type"].asString();
+								if (typeOfThisOne == root["result"][ii - 1]["Type"].asString()) {
+									root["result"][ii - 1]["PlanIDs"].append(atoi(sd[9].c_str()));
+									continue;
+								}
+							}
+
 							root["result"][ii]["idx"] = sd[0];
 							root["result"][ii]["Name"] = sSceneName;
 							root["result"][ii]["Description"] = sd[10];
 							root["result"][ii]["Favorite"] = favorite;
 							root["result"][ii]["Protected"] = (iProtected != 0);
 							root["result"][ii]["LastUpdate"] = sLastUpdate;
+							root["result"][ii]["PlanID"] = sd[9].c_str();
+							Json::Value jsonArray;
+							jsonArray.append(atoi(sd[9].c_str()));
+							root["result"][ii]["PlanIDs"] = jsonArray;
+
 							if (nValue == 0)
 								root["result"][ii]["Status"] = "Off";
 							else if (nValue == 1)
@@ -7828,10 +8138,10 @@ namespace http {
 							)
 						{
 							root["result"][ii]["TypeImg"] = "blinds";
-							if (lstatus == "On") {
+							if ((lstatus == "On")||(lstatus=="Close inline relay")) {
 								lstatus = "Closed";
 							}
-							else if (lstatus == "Stop") {
+							else if ((lstatus == "Stop")||(lstatus=="Stop inline relay")) {
 								lstatus = "Stopped";
 							}
 							else {
@@ -7875,16 +8185,24 @@ namespace http {
 						}
 						else if (switchtype == STYPE_Selector)
 						{
-							std::string selectorStyle = m_sql.BuildDeviceOptions(sOptions)["SelectorStyle"];
-							std::string levelNames = m_sql.BuildDeviceOptions(sOptions)["LevelNames"];
+							std::map<std::string, std::string> options = m_sql.BuildDeviceOptions(sOptions);
+							std::string selectorStyle = options["SelectorStyle"];
+							std::string levelOffHidden = options["LevelOffHidden"];
+							std::string levelNames = options["LevelNames"];
+							std::string levelActions = options["LevelActions"];
 							if (selectorStyle.empty()) {
-								selectorStyle.assign("0"); // default is button set
+								selectorStyle.assign("0"); // default is 'button set'
+							}
+							if (levelOffHidden.empty()) {
+								levelOffHidden.assign("false"); // default is 'not hidden'
 							}
 							if (levelNames.empty()) {
 								levelNames.assign("Off"); // default is Off only
 							}
 							root["result"][ii]["SelectorStyle"] = atoi(selectorStyle.c_str());
+							root["result"][ii]["LevelOffHidden"] = levelOffHidden == "true";
 							root["result"][ii]["LevelNames"] = levelNames;
+							root["result"][ii]["LevelActions"] = levelActions;
 						}
 						if (llevel != 0)
 							sprintf(szData, "%s, Level: %d %%", lstatus.c_str(), llevel);
@@ -9460,7 +9778,11 @@ namespace http {
 		std::string CWebServer::GetDatabaseBackup(WebEmSession & session, const request& req)
 		{
 			m_retstr = "";
+#ifdef WIN32
 			std::string OutputFileName = szUserDataFolder + "backup.db";
+#else
+			std::string OutputFileName = "/tmp/backup.db";
+#endif
 			if (m_sql.BackupDatabase(OutputFileName))
 			{
 				std::ifstream testFile(OutputFileName.c_str(), std::ios::binary);
@@ -10766,7 +11088,7 @@ namespace http {
 			if ( (SwitchIdx!="")&&(SwitchIdx!="null"))
 				m_sql.UpdateDeviceValue("SwitchIdx",SwitchIdx,idx);
 
-			std::string sOptions = base64_decode(request::findValue(&req, "options"));
+			std::string sOptions = CURLEncode::URLDecode(base64_decode(request::findValue(&req, "options")));
 
 			char szTmp[200];
 

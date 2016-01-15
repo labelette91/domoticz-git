@@ -230,6 +230,7 @@ hardware/MQTT.cpp
 hardware/MySensorsBase.cpp
 hardware/MySensorsSerial.cpp
 hardware/MySensorsTCP.cpp
+hardware/NefitEasy.cpp
 hardware/Nest.cpp
 hardware/Netatmo.cpp
 hardware/OpenZWave.cpp
@@ -533,7 +534,7 @@ SET(CPACK_DEBIAN_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
 
 INCLUDE(CPack)
 
-set(CMAKE_INSTALL_PREFIX "/opt/${CPACK_PACKAGE_NAME}" CACHE PATH "Install path prefix, prepended onto install directories.")
+set(CMAKE_INSTALL_PREFIX "/opt/${CPACK_PACKAGE_NAME}" CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
 
 install(TARGETS domoticz DESTINATION ${CMAKE_INSTALL_PREFIX})
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/www DESTINATION ${CMAKE_INSTALL_PREFIX} USE_SOURCE_PERMISSIONS)

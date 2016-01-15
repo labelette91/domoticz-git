@@ -31,7 +31,7 @@
 	#include "../msbuild/WindowsHelper.h"
 #endif
 
-#define DB_VERSION 91
+#define DB_VERSION 94
 
 extern http::server::CWebServerHelper m_webservers;
 extern std::string szWWWFolder;
@@ -69,7 +69,7 @@ const char *sqlCreateDeviceStatus =
 "[DeltaTemp] float DEFAULT 0, "
 "[CustomImage] INTEGER DEFAULT 0, "
 "[Description] VARCHAR(200) DEFAULT '', "
-"[Options] VARCHAR(1024) DEFAULT null);";
+"[Options] TEXT DEFAULT null);";
 
 const char *sqlCreateDeviceStatusTrigger =
 "CREATE TRIGGER IF NOT EXISTS devicestatusupdate AFTER INSERT ON DeviceStatus\n"
@@ -163,7 +163,10 @@ const char *sqlCreateTimers =
 "[Hue] INTEGER DEFAULT 0, "
 "[UseRandomness] INTEGER DEFAULT 0, "
 "[TimerPlan] INTEGER DEFAULT 0, "
-"[Days] INTEGER NOT NULL);";
+"[Days] INTEGER NOT NULL, "
+"[Month] INTEGER DEFAULT 0, "
+"[MDay] INTEGER DEFAULT 0, "
+"[Occurence] INTEGER DEFAULT 0);";
 
 const char *sqlCreateUV =
 "CREATE TABLE IF NOT EXISTS [UV] ("
@@ -385,7 +388,10 @@ const char *sqlCreateSceneTimers =
 "[Hue] INTEGER DEFAULT 0, "
 "[UseRandomness] INTEGER DEFAULT 0, "
 "[TimerPlan] INTEGER DEFAULT 0, "
-"[Days] INTEGER NOT NULL);";
+"[Days] INTEGER NOT NULL, "
+"[Month] INTEGER DEFAULT 0, "
+"[MDay] INTEGER DEFAULT 0, "
+"[Occurence] INTEGER DEFAULT 0);";
 
 const char *sqlCreateSetpointTimers =
 "CREATE TABLE IF NOT EXISTS [SetpointTimers] ("
@@ -1661,6 +1667,77 @@ bool CSQLHelper::OpenDatabase()
 				}
 			}
 		}
+		if (dbversion < 92) {
+			// Change DeviceStatus.Options datatype from VARCHAR(1024) to TEXT
+			std::string tableName = "DeviceStatus";
+			std::string fieldList = "[ID],[HardwareID],[DeviceID],[Unit],[Name],[Used],[Type],[SubType],[SwitchType],[Favorite],[SignalLevel],[BatteryLevel],[nValue],[sValue],[LastUpdate],[Order],[AddjValue],[AddjMulti],[AddjValue2],[AddjMulti2],[StrParam1],[StrParam2],[LastLevel],[Protected],[CustomImage],[Description],[Options]";
+			std::stringstream szQuery;
+
+			sqlite3_exec(m_dbase, "PRAGMA foreign_keys=off", NULL, NULL, NULL);
+			sqlite3_exec(m_dbase, "BEGIN TRANSACTION", NULL, NULL, NULL);
+
+			// Drop indexes and trigger
+			safe_query("DROP TRIGGER IF EXISTS devicestatusupdate");
+			// Save all table rows
+			szQuery.clear();
+			szQuery.str("");
+			szQuery << "ALTER TABLE " << tableName << " RENAME TO _" << tableName << "_old";
+			safe_query(szQuery.str().c_str());
+			// Create new table
+			safe_query(sqlCreateDeviceStatus);
+			// Restore all table rows
+			szQuery.clear();
+			szQuery.str("");
+			szQuery << "INSERT INTO " << tableName << " (" << fieldList << ") SELECT " << fieldList << " FROM _" << tableName << "_old";
+			safe_query(szQuery.str().c_str());
+			// Restore indexes and triggers
+			safe_query(sqlCreateDeviceStatusTrigger);
+			// Delete old table
+			szQuery.clear();
+			szQuery.str("");
+			szQuery << "DROP TABLE IF EXISTS _" << tableName << "_old";
+			safe_query(szQuery.str().c_str());
+
+			sqlite3_exec(m_dbase, "END TRANSACTION", NULL, NULL, NULL);
+			sqlite3_exec(m_dbase, "PRAGMA foreign_keys=on", NULL, NULL, NULL);
+		}
+		if (dbversion < 93)
+		{
+			if (!DoesColumnExistsInTable("Month", "Timers"))
+			{
+				query("ALTER TABLE Timers ADD COLUMN [Month] INTEGER DEFAULT 0");
+			}
+			if (!DoesColumnExistsInTable("MDay", "Timers"))
+			{
+				query("ALTER TABLE Timers ADD COLUMN [MDay] INTEGER DEFAULT 0");
+			}
+			if (!DoesColumnExistsInTable("Occurence", "Timers"))
+			{
+				query("ALTER TABLE Timers ADD COLUMN [Occurence] INTEGER DEFAULT 0");
+			}
+			if (!DoesColumnExistsInTable("Month", "SceneTimers"))
+			{
+				query("ALTER TABLE SceneTimers ADD COLUMN [Month] INTEGER DEFAULT 0");
+			}
+			if (!DoesColumnExistsInTable("MDay", "SceneTimers"))
+			{
+				query("ALTER TABLE SceneTimers ADD COLUMN [MDay] INTEGER DEFAULT 0");
+			}
+			if (!DoesColumnExistsInTable("Occurence", "SceneTimers"))
+			{
+				query("ALTER TABLE SceneTimers ADD COLUMN [Occurence] INTEGER DEFAULT 0");
+			}
+		}
+		if (dbversion < 94)
+		{
+			std::stringstream szQuery;
+			szQuery << "UPDATE Timers SET [Type]=[Type]+2 WHERE ([Type]>" << TTYPE_FIXEDDATETIME << ")";
+			query(szQuery.str());
+			szQuery.clear();
+			szQuery.str("");
+			szQuery << "UPDATE SceneTimers SET [Type]=[Type]+2 WHERE ([Type]>" << TTYPE_FIXEDDATETIME << ")";
+			query(szQuery.str());
+		}
 
 	}
 	else if (bNewInstall)
@@ -2823,7 +2900,7 @@ unsigned long long CSQLHelper::UpdateValueInt(const int HardwareID, const char* 
 		int maxDimLevel=0;
 
 		result = safe_query(
-			"SELECT Name,SwitchType,AddjValue,StrParam1,StrParam2 FROM DeviceStatus WHERE (ID = %llu)",
+			"SELECT Name,SwitchType,AddjValue,StrParam1,StrParam2,Options FROM DeviceStatus WHERE (ID = %llu)",
 			ulID);
 		if (result.size()>0)
 		{
@@ -2850,6 +2927,7 @@ unsigned long long CSQLHelper::UpdateValueInt(const int HardwareID, const char* 
 				//Perform any On/Off actions
 				std::string OnAction=sd[3];
 				std::string OffAction=sd[4];
+				std::string Options=sd[5];
 
 				if(devType==pTypeEvohome)//would this be ok to extend as a general purpose feature?
 				{
@@ -2858,9 +2936,14 @@ unsigned long long CSQLHelper::UpdateValueInt(const int HardwareID, const char* 
 					//boost::replace_all(OnAction, ID);//future expansion
 					//boost::replace_all(OnAction, "{status}", lstatus);
 					bIsLightSwitchOn=true;//Force use of OnAction for all actions
+
+				} else if (switchtype == STYPE_Selector) {
+					bIsLightSwitchOn = (llevel > 0) ? true : false;
+					OnAction = CURLEncode::URLDecode(GetSelectorSwitchLevelAction(BuildDeviceOptions(Options, true), llevel));
+					OffAction = CURLEncode::URLDecode(GetSelectorSwitchLevelAction(BuildDeviceOptions(Options, true), 0));
 				}
 				
-				HandleOnOffAction(bIsLightSwitchOn,OnAction,OffAction);
+				HandleOnOffAction(bIsLightSwitchOn, OnAction, OffAction);
 			}
 
 			//Check if we need to email a snapshot of a Camera
@@ -5682,7 +5765,11 @@ bool CSQLHelper::RestoreDatabase(const std::string &dbase)
 #endif
 	if (bpos!=std::string::npos)
 		fpath=m_dbase_name.substr(0,bpos+1);
+#ifdef WIN32
 	std::string outputfile=fpath+"restore.db";
+#else
+	std::string outputfile = "/tmp/restore.db";
+#endif
 	std::ofstream outfile;
 	outfile.open(outputfile.c_str(),std::ios::out|std::ios::binary|std::ios::trunc);
 	if (!outfile.is_open())
@@ -6741,7 +6828,11 @@ void LogQueryResult (TSqlQueryResult &result)
 bool CSQLHelper::InsertCustomIconFromZip(const std::string &szZip, std::string &ErrorMessage)
 {
 	//write file to disk
+#ifdef WIN32
 	std::string outputfile = "custom_icons.zip";
+#else
+	std::string outputfile = "/tmp/custom_icons.zip";
+#endif
 	std::ofstream outfile;
 	outfile.open(outputfile.c_str(), std::ios::out | std::ios::binary | std::ios::trunc);
 	if (!outfile.is_open())

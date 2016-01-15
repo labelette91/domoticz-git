@@ -68,8 +68,8 @@ public:
 
 	bool SetSetPoint(const std::string &idx, const float TempValue);
 	bool SetSetPoint(const std::string &idx, const float TempValue, const int newMode, const std::string &until);
-	bool SetThermostatState(const std::string &idx, const int newState);
 	bool SetSetPointInt(const std::vector<std::string> &sd, const float TempValue);
+	bool SetThermostatState(const std::string &idx, const int newState);
 	bool SetClock(const std::string &idx, const std::string &clockstr);
 	bool SetClockInt(const std::vector<std::string> &sd, const std::string &clockstr);
 	bool SetZWaveThermostatMode(const std::string &idx, const int tMode);
@@ -110,7 +110,7 @@ public:
   int ConvertPercentLevel(int dType,int dSubType,_eSwitchType switchtype,int level );
 	bool GetSensorData(const unsigned long long idx, int &nValue, std::string &sValue);
 
-	bool UpdateDevice(const int HardwareID, const std::string &DeviceID, const int unit, const int devType, const int subType, const int nValue, const std::string &sValue, const int signallevel, const int batterylevel);
+	bool UpdateDevice(const int HardwareID, const std::string &DeviceID, const int unit, const int devType, const int subType, const int nValue, const std::string &sValue, const int signallevel, const int batterylevel, const bool parseTrigger = true);
 
 	boost::signals2::signal<void(const int m_HwdID, const unsigned long long DeviceRowIdx, const std::string &DeviceName, const unsigned char *pRXCommand)> sOnDeviceReceived;
 
@@ -223,6 +223,7 @@ private:
 	struct _tRxMessageProcessingResult {
 		std::string DeviceName;
 		unsigned long long DeviceRowIdx;
+		bool bProcessBatteryValue;
 	};
 
 	//(RFX) Message decoders
@@ -275,7 +276,7 @@ private:
 	void decode_Rego6XXValue(const int HwdID, const _eHardwareTypes HwdType, const tRBUF *pResponse, _tRxMessageProcessingResult & procResult);
 	void decode_Usage(const int HwdID, const _eHardwareTypes HwdType, const tRBUF *pResponse, _tRxMessageProcessingResult & procResult);
 	void decode_Lux(const int HwdID, const _eHardwareTypes HwdType, const tRBUF *pResponse, _tRxMessageProcessingResult & procResult);
-	void decode_General(const int HwdID, const _eHardwareTypes HwdType, const tRBUF *pResponse, _tRxMessageProcessingResult & procResult);
+	void decode_General(const int HwdID, const _eHardwareTypes HwdType, const tRBUF *pResponse, _tRxMessageProcessingResult & procResult, const unsigned char SignalLevel = 12, const unsigned char BatteryLevel = 255);
 	void decode_GeneralSwitch(const int HwdID, const _eHardwareTypes HwdType, const tRBUF *pResponse, _tRxMessageProcessingResult & procResult);
 	void decode_HomeConfort(const int HwdID, const _eHardwareTypes HwdType, const tRBUF *pResponse, _tRxMessageProcessingResult & procResult);
 	void decode_Thermostat(const int HwdID, const _eHardwareTypes HwdType, const tRBUF *pResponse, _tRxMessageProcessingResult & procResult);

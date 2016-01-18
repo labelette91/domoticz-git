@@ -105,7 +105,7 @@ function ThermostatMouseUp()
 }
 function IncrementThermostat(idx, IncDec, LightId ) {
 //    var objText   = $(LightId + idx + " #bigtext");
-    var val  = parseInt( GetTargetTemp(LightId + idx));
+    var val  = parseFloat( GetTargetTemp(LightId + idx));
     var val2 = GetRoomTemp(LightId + idx);
     clearInterval($.setDimValue);
 
@@ -114,7 +114,7 @@ function IncrementThermostat(idx, IncDec, LightId ) {
 //    var minValue = $(id).slider("option", "min");
 
     //if increment
-    if (IncDec == 1) val = val + 1; else val = val - 1;
+    if (IncDec == 1) val = val + 0.5; else val = val - 0.5;
     RefreshThSlider(idx, LightId, val);
 
 //    objText.html(BuildStatus(val,val2));
@@ -484,7 +484,7 @@ function SetShortRefreshTimer ()
 }
 function getThermostatSlider(idx,TargetTemp , tabName)
 {
-var xhtm = '<div style="margin-left: 10px;margin-right: 10px;margin-top: 4px;"  class="thslider" id="ThermostatSlider" data-idx="' + idx + '" data-maxlevel="25" data-minlevel="10" data-svalue="' + TargetTemp + '" data-unit="Deg" data-step="1"  data-tab="'+ tabName + '"' + '">';
+var xhtm = '<div style="margin-left: 10px;margin-right: 10px;margin-top: 4px;"  class="thslider" id="ThermostatSlider" data-idx="' + idx + '" data-maxlevel="25" data-minlevel="10" data-svalue="' + TargetTemp + '" data-unit="Deg" data-step="0.5"  data-tab="'+ tabName + '"' + '">';
  xhtm += '</div>';
  return xhtm ;
 }

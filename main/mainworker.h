@@ -124,6 +124,9 @@ public:
 	bool m_bHaveUpdate;
 	int m_iRevision;
 
+	std::string m_szSystemName;
+	std::string m_szDomoticzUpdateURL;
+
 	bool IsUpdateAvailable(const bool bIsForced=false);
 	bool StartDownloadUpdate();
 	bool m_bHaveDownloadedDomoticzUpdate;
@@ -161,7 +164,6 @@ private:
 
 	boost::mutex m_devicemutex;
 
-	std::string m_szDomoticzUpdateURL;
 	std::string m_szDomoticzUpdateChecksumURL;
 	bool m_bDoDownloadDomoticzUpdate;
 	bool m_bStartHardware;

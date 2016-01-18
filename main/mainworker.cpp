@@ -256,7 +256,7 @@ void MainWorker::GetAvailableWebThemes()
 		while ((de = readdir(d)))
 		{
 			std::string dirname = de->d_name;
-			if (de->d_type == DT_DIR)
+			if (dirent_is_directory(ThemeFolder, de))
 			{
 				if ((dirname != ".") && (dirname != "..") && (dirname != ".svn"))
 				{
@@ -1015,9 +1015,9 @@ bool MainWorker::IsUpdateAvailable(const bool bIsForced)
 	if (uname(&my_uname) < 0)
 		return false;
 
-	std::string systemname = my_uname.sysname;
+	m_szSystemName = my_uname.sysname;
 	std::string machine = my_uname.machine;
-	std::transform(systemname.begin(), systemname.end(), systemname.begin(), ::tolower);
+	std::transform(m_szSystemName.begin(), m_szSystemName.end(), m_szSystemName.begin(), ::tolower);
 
 	if (machine == "armv6l")
 	{
@@ -1026,13 +1026,13 @@ bool MainWorker::IsUpdateAvailable(const bool bIsForced)
 	}
 
 #ifdef DEBUG_DOWNLOAD
-	systemname = "linux";
-	machine = "armv7l";
+	//m_szSystemName = "linux";
+	//machine = "armv7l";
 #endif
 
-	if ((systemname == "windows") || ((machine != "armv6l") && (machine != "armv7l") && (machine != "x86_64")))
+	if (((m_szSystemName != "windows") && (machine != "armv6l") && (machine != "armv7l") && (machine != "x86_64")))
 	{
-		//Only Raspberry Pi (Wheezy)/Ubuntu for now!
+		//Only Raspberry Pi (Wheezy)/Ubuntu/windows/osx for now!
 		return false;
 	}
 	time_t atime = mytime(NULL);
@@ -1048,71 +1048,51 @@ bool MainWorker::IsUpdateAvailable(const bool bIsForced)
 	m_sql.GetPreferencesVar("ReleaseChannel", nValue);
 	bool bIsBetaChannel = (nValue != 0);
 
-	std::string szURL = "http://www.domoticz.com/download.php?channel=stable&type=version&system=" + systemname + "&machine=" + machine;
-	if (bIsBetaChannel)
+	std::string szURL;
+	if (!bIsBetaChannel)
 	{
-		szURL = "http://www.domoticz.com/download.php?channel=beta&type=version&system=" + systemname + "&machine=" + machine;
+		szURL = "http://www.domoticz.com/download.php?channel=stable&type=version&system=" + m_szSystemName + "&machine=" + machine;
+		m_szDomoticzUpdateURL = "http://www.domoticz.com/download.php?channel=stable&type=release&system=" + m_szSystemName + "&machine=" + machine;
+		m_szDomoticzUpdateChecksumURL = "http://www.domoticz.com/download.php?channel=stable&type=checksum&system=" + m_szSystemName + "&machine=" + machine;
 	}
+	else
+	{
+		szURL = "http://www.domoticz.com/download.php?channel=beta&type=version&system=" + m_szSystemName + "&machine=" + machine;
+		m_szDomoticzUpdateURL = "http://www.domoticz.com/download.php?channel=beta&type=release&system=" + m_szSystemName + "&machine=" + machine;
+		m_szDomoticzUpdateChecksumURL = "http://www.domoticz.com/download.php?channel=beta&type=checksum&system=" + m_szSystemName + "&machine=" + machine;
+	}
+
 	std::string revfile;
 
 	if (!HTTPClient::GET(szURL, revfile))
 		return false;
+	stdreplace(revfile, "\r\n", "\n");
 	std::vector<std::string> strarray;
-	StringSplit(revfile, " ", strarray);
+	StringSplit(revfile, "\n", strarray);
+	if (strarray.size() != 3)
+		return false;
+	StringSplit(strarray[0], " ", strarray);
 	if (strarray.size() != 3)
 		return false;
 
 	int version = atoi(szAppVersion.substr(szAppVersion.find(".") + 1).c_str());
 	m_iRevision = atoi(strarray[2].c_str());
 #ifdef DEBUG_DOWNLOAD
-	return true;
+	m_bHaveUpdate = true;
 #else
-	return (version != m_iRevision);
+	m_bHaveUpdate = (version != m_iRevision);
 #endif
+	return m_bHaveUpdate;
 }
 
 bool MainWorker::StartDownloadUpdate()
 {
-	if (!IsUpdateAvailable(true))
-		return false; //no new version available
-
-	int nValue;
-	m_sql.GetPreferencesVar("ReleaseChannel", nValue);
-	bool bIsBetaChannel = (nValue != 0);
-
-	utsname my_uname;
-	if (uname(&my_uname) < 0)
-		return false;
-
-	std::string systemname = my_uname.sysname;
-	std::string machine = my_uname.machine;
-	std::transform(systemname.begin(), systemname.end(), systemname.begin(), ::tolower);
-
-	if (machine == "armv6l")
-	{
-		//Seems like old arm systems can also use the new arm build
-		machine = "armv7l";
-	}
-
-#ifdef DEBUG_DOWNLOAD
-	systemname = "linux";
-	machine = "armv7l";
+#ifdef WIN32
+	return false; //managed by web gui
 #endif
 
-	std::string downloadURL;
-	std::string checksumURL;
-	if (!bIsBetaChannel)
-	{
-		downloadURL = "http://www.domoticz.com/download.php?channel=stable&type=release&system=" + systemname + "&machine=" + machine;
-		checksumURL = "http://www.domoticz.com/download.php?channel=stable&type=checksum&system=" + systemname + "&machine=" + machine;
-	}
-	else
-	{
-		downloadURL = "http://www.domoticz.com/download.php?channel=beta&type=release&system=" + systemname + "&machine=" + machine;
-		checksumURL = "http://www.domoticz.com/download.php?channel=beta&type=checksum&system=" + systemname + "&machine=" + machine;
-	}
-	m_szDomoticzUpdateURL = downloadURL;
-	m_szDomoticzUpdateChecksumURL = checksumURL;
+	if (!IsUpdateAvailable(true))
+		return false; //no new version available
 
 	m_bHaveDownloadedDomoticzUpdate = false;
 	m_bHaveDownloadedDomoticzUpdateSuccessFull = false;
@@ -11384,7 +11364,8 @@ bool MainWorker::SwitchScene(const unsigned long long idx, const std::string &sw
 	result = m_sql.safe_query(
 		"SELECT DeviceRowID, Cmd, Level, Hue, OnDelay, OffDelay FROM SceneDevices WHERE (SceneRowID == %llu) ORDER BY [Order] ASC", idx);
 	if (result.size()<1)
-		return false;
+		return true; //no devices in the scene
+
 	std::vector<std::vector<std::string> >::const_iterator itt;
 	for (itt=result.begin(); itt!=result.end(); ++itt)
 	{

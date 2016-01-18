@@ -40,7 +40,10 @@ enum DeviceTypeEnum
     DevUV            ,
     DevWind          ,
     DevCO2Alert      ,
-    DevThermostat
+    DevThermostat    ,
+    DevRGBLight			 , // RGB(W) Light (dimmable)
+    DevTempHygro		   // Temperature and Hygrometry combined sensor
+    
 	};
 
 class  ImperiHome {
@@ -98,7 +101,10 @@ std::string DeviceTypeString[]={
 "DevUV",
 "DevWind",
 "DevCO2Alert",
-"DevThermostat"
+"DevThermostat",
+"DevRGBLight",	
+"DevTempHygro"
+
 };	
   
 const char * ImperiHome::GetTypeDevice(DeviceTypeEnum dev)
@@ -434,7 +440,6 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
 
     nValueGlb = (*row)[nValue] ;
 
-
 		switch (dtype)
 		{
         case pTypeLighting1         :
@@ -465,11 +470,16 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
           break;
         case pTypeTEMP_HUM :
           //temperature
-          SetKey(0,"value" ,sValueGlb[0] , "°C",true );
-          updateRoot( iroot++ , row , DevTemperature );
-          //humidity
-          SetKey(0,"value" ,sValueGlb[1] ,"%" , false);
-          updateRoot( iroot++ , row , DevHygrometry );
+          //SetKey(0,"value" ,sValueGlb[0] , "°C",true );
+          //updateRoot( iroot++ , row , DevTemperature );
+          ////humidity
+          //SetKey(0,"value" ,sValueGlb[1] ,"%" , false);
+          //updateRoot( iroot++ , row , DevHygrometry );
+          //DevTempHygro
+          SetKey(0,"temp" ,sValueGlb[0] , "°C",true );
+          SetKey(1,"hygro",sValueGlb[1] , "%" , false);
+          updateRoot( iroot++ , row , DevTempHygro );
+          
           break;
         case pTypeTEMP_HUM_BARO :
           //temperature

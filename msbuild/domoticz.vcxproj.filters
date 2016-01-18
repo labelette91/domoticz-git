@@ -591,9 +591,6 @@
     <ClInclude Include="..\hardware\ETH8020.h">
       <Filter>Devices\ETH8020</Filter>
     </ClInclude>
-    <ClInclude Include="..\hardware\RFLink.h">
-      <Filter>Devices\RFLink</Filter>
-    </ClInclude>
     <ClInclude Include="..\notifications\NotificationBase.h">
       <Filter>Notifications</Filter>
     </ClInclude>
@@ -647,9 +644,6 @@
     </ClInclude>
     <ClInclude Include="..\hardware\Pinger.h">
       <Filter>Devices\Ping</Filter>
-    </ClInclude>
-    <ClInclude Include="..\hardware\NestThermostat.h">
-      <Filter>Devices\Nest</Filter>
     </ClInclude>
     <ClInclude Include="..\main\HttpPush.h">
       <Filter>Devices\HttpLink</Filter>
@@ -735,9 +729,6 @@
     <ClInclude Include="..\hardware\P1MeterTCP.h">
       <Filter>Devices\P1Smart Meter</Filter>
     </ClInclude>
-    <ClInclude Include="..\hardware\NetatmoWeatherStation.h">
-      <Filter>Devices\Netatmo</Filter>
-    </ClInclude>
     <ClInclude Include="..\main\Push.h">
       <Filter>Devices\PushBase</Filter>
     </ClInclude>
@@ -770,6 +761,48 @@
     </ClInclude>
     <ClInclude Include="..\notifications\NotificationLogitechMediaServer.h">
       <Filter>Notifications</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\Comm5TCP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\CurrentCostMeterBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\CurrentCostMeterSerial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\CurrentCostMeterTCP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\NefitEasy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\Nest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\Netatmo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\RFLinkBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\RFLinkSerial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\RFLinkTCP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\SolarEdgeAPI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\concurrent_queue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\webserver\proxyclient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\webserver\proxycommon.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1064,9 +1097,6 @@
     <ClCompile Include="..\hardware\ETH8020.cpp">
       <Filter>Devices\ETH8020</Filter>
     </ClCompile>
-    <ClCompile Include="..\hardware\RFLink.cpp">
-      <Filter>Devices\RFLink</Filter>
-    </ClCompile>
     <ClCompile Include="..\notifications\NotificationBase.cpp">
       <Filter>Notifications</Filter>
     </ClCompile>
@@ -1120,9 +1150,6 @@
     </ClCompile>
     <ClCompile Include="..\hardware\Pinger.cpp">
       <Filter>Devices\Ping</Filter>
-    </ClCompile>
-    <ClCompile Include="..\hardware\NestThermostat.cpp">
-      <Filter>Devices\Nest</Filter>
     </ClCompile>
     <ClCompile Include="..\main\HttpPush.cpp">
       <Filter>Devices\HttpLink</Filter>
@@ -1196,9 +1223,6 @@
     <ClCompile Include="..\hardware\P1MeterTCP.cpp">
       <Filter>Devices\P1Smart Meter</Filter>
     </ClCompile>
-    <ClCompile Include="..\hardware\NetatmoWeatherStation.cpp">
-      <Filter>Devices\Netatmo</Filter>
-    </ClCompile>
     <ClCompile Include="..\main\Push.cpp">
       <Filter>Devices\PushBase</Filter>
     </ClCompile>
@@ -1239,6 +1263,45 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\main\VirtualThermostat.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\Comm5TCP.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\CurrentCostMeterBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\CurrentCostMeterSerial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\CurrentCostMeterTCP.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\NefitEasy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\Nest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\Netatmo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\RFLinkBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\RFLinkSerial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\RFLinkTCP.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\SolarEdgeAPI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\webserver\proxyclient.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\webserver\proxycommon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

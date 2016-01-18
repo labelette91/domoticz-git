@@ -11,7 +11,7 @@
 #include "../main/VirtualThermostat.h"
 #include "../webserver/Base64.h"
 
-#define __PI__
+//#define __PI__
 
 #ifndef __PI__
 #include "WebServerHelper.h"

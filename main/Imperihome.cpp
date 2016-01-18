@@ -11,9 +11,18 @@
 #include "../main/VirtualThermostat.h"
 #include "../webserver/Base64.h"
 
+#define __PI__
+
+#ifndef __PI__
 #include "WebServerHelper.h"
 
 extern http::server::CWebServerHelper m_webservers;
+#else
+#include "WebServer.h"
+
+extern http::server::CWebServer m_webserver;
+
+#endif
 
 enum DeviceTypeEnum
 	{
@@ -57,7 +66,8 @@ private:
 	void ManageAction (std::string &device , std::string &action	 , std::string &actionType	 , std::string actionValue	 );
 	DeviceTypeEnum LightType( TSqlRowQuery * row  , Json::Value &params );
 	void updateRoot(int ii , TSqlRowQuery * row , DeviceTypeEnum ApType );
-  void updateRoot(int ii , std::string pidx , std::string pname, std::string proom , DeviceTypeEnum ApType );
+	void updateRoot(int ii , TSqlRowQuery * row , DeviceTypeEnum ApType , std::string DevTypeName );
+  void updateRoot(int ii , std::string pidx , std::string pname, std::string proom , DeviceTypeEnum ApType , std::string DevTypeName );
 	void DeviceContent3(std::string &rep_content);
 	void DeviceContent2(std::string &rep_content);
 	void DeviceContent1(std::string &rep_content);
@@ -76,6 +86,7 @@ public:
 	void getScenes(int &iroot);
 };
 
+void getGraphic(std::string &idx , std::string TableName , std::string FieldName , std::string KeyName , time_t DateStart , time_t  DateEnd, std::string &rep_content );
 	
 std::string DeviceTypeString[]={
 "DevDimmer",
@@ -142,6 +153,8 @@ void ImperiHome::ManageHisto (std::string &device , std::string &value	 , std::s
 	time_t  DateStartSec ;
 	time_t  DateEndSec ;
 
+	_log.Log(LOG_STATUS,"IMPE: Graphic Device:%s Value:%s Histo:%s From:%s To:%s",device.c_str () , value.c_str () , histo.c_str () , from.c_str () , to.c_str ()  );
+
     //the dev Id is DEVnnn_zzz : nnn is the ID 
     std::string ID = getDeviceId(device);
 		//divide by 1000 = sec
@@ -153,8 +166,13 @@ void ImperiHome::ManageHisto (std::string &device , std::string &value	 , std::s
 
 //	Histo(rep_content, to )	;
 
-	getGraphTemperature(ID ,  DateStartSec , DateEndSec , rep_content );
-
+//	getGraphic(ID , "TEMPERATURE" , "Temperature" , "value" , DateStartSec ,  DateEndSec, rep_content );
+	//if power graphics 
+	if (value=="Watts")
+		getGraphic(ID , "Meter"       , "Value"       , "Watts" , DateStartSec ,  DateEndSec, rep_content );
+	else
+	  getGraphTemperature(ID ,  DateStartSec , DateEndSec , rep_content );
+	
 }
 void ImperiHome::ManageAction (std::string &device , std::string &action	 , std::string &actionType	 , std::string actionValue	 )
 {
@@ -164,12 +182,24 @@ void ImperiHome::ManageAction (std::string &device , std::string &action	 , std:
 			if (actionType=="setStatus")
 			{
 				if (actionValue=="1" )
+					#ifndef __PI__
 					m_mainworker.SwitchLight( ID, "On" , "100" , "0", "0" ,0 );
+					#else
+					m_mainworker.SwitchLight( ID, "On" , "100" , "0" );
+					#endif					
 				else
+					#ifndef __PI__
 					m_mainworker.SwitchLight( ID, "Off", "0"   , "0", "0" ,0 );
+					#else
+					m_mainworker.SwitchLight( ID, "Off", "0" , "0" );
+					#endif
 			}
 			else if (actionType=="setLevel"){
+					#ifndef __PI__
 					m_mainworker.SwitchLight( ID, "setLevel" , actionValue , "0" , "0",0 );
+					#else
+					m_mainworker.SwitchLight( ID, "setLevel" , actionValue , "0" );
+					#endif
 			}
 			else if (actionType=="stopShutter"){
 			}
@@ -401,11 +431,9 @@ DeviceTypeEnum ImperiHome::LightType( TSqlRowQuery * row  , Json::Value &params 
     return ApType;
 }
 
-void ImperiHome::updateRoot(int ii , std::string pidx , std::string pname, std::string proom , DeviceTypeEnum ApType )
+void ImperiHome::updateRoot(int ii , std::string pidx , std::string pname, std::string proom , DeviceTypeEnum ApType , std::string DevTypeName)
 {
-		char iis[128];
-		sprintf(iis, "%d", ii);
-	  root["devices"][ii]["id"]     = "dev"+pidx+"_" + iis ;  //devIdx
+	  root["devices"][ii]["id"]     = "dev"+pidx+"_" + DevTypeName ;  //devIdx
 		root["devices"][ii]["name"]   = pname ;		//Name
 		root["devices"][ii]["room"]   = proom ;
 		root["devices"][ii]["type"]   = GetTypeDevice(ApType);		//type
@@ -413,9 +441,13 @@ void ImperiHome::updateRoot(int ii , std::string pidx , std::string pname, std::
 }
 
 
-void ImperiHome::updateRoot(int ii , TSqlRowQuery * row , DeviceTypeEnum ApType )
+void ImperiHome::updateRoot(int ii , TSqlRowQuery * row , DeviceTypeEnum ApType ,  std::string DevTypeName  )
 {
-    updateRoot( ii ,  (*row)[ID] , (*row)[Name], "roomID1" ,  ApType );
+    updateRoot( ii ,  (*row)[ID] , (*row)[Name], "roomID1" ,  ApType , DevTypeName );
+}
+void ImperiHome::updateRoot(int ii , TSqlRowQuery * row , DeviceTypeEnum ApType  )
+{
+    updateRoot( ii ,  (*row)[ID] , (*row)[Name], "roomID1" ,  ApType , "" );
 
 }
 
@@ -439,6 +471,7 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
       sValueGlb.push_back("");
 
     nValueGlb = (*row)[nValue] ;
+
 
 		switch (dtype)
 		{
@@ -484,29 +517,29 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
         case pTypeTEMP_HUM_BARO :
           //temperature
           SetKey(0,"value" ,sValueGlb[0] , "°C",true );
-          updateRoot( iroot++ , row , DevTemperature );
+          updateRoot( iroot++ , row , DevTemperature ,"temp");
           //humidity
           SetKey(0,"value" ,sValueGlb[1] ,"%" , false);
-          updateRoot( iroot++ , row , DevHygrometry );
+          updateRoot( iroot++ , row , DevHygrometry ,"hum");
           //baro
           SetKey(0,"value" ,sValueGlb[3] ,"mbar" , false);
-          updateRoot( iroot++ , row , DevPressure );
+          updateRoot( iroot++ , row , DevPressure ,"baro");
           break;
         case pTypeTEMP_BARO :
           //temperature
           SetKey(0,"value" ,sValueGlb[0] , "°C",true );
-          updateRoot( iroot++ , row , DevTemperature );
+          updateRoot( iroot++ , row , DevTemperature ,"temp");
           //baro
           SetKey(0,"value" ,sValueGlb[1] ,"mbar" , false);
-          updateRoot( iroot++ , row , DevPressure );
+          updateRoot( iroot++ , row , DevPressure ,"baro" );
           break;
         case pTypeUV :
           //UVI
           SetKey(0,"value" ,sValueGlb[0] ,"" , false);
-          updateRoot( iroot++ , row , DevUV );
+          updateRoot( iroot++ , row , DevUV ,"uv");
           //temperature
           SetKey(0,"value" ,sValueGlb[1] , "°C",false );
-          updateRoot( iroot++ , row , DevTemperature );
+          updateRoot( iroot++ , row , DevTemperature ,"temp");
           break;
         case pTypeWIND :
           //wind direction /speed
@@ -539,19 +572,19 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
         case pTypePOWER :
               //data= I1;I2;I3
 	          SetKey(0,"Watts"     ,sValueGlb[0] ,"W" ,false );
-            updateRoot( iroot++ , row , DevElectricity );
+            updateRoot( iroot++ , row , DevElectricity ,"i1");
             if (sValueGlb.size()>=2){
 	          SetKey(0,"Watts"     ,sValueGlb[1] ,"W" ,false );
-            updateRoot( iroot++ , row , DevElectricity );
+            updateRoot( iroot++ , row , DevElectricity ,"i2");
             }
             if (sValueGlb.size()>=3){
 	          SetKey(0,"Watts"     ,sValueGlb[2] ,"W" ,false );
-            updateRoot( iroot++ , row , DevElectricity );
+            updateRoot( iroot++ , row , DevElectricity ,"i3");
             }
               
           break;
         case pTypeENERGY ://   //CM119/160  //CM180
-	          SetKey(0,"Watts"     ,sValueGlb[0] ,"W" ,false );
+	          SetKey(0,"Watts"     ,sValueGlb[0] ,"W" ,true );
 	          SetKey(1,"ConsoTotal",sValueGlb[1] ,"kWh" ,false );
             updateRoot( iroot++ , row , DevElectricity );
 
@@ -609,14 +642,18 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
 void ImperiHome::getScenes(int &iroot)
 {
   Json::Value root;
+  #ifndef __PI__
   m_webservers.RType_Scenes(root);
+  #else
+  m_webserver.RType_Scenes(root);
+  #endif	
   if ( root["status"] == "OK" )
   for (unsigned int ii=0;ii<root["result"].size();ii++)
   {
 		std::string lastU = root["result"][ii]["LastUpdate"].asString() ;
     params.clear();
 		SetKey(0,"LastRun" , lastU);
-    updateRoot( iroot++ ,  root["result"][ii]["idx"].asString() , root["result"][ii]["Name"].asString(), "roomID1" , DevScene );
+    updateRoot( iroot++ ,  root["result"][ii]["idx"].asString() , root["result"][ii]["Name"].asString(), "roomID1" , DevScene ,"");
   }
 //					root["result"][ii]["idx"] = sd[0];
 //					root["result"][ii]["Name"] = sd[1];

@@ -10,7 +10,7 @@ css/jquery.dataTables.min.css
 css/demo_table_jui.css
 css/jquery.uix.multiselect.css
 css/jquery-ui-timepicker-addon.css
-css/style.css
+##css/style.css
 css/ui-darkness/jquery-ui.min.css
 secpanel/css/font.less
 secpanel/css/reset.less
@@ -440,7 +440,7 @@ app/AboutController.js
 app/app.js
 app/CamController.js
 app/CustomIconsController.js
-app/DashboardController.js
+##app/DashboardController.js
 app/DevicesController.js
 app/DPFibaroController.js
 app/DPHttpController.js
@@ -466,7 +466,7 @@ app/TemperatureController.js
 app/UpdateController.js
 app/UsersController.js
 app/UserVariablesController.js
-app/UtilityController.js
+###app/UtilityController.js
 app/WeatherController.js
 app/ZWaveTopologyController.js
 js/angular-animate.min.js
@@ -525,6 +525,8 @@ js/wow.min.js
 js/ZeroClipboard.js
 secpanel/js/less.js
 secpanel/js/ion.sound.min.js
+#####app/thermostat.js
+#####app/ihmSetpointTimers.js
 ozwcp/cp.js
 
 #Dynamic theme
@@ -540,7 +542,7 @@ ozwcp/cp.js
 views/about.html
 views/cam.html
 views/customicons.html
-views/dashboard.html
+#####views/dashboard.html
 views/devices.html
 views/dpfibaro.html
 views/dphttp.html
@@ -561,7 +563,7 @@ views/setup.html
 views/temperature.html
 views/update.html
 views/users.html
-views/utility.html
+###views/utility.html
 views/weather.html
 eventsframe.html
 zwavetopology.html

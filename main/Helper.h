@@ -33,7 +33,7 @@ std::vector<std::string> ExecuteCommandAndReturn(const std::string &szCommand);
 std::string To_string (double  val);
 std::string To_string (int  val);
 std::string To_string (long  val);
-std::string To_string (long  long val);
+std::string To_string (unsigned long  long val);
 void DateAsciiTotmTime (std::string &sLastUpdate , struct tm &LastUpdateTime  );
 void AsciiTime (struct tm &ltime , char * pLastUpdate );
 std::string  GetCurrentAsciiTime ();

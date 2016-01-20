@@ -7241,7 +7241,6 @@ namespace http {
 			int HardwareTypeVal;
 			std::string HardwareType;
 			bool Enabled;
-			int  Type;
 		} tHardwareList;
 
 		void CWebServer::GetJSonDevices(Json::Value &root, const std::string &rused, const std::string &rfilter, const std::string &order, const std::string &rowid, const std::string &planID, const std::string &floorID, const bool bDisplayHidden, const time_t LastUpdate, const std::string &username)
@@ -9387,8 +9386,8 @@ namespace http {
 							root["result"][ii]["SetPoint"] = szTmp;
 							root["result"][ii]["HaveTimeout"] = bHaveTimeout;
 							root["result"][ii]["TypeImg"] = "override_mini";
-							root["result"][ii]["HwType"] = _hardwareNames[hardwareID].Type;
-							#define INDEX_POWER  28     //index of power field in sql request
+							root["result"][ii]["HwType"] = _hardwareNames[hardwareID].HardwareTypeVal;
+							#define INDEX_POWER  29     //index of power field in sql request
 							root["result"][ii]["Power"]		=sd[INDEX_POWER];
 							root["result"][ii]["RoomTemp"]	=sd[INDEX_POWER+1];
 							root["result"][ii]["TempIdx"]	  =sd[INDEX_POWER+2];

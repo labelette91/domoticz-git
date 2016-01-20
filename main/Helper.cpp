@@ -497,10 +497,10 @@ std::string To_string (long  val)
 	sprintf(vs, "%ld", val);
 	return vs;
 }
-std::string To_string (long  long val)
+std::string To_string (unsigned long  long val)
 {
 	char vs[128];
-	sprintf(vs, "%lld", val);
+	sprintf(vs, "%llu", val);
 	return vs;
 }
 //convert date string 10/12/2014 10:45:58 en  struct tm 

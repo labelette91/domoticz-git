@@ -302,9 +302,9 @@ namespace http {
 			case pTypeThermostat:	
 				{
 				sprintf(ID, "%07ld", nid);
-				long long Uid = m_sql.UpdateValue(HwdID, ID, 1, pTypeThermostat, sTypeThermSetpoint, 10, 255, 0, "0", devname);
+				DeviceRowIdx = m_sql.UpdateValue(HwdID, ID, 1, pTypeThermostat, sTypeThermSetpoint, 10, 255, 0, "0", devname);
 				//set coefficient for PID
-				std::string uidstr = To_string(Uid);
+				std::string uidstr = To_string(DeviceRowIdx);
 				m_sql.UpdateDeviceValue("AddjMulti",(float)100.0,uidstr);  //coef Kp proportionnal
 				m_sql.UpdateDeviceValue("AddjMulti2",(float)0.0,uidstr);    //coef Ki integral
 				m_sql.UpdateDeviceValue("TempIdx",(int)-1,uidstr);

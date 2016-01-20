@@ -169,7 +169,7 @@ void ImperiHome::ManageHisto (std::string &device , std::string &value	 , std::s
 //	getGraphic(ID , "TEMPERATURE" , "Temperature" , "value" , DateStartSec ,  DateEndSec, rep_content );
 	//if power graphics 
 	if (value=="Watts")
-		getGraphic(ID , "Meter"       , "Value"       , "Watts" , DateStartSec ,  DateEndSec, rep_content );
+		getGraphic(ID , "Meter"       , "Usage"       , "Watts" , DateStartSec ,  DateEndSec, rep_content );
 	else
 	  getGraphTemperature(ID ,  DateStartSec , DateEndSec , rep_content );
 	

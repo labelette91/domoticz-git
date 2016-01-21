@@ -62,7 +62,7 @@ function ClearSetpointTimersInt (devIdx)
 		 success: function(data) {
 		 },
 		 error: function(){
-				ShowNotify($.i18n('Problem clearing timers!'), 2500, true);
+				ShowNotify($.t('Problem clearing timers!'), 2500, true);
 		 }     
 	});
 }
@@ -88,7 +88,7 @@ function ProgAddSetpointTimer (devIdx,days,hour,min,val)
 		 success: function(data) {
 		 },
 		 error: function(){
-				ShowNotify($.i18n('Problem addsetpointtimer timers!'), 2500, true);
+				ShowNotify($.t('Problem addsetpointtimer timers!'), 2500, true);
 		 }     
 	});
 }
@@ -116,7 +116,7 @@ function ProgAdd(devIdx) {
 			ProgAddSetpointTimer(devIdx, tdays, hour, 0, DayHourTemp);
 	}
 	//            $.each($("button.btn-timer."+entry), function(i,item) {CreateTimer(devIdx,day,i,item);	});        
-	ShowNotify($.i18n('Sensor Timer added!'), 2500, true);
+	ShowNotify($.t('Sensor Timer added!'), 2500, true);
 }
 
 function setDayTimer(day,hour,value)
@@ -449,7 +449,7 @@ function ProgCopy(idx)
 							var SensorIdx =$("#dialog-copy #sensor option:selected").val();
 							var SensorName=$("#dialog-copy #sensor option:selected").text();
 							if (typeof SensorName == 'undefined') {
-								bootbox.alert($.i18n('No Sensor Type Selected!'));
+								bootbox.alert($.t('No Sensor Type Selected!'));
 								return ;
 							}
 							clearDayTimer() ;
@@ -457,7 +457,7 @@ function ProgCopy(idx)
 							getTimerSetPoints(SensorIdx) ;
 							DisplayTimerValues(20);
 
-							bootbox.alert($.i18n('Sensor Timer '+ SensorName +' copied!'));
+							bootbox.alert($.t('Sensor Timer '+ SensorName +' copied!'));
 
 					  },
 					  Cancel: function() {

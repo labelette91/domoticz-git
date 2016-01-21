@@ -11,14 +11,14 @@ function ShowTempMobile(item) {
 }
 function ShowTempDownMobile(item) 
 {
-//  status = '<label id=\"statustext\"> <button class="btn btn-th btn-info" type="button" onmouseup="ThermostatMouseUp()" onmousedown="ThermostatMouseDown(' + item.idx + ',0,\'#dashcontent #light_\');">' + $.i18n("Dec")  + '</button> </label> ' ;
-  status = '<label id=\"statustext\"> <button class="btn btn-th btn-info" type="button" onmouseup="ThermostatMouseUp()" onmousedown="ThermostatMouseDown(' + item.idx + ',0,\'#dashcontent #utility_\');">' + $.i18n("Dec")  + '</button> </label> ' ;
+//  status = '<label id=\"statustext\"> <button class="btn btn-th btn-info" type="button" onmouseup="ThermostatMouseUp()" onmousedown="ThermostatMouseDown(' + item.idx + ',0,\'#dashcontent #light_\');">' + $.t("Dec")  + '</button> </label> ' ;
+  status = '<label id=\"statustext\"> <button class="btn btn-th btn-info" type="button" onmouseup="ThermostatMouseUp()" onmousedown="ThermostatMouseDown(' + item.idx + ',0,\'#dashcontent #utility_\');">' + $.t("Dec")  + '</button> </label> ' ;
   return status;
 }
 function ShowTempUpMobile(item) 
 {
-//  status =	'<label id=\"img\">        <button class="btn btn-th btn-info" type="button" onmouseup="ThermostatMouseUp()" onmousedown="ThermostatMouseDown(' + item.idx + ',1,\'#dashcontent #light_\');">' + $.i18n("Inc")  + '</button> </label>';
-  status =	'<label id=\"img\">        <button class="btn btn-th btn-info" type="button" onmouseup="ThermostatMouseUp()" onmousedown="ThermostatMouseDown(' + item.idx + ',1,\'#dashcontent #utility_\');">' + $.i18n("Inc")  + '</button> </label>';
+//  status =	'<label id=\"img\">        <button class="btn btn-th btn-info" type="button" onmouseup="ThermostatMouseUp()" onmousedown="ThermostatMouseDown(' + item.idx + ',1,\'#dashcontent #light_\');">' + $.t("Inc")  + '</button> </label>';
+  status =	'<label id=\"img\">        <button class="btn btn-th btn-info" type="button" onmouseup="ThermostatMouseUp()" onmousedown="ThermostatMouseDown(' + item.idx + ',1,\'#dashcontent #utility_\');">' + $.t("Inc")  + '</button> </label>';
   return status;
 }
 function ShowThermostatMobile(item) {
@@ -28,11 +28,11 @@ function ShowThermostatMobile(item) {
 //    status += GetThermostatImg(item, "RefreshFavorites",30) ;
     status += GetThermostatMobile(item, "RefreshFavorites",30) ;
 
-//        status +=		'<label id=\"statustext\"> <button class="btn btn-mini btn-info" type="button" onclick="IncrementThermostat(' + item.idx + ',0,\'#dashcontent #light_\');">' + $.i18n("Dec")  + '</button> </label> ' +
-//						'<label id=\"img\">        <button class="btn btn-mini btn-info" type="button" onclick="IncrementThermostat(' + item.idx + ',1,\'#dashcontent #light_\');">' + $.i18n("Inc")  + '</button> </label>';
+//        status +=		'<label id=\"statustext\"> <button class="btn btn-mini btn-info" type="button" onclick="IncrementThermostat(' + item.idx + ',0,\'#dashcontent #light_\');">' + $.t("Dec")  + '</button> </label> ' +
+//						'<label id=\"img\">        <button class="btn btn-mini btn-info" type="button" onclick="IncrementThermostat(' + item.idx + ',1,\'#dashcontent #light_\');">' + $.t("Inc")  + '</button> </label>';
     
-//        status +=		'<label id=\"statustext\"> <button class="btn btn-th btn-info" type="button" onmouseup="ThermostatMouseUp()" onmousedown="ThermostatMouseDown(' + item.idx + ',0,\'#dashcontent #light_\');">' + $.i18n("Dec")  + '</button> </label> ' +
-//						'<label id=\"img\">        <button class="btn btn-th btn-info" type="button" onmouseup="ThermostatMouseUp()" onmousedown="ThermostatMouseDown(' + item.idx + ',1,\'#dashcontent #light_\');">' + $.i18n("Inc")  + '</button> </label>';
+//        status +=		'<label id=\"statustext\"> <button class="btn btn-th btn-info" type="button" onmouseup="ThermostatMouseUp()" onmousedown="ThermostatMouseDown(' + item.idx + ',0,\'#dashcontent #light_\');">' + $.t("Dec")  + '</button> </label> ' +
+//						'<label id=\"img\">        <button class="btn btn-th btn-info" type="button" onmouseup="ThermostatMouseUp()" onmousedown="ThermostatMouseDown(' + item.idx + ',1,\'#dashcontent #light_\');">' + $.t("Inc")  + '</button> </label>';
 //
 //    status += ShowTempDownMobile(item);
 //    status += ShowTempUpMobile(item);
@@ -159,7 +159,7 @@ function mouseUp(idx, value,refreshfunction){
 
 function getEcoConforClick(item, RefreshLights)
 {
-var xhtml = 'title="' + $.i18n("Eco/Confort") + '" onmousedown="mouseDown(' + item.idx + ',' + item.SetPoint + ',' + RefreshLights + ')"  onmouseup="mouseUp(' + item.idx + ',' + item.SetPoint + ',' + RefreshLights + ');" onmouseover="cursorhand()" onmouseout="cursordefault()"'
+var xhtml = 'title="' + $.t("Eco/Confort") + '" onmousedown="mouseDown(' + item.idx + ',' + item.SetPoint + ',' + RefreshLights + ')"  onmouseup="mouseUp(' + item.idx + ',' + item.SetPoint + ',' + RefreshLights + ');" onmouseover="cursorhand()" onmouseout="cursordefault()"'
 return xhtml;
 }
 
@@ -179,14 +179,14 @@ function GetThermostatMobile(item, RefreshLights, height) {
 function GetThermostatImg(item, RefreshLights, height) {
     var img;
     if 	(item.nValue == 1) {
-//        img = '<img src="images/heating48_on.png" title="' + $.i18n("Turn Off") + '" onclick="SwitchLight(' + item.idx + ',\'Off\','+RefreshLights+');" onmouseover="cursorhand()" onmouseout="cursordefault()" height="'+height+'">';
-//        img = '<img src="images/heating48_on.png" title="' + $.i18n("Eco/Confort") + '" onclick="SetThermostatValue(' + item.idx + ','+item.SetPoint+',' + RefreshLights + ');" onmouseover="cursorhand()" onmouseout="cursordefault()" height="' + height + '">';
-        img = '<img src="images/smoke48on.png" title="' + $.i18n("Eco/Confort") + '" onmousedown="mouseDown(' + item.idx + ',' + item.SetPoint + ',' + RefreshLights + ')"  onmouseup="mouseUp(' + item.idx + ',' + item.SetPoint + ',' + RefreshLights + ');" onmouseover="cursorhand()" onmouseout="cursordefault()" height="' + height + '" width="' + height + '" style="vertical-align: middle;">';
+//        img = '<img src="images/heating48_on.png" title="' + $.t("Turn Off") + '" onclick="SwitchLight(' + item.idx + ',\'Off\','+RefreshLights+');" onmouseover="cursorhand()" onmouseout="cursordefault()" height="'+height+'">';
+//        img = '<img src="images/heating48_on.png" title="' + $.t("Eco/Confort") + '" onclick="SetThermostatValue(' + item.idx + ','+item.SetPoint+',' + RefreshLights + ');" onmouseover="cursorhand()" onmouseout="cursordefault()" height="' + height + '">';
+        img = '<img src="images/smoke48on.png" title="' + $.t("Eco/Confort") + '" onmousedown="mouseDown(' + item.idx + ',' + item.SetPoint + ',' + RefreshLights + ')"  onmouseup="mouseUp(' + item.idx + ',' + item.SetPoint + ',' + RefreshLights + ');" onmouseover="cursorhand()" onmouseout="cursordefault()" height="' + height + '" width="' + height + '" style="vertical-align: middle;">';
     }
     else {
-//        img = '<img src="images/heating48_off.png" title="' + $.i18n("Turn On") + '" onclick="SwitchLight(' + item.idx + ',\'On\',' + RefreshLights + ');" onmouseover="cursorhand()" onmouseout="cursordefault()" height="' + height + '">';
-//        img = '<img src="images/heating48_off.png" title="' + $.i18n("Eco/Confort") + '" onclick="SetThermostatValue(' + item.idx + ','+item.SetPoint+',' + RefreshLights + ');" onmouseover="cursorhand()" onmouseout="cursordefault()" height="' + height + '">';
-        img = '<img src="images/smoke48off.png" title="' + $.i18n("Eco/Confort") + '" onmousedown="mouseDown(' + item.idx + ',' + item.SetPoint + ',' + RefreshLights + ')" onmouseup="mouseUp(' + item.idx + ',' + item.SetPoint + ',' + RefreshLights + ');" onmouseover="cursorhand()" onmouseout="cursordefault()" height="' + height + '" width="' + height + '" style="vertical-align: middle;">';
+//        img = '<img src="images/heating48_off.png" title="' + $.t("Turn On") + '" onclick="SwitchLight(' + item.idx + ',\'On\',' + RefreshLights + ');" onmouseover="cursorhand()" onmouseout="cursordefault()" height="' + height + '">';
+//        img = '<img src="images/heating48_off.png" title="' + $.t("Eco/Confort") + '" onclick="SetThermostatValue(' + item.idx + ','+item.SetPoint+',' + RefreshLights + ');" onmouseover="cursorhand()" onmouseout="cursordefault()" height="' + height + '">';
+        img = '<img src="images/smoke48off.png" title="' + $.t("Eco/Confort") + '" onmousedown="mouseDown(' + item.idx + ',' + item.SetPoint + ',' + RefreshLights + ')" onmouseup="mouseUp(' + item.idx + ',' + item.SetPoint + ',' + RefreshLights + ');" onmouseover="cursorhand()" onmouseout="cursordefault()" height="' + height + '" width="' + height + '" style="vertical-align: middle;">';
     }
     return img;
 }
@@ -311,7 +311,7 @@ function debug(log_txt) {
 function SetThermostatValue(idx, value, duration,refreshfunction) {
 
     clearInterval($.myglobals.refreshTimer);
-    ShowNotify($.i18n('Toggle Eco-Confort') );
+    ShowNotify($.t('Toggle Eco-Confort') );
 
     $.ajax({
         url: "json.htm?type=command&param=thermostat&idx=" + idx + "&setTemp=" + value + "&duration=" + value,
@@ -326,7 +326,7 @@ function SetThermostatValue(idx, value, duration,refreshfunction) {
         },
         error: function () {
             HideNotify();
-            alert($.i18n('Problem sending thermostat command'));
+            alert($.t('Problem sending thermostat command'));
         }
     });
 }
@@ -490,7 +490,7 @@ var xhtm = '<div style="margin-left: 10px;margin-right: 10px;margin-top: 4px;"  
 }
 function AddLastSeen(item)
 {
- item.LastUpdate = $.i18n('Last Seen') + ':' + item.LastUpdate;
+ item.LastUpdate = $.t('Last Seen') + ':' + item.LastUpdate;
 }
 function isVirtualThermostat(item)
 {
@@ -500,12 +500,12 @@ function isVirtualThermostat(item)
 
 function ShowTempDown(item,tabName) 
 {
- var xhtm='<img   src="images/down.png" style="width:30px;"            height="24px" title="' + $.i18n('Decrement') + '" onmouseup="ThermostatMouseUp()" onmousedown="ThermostatMouseDown(' + item.idx + ',0,\'' + tabName +'\');" onmouseover="cursorhand()" onmouseout="cursordefault()">';
+ var xhtm='<img   src="images/down.png" style="width:30px;"            height="24px" title="' + $.t('Decrement') + '" onmouseup="ThermostatMouseUp()" onmousedown="ThermostatMouseDown(' + item.idx + ',0,\'' + tabName +'\');" onmouseover="cursorhand()" onmouseout="cursordefault()">';
  return xhtm;
 }
 function ShowTempUp(item,tabName) 
 {
- var xhtm='<img   src="images/up.png"   style="width:30px;"             height="24px" title="' + $.i18n('Increment') + '" onmouseup="ThermostatMouseUp()" onmousedown="ThermostatMouseDown(' + item.idx + ',1,\'' + tabName +'\');" onmouseover="cursorhand()" onmouseout="cursordefault()">';
+ var xhtm='<img   src="images/up.png"   style="width:30px;"             height="24px" title="' + $.t('Increment') + '" onmouseup="ThermostatMouseUp()" onmousedown="ThermostatMouseDown(' + item.idx + ',1,\'' + tabName +'\');" onmouseover="cursorhand()" onmouseout="cursordefault()">';
  return xhtm;
 }
 

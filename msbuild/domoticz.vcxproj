@@ -121,6 +121,7 @@
     <None Include="..\www\app\FrontpageController.js" />
     <None Include="..\www\app\HardwareController.js" />
     <None Include="..\www\app\HistoryController.js" />
+    <None Include="..\www\app\ihmSetpointTimers.js" />
     <None Include="..\www\app\LightsController.js" />
     <None Include="..\www\app\LogController.js" />
     <None Include="..\www\app\LoginController.js" />
@@ -134,6 +135,7 @@
     <None Include="..\www\app\ScenesController.js" />
     <None Include="..\www\app\SetupController.js" />
     <None Include="..\www\app\TemperatureController.js" />
+    <None Include="..\www\app\thermostat.js" />
     <None Include="..\www\app\UpdateController.js" />
     <None Include="..\www\app\UsersController.js" />
     <None Include="..\www\app\UserVariablesController.js" />

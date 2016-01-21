@@ -3481,9 +3481,9 @@ define(['app'], function (app) {
 						}
 						else  {
 						    xhtm += '<td style="display: flex;">';
-						    xhtm += '<img align="left"  src="images/down.png"  style="width: 32px;"                    height="24px" title="' + $.i18n('Decrement') + '" onclick="IncrementThermostat(' + item.idx + ',0,\'#dashcontent #utility_\');" onmouseover="cursorhand()" onmouseout="cursordefault()">';
+						    xhtm += '<img align="left"  src="images/down.png"  style="width: 32px;"                    height="24px" title="' + $.t('Decrement') + '" onclick="IncrementThermostat(' + item.idx + ',0,\'#dashcontent #utility_\');" onmouseover="cursorhand()" onmouseout="cursordefault()">';
 						    xhtm += getThermostatSlider(item.idx,item.SetPoint, "#dashcontent #utility_");
-						    xhtm += '<img align="right" src="images/up.png"    style="width: 32px;margin-right: 10px;" height="24px"  title="' + $.i18n('Increment') + '" onclick="IncrementThermostat(' + item.idx + ',1,\'#dashcontent #utility_\');" onmouseover="cursorhand()" onmouseout="cursordefault()">';
+						    xhtm += '<img align="right" src="images/up.png"    style="width: 32px;margin-right: 10px;" height="24px"  title="' + $.t('Increment') + '" onclick="IncrementThermostat(' + item.idx + ',1,\'#dashcontent #utility_\');" onmouseover="cursorhand()" onmouseout="cursordefault()">';
 						    xhtm += '</td>';
 						}
 

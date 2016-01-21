@@ -461,7 +461,7 @@ app/OfflineController.js
 app/RestoreDatabaseController.js
 app/RoomplanController.js
 app/ScenesController.js
-app/SetupController.js
+###app/SetupController.js
 app/TemperatureController.js
 app/UpdateController.js
 app/UsersController.js

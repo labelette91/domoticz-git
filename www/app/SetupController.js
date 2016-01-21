@@ -228,9 +228,9 @@ define(['app'], function (app) {
 			 async: false, 
 			 dataType: 'json',
 			 success: function(data) {
-			  if (typeof data.Location != 'undefined') {
-				$("#locationtable #Latitude").val(data.Location.Latitude);
-				$("#locationtable #Longitude").val(data.Location.Longitude);
+			  if (typeof data.Latitude != 'undefined') {
+				$("#locationtable #Latitude").val(data.Latitude);
+				$("#locationtable #Longitude").val(data.Longitude);
 			  }
 			  if (typeof data.ProwlEnabled != 'undefined') {
   				$("#prowltable #ProwlEnabled").prop('checked',data.ProwlEnabled==1);

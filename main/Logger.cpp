@@ -11,6 +11,7 @@
 #endif
 
 #include "SQLHelper.h"
+#include "mainworker.h"
 
 #define MAX_LOG_LINE_BUFFER 100
 #define MAX_LOG_LINE_LENGTH 2048
@@ -373,6 +374,17 @@ bool CLogger::TestFilter(char * cbuffer)
 
 	return filtered;
 }
+void CLogger::setLogVerboseLevel(int LogLevel)
+{
+	SetVerboseLevel((_eLogFileVerboseLevel) (LogLevel & 0x3 ) );
+	//test verbose level
+	if (LogLevel & 0x4)
+		m_mainworker.SetVerboseLevel(EVBL_ALL);
+	else
+		m_mainworker.SetVerboseLevel(EVBL_None);
+
+
+}
 void CLogger::SetLogPreference (std::string  LogFilter, std::string  LogFileName , std::string  LogLevel )
 {
 	m_sql.UpdatePreferencesVar("LogFilter"  , 0, LogFilter.c_str() );
@@ -380,7 +392,7 @@ void CLogger::SetLogPreference (std::string  LogFilter, std::string  LogFileName
 	m_sql.UpdatePreferencesVar("LogLevel"   ,0, LogLevel.c_str() );
 	SetFilterString (LogFilter);
 	SetOutputFile (LogFileName.c_str());
-	SetVerboseLevel((_eLogFileVerboseLevel)atoi(LogLevel.c_str()));
+	setLogVerboseLevel(atoi(LogLevel.c_str()));
 }
 void CLogger::GetLogPreference ()
 {
@@ -392,7 +404,7 @@ void CLogger::GetLogPreference ()
 	SetFilterString (LogFilter);
 	SetOutputFile (LogFileName.c_str());
 	if (LogLevel.length()!=0)
-		SetVerboseLevel((_eLogFileVerboseLevel)atoi(LogLevel.c_str()));
+		setLogVerboseLevel(atoi(LogLevel.c_str()));
 	else
 		SetVerboseLevel(VBL_ALL);
 

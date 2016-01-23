@@ -52,6 +52,7 @@ public:
 	void SetFilterString(std::string  &Filter);
 	bool isTraceEnable();
   bool TestFilter(char * cbuffer);
+	void setLogVerboseLevel(int LogLevel);
   void SetLogPreference (std::string  LogFilter, std::string  LogFileName , std::string  LogLevel );
   void GetLogPreference ();
 

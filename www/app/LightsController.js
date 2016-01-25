@@ -1357,9 +1357,9 @@ define(['app'], function (app) {
 				});
 			});
 			// Limit level length to levelNamesMaxLength
-			$("#newselectorlevelbutton").prop("disabled", false).removeClass("ui-state-disabled");
+			$("#lightcontent #newselectorlevelbutton").prop("disabled", false).removeClass("ui-state-disabled");
 			if (levelNames.length === levelNamesMaxLength) {
-				$("#newselectorlevelbutton").prop("disabled", true).addClass("ui-state-disabled");
+				$("#lightcontent #newselectorlevelbutton").prop("disabled", true).addClass("ui-state-disabled");
 			}
 		};
 
@@ -2892,9 +2892,9 @@ define(['app'], function (app) {
 									}
 					  }					
 					  if (item.Notifications == "true")
-						xhtm+='<a class="btnsmall-sel" onclick="ShowNotifications(' + item.idx + ',\'' + escape(item.Name) + '\', \'#lightcontent\', \'ShowLights\');" data-i18n="Notifications">Notifications</a>';
+						xhtm+='<a class="btnsmall-sel" onclick="ShowNotifications(' + item.idx + ',\'' + escape(item.Name) + '\', \'#lightcontent\', \'ShowLights\',' + bIsDimmer + ',\'' + item.Type + '\'' + ', \'' + item.SubType + '\');" data-i18n="Notifications">Notifications</a>';
 					  else
-						xhtm+='<a class="btnsmall" onclick="ShowNotifications(' + item.idx + ',\'' + escape(item.Name) + '\', \'#lightcontent\', \'ShowLights\');" data-i18n="Notifications">Notifications</a>';
+						xhtm+='<a class="btnsmall" onclick="ShowNotifications(' + item.idx + ',\'' + escape(item.Name) + '\', \'#lightcontent\', \'ShowLights\',' + bIsDimmer + ',\'' + item.Type + '\'' + ', \'' + item.SubType + '\');" data-i18n="Notifications">Notifications</a>';
 				  }
 				  xhtm+=
 						'</td>\n' +

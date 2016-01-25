@@ -451,7 +451,7 @@ app/ForecastController.js
 app/FrontpageController.js
 app/HardwareController.js
 app/HistoryController.js
-app/LightsController.js
+###app/LightsController.js
 app/LogController.js
 app/LoginController.js
 app/LogoutController.js
@@ -552,7 +552,7 @@ views/floorplanedit.html
 views/floorplans.html
 views/hardware.html
 views/history.html
-views/lights.html
+####views/lights.html
 views/log.html
 views/notification.html
 views/offline.html

@@ -67,6 +67,7 @@ const char *sqlCreateDeviceStatus =
 "[TempIdx] BIGINT DEFAULT 0 , "
 "[SwitchIdx] INTEGER DEFAULT 0 , "
 "[DeltaTemp] float DEFAULT 0, "
+"[Log] INTEGER DEFAULT 1 , "
 "[CustomImage] INTEGER DEFAULT 0, "
 "[Description] VARCHAR(200) DEFAULT '', "
 "[Options] TEXT DEFAULT null);";
@@ -1105,6 +1106,7 @@ bool CSQLHelper::OpenDatabase()
 			query("ALTER TABLE DeviceStatus ADD COLUMN [TempIdx]    BIGINT     DEFAULT 0");
 			query("ALTER TABLE DeviceStatus ADD COLUMN [SwitchIdx]  INTEGER    DEFAULT 0");
 			query("ALTER TABLE DeviceStatus ADD COLUMN [DeltaTemp]  float      DEFAULT 0");
+			query("ALTER TABLE DeviceStatus ADD COLUMN [Log]        INTEGER    DEFAULT 1");
 		}
 		if (dbversion < 52)
 		{
@@ -2793,8 +2795,10 @@ unsigned long long CSQLHelper::UpdateValueInt(const int HardwareID, const char* 
 
 	unsigned long long ulID=0;
 	bool bDeviceUsed = false;
+	bool bLogDevice  = true;
+
 	std::vector<std::vector<std::string> > result;
-	result = safe_query("SELECT ID,Name, Used FROM DeviceStatus WHERE (HardwareID=%d AND DeviceID='%q' AND Unit=%d AND Type=%d AND SubType=%d)",HardwareID, ID, unit, devType, subType);
+	result = safe_query("SELECT ID,Name, Used , Log FROM DeviceStatus WHERE (HardwareID=%d AND DeviceID='%q' AND Unit=%d AND Type=%d AND SubType=%d)",HardwareID, ID, unit, devType, subType);
 	if (result.size()==0)
 	{
 		//Insert
@@ -2834,6 +2838,7 @@ unsigned long long CSQLHelper::UpdateValueInt(const int HardwareID, const char* 
 
 		devname=result[0][1];
 		bDeviceUsed= atoi(result[0][2].c_str())!=0;
+		bLogDevice = atoi(result[0][3].c_str()) != 0;
 
 		time_t now = time(0);
 		struct tm ltime;
@@ -2861,7 +2866,6 @@ unsigned long long CSQLHelper::UpdateValueInt(const int HardwareID, const char* 
 				ulID);
 		}
 	}
-
 	switch (devType)
 	{
 	case pTypeRego6XXValue:
@@ -2900,11 +2904,12 @@ unsigned long long CSQLHelper::UpdateValueInt(const int HardwareID, const char* 
 		//Add Lighting log
 		m_LastSwitchID=ID;
 		m_LastSwitchRowID=ulID;
-		result = safe_query(
-			"INSERT INTO LightingLog (DeviceRowID, nValue, sValue) "
-			"VALUES ('%llu', '%d', '%q')",
-			ulID,
-			nValue,sValue);
+		if (bLogDevice)
+			result = safe_query(
+				"INSERT INTO LightingLog (DeviceRowID, nValue, sValue) "
+				"VALUES ('%llu', '%d', '%q')",
+				ulID,
+				nValue,sValue);
 
 		if (!bDeviceUsed)
 			return ulID;	//don't process further as the device is not used
@@ -3219,6 +3224,11 @@ void CSQLHelper::UpdatePreferencesVar(const std::string &Key, const std::string 
 {
 	UpdatePreferencesVar(Key, 0, sValue);
 }
+void CSQLHelper::UpdatePreferencesVar(const std::string &Key, const double Value)
+{
+	std::string sValue = std::to_string(Value);
+	UpdatePreferencesVar(Key, 0, sValue);
+}
 
 void CSQLHelper::UpdatePreferencesVar(const std::string &Key, const int nValue)
 {
@@ -3263,6 +3273,21 @@ bool CSQLHelper::GetPreferencesVar(const std::string &Key, std::string &sValue)
 	return true;
 }
 
+bool CSQLHelper::GetPreferencesVar(const std::string &Key, double &Value)
+{
+	
+	std::string sValue;
+	int nValue;
+	Value = 0;
+	bool res = GetPreferencesVar(Key, nValue, sValue);
+	if (!res)
+		return false;
+	size_t idx;
+	Value = std::stold(sValue.c_str(),&idx);
+	if (idx!=0)
+		return false;
+	return true;
+}
 bool CSQLHelper::GetPreferencesVar(const std::string &Key, int &nValue, std::string &sValue)
 {
 	if (!m_dbase)
@@ -3459,7 +3484,7 @@ void CSQLHelper::ScheduleDay()
 	}
 }
 
-#define DELTA_TEMP 0.5
+//#define DELTA_TEMP 0.5
 
 void CSQLHelper::UpdateTemperatureLog()
 {
@@ -3471,6 +3496,8 @@ void CSQLHelper::UpdateTemperatureLog()
 
 	int SensorTimeOut=60;
 	GetPreferencesVar("SensorTimeout", SensorTimeOut);
+	double DELTA_TEMP = 0.5;
+	GetPreferencesVar("DeltaTemperatureLog", DELTA_TEMP);
 
 	std::vector<std::vector<std::string> > result;
 	result=safe_query("SELECT ID,Type,SubType,nValue,sValue,LastUpdate,Power,RoomTemp FROM DeviceStatus WHERE (Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR (Type=%d AND SubType=%d) OR (Type=%d AND SubType=%d) OR (Type=%d AND SubType=%d))",

@@ -332,7 +332,10 @@ define(['app'], function (app) {
 			  if (typeof data.LmsDuration != 'undefined') {
 				$("#lmstable #LmsDuration").val(data.LmsDuration);
 			  }
-
+			  
+			  if (typeof data.DeltaTemperatureLog != 'undefined') {
+			      $("#shortlogtable #DeltaTemperatureLog").val(data.DeltaTemperatureLog);
+			  }
 			  if (typeof data.LightHistoryDays != 'undefined') {
 				$("#lightlogtable #LightHistoryDays").val(data.LightHistoryDays);
 			  }

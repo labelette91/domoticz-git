@@ -6969,6 +6969,9 @@ namespace http {
 			std::string LightHistoryDays = request::findValue(&req, "LightHistoryDays");
 			m_sql.UpdatePreferencesVar("LightHistoryDays", atoi(LightHistoryDays.c_str()));
 
+			std::string DeltaTemperatureLog = request::findValue(&req, "DeltaTemperatureLog");
+			m_sql.UpdatePreferencesVar("DeltaTemperatureLog", atof(DeltaTemperatureLog.c_str()));
+
 			std::string s5MinuteHistoryDays = request::findValue(&req, "ShortLogDays");
 			m_sql.UpdatePreferencesVar("5MinuteHistoryDays", atoi(s5MinuteHistoryDays.c_str()));
 
@@ -7482,6 +7485,9 @@ namespace http {
 				}
 			}
 
+//index of ,A.Power field in sql request
+#define INDEX_POWER  29     
+
 			if (totUserDevices == 0)
 			{
 				//All
@@ -7496,7 +7502,7 @@ namespace http {
 						" A.LastLevel, A.CustomImage, A.StrParam1, A.StrParam2,"
 						" A.Protected, IFNULL(B.XOffset,0), IFNULL(B.YOffset,0), IFNULL(B.PlanID,0), A.Description,"
 						" A.Options "
-						" ,A.Power,  A.RoomTemp,  A.TempIdx,A.SwitchIdx "
+						" ,A.Power,  A.RoomTemp,  A.TempIdx,A.SwitchIdx ,A.Log "
 						"FROM DeviceStatus A LEFT OUTER JOIN DeviceToPlansMap as B ON (B.DeviceRowID==a.ID) "
 						"WHERE (A.ID=='%q')",
 						rowid.c_str());
@@ -7512,7 +7518,7 @@ namespace http {
 						" A.StrParam2, A.Protected, B.XOffset, B.YOffset,"
 						" B.PlanID, A.Description,"
 						" A.Options "
-						" ,A.Power,  A.RoomTemp,  A.TempIdx,A.SwitchIdx "
+						" ,A.Power,  A.RoomTemp,  A.TempIdx,A.SwitchIdx ,A.Log "
 						"FROM DeviceStatus as A, DeviceToPlansMap as B "
 						"WHERE (B.PlanID=='%q') AND (B.DeviceRowID==a.ID)"
 						" AND (B.DevSceneType==0) ORDER BY B.[Order]",
@@ -7528,7 +7534,7 @@ namespace http {
 						" A.StrParam2, A.Protected, B.XOffset, B.YOffset,"
 						" B.PlanID, A.Description,"
 						" A.Options "
-						" ,A.Power,  A.RoomTemp,  A.TempIdx,A.SwitchIdx "
+						" ,A.Power,  A.RoomTemp,  A.TempIdx,A.SwitchIdx ,A.Log "
 						"FROM DeviceStatus as A, DeviceToPlansMap as B,"
 						" Plans as C "
 						"WHERE (C.FloorplanID=='%q') AND (C.ID==B.PlanID)"
@@ -7572,7 +7578,7 @@ namespace http {
 						" A.LastLevel, A.CustomImage, A.StrParam1, A.StrParam2,"
 						" A.Protected, IFNULL(B.XOffset,0), IFNULL(B.YOffset,0), IFNULL(B.PlanID,0), A.Description,"
 						" A.Options "
-						" ,A.Power,  A.RoomTemp,  A.TempIdx,A.SwitchIdx "
+						" ,A.Power,  A.RoomTemp,  A.TempIdx,A.SwitchIdx ,A.Log "
 						"FROM DeviceStatus as A LEFT OUTER JOIN DeviceToPlansMap as B "
 						"ON (B.DeviceRowID==a.ID) AND (B.DevSceneType==0) "
 						"ORDER BY %s",
@@ -7595,7 +7601,7 @@ namespace http {
 						" A.StrParam2, A.Protected, 0 as XOffset,"
 						" 0 as YOffset, 0 as PlanID, A.Description,"
 						" A.Options "
-						" ,A.Power,  A.RoomTemp,  A.TempIdx,A.SwitchIdx "
+						" ,A.Power,  A.RoomTemp,  A.TempIdx,A.SwitchIdx ,A.Log "
 						"FROM DeviceStatus as A, SharedDevices as B "
 						"WHERE (B.DeviceRowID==a.ID)"
 						" AND (B.SharedUserID==%lu) AND (A.ID=='%q')",
@@ -7612,7 +7618,7 @@ namespace http {
 						" A.StrParam2, A.Protected, C.XOffset,"
 						" C.YOffset, C.PlanID, A.Description,"
 						" A.Options "
-						" ,A.Power,  A.RoomTemp,  A.TempIdx,A.SwitchIdx "
+						" ,A.Power,  A.RoomTemp,  A.TempIdx,A.SwitchIdx ,A.Log "
 						"FROM DeviceStatus as A, SharedDevices as B,"
 						" DeviceToPlansMap as C "
 						"WHERE (C.PlanID=='%q') AND (C.DeviceRowID==a.ID)"
@@ -7630,7 +7636,7 @@ namespace http {
 						" A.StrParam2, A.Protected, C.XOffset, C.YOffset,"
 						" C.PlanID, A.Description,"
 						" A.Options "
-						" ,A.Power,  A.RoomTemp,  A.TempIdx,A.SwitchIdx "
+						" ,A.Power,  A.RoomTemp,  A.TempIdx,A.SwitchIdx ,A.Log "
 						"FROM DeviceStatus as A, SharedDevices as B,"
 						" DeviceToPlansMap as C, Plans as D "
 						"WHERE (D.FloorplanID=='%q') AND (D.ID==C.PlanID)"
@@ -7676,7 +7682,7 @@ namespace http {
 						" A.StrParam2, A.Protected, IFNULL(C.XOffset,0),"
 						" IFNULL(C.YOffset,0), IFNULL(C.PlanID,0), A.Description,"
 						" A.Options "
-						" ,A.Power,  A.RoomTemp,  A.TempIdx,A.SwitchIdx "
+						" ,A.Power,  A.RoomTemp,  A.TempIdx,A.SwitchIdx ,A.Log "
 						"FROM DeviceStatus as A, SharedDevices as B "
 						"LEFT OUTER JOIN DeviceToPlansMap as C  ON (C.DeviceRowID==A.ID)"
 						"WHERE (B.DeviceRowID==A.ID)"
@@ -7943,6 +7949,8 @@ namespace http {
 					}
 					root["result"][ii]["idx"] = sd[0];
 					root["result"][ii]["Protected"] = (iProtected != 0);
+					root["result"][ii]["Log"] = sd[INDEX_POWER+4];
+					
 
 					CDomoticzHardwareBase *pHardware = m_mainworker.GetHardware(hardwareID);
 					if (pHardware != NULL)
@@ -9406,7 +9414,6 @@ namespace http {
 							root["result"][ii]["HaveTimeout"] = bHaveTimeout;
 							root["result"][ii]["TypeImg"] = "override_mini";
 							root["result"][ii]["HwType"] = _hardwareNames[hardwareID].HardwareTypeVal;
-							#define INDEX_POWER  29     //index of power field in sql request
 							root["result"][ii]["Power"]		=sd[INDEX_POWER];
 							root["result"][ii]["RoomTemp"]	=sd[INDEX_POWER+1];
 							root["result"][ii]["TempIdx"]	  =sd[INDEX_POWER+2];
@@ -11146,6 +11153,14 @@ namespace http {
 			std::string TempIdx=request::findValue(&req,"TempIdx");
 			if ( (TempIdx!="")&&(TempIdx!="null"))
 				m_sql.UpdateDeviceValue("TempIdx",TempIdx,idx);
+
+			std::string LogWrite = request::findValue(&req, "log");
+			if ((LogWrite != "") && (LogWrite != "null"))
+				if (LogWrite=="true")
+					m_sql.UpdateDeviceValue("log", 1, idx);
+				else
+					m_sql.UpdateDeviceValue("log", 0, idx);
+
 
 			std::string SwitchIdx=request::findValue(&req,"SwitchIdx");
 			if ( (SwitchIdx!="")&&(SwitchIdx!="null"))

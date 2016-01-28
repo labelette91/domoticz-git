@@ -31,7 +31,7 @@
 	#include "../msbuild/WindowsHelper.h"
 #endif
 
-#define DB_VERSION 95
+#define DB_VERSION 96
 
 extern http::server::CWebServerHelper m_webservers;
 extern std::string szWWWFolder;
@@ -586,6 +586,16 @@ const char *sqlCreateUserSessions =
 	" [LastUpdate] DATETIME DEFAULT(datetime('now', 'localtime')),"
 	" PRIMARY KEY([SessionID]));";
 
+const char *sqlCreateMobileDevices =
+"CREATE TABLE IF NOT EXISTS [MobileDevices]("
+"[ID] INTEGER PRIMARY KEY, "
+"[Active] BOOLEAN DEFAULT false, "
+"[Name] VARCHAR(100) DEFAULT '',"
+"[SenderID] TEXT NOT NULL,"
+"[UUID] TEXT NOT NULL, "
+"[LastUpdate] DATETIME DEFAULT(datetime('now', 'localtime'))"
+");";
+
 extern std::string szUserDataFolder;
 
 CSQLHelper::CSQLHelper(void)
@@ -707,6 +717,7 @@ bool CSQLHelper::OpenDatabase()
 	query(sqlCreateMySensorsChilds);
 	query(sqlCreateToonDevices);
 	query(sqlCreateUserSessions);
+	query(sqlCreateMobileDevices);
 	//Add indexes to log tables
 	query("create index if not exists f_idx on Fan(DeviceRowID);");
 	query("create index if not exists fc_idx on Fan_Calendar(DeviceRowID);");
@@ -1755,7 +1766,10 @@ bool CSQLHelper::OpenDatabase()
 				query("ALTER TABLE SetpointTimers ADD COLUMN [Occurence] INTEGER DEFAULT 0");
 			}
 		}
-
+		if (dbversion < 96)
+		{
+			query("ALTER TABLE MobileDevices ADD COLUMN [Name] VARCHAR(100) DEFAULT ''");
+		}
 	}
 	else if (bNewInstall)
 	{

@@ -396,6 +396,9 @@
     <Filter Include="XML">
       <UniqueIdentifier>{19baf552-3c12-432c-bebe-8bb25fa327d0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Devices\HomeEasy">
+      <UniqueIdentifier>{a6a316f9-6024-4c24-9ab6-37f183b4d72f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\CMakeLists.txt">
@@ -1801,6 +1804,12 @@
     <ClInclude Include="..\notifications\NotificationGCM.h">
       <Filter>Notifications</Filter>
     </ClInclude>
+    <ClInclude Include="..\hardware\HomeEasy.h">
+      <Filter>Devices\HomeEasy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\HomeEasyTransmitter.h">
+      <Filter>Devices\HomeEasy</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\webserver\Base64.cpp">
@@ -2342,6 +2351,9 @@
     </ClCompile>
     <ClCompile Include="..\main\VirtualThermostat.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\HomeEasy.cpp">
+      <Filter>Devices\HomeEasy</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

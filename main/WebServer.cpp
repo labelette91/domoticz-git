@@ -1067,6 +1067,9 @@ namespace http {
 			else if (htype == HTYPE_RaspberryBMP085) {
 				//all fine here!
 			}
+			else if (htype == HTYPE_HomeEasy) {
+				//all fine here!
+			}
 			else if (htype == HTYPE_Dummy) {
 				//all fine here!
 			}
@@ -1309,6 +1312,9 @@ namespace http {
 				//All fine here
 			}
 			else if (htype == HTYPE_RaspberryBMP085) {
+				//All fine here
+			}
+			else if (htype == HTYPE_HomeEasy) {
 				//All fine here
 			}
 			else if (htype == HTYPE_Dummy) {
@@ -3547,6 +3553,7 @@ namespace http {
 						case HTYPE_EnOceanESP2:
 						case HTYPE_EnOceanESP3:
 						case HTYPE_Dummy:
+						case HTYPE_HomeEasy:
 						case HTYPE_Tellstick:
 						case HTYPE_EVOHOME_SCRIPT:
 						case HTYPE_EVOHOME_SERIAL:

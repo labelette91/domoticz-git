@@ -58,6 +58,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;PTW32_STATIC_LIB;WITH_OPENZWAVE;OPENZWAVE_USEDLL;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>./Windows Libraries/Boost/boost_1_59_0;./libusb;..\hardware\openzwave;./Windows Libraries/openssl;./Windows Libraries/Curl;./Windows Libraries/pthread;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <DisableSpecificWarnings>4251;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -429,6 +430,8 @@
     <ClInclude Include="..\hardware\Gpio.h" />
     <ClInclude Include="..\hardware\GpioPin.h" />
     <ClInclude Include="..\hardware\HarmonyHub.h" />
+    <ClInclude Include="..\hardware\HomeEasy.h" />
+    <ClInclude Include="..\hardware\HomeEasyTransmitter.h" />
     <ClInclude Include="..\hardware\ICYThermostat.h" />
     <ClInclude Include="..\hardware\KMTronic433.h" />
     <ClInclude Include="..\hardware\KMTronicBase.h" />
@@ -624,6 +627,7 @@
     <ClCompile Include="..\hardware\Gpio.cpp" />
     <ClCompile Include="..\hardware\GpioPin.cpp" />
     <ClCompile Include="..\hardware\HarmonyHub.cpp" />
+    <ClCompile Include="..\hardware\HomeEasy.cpp" />
     <ClCompile Include="..\hardware\ICYThermostat.cpp" />
     <ClCompile Include="..\hardware\KMTronic433.cpp" />
     <ClCompile Include="..\hardware\KMTronicBase.cpp" />

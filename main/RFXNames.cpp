@@ -217,6 +217,7 @@ const char *Hardware_Type_Desc(int hType)
 		{ HTYPE_CurrentCostMeter, "CurrentCost Meter USB" },
 		{ HTYPE_CurrentCostMeterLAN, "CurrentCost Meter with LAN interface" },
 		{ HTYPE_DomoticzInternal, "Domoticz Internal interface" },
+		{ HTYPE_HomeEasy, "HomeEasy RF Transmiter" },
 		{ HTYPE_NefitEastLAN, "Nefit Easy HTTP server over LAN interface" },
 		{ 0, NULL, NULL }
 	};

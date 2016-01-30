@@ -495,7 +495,8 @@ define(['app'], function (app) {
 				(text.indexOf("Volcraft") >= 0) || 
 				(text.indexOf("1-Wire") >= 0) || 
 				(text.indexOf("BMP085") >= 0) || 
-				(text.indexOf("Dummy") >= 0) || 
+				(text.indexOf("Dummy") >= 0) ||
+				(text.indexOf("HomeEasy RF") >= 0) ||
 				(text.indexOf("System Alive") >= 0) || 
 				(text.indexOf("Kodi") >= 0) || 
 				(text.indexOf("PiFace") >= 0) || 

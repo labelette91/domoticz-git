@@ -87,6 +87,7 @@
 #include "../hardware/SolarEdgeAPI.h"
 #include "../hardware/DomoticzInternal.h"
 #include "../hardware/NefitEasy.h"
+#include "../hardware/HomeEasy.h"
 #include "../hardware/PanasonicTV.h"
 
 // load notifications configuration
@@ -809,6 +810,9 @@ bool MainWorker::AddHardwareFromParams(
 #endif
 	case HTYPE_RaspberryBMP085:
 		pHardware = new CBMP085(ID);
+		break;
+	case HTYPE_HomeEasy:
+		pHardware = new HomeEasy(ID);
 		break;
 	case HTYPE_Wunderground:
 		pHardware = new CWunderground(ID,Username,Password);

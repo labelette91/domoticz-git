@@ -33,7 +33,7 @@ HomeEasy::HomeEasy(const int ID)
 #ifdef __arm__
 	if (wiringPiSetup() == -1)
 	{
-		_log.Log(LOG_ERROR, ("failed to initialize wiring pi");
+		_log.Log(LOG_ERROR, "failed to initialize wiring pi");
 	}
 	HomeEasyRfTx = new HomeEasyTransmitter(TXPIN, 0);
 	HomeEasyRfTx->initPin();

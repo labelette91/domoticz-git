@@ -280,7 +280,7 @@ public:
 	float getTemperatureFromSValue(const char * sValue);
 
 	bool GetPreferencesVar(const std::string &Key, double &Value);
-	void CSQLHelper::UpdatePreferencesVar(const std::string &Key, const double Value);
+	void UpdatePreferencesVar(const std::string &Key, const double Value);
 
 	float getHumidityFromSValue(const char * sValue);
 	bool GetLastValue(  const char* DeviceID, int &nValue, std::string &sValue, struct tm &LastUpdateTime);

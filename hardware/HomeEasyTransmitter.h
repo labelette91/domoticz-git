@@ -2,6 +2,10 @@
 #ifndef HomeEasyTransmitter_h
 #define HomeEasyTransmitter_h
 
+#ifndef ARDUINO
+typedef unsigned char byte;
+#endif
+
 class HomeEasyTransmitter
 {
 

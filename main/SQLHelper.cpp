@@ -3262,7 +3262,7 @@ void CSQLHelper::UpdatePreferencesVar(const std::string &Key, const std::string 
 }
 void CSQLHelper::UpdatePreferencesVar(const std::string &Key, const double Value)
 {
-	std::string sValue = std::to_string(Value);
+	std::string sValue = To_string(Value);
 	UpdatePreferencesVar(Key, 0, sValue);
 }
 
@@ -3318,10 +3318,7 @@ bool CSQLHelper::GetPreferencesVar(const std::string &Key, double &Value)
 	bool res = GetPreferencesVar(Key, nValue, sValue);
 	if (!res)
 		return false;
-	size_t idx;
-	Value = std::stold(sValue.c_str(),&idx);
-	if (idx!=0)
-		return false;
+	Value = atof(sValue.c_str());
 	return true;
 }
 bool CSQLHelper::GetPreferencesVar(const std::string &Key, int &nValue, std::string &sValue)

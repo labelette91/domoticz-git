@@ -195,6 +195,8 @@ hardware/AnnaThermostat.cpp
 hardware/ASyncSerial.cpp
 hardware/ASyncTCP.cpp
 hardware/BMP085.cpp
+hardware/HomeEasy.cpp
+hardware/HomeEasyTransmitter.cpp
 hardware/Comm5TCP.cpp
 hardware/csocket.cpp
 hardware/CurrentCostMeterBase.cpp

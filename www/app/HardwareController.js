@@ -44,7 +44,14 @@ define(['app'], function (app) {
             var datatimeout=$('#hardwarecontent #hardwareparamstable #combodatatimeout').val();
 
             var text = $("#hardwarecontent #hardwareparamstable #combotype option:selected").text();
-            if ((text.indexOf("Panasonic") >= 0)||(text.indexOf("TE923") >= 0)||(text.indexOf("Volcraft") >= 0)||(text.indexOf("1-Wire") >= 0)||(text.indexOf("GPIO") >= 0)||(text.indexOf("BMP085") >= 0)||(text.indexOf("Dummy") >= 0)||(text.indexOf("System Alive") >= 0)||(text.indexOf("PiFace") >= 0)||(text.indexOf("Motherboard") >= 0)||(text.indexOf("Kodi") >= 0)||(text.indexOf("Evohome") >= 0 && text.indexOf("script") >= 0))
+            if (text.indexOf("HomeEasy RF") >= 0)
+            {
+                Mode1 = $("#hardwarecontent #divrftransmitter #comboInputPin ").val();
+                Mode2 = $("#hardwarecontent #divrftransmitter #comboOutputPin").val();
+
+            }
+
+            if ((text.indexOf("Panasonic") >= 0) || (text.indexOf("TE923") >= 0) || (text.indexOf("Volcraft") >= 0) || (text.indexOf("1-Wire") >= 0) || (text.indexOf("GPIO") >= 0) || (text.indexOf("BMP085") >= 0) || (text.indexOf("Dummy") >= 0) || (text.indexOf("HomeEasy RF") >= 0) || (text.indexOf("System Alive") >= 0) || (text.indexOf("PiFace") >= 0) || (text.indexOf("Motherboard") >= 0) || (text.indexOf("Kodi") >= 0) || (text.indexOf("Evohome") >= 0 && text.indexOf("script") >= 0))
             {
                 $.ajax({
                      url: "json.htm?type=command&param=updatehardware&htype=" + hardwaretype +
@@ -496,7 +503,6 @@ define(['app'], function (app) {
 				(text.indexOf("1-Wire") >= 0) || 
 				(text.indexOf("BMP085") >= 0) || 
 				(text.indexOf("Dummy") >= 0) ||
-				(text.indexOf("HomeEasy RF") >= 0) ||
 				(text.indexOf("System Alive") >= 0) || 
 				(text.indexOf("Kodi") >= 0) || 
 				(text.indexOf("PiFace") >= 0) || 
@@ -508,6 +514,32 @@ define(['app'], function (app) {
             {
                 $.ajax({
                      url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&port=1&name=" + encodeURIComponent(name) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout,
+                     async: false,
+                     dataType: 'json',
+                     success: function(data) {
+                        RefreshHardwareTable();
+                     },
+                     error: function(){
+                            ShowNotify($.t('Problem adding hardware!'), 2500, true);
+                     }
+                });
+            }
+            else if (text.indexOf("HomeEasy RF") >= 0)
+            {
+                var inputport = $("#hardwarecontent #divrftransmitter #comboInputPin  ").val();
+                if (typeof inputport == 'undefined')
+                {
+                    ShowNotify($.t('No GPIO Input port selected!'), 2500, true);
+                    return;
+                }
+                var outputport = $("#hardwarecontent #divrftransmitter #comboOutputPin  ").val();
+                if (typeof outputport == 'undefined')
+                {
+                    ShowNotify($.t('No GPIO Output port selected!'), 2500, true);
+                    return;
+                }
+                $.ajax({
+                     url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&port=1&name=" + encodeURIComponent(name) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout + "&mode1=" + inputport + "&mode2=" + outputport ,
                      async: false,
                      dataType: 'json',
                      success: function(data) {
@@ -3596,6 +3628,11 @@ define(['app'], function (app) {
                                 $("#hardwarecontent #divremote #tcpaddress").val(data["Address"]);
                             }
                         }
+                        else if (data["Type"].indexOf("HomeEasy RF") >= 0) {
+                            $("#hardwarecontent #divrftransmitter #comboInputPin").val(data["Mode1"]);
+                            $("#hardwarecontent #divrftransmitter #comboOutputPin").val(data["Mode2"]);
+                            
+                        }
                         else if (((data["Type"].indexOf("LAN") >= 0) && (data["Type"].indexOf("YouLess") == -1) && (data["Type"].indexOf("Satel") == -1)) ||(data["Type"].indexOf("Domoticz") >= 0) ||(data["Type"].indexOf("Harmony") >= 0)) {
                             $("#hardwarecontent #hardwareparamsremote #tcpaddress").val(data["Address"]);
                             $("#hardwarecontent #hardwareparamsremote #tcpport").val(data["Port"]);
@@ -3710,6 +3747,7 @@ define(['app'], function (app) {
             $("#hardwarecontent #divwinddelen").hide();
             $("#hardwarecontent #divmqtt").hide();
             $("#hardwarecontent #divsolaredgeapi").hide();
+            $("#hardwarecontent #divrftransmitter").hide();
 
             if ((text.indexOf("TE923") >= 0)||(text.indexOf("Volcraft") >= 0)||(text.indexOf("BMP085") >= 0)||(text.indexOf("Dummy") >= 0)||(text.indexOf("System Alive") >= 0)||(text.indexOf("PiFace") >= 0))
             {
@@ -3717,6 +3755,14 @@ define(['app'], function (app) {
                 $("#hardwarecontent #divremote").hide();
                 $("#hardwarecontent #divlogin").hide();
                 $("#hardwarecontent #divunderground").hide();
+            }
+            else if (text.indexOf("HomeEasy RF") >= 0) {
+                $("#hardwarecontent #divserial").hide();
+                $("#hardwarecontent #divremote").hide();
+                $("#hardwarecontent #divlogin").hide();
+                $("#hardwarecontent #divunderground").hide();
+                $("#hardwarecontent #divrftransmitter").show();
+
             }
             else if (text.indexOf("USB") >= 0)
             {

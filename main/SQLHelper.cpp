@@ -1110,7 +1110,7 @@ bool CSQLHelper::OpenDatabase()
 		}
     /*  new field for themostat */
     /* Room temperature  */
-		if (dbversion<57)
+		if (dbversion<96)
 		{
 			query("ALTER TABLE DeviceStatus ADD COLUMN [Power]      INTEGER    default 0");
 			query("ALTER TABLE DeviceStatus ADD COLUMN [RoomTemp]   VARCHAR(4) default 0");

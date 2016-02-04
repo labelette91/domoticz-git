@@ -809,13 +809,6 @@ namespace http {
 			if (rtype == "command")
 			{
 				std::string cparam = request::findValue(&req, "param");
-				if (_log.isTraceEnable())
-				{
-				std::string idx    = request::findValue(&req,"idx");
-					std::string cparamd=request::findValue(&req,"param");
-					if (cparamd.size()==0) cparamd=rtype;
-					if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"JSON:%s idx:%s ",cparamd.c_str() ,  idx.c_str()  );
-				}
 				if (cparam == "")
 				{
 					cparam = request::findValue(&req, "dparam");
@@ -831,6 +824,7 @@ namespace http {
 					goto exitjson;
 
 				}
+				if (_log.isTraceEnable()) _log.Log(LOG_TRACE, "JSON:%s :%s ", cparam.c_str(), req.uri.c_str());
 				HandleCommand(cparam, session, req, root);
 			} //(rtype=="command")
 			else {

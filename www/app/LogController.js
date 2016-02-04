@@ -30,7 +30,7 @@ define(['app'], function (app) {
 			var lastscrolltop=$("#logcontent #logdata").scrollTop();
 			var llogtime = $scope.LastLogTime;
 			$http({
-				url: "json.htm?type=command&param=getlog&lastlogtime=" + $scope.LastLogTime + "&loglevel=0",
+				url: "json.htm?type=command&param=getlog&lastlogtime=" + $scope.LastLogTime + "&loglevel=2",
 				async: false, 
 				dataType: 'json'
 			}).success(function(data) {
@@ -109,7 +109,7 @@ define(['app'], function (app) {
 				});
 				//Status
 				$http({
-					url: "json.htm?type=command&param=getlog&lastlogtime=" + $scope.LastLogTime + "&loglevel=2",
+					url: "json.htm?type=command&param=getlog&lastlogtime=" + $scope.LastLogTime + "&loglevel=0",
 					async: false, 
 					dataType: 'json'
 				}).success(function(data) {

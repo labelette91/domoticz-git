@@ -336,7 +336,7 @@ private:
 	void CheckAndUpdateDeviceOrder();
 	void CheckAndUpdateSceneDeviceOrder();
 
-	void CleanupLightLog();
+	void CleanupLightSceneLog();
 
 	void UpdateTemperatureLog();
 	void UpdateRainLog();

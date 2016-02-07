@@ -433,8 +433,13 @@ bool MainWorker::GetSunSettings()
 	std::vector<std::string> strarray;
 	StringSplit(sValue, ";", strarray);
 
-	if (strarray.size()!=2)
+	if (strarray.size() != 2)
+	{
+		// No location entered in the settings, lets just reload our schedules and return
+		// Load non sun settings timers 
+		m_scheduler.ReloadSchedules();
 		return false;
+	}
 
 	std::string Latitude=strarray[0];
 	std::string Longitude=strarray[1];
@@ -4081,6 +4086,7 @@ void MainWorker::decode_Lighting1(const int HwdID, const _eHardwareTypes HwdType
 		case sTypeEnergenie:
 		case sTypeEnergenie5:
 		case sTypeGDR2:
+		case sTypeHQ:
 			//decoding of these types is only implemented for use by simulate and verbose
 			//these types are not received by the RFXtrx433
 			switch (pResponse->LIGHTING1.subtype)
@@ -4108,6 +4114,9 @@ void MainWorker::decode_Lighting1(const int HwdID, const _eHardwareTypes HwdType
 				break;
 			case sTypeGDR2:
 				WriteMessage("subtype       = COCO GDR2");
+				break;
+			case sTypeHQ:
+				WriteMessage("subtype       = HQ COCO-20");
 				break;
 			}
 			sprintf(szTmp,"Sequence nbr  = %d", pResponse->LIGHTING1.seqnbr);
@@ -4217,7 +4226,6 @@ void MainWorker::decode_Lighting2(const int HwdID, const _eHardwareTypes HwdType
 		case sTypeAC:
 		case sTypeHEU:
 		case sTypeANSLUT:
-		case sTypeZWaveSwitch:
 			switch (pResponse->LIGHTING2.subtype)
 			{
 			case sTypeAC:
@@ -4228,9 +4236,6 @@ void MainWorker::decode_Lighting2(const int HwdID, const _eHardwareTypes HwdType
 				break;
 			case sTypeANSLUT:
 				WriteMessage("subtype       = ANSLUT");
-				break;
-			case sTypeZWaveSwitch:
-				WriteMessage("subtype       = ZWave");
 				break;
 			}
 			sprintf(szTmp,"Sequence nbr  = %d", pResponse->LIGHTING2.seqnbr);
@@ -4886,6 +4891,35 @@ void MainWorker::decode_Lighting5(const int HwdID, const _eHardwareTypes HwdType
 			sprintf(szTmp, "ID            = %02X%02X", pResponse->LIGHTING5.id2, pResponse->LIGHTING5.id3);
 			WriteMessage(szTmp);
 			WriteMessage("Command       = Toggle");
+			break;
+		case sTypeAvantek:
+			WriteMessage("subtype       = Avantek");
+			sprintf(szTmp, "Sequence nbr  = %d", pResponse->LIGHTING5.seqnbr);
+			WriteMessage(szTmp);
+			sprintf(szTmp, "ID            = %02X%02X%02X", pResponse->LIGHTING5.id1, pResponse->LIGHTING5.id2, pResponse->LIGHTING5.id3);
+			WriteMessage(szTmp);
+			sprintf(szTmp, "Unit          = %d", pResponse->LIGHTING5.unitcode);
+			WriteMessage(szTmp);
+			WriteMessage("Command       = ", false);
+			switch (pResponse->LIGHTING5.cmnd)
+			{
+			case light5_sOff:
+				WriteMessage("Off");
+				break;
+			case light5_sOn:
+				WriteMessage("On");
+				break;
+			case light5_sGroupOff:
+				WriteMessage("Group Off");
+				break;
+			case light5_sGroupOn:
+				WriteMessage("Group On");
+				break;
+			default:
+				WriteMessage("Unknown");
+				break;
+			}
+			break;
 		default:
 			sprintf(szTmp,"ERROR: Unknown Sub type for Packet type= %02X:%02X", pResponse->LIGHTING5.packettype, pResponse->LIGHTING5.subtype);
 			WriteMessage(szTmp);
@@ -5470,6 +5504,9 @@ void MainWorker::decode_BLINDS1(const int HwdID, const _eHardwareTypes HwdType, 
 			break;
 		case sTypeBlindsT10:
 			WriteMessage("subtype       = Dolat DLM-1");
+			break;
+		case sTypeBlindsT11:
+			WriteMessage("subtype       = ASP");
 			break;
 		default:
 			sprintf(szTmp,"ERROR: Unknown Sub type for Packet type= %02X:%02X:", pResponse->BLINDS1.packettype, pResponse->BLINDS1.subtype);
@@ -9798,6 +9835,7 @@ bool MainWorker::GetSensorData(const unsigned long long idx, int &nValue, std::s
 				sprintf(szTmp, "%llu", total_real);
 				break;
 			case MTYPE_COUNTER:
+			case MTYPE_TIME:
 				sprintf(szTmp, "%llu", total_real);
 				break;
 			}
@@ -9904,12 +9942,10 @@ bool MainWorker::SwitchLightInt(const std::vector<std::string> &sd, std::string 
 	if (switchcmd=="Set Level")
 	{
 		if (
-			(level > 0) && 
-			(switchtype != STYPE_Selector) &&
-			((dType==pTypeGeneralSwitch)&&(dSubType != sSwitchGeneralSwitch))
+			(level > 0) &&
+			(switchtype != STYPE_Selector)
 			)
 		{
-			//GizMoCuz: Who did this and why?
 			level -= 1;
 		}
 		if (level==0)
@@ -9986,33 +10022,6 @@ bool MainWorker::SwitchLightInt(const std::vector<std::string> &sd, std::string 
 					else if (level==0)
 					{
 						lcmd.LIGHTING2.cmnd=light2_sOff;
-					}
-				}
-			}
-
-			// ZWave allows 0 (for "off"), 255 (for "on") and 0-99 (in case of dimmers). 
-			if (dSubType == sTypeZWaveSwitch)
-			{
-				// Only allow off/on for normal ZWave switches
-				if (switchtype == STYPE_OnOff)
-				{
-					level = (level == 0) ? 0 : 255;
-					lcmd.LIGHTING2.cmnd = (lcmd.LIGHTING2.cmnd == light2_sOn) ? light2_sOn : light2_sOff;
-				}
-				else
-				{
-					if (lcmd.LIGHTING2.cmnd == light2_sSetLevel)
-					{
-						// Set command based on level value
-						if (level == 0)
-							lcmd.LIGHTING2.cmnd = light2_sOff;
-						else if (level == 255)
-							lcmd.LIGHTING2.cmnd = light2_sOn;
-						else
-						{
-							// For dimmers we only allow level 0-99
-							level = (level > 99) ? 99 : level;
-						}
 					}
 				}
 			}
@@ -10661,9 +10670,11 @@ bool MainWorker::SwitchLightInt(const std::vector<std::string> &sd, std::string 
 			gswitch.unitcode = Unit;
 			if (!GetLightCommand(dType, dSubType, switchtype, switchcmd, gswitch.cmnd, options))
 				return false;
+
 			if ((switchtype != STYPE_Selector) && (dSubType != sSwitchGeneralSwitch)) {
 				level = (level > 99) ? 99 : level;
 			}
+
 			if (switchtype == STYPE_Selector)
 			{
 				if ((switchcmd == "Set Level") || (switchcmd == "Set Group Level")) {
@@ -11315,6 +11326,8 @@ bool MainWorker::SwitchScene(const unsigned long long idx, const std::string &sw
 	//Get Scene details
 	std::vector<std::vector<std::string> > result;
 	int nValue=(switchcmd=="On")?1:0;
+
+	m_sql.safe_query("INSERT INTO SceneLog (SceneRowID, nValue) VALUES ('%llu', '%d')", idx, nValue);
 
 	time_t now = time(0);
 	struct tm ltime;

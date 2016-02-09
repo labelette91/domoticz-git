@@ -3172,6 +3172,10 @@ define(['app'], function (app) {
 				tothousecodes=4;
 				totunits=4;
 			}
+			else if (lighttype==11) {
+				tothousecodes=16;
+				totunits=64;
+			}
 			else if (lighttype==60) {
 				//Blyss
 				tothousecodes=16;

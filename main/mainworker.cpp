@@ -9836,7 +9836,6 @@ bool MainWorker::GetSensorData(const unsigned long long idx, int &nValue, std::s
 				sprintf(szTmp, "%llu", total_real);
 				break;
 			case MTYPE_COUNTER:
-			case MTYPE_TIME:
 				sprintf(szTmp, "%llu", total_real);
 				break;
 			}
@@ -11647,7 +11646,7 @@ void MainWorker::SetInternalSecStatus()
 	}
 
 	CDomoticzHardwareBase *pHardware = GetHardwareByType(HTYPE_DomoticzInternal);
-	PushAndWaitRxMessage(pHardware, (const unsigned char *)&tsen, "Domoticz Security Panel", tsen.SECURITY1.battery_level);
+	PushAndWaitRxMessage(pHardware, (const unsigned char *)&tsen, "Domoticz Security Panel", 100);
 }
 
 void MainWorker::UpdateDomoticzSecurityStatus(const int iSecStatus)

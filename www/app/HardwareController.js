@@ -51,7 +51,21 @@ define(['app'], function (app) {
 
             }
 
-            if ((text.indexOf("Panasonic") >= 0) || (text.indexOf("TE923") >= 0) || (text.indexOf("Volcraft") >= 0) || (text.indexOf("1-Wire") >= 0) || (text.indexOf("GPIO") >= 0) || (text.indexOf("BMP085") >= 0) || (text.indexOf("Dummy") >= 0) || (text.indexOf("HomeEasy RF") >= 0) || (text.indexOf("System Alive") >= 0) || (text.indexOf("PiFace") >= 0) || (text.indexOf("Motherboard") >= 0) || (text.indexOf("Kodi") >= 0) || (text.indexOf("Evohome") >= 0 && text.indexOf("script") >= 0))
+            if (
+        (text.indexOf("HomeEasy RF") >= 0) || 
+				(text.indexOf("Panasonic") >= 0) ||
+				(text.indexOf("TE923") >= 0) ||
+				(text.indexOf("Volcraft") >= 0) ||
+				(text.indexOf("1-Wire") >= 0) ||
+				(text.indexOf("GPIO") >= 0) ||
+				(text.indexOf("BMP085") >= 0) ||
+				(text.indexOf("Dummy") >= 0) ||
+				(text.indexOf("System Alive") >= 0) ||
+				(text.indexOf("PiFace") >= 0) ||
+				(text.indexOf("Motherboard") >= 0) ||
+				(text.indexOf("Kodi") >= 0) ||
+				(text.indexOf("Evohome") >= 0 && text.indexOf("script") >= 0)
+				)
             {
                 $.ajax({
                      url: "json.htm?type=command&param=updatehardware&htype=" + hardwaretype +
@@ -123,7 +137,17 @@ define(['app'], function (app) {
                      }
                 });
             }
-            else if ((text.indexOf("LAN") >= 0 && text.indexOf("YouLess") == -1 && text.indexOf("Integra") == -1 && text.indexOf("ETH8020") == -1 && text.indexOf("Anna") == -1 && text.indexOf("KMTronic") == -1 && text.indexOf("MQTT") == -1))
+            else if (
+					(text.indexOf("LAN") >= 0 && 
+					text.indexOf("YouLess") == -1 && 
+					text.indexOf("Integra") == -1 && 
+					text.indexOf("ETH8020") == -1 && 
+					text.indexOf("Anna") == -1 && 
+					text.indexOf("KMTronic") == -1  &&
+					text.indexOf("MQTT") == -1 &&
+					text.indexOf("Razberry") == -1
+					)
+				)
             {
                 var address=$("#hardwarecontent #divremote #tcpaddress").val();
                 if (address=="")
@@ -201,7 +225,15 @@ define(['app'], function (app) {
                      }
                 });
             }
-            else if ((text.indexOf("Domoticz") >= 0) || (text.indexOf("Harmony") >= 0) || (text.indexOf("ETH8020") >= 0) || (text.indexOf("Anna") >= 0) || (text.indexOf("KMTronic") >= 0) || (text.indexOf("MQTT") >= 0))
+            else if (
+				(text.indexOf("Domoticz") >= 0) ||
+				(text.indexOf("Harmony") >= 0) ||
+				(text.indexOf("ETH8020") >= 0) ||
+				(text.indexOf("Anna") >= 0) ||
+				(text.indexOf("KMTronic") >= 0) ||
+				(text.indexOf("MQTT") >= 0) ||
+				(text.indexOf("Razberry") >= 0)
+				)
             {
                 var address=$("#hardwarecontent #divremote #tcpaddress").val();
                 if (address=="")
@@ -222,8 +254,12 @@ define(['app'], function (app) {
                 }
                 var username=$("#hardwarecontent #divlogin #username").val();
                 var password=$("#hardwarecontent #divlogin #password").val();
-                var extra=$("#hardwarecontent #divmqtt #filename").val();
-                Mode1 = $("#hardwarecontent #divmqtt #combotopicselect").val();
+                var extra="";
+                var Mode1="";
+                if ((text.indexOf("MQTT") >= 0)) {
+					extra=$("#hardwarecontent #divmqtt #filename").val();
+					Mode1 = $("#hardwarecontent #divmqtt #combotopicselect").val();
+				}
                 $.ajax({
                      url: "json.htm?type=command&param=updatehardware&htype=" + hardwaretype +
                         "&address=" + address +
@@ -601,7 +637,17 @@ define(['app'], function (app) {
                      }
                 });
             }
-            else if ((text.indexOf("LAN") >= 0 && text.indexOf("YouLess") == -1 && text.indexOf("ETH8020") == -1 && text.indexOf("Anna") == -1 && text.indexOf("KMTronic") == -1 && text.indexOf("MQTT") == -1 && text.indexOf("Integra") == -1))
+            else if (
+					(text.indexOf("LAN") >= 0 && 
+					text.indexOf("YouLess") == -1 && 
+					text.indexOf("ETH8020") == -1 && 
+					text.indexOf("Anna") == -1 && 
+					text.indexOf("KMTronic") == -1 
+					&& text.indexOf("MQTT") == -1 && 
+					text.indexOf("Integra") == -1 &&
+					text.indexOf("Razberry") == -1
+					)
+				)
             {
                 var address=$("#hardwarecontent #divremote #tcpaddress").val();
                 if (address=="")
@@ -701,7 +747,16 @@ define(['app'], function (app) {
                      }
                 });
             }
-            else if ((text.indexOf("Domoticz") >= 0) || (text.indexOf("Harmony") >= 0) || (text.indexOf("ETH8020") >= 0) || (text.indexOf("Anna") >= 0) || (text.indexOf("KMTronic") >= 0) || (text.indexOf("MQTT") >= 0) || (text.indexOf("Logitech Media Server") >= 0))
+            else if (
+				(text.indexOf("Domoticz") >= 0) ||
+				(text.indexOf("Harmony") >= 0) ||
+				(text.indexOf("ETH8020") >= 0) ||
+				(text.indexOf("Anna") >= 0) ||
+				(text.indexOf("KMTronic") >= 0) ||
+				(text.indexOf("MQTT") >= 0) ||
+				(text.indexOf("Logitech Media Server") >= 0) ||
+				(text.indexOf("Razberry") >= 0)
+				)
             {
                 var address=$("#hardwarecontent #divremote #tcpaddress").val();
                 if (address=="")
@@ -722,9 +777,12 @@ define(['app'], function (app) {
                 }
                 var username=$("#hardwarecontent #divlogin #username").val();
                 var password = encodeURIComponent($("#hardwarecontent #divlogin #password").val());
-                var extra = encodeURIComponent($("#hardwarecontent #divmqtt #filename").val());
-                var mode1 = $("#hardwarecontent #divmqtt #combotopicselect").val();
-
+                var extra = "";
+                var mode1 = "";
+				if (text.indexOf("MQTT") >= 0) {
+					extra = encodeURIComponent($("#hardwarecontent #divmqtt #filename").val());
+					mode1 = $("#hardwarecontent #divmqtt #combotopicselect").val();
+				}
                 if ((text.indexOf("Harmony") >= 0) && (username == "")) {
                     ShowNotify($.t('Please enter a username!'), 2500, true);
                     return;
@@ -3718,6 +3776,7 @@ define(['app'], function (app) {
                             (data["Type"].indexOf("Netatmo") >= 0)||
                             (data["Type"].indexOf("Thermosmart") >= 0) ||
 							(data["Type"].indexOf("Logitech Media Server") >= 0) ||
+							(data["Type"].indexOf("Razberry") >= 0) ||
 							(data["Type"].indexOf("Comm5") >= 0)
                             )
                         {
@@ -3908,7 +3967,13 @@ define(['app'], function (app) {
                 $("#hardwarecontent #divlogin").hide();
                 $("#hardwarecontent #divunderground").hide();
             }
-            if ((text.indexOf("ETH8020") >= 0)||(text.indexOf("Anna") >= 0)||(text.indexOf("MQTT") >= 0)||(text.indexOf("KMTronic Gateway with LAN") >= 0)) {
+            if (
+				(text.indexOf("ETH8020") >= 0) ||
+				(text.indexOf("Anna") >= 0) ||
+				(text.indexOf("MQTT") >= 0) ||
+				(text.indexOf("KMTronic Gateway with LAN") >= 0) ||
+				(text.indexOf("Razberry") >= 0)
+				) {
                 $("#hardwarecontent #divlogin").show();
             }
             if (text.indexOf("MQTT") >= 0)

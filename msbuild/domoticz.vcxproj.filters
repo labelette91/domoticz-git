@@ -1318,6 +1318,9 @@
     <ClInclude Include="..\webserver\header.hpp">
       <Filter>Webserver</Filter>
     </ClInclude>
+    <ClInclude Include="..\webserver\server_settings.hpp">
+      <Filter>Webserver</Filter>
+    </ClInclude>
     <ClInclude Include="..\webserver\utf.hpp">
       <Filter>Webserver</Filter>
     </ClInclude>
@@ -1806,6 +1809,12 @@
     </ClInclude>
     <ClInclude Include="..\hardware\HomeEasyTransmitter.h">
       <Filter>Devices\HomeEasy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\OpenWebNet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\openwebnet\bt_openwebnet.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2345,6 +2354,12 @@
     </ClCompile>
     <ClCompile Include="..\hardware\HomeEasy.cpp">
       <Filter>Devices\HomeEasy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\OpenWebNet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\openwebnet\bt_openwebnet.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

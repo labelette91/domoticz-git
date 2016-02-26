@@ -967,7 +967,7 @@ bool MainWorker::StartThread()
 		if (!m_webservers.StartServers(m_webserver_settings, m_secure_webserver_settings, szWWWFolder, m_bIgnoreUsernamePassword, &m_sharedserver))
 		{
 #ifdef WIN32
-			MessageBox(0,"Error starting webserver, check if ports are not in use!", MB_OK, MB_ICONERROR);
+			MessageBox(0,"Error starting webserver(s), check if ports are not in use!", MB_OK, MB_ICONERROR);
 #endif
 			return false;
 		}
@@ -4511,10 +4511,12 @@ void MainWorker::decode_Lighting5(const int HwdID, const _eHardwareTypes HwdType
 	unsigned char Unit=pResponse->LIGHTING5.unitcode;
 	unsigned char cmnd=pResponse->LIGHTING5.cmnd;
 	float flevel;
-	if (subType==sTypeLivolo)
-		flevel=(100.0f/7.0f)*float(pResponse->LIGHTING5.level);
+	if (subType == sTypeLivolo)
+		flevel = (100.0f / 7.0f)*float(pResponse->LIGHTING5.level);
+	else if (subType == sTypeLightwaveRF)
+		flevel = (100.0f / 31.0f)*float(pResponse->LIGHTING5.level);
 	else
-		flevel=(100.0f/31.0f)*float(pResponse->LIGHTING5.level);
+		flevel = (100.0f / 7.0f)*float(pResponse->LIGHTING5.level);
 	unsigned char SignalLevel=pResponse->LIGHTING5.rssi;
 
 	bool bDoUpdate=true;
@@ -4913,6 +4915,38 @@ void MainWorker::decode_Lighting5(const int HwdID, const _eHardwareTypes HwdType
 				break;
 			default:
 				WriteMessage("Unknown");
+				break;
+			}
+			break;
+		case sTypeIT:
+			WriteMessage("subtype       = Intertek,FA500,PROmax");
+			sprintf(szTmp, "Sequence nbr  = %d", pResponse->LIGHTING5.seqnbr);
+			WriteMessage(szTmp);
+			sprintf(szTmp, "ID            = %02X%02X%02X", pResponse->LIGHTING5.id1, pResponse->LIGHTING5.id2, pResponse->LIGHTING5.id3);
+			WriteMessage(szTmp);
+			sprintf(szTmp, "Unit          = %d", pResponse->LIGHTING5.unitcode);
+			WriteMessage(szTmp);
+			WriteMessage("Command       = ", false);
+			switch (pResponse->LIGHTING5.cmnd)
+			{
+			case light5_sOff:
+				WriteMessage("Off");
+				break;
+			case light5_sOn:
+				WriteMessage("On");
+				break;
+			case light5_sGroupOff:
+				WriteMessage("Group Off");
+				break;
+			case light5_sGroupOn:
+				WriteMessage("Group On");
+				break;
+			case light5_sSetLevel:
+				sprintf(szTmp, "Set dim level to: %.2f %%", flevel);
+				WriteMessage(szTmp);
+				break;
+			default:
+				WriteMessage("UNKNOWN");
 				break;
 			}
 			break;

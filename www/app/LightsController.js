@@ -3196,6 +3196,11 @@ define(['app'], function (app) {
 				bIsType5=1;
 				totunits=16;
 			}
+			else if (lighttype==59) {
+				//IT (Intertek,FA500,PROmax...)
+				bIsType5=1;
+				totunits=4;
+			}
 			else if ((lighttype==55)||(lighttype==57)) {
 				//Livolo
 				bIsType5=1;
@@ -3375,9 +3380,9 @@ define(['app'], function (app) {
 				}
 				else {
 					$("#dialog-addmanuallightdevice #lighting2params #combocmd1").hide();
-					if ((lighttype==55)||(lighttype==57)||(lighttype==100)) {
+					if ((lighttype==55)||(lighttype==57)||(lighttype==59)||(lighttype==100)) {
 						$("#dialog-addmanuallightdevice #lighting2params #combocmd2").hide();
-						if (lighttype!=100) {
+						if ((lighttype!=59)&&(lighttype!=100)) {
 							$("#dialog-addmanuallightdevice #lighting2paramsUnitCode").hide();
 						}
 					}
@@ -3482,8 +3487,16 @@ define(['app'], function (app) {
 				//AC
 				var ID="";
 				var bIsType5=0;
-				if ((lighttype==50)||(lighttype==55)||(lighttype==57)||(lighttype==100)||(lighttype==102)||(lighttype==105)||(lighttype==103))
-				{
+				if (
+					(lighttype==50)||
+					(lighttype==55)||
+					(lighttype==57)||
+					(lighttype==59)||
+					(lighttype==100)||
+					(lighttype==102)||
+					(lighttype==105)||
+					(lighttype==103)
+				) {
 					bIsType5=1;
 				}
 				if (bIsType5==0) {

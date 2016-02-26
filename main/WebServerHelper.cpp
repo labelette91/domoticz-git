@@ -13,7 +13,7 @@ namespace http {
 
 		CWebServerHelper::CWebServerHelper()
 		{
-#ifdef NS_ENABLE_SSL
+#ifdef WWW_ENABLE_SSL
 			secureServer_ = NULL;
 #endif
 			plainServer_ = NULL;
@@ -23,39 +23,25 @@ namespace http {
 
 		CWebServerHelper::~CWebServerHelper()
 		{
-#ifdef NS_ENABLE_SSL
-			if (secureServer_) delete secureServer_;
-#endif
-			if (plainServer_) delete plainServer_;
-
-#ifndef NOCLOUD
-			for (proxy_iterator it = proxymanagerCollection.begin(); it != proxymanagerCollection.end(); ++it) {
-				delete (*it);
-			}
-#endif
+			StopServers();
 		}
 
-		bool CWebServerHelper::StartServers(const server_settings & web_settings, const ssl_server_settings & secure_web_settings, const std::string &serverpath, const bool bIgnoreUsernamePassword, tcp::server::CTCPServer *sharedServer)
+		bool CWebServerHelper::StartServers(server_settings & web_settings, ssl_server_settings & secure_web_settings, const std::string &serverpath, const bool bIgnoreUsernamePassword, tcp::server::CTCPServer *sharedServer)
 		{
 			bool bRet = false;
 
 			m_pDomServ = sharedServer;
 
-#ifdef NS_ENABLE_SSL
-			SSL_library_init();
-			serverCollection.resize(secure_web_settings.is_enabled() ? 2 : 1);
-#else
-			serverCollection.resize(1);
-#endif
 			our_serverpath = serverpath;
 			plainServer_ = new CWebServer();
-			serverCollection[0] = plainServer_;
+			serverCollection.push_back(plainServer_);
 			bRet |= plainServer_->StartServer(web_settings, serverpath, bIgnoreUsernamePassword);
-#ifdef NS_ENABLE_SSL
+#ifdef WWW_ENABLE_SSL
 			if (secure_web_settings.is_enabled()) {
+				SSL_library_init();
 				secureServer_ = new CWebServer();
 				bRet |= secureServer_->StartServer(secure_web_settings, serverpath, bIgnoreUsernamePassword);
-				serverCollection[1] = secureServer_;
+				serverCollection.push_back(secureServer_);
 			}
 #endif
 
@@ -70,12 +56,21 @@ namespace http {
 		void CWebServerHelper::StopServers()
 		{
 			for (server_iterator it = serverCollection.begin(); it != serverCollection.end(); ++it) {
-				(*it)->StopServer();
+				((CWebServer*) *it)->StopServer();
+				if (*it) delete (*it);
 			}
+			serverCollection.clear();
+			plainServer_ = NULL; // avoid double free
+#ifdef WWW_ENABLE_SSL
+			secureServer_ = NULL; // avoid double free
+#endif
+
 #ifndef NOCLOUD
 			for (proxy_iterator it = proxymanagerCollection.begin(); it != proxymanagerCollection.end(); ++it) {
-				(*it)->Stop();
+				((CProxyManager*) *it)->Stop();
+				if (*it) delete (*it);
 			}
+			proxymanagerCollection.clear();
 #endif
 		}
 
@@ -160,7 +155,7 @@ namespace http {
 			if (plainServer_) { // assert
 				plainServer_->GetJSonDevices(root, rused, rfilter, order, rowid, planID, floorID, bDisplayHidden, LastUpdate, username);
 			}
-#ifdef NS_ENABLE_SSL
+#ifdef WWW_ENABLE_SSL
 			else if (secureServer_) {
 				secureServer_->GetJSonDevices(root, rused, rfilter, order, rowid, planID, floorID, bDisplayHidden, LastUpdate, username);
 			}

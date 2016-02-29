@@ -252,9 +252,6 @@
     <Filter Include="Devices\Nefit-Easy">
       <UniqueIdentifier>{eda6c8ec-7cdc-4897-9d23-c502aedbee4b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="tinyxpath">
-      <UniqueIdentifier>{dec41c77-32d9-454a-a9fc-a9c2de0dc4a1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="www">
       <UniqueIdentifier>{86db03ef-13cf-48f9-8cfd-9c490e22c5d2}</UniqueIdentifier>
     </Filter>
@@ -398,6 +395,8 @@
     </Filter>
     <Filter Include="Devices\HomeEasy">
       <UniqueIdentifier>{a6a316f9-6024-4c24-9ab6-37f183b4d72f}</UniqueIdentifier>
+    <Filter Include="Devices\OpenWebNet">
+      <UniqueIdentifier>{9cd757d1-3254-4dad-8fa4-bb2ba44472dd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -1408,9 +1407,6 @@
     <ClInclude Include="..\main\dirent_windows.h">
       <Filter>Windows</Filter>
     </ClInclude>
-    <ClInclude Include="..\hardware\BMP085.h">
-      <Filter>Devices\I2C</Filter>
-    </ClInclude>
     <ClInclude Include="..\main\EventSystem.h">
       <Filter>EventSystem</Filter>
     </ClInclude>
@@ -1810,11 +1806,14 @@
     <ClInclude Include="..\hardware\HomeEasyTransmitter.h">
       <Filter>Devices\HomeEasy</Filter>
     </ClInclude>
-    <ClInclude Include="..\hardware\OpenWebNet.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\hardware\openwebnet\bt_openwebnet.h">
-      <Filter>Header Files</Filter>
+      <Filter>Devices\OpenWebNet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\OpenWebNet.h">
+      <Filter>Devices\OpenWebNet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\I2C.h">
+      <Filter>Devices\I2C</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1946,9 +1945,6 @@
     </ClCompile>
     <ClCompile Include="..\hardware\1Wire.cpp">
       <Filter>Devices\1-Wire</Filter>
-    </ClCompile>
-    <ClCompile Include="..\hardware\BMP085.cpp">
-      <Filter>Devices\I2C</Filter>
     </ClCompile>
     <ClCompile Include="..\main\EventSystem.cpp">
       <Filter>EventSystem</Filter>
@@ -2346,6 +2342,7 @@
     <ClCompile Include="..\notifications\NotificationGCM.cpp">
       <Filter>Notifications</Filter>
     </ClCompile>
+<<<<<<< HEAD
     <ClCompile Include="..\main\Imperihome.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -2354,12 +2351,16 @@
     </ClCompile>
     <ClCompile Include="..\hardware\HomeEasy.cpp">
       <Filter>Devices\HomeEasy</Filter>
+=======
+    <ClCompile Include="..\hardware\openwebnet\bt_openwebnet.cpp">
+      <Filter>Devices\OpenWebNet</Filter>
+>>>>>>> 351aa84b72cd4473be965374ad8a0d72ae3fdf4e
     </ClCompile>
     <ClCompile Include="..\hardware\OpenWebNet.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Devices\OpenWebNet</Filter>
     </ClCompile>
-    <ClCompile Include="..\hardware\openwebnet\bt_openwebnet.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="..\hardware\I2C.cpp">
+      <Filter>Devices\I2C</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

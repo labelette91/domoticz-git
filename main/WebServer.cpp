@@ -1033,10 +1033,11 @@ namespace http {
 				//all fine here!
 			}
 			else if (htype == HTYPE_HomeEasy) {
-                //input pin in mode1
-				std::string iPin = request::findValue(&req, "mode1");if (!iPin.empty()) mode1 = atoi(iPin.c_str());
-                //output pin in mode2
-				std::string oPin = request::findValue(&req, "mode2");if (!oPin.empty()) mode2 = atoi(oPin.c_str());
+				//input pin in mode1
+				std::string iPin = request::findValue(&req, "mode1"); if (!iPin.empty()) mode1 = atoi(iPin.c_str());
+				//output pin in mode2
+				std::string oPin = request::findValue(&req, "mode2"); if (!oPin.empty()) mode2 = atoi(oPin.c_str());
+			}
 			else if (htype == HTYPE_RaspberryHTU21D) {
 				//all fine here!
 			}

@@ -879,6 +879,9 @@ namespace http {
 
 		void CWebServer::Cmd_GetHardwareTypes(WebEmSession & session, const request& req, Json::Value &root)
 		{
+			if (session.rights != 2)
+				return;//Only admin user allowed
+
 			root["status"] = "OK";
 			root["title"] = "GetHardwareTypes";
 			std::map<std::string, int> _htypes;
@@ -1412,6 +1415,8 @@ namespace http {
 
 		void CWebServer::Cmd_GetDeviceValueOptions(WebEmSession & session, const request& req, Json::Value &root)
 		{
+			if (session.rights != 2)
+				return;//Only admin user allowed
 			std::string idx = request::findValue(&req, "idx");
 			if (idx == "")
 				return;
@@ -1439,6 +1444,8 @@ namespace http {
 
 		void CWebServer::Cmd_GetDeviceValueOptionWording(WebEmSession & session, const request& req, Json::Value &root)
 		{
+			if (session.rights != 2)
+				return;//Only admin user allowed
 			std::string idx = request::findValue(&req, "idx");
 			std::string pos = request::findValue(&req, "pos");
 			if ((idx == "") || (pos == ""))
@@ -1453,6 +1460,8 @@ namespace http {
 
 		void CWebServer::Cmd_DeleteUserVariable(WebEmSession & session, const request& req, Json::Value &root)
 		{
+			if (session.rights != 2)
+				return;//Only admin user allowed
 			std::string idx = request::findValue(&req, "idx");
 			if (idx == "")
 				return;
@@ -1463,6 +1472,8 @@ namespace http {
 
 		void CWebServer::Cmd_SaveUserVariable(WebEmSession & session, const request& req, Json::Value &root)
 		{
+			if (session.rights != 2)
+				return;//Only admin user allowed
 			std::string variablename = request::findValue(&req, "vname");
 			std::string variablevalue = request::findValue(&req, "vvalue");
 			std::string variabletype = request::findValue(&req, "vtype");
@@ -1475,6 +1486,8 @@ namespace http {
 
 		void CWebServer::Cmd_UpdateUserVariable(WebEmSession & session, const request& req, Json::Value &root)
 		{
+			if (session.rights != 2)
+				return;//Only admin user allowed
 			std::string idx = request::findValue(&req, "idx");
 			std::string variablename = request::findValue(&req, "vname");
 			std::string variablevalue = request::findValue(&req, "vvalue");
@@ -1557,6 +1570,8 @@ namespace http {
 
 		void CWebServer::Cmd_AllowNewHardware(WebEmSession & session, const request& req, Json::Value &root)
 		{
+			if (session.rights != 2)
+				return;//Only admin user allowed
 			std::string sTimeout = request::findValue(&req, "timeout");
 			if (sTimeout == "")
 				return;
@@ -2803,6 +2818,8 @@ namespace http {
 
 		void CWebServer::Cmd_SystemShutdown(WebEmSession & session, const request& req, Json::Value &root)
 		{
+			if (session.rights != 2)
+				return;//Only admin user allowed
 #ifdef WIN32
 			int ret = system("shutdown -s -f -t 1 -d up:125:1");
 #else
@@ -2819,6 +2836,8 @@ namespace http {
 
 		void CWebServer::Cmd_SystemReboot(WebEmSession & session, const request& req, Json::Value &root)
 		{
+			if (session.rights != 2)
+				return;//Only admin user allowed
 #ifdef WIN32
 			int ret = system("shutdown -r -f -t 1 -d up:125:1");
 #else
@@ -9672,6 +9691,8 @@ namespace http {
 
 		void CWebServer::GetDatabaseBackup(WebEmSession & session, const request& req, reply & rep)
 		{
+			if (session.rights != 2)
+				return;//Only admin user allowed
 #ifdef WIN32
 			std::string OutputFileName = szUserDataFolder + "backup.db";
 #else
@@ -10516,23 +10537,22 @@ namespace http {
 			root["title"] = "UploadCustomIcon";
 			root["status"] = "ERROR";
 			root["error"] = "Invalid";
-			if (session.rights == 2)
+			//Only admin user allowed
+			if (session.rights != 2)
+				return;
+			std::string zipfile = request::findValue(&req, "file");
+			if (zipfile != "")
 			{
-				//Only admin user allowed
-				std::string zipfile = request::findValue(&req, "file");
-				if (zipfile != "")
+				std::string ErrorMessage;
+				bool bOK = m_sql.InsertCustomIconFromZip(zipfile, ErrorMessage);
+				if (bOK)
 				{
-					std::string ErrorMessage;
-					bool bOK = m_sql.InsertCustomIconFromZip(zipfile, ErrorMessage);
-					if (bOK)
-					{
-						root["status"] = "OK";
-					}
-					else
-					{
-						root["status"] = "ERROR";
-						root["error"] = ErrorMessage;
-					}
+					root["status"] = "OK";
+				}
+				else
+				{
+					root["status"] = "ERROR";
+					root["error"] = ErrorMessage;
 				}
 			}
 			std::string jcallback = request::findValue(&req, "jsoncallback");

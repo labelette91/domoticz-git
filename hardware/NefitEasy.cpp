@@ -64,6 +64,7 @@ std::string ReadFile(std::string filename)
 #define NEFITEASY_SET_TEMP_ROOM "/heatingCircuits/hc1/temperatureRoomManual"
 #define NEFITEASY_SET_TEMP_OVERRIDE "/heatingCircuits/hc1/manualTempOverride/status"
 #define NEFITEASY_SET_TEMP_OVERRIDE_TEMP "/heatingCircuits/hc1/manualTempOverride/temperature"
+#define NEFITEASY_SET_USER_MODE "/heatingCircuits/hc1/usermode"
 #define NEFITEASY_LOCATION_LATITUDE "/system/location/latitude"
 #define NEFITEASY_LOCATION_LONGITUDE "/system/location/longitude"
 
@@ -115,6 +116,9 @@ void CNefitEasy::Do_Work()
 	bool bFirstTime = true;
 	int nstat_pollint = NEFIT_STATUS_POLL_INTERVAL;
 	int npres_pollint = NEFIT_PRESSURE_POLL_INTERVAL;
+
+	_log.Log(LOG_STATUS, "NefitEasy: Worker started...");
+
 	while (!m_stoprequested)
 	{
 		sleep_seconds(1);
@@ -147,12 +151,54 @@ void CNefitEasy::Do_Work()
 		}
 		bFirstTime = false;
 	}
-	_log.Log(LOG_STATUS, "NefitEasy Worker stopped...");
+	_log.Log(LOG_STATUS, "NefitEasy: Worker stopped...");
 }
 
 bool CNefitEasy::WriteToHardware(const char *pdata, const unsigned char length)
 {
+	const tRBUF *pCmd = reinterpret_cast<const tRBUF *>(pdata);
+	if (pCmd->LIGHTING2.packettype == pTypeLighting2)
+	{
+		//Light command
+		int node_id = pCmd->LIGHTING2.id4;
+		bool bIsOn = (pCmd->LIGHTING2.cmnd == light2_sOn);
+		if (node_id == 1)
+		{
+			//User Mode Switch Clock/Manual
+			SetUserMode(bIsOn);
+			return true;
+		}
+	}
 	return false;
+}
+
+void CNefitEasy::SetUserMode(bool bSetUserModeClock)
+{
+	Json::Value root;
+	root["value"] = (bSetUserModeClock == true) ? "clock" : "manual";
+
+	std::stringstream szURL;
+	std::string sResult;
+	std::vector<std::string> ExtraHeaders;
+	//ExtraHeaders.push_back("User-Agent: NefitEasy");
+	ExtraHeaders.push_back("Content-Type: application/json");
+
+	try
+	{
+
+		szURL << "http://" << m_szIPAddress << ":" << m_usIPPort << NEFITEASY_HTTP_BRIDGE << NEFITEASY_SET_USER_MODE;
+		if (!HTTPClient::POST(szURL.str(), root.toStyledString(), ExtraHeaders, sResult))
+		{
+			_log.Log(LOG_ERROR, "NefitEasy: Error setting User Mode!");
+			return;
+		}
+		GetStatusDetails();
+	}
+	catch (...)
+	{
+		_log.Log(LOG_ERROR, "NefitEasy: Error setting User Mode!");
+		return;
+	}
 }
 
 bool CNefitEasy::GetStatusDetails()
@@ -277,6 +323,12 @@ UMD -> 'user mode' string (clock)
 				}
 			}
 		}
+	}
+	if (!root2["UMD"].empty())
+	{
+		tmpstr = root2["UMD"].asString();
+		bool bIsClockMode = (tmpstr == "clock");
+		SendSwitch(1, 1, -1, bIsClockMode, 100, "Clock Mode");
 	}
 
 	//Outdoor Temperature

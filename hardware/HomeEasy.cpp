@@ -21,6 +21,7 @@
 #include "../main/mainworker.h"
 
 #include "HomeEasyTransmitter.h"
+#include "../main/SQLHelper.h"
 
 HomeEasy::HomeEasy(const int ID)
 {
@@ -28,7 +29,22 @@ HomeEasy::HomeEasy(const int ID)
 	m_HwdID=ID;
 
 	int TXPIN = 0;
+	int RXPIN = 0;
+	int SPI_CHAN = 1;
+	int Spi_speed = 500000;
 	HomeEasyRfTx = 0;
+
+	//input pin in mode1
+	//output pin in mode2
+
+	TSqlQueryResult result = m_sql.Query("SELECT Mode1, Mode2, Mode3, Mode4, Mode5, Mode6 FROM Hardware WHERE (ID='%d')", ID );
+	if (result.size() > 0)
+	{
+		TXPIN = atoi(result[0][0].c_str());
+		RXPIN = atoi(result[0][1].c_str());
+		_log.Log(LOG_TRACE, "HERF: RXPin:%d TXPin:%d", TXPIN, RXPIN);
+
+	}
 
 #ifdef __arm__
 	if (wiringPiSetup() == -1)
@@ -37,6 +53,19 @@ HomeEasy::HomeEasy(const int ID)
 	}
 	HomeEasyRfTx = new HomeEasyTransmitter(TXPIN, 0);
 	HomeEasyRfTx->initPin();
+
+	//  spiSetup ( 1, 500000) ;
+	if (SPI.Setup(SPI_CHAN, Spi_speed))
+	{
+		_log.Log(LOG_ERROR, "failed to open the SPI bus: ");
+	}
+
+	radio = new RFM69(0, 0);
+	radio->initialize(RF69_433MHZ, 1, 100);
+	_log.Log(LOG_TRACE, "HERF: RFM69 initialized ", TXPIN, RXPIN);
+	radio->setMode(RF69_MODE_SLEEP);
+
+
 #endif
 }
 
@@ -82,7 +111,14 @@ bool HomeEasy::WriteToHardware(const char *pdata, const unsigned char length)
 		_log.Log(LOG_TRACE, "HERF: Send Home Easy Id :%08X Unit:%d Cmd:%d" ,id , unit, cmd );
 		if (HomeEasyRfTx){
 #ifdef __arm__
+			radio->setMode(RF69_MODE_TX);
+			//attente une secone max pour emetre si emission en cours -80--> -70
+			radio->WaitCanSend(-70);
+			HomeEasyRfTx->initPin();
+			//send
 			HomeEasyRfTx->setSwitch(cmd, id, unit);   
+			radio->setMode(RF69_MODE_SLEEP);
+
 #endif
 			}
 		else

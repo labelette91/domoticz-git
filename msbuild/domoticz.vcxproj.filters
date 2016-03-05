@@ -395,6 +395,7 @@
     </Filter>
     <Filter Include="Devices\HomeEasy">
       <UniqueIdentifier>{a6a316f9-6024-4c24-9ab6-37f183b4d72f}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Devices\OpenWebNet">
       <UniqueIdentifier>{9cd757d1-3254-4dad-8fa4-bb2ba44472dd}</UniqueIdentifier>
     </Filter>
@@ -2342,7 +2343,6 @@
     <ClCompile Include="..\notifications\NotificationGCM.cpp">
       <Filter>Notifications</Filter>
     </ClCompile>
-<<<<<<< HEAD
     <ClCompile Include="..\main\Imperihome.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -2351,10 +2351,9 @@
     </ClCompile>
     <ClCompile Include="..\hardware\HomeEasy.cpp">
       <Filter>Devices\HomeEasy</Filter>
-=======
+    </ClCompile>
     <ClCompile Include="..\hardware\openwebnet\bt_openwebnet.cpp">
       <Filter>Devices\OpenWebNet</Filter>
->>>>>>> 351aa84b72cd4473be965374ad8a0d72ae3fdf4e
     </ClCompile>
     <ClCompile Include="..\hardware\OpenWebNet.cpp">
       <Filter>Devices\OpenWebNet</Filter>

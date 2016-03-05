@@ -2,7 +2,12 @@
 
 #include "DomoticzHardware.h"
 #include "HomeEasyTransmitter.h"
+#ifdef __arm__
 
+#include "RFM69.h"
+#include "RFM69registers.h"
+
+#endif
 class HomeEasy : public CDomoticzHardwareBase
 {
 public:
@@ -18,4 +23,10 @@ private:
 	volatile bool m_stoprequested;
 
 	HomeEasyTransmitter *HomeEasyRfTx;
+
+#ifdef __arm__
+	SPIClass SPI;
+	RFM69 * radio;
+
+#endif
 };

@@ -5,23 +5,25 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #ifdef __arm__
-	#include <linux/i2c-dev.h>
-	#include <linux/i2c.h> 
+	//#include <linux/i2c-dev.h>
+	//#include <linux/i2c.h> 
 	#include <unistd.h>
 	#include <sys/ioctl.h>
   #include <sched.h>    
 	#include <wiringPi.h>
 #endif
-#include <math.h> 
-#include "../main/Helper.h"
 #include "../main/Logger.h"
-#include "hardwaretypes.h"
-#include "../main/RFXtrx.h"
 #include "../main/localtime_r.h"
 #include "../main/mainworker.h"
 
 #include "HomeEasyTransmitter.h"
 #include "../main/SQLHelper.h"
+
+#ifdef __arm__
+#include "SPI.h"
+SPIClass SPI;
+
+#endif
 
 HomeEasy::HomeEasy(const int ID)
 {
@@ -45,7 +47,7 @@ HomeEasy::HomeEasy(const int ID)
 		_log.Log(LOG_TRACE, "HERF: RXPin:%d TXPin:%d", TXPIN, RXPIN);
 
 	}
-
+	TXPIN = 5;
 #ifdef __arm__
 	if (wiringPiSetup() == -1)
 	{

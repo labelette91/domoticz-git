@@ -4,6 +4,9 @@
 #include "HomeEasyTransmitter.h"
 #ifdef __arm__
 
+#define SS 0
+#define RF69_IRQ_PIN 0 
+#define RF69_IRQ_NUM 0 
 #include "RFM69.h"
 #include "RFM69registers.h"
 
@@ -25,7 +28,6 @@ private:
 	HomeEasyTransmitter *HomeEasyRfTx;
 
 #ifdef __arm__
-	SPIClass SPI;
 	RFM69 * radio;
 
 #endif

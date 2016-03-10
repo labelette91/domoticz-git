@@ -131,6 +131,7 @@ HomeEasyTransmitter::HomeEasyTransmitter(short dataPin,  byte pLed )
 
 void HomeEasyTransmitter::setSwitch(bool on, unsigned long transmitterId, short recipient)
 {
+	initPin();
   transmit(on, transmitterId, recipient);
   delay(10);
   transmit(on, transmitterId, recipient);
@@ -139,7 +140,7 @@ void HomeEasyTransmitter::setSwitch(bool on, unsigned long transmitterId, short 
   delay(10);
   transmit(on, transmitterId, recipient);
   delay(10);
-
+	deactivatePin();
 }
 
 
@@ -149,7 +150,6 @@ void HomeEasyTransmitter::transmit(bool blnOn,unsigned long transmitterId, short
   int i;
 
   cli();
-	initPin();
 
   // Do the latch sequence.. 
   rfm69_set_data( HIGH);
@@ -237,8 +237,8 @@ void HomeEasyTransmitter::sendPair(bool b)
 }
 
 
- void HomeEasyTransmitter::initPin()
-    {
+void HomeEasyTransmitter::initPin()
+{
     pinMode(txPin, OUTPUT);      // transmitter pin.
     digitalWrite(txPin, LOW);    //no tx 
 
@@ -247,4 +247,13 @@ void HomeEasyTransmitter::sendPair(bool b)
     	pinMode(clkPin, OUTPUT);      
     	digitalWrite(clkPin, LOW);
 		}
-    }
+}
+
+void HomeEasyTransmitter::deactivatePin()
+{
+    pinMode(txPin, INPUT);
+    if (clkPin>=0)
+		{
+    	pinMode(clkPin, INPUT);      
+		}
+}

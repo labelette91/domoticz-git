@@ -5,7 +5,6 @@
 #ifndef ARDUINO
 typedef unsigned char byte;
 #endif
-
 class HomeEasyTransmitter
 {
 
@@ -34,7 +33,8 @@ class HomeEasyTransmitter
     void rfm69_set_data(byte state);
     void rfm69_set_data_without_clk(byte state);
     void rfm69_set_data_with_clk(byte state);
-
+		void deactivatePin();
+ 
 
 };
 

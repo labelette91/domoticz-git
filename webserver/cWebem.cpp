@@ -98,14 +98,8 @@ void cWebem::Stop() {
 		_log.Log(LOG_ERROR, "[web:%s] exception thrown while stopping session cleaner", GetPort().c_str());
 	}
 	// Stop Web server
-	if ((myServer != NULL) && !myServer->stopped()) {
-		myServer->stop(); // asynchronous stop
-		while(true) {
-			if (myServer->stopped()) {
-				break;
-			}
-			sleep_milliseconds(500);
-		}
+	if (myServer != NULL) {
+		myServer->stop();
 	}
 }
 
@@ -1332,9 +1326,21 @@ bool cWebemRequestHandler::CompressWebOutput(const request& req, reply& rep)
 static void GetURICommandParameter(const std::string &uri, std::string &cmdparam)
 {
 	cmdparam = uri;
-	size_t ppos = uri.find("&param=");
-	if (ppos == std::string::npos)
+	size_t ppos1 = uri.find("&param=");
+	size_t ppos2 = uri.find("?param=");
+	if (
+		(ppos1 == std::string::npos) &&
+		(ppos2 == std::string::npos)
+		)
 		return;
+	size_t ppos = ppos1;
+	if (ppos == std::string::npos)
+		ppos = ppos2;
+	else
+	{
+		if ((ppos2 < ppos) && (ppos != std::string::npos))
+			ppos = ppos2;
+	}
 	cmdparam = uri.substr(ppos + 7);
 	ppos = cmdparam.find("&");
 	if (ppos != std::string::npos)

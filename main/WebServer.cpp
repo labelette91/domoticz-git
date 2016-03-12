@@ -4506,7 +4506,8 @@ namespace http {
 						if (
 							(lighttype == 205) ||
 							(lighttype == 210) ||
-							(lighttype == 211)
+							(lighttype == 211)||
+							(lighttype == 212)
 							)
 						{
 							id = id.substr(0, 6);
@@ -8814,7 +8815,7 @@ namespace http {
 								break;
 							case MTYPE_GAS:
 								musage = float(total_real) / GasDivider;
-								sprintf(szTmp, "%.02f m3", musage);
+								sprintf(szTmp, "%.03f m3", musage);
 								break;
 							case MTYPE_WATER:
 								musage = float(total_real) / WaterDivider;
@@ -8870,7 +8871,7 @@ namespace http {
 							break;
 						case MTYPE_GAS:
 							musage = float(acounter) / GasDivider;
-							sprintf(szTmp, "%.02f m3", musage);
+							sprintf(szTmp, "%.03f m3", musage);
 							break;
 						case MTYPE_WATER:
 							musage = float(acounter) / WaterDivider;
@@ -8890,10 +8891,10 @@ namespace http {
 							sprintf(szTmp, "%s Watt", splitresults[1].c_str());
 							break;
 						case MTYPE_GAS:
-							sprintf(szTmp, "%s m", splitresults[1].c_str());
+							sprintf(szTmp, "%s m3", splitresults[1].c_str());
 							break;
 						case MTYPE_WATER:
-							sprintf(szTmp, "%s m", splitresults[1].c_str());
+							sprintf(szTmp, "%s m3", splitresults[1].c_str());
 							break;
 						case MTYPE_COUNTER:
 							sprintf(szTmp, "%s", splitresults[1].c_str());
@@ -9401,7 +9402,7 @@ namespace http {
 								SensorType = atoi(sResults[0].c_str());
 								szAxesLabel = sResults[1];
 							}
-							sprintf(szData, "%.2f %s", atof(sValue.c_str()), szAxesLabel.c_str());
+							sprintf(szData, "%g %s", atof(sValue.c_str()), szAxesLabel.c_str());
 							root["result"][ii]["Data"] = szData;
 							root["result"][ii]["SensorType"] = SensorType;
 							root["result"][ii]["SensorUnit"] = szAxesLabel;
@@ -12655,7 +12656,7 @@ namespace http {
 						if (bHaveUsage == false)
 							method = 0;
 
-						if (dType == pTypeYouLess)
+						if ((dType == pTypeYouLess) && ((metertype == MTYPE_ENERGY) || (metertype == MTYPE_ENERGY_GENERATED)))
 							method = 1;
 
 						int iDisplayInPower = 1;
@@ -12719,7 +12720,7 @@ namespace http {
 												sprintf(szTmp, "%.3f", (TotalValue / EnergyDivider)*1000.0f);	//from kWh -> Watt
 												break;
 											case MTYPE_GAS:
-												sprintf(szTmp, "%.2f", TotalValue / GasDivider);
+												sprintf(szTmp, "%.3f", TotalValue / GasDivider);
 												break;
 											case MTYPE_WATER:
 												sprintf(szTmp, "%.3f", TotalValue / WaterDivider);

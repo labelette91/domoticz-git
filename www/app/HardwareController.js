@@ -430,7 +430,7 @@ define(['app'], function (app) {
                      }
                 });
             }
-            else if ((text.indexOf("ICY") >= 0) || (text.indexOf("Toon") >= 0) || (text.indexOf("Nest Th") >= 0) || (text.indexOf("PVOutput") >= 0) || (text.indexOf("Netatmo") >= 0) || (text.indexOf("Thermosmart") >= 0)) {
+            else if ((text.indexOf("ICY") >= 0) || (text.indexOf("Toon") >= 0) || (text.indexOf("Atag") >= 0) || (text.indexOf("Nest Th") >= 0) || (text.indexOf("PVOutput") >= 0) || (text.indexOf("Netatmo") >= 0) || (text.indexOf("Thermosmart") >= 0)) {
                 var username = $("#hardwarecontent #divlogin #username").val();
                 var password = encodeURIComponent($("#hardwarecontent #divlogin #password").val());
                 $.ajax({
@@ -966,7 +966,7 @@ define(['app'], function (app) {
                      }
                 });
             }
-            else if ((text.indexOf("ICY") >= 0)||(text.indexOf("Toon") >= 0)||(text.indexOf("Nest Th") >= 0)||(text.indexOf("PVOutput") >= 0)||(text.indexOf("Netatmo") >= 0) || (text.indexOf("Thermosmart") >= 0))
+            else if ((text.indexOf("ICY") >= 0)||(text.indexOf("Toon") >= 0)||(text.indexOf("Atag") >= 0)||(text.indexOf("Nest Th") >= 0)||(text.indexOf("PVOutput") >= 0)||(text.indexOf("Netatmo") >= 0) || (text.indexOf("Thermosmart") >= 0))
             {
                 var username=$("#hardwarecontent #divlogin #username").val();
                 var password=encodeURIComponent($("#hardwarecontent #divlogin #password").val());
@@ -3907,6 +3907,7 @@ define(['app'], function (app) {
                             (data["Type"].indexOf("ICY") >= 0) ||
                             (data["Type"].indexOf("Harmony") >= 0)||
                             (data["Type"].indexOf("Toon") >= 0)||
+                            (data["Type"].indexOf("Atag") >= 0)||
                             (data["Type"].indexOf("Nest Th") >= 0)||
                             (data["Type"].indexOf("PVOutput") >= 0)||
                             (data["Type"].indexOf("ETH8020") >= 0)||
@@ -4066,7 +4067,7 @@ define(['app'], function (app) {
                 $("#hardwarecontent #username").hide();
                 $("#hardwarecontent #lblusername").hide();
             }
-            else if ((text.indexOf("ICY") >= 0)||(text.indexOf("Toon") >= 0)||(text.indexOf("Nest Th") >= 0)||(text.indexOf("PVOutput") >= 0)||(text.indexOf("Netatmo") >= 0)||(text.indexOf("Thermosmart") >= 0))
+            else if ((text.indexOf("ICY") >= 0)||(text.indexOf("Toon") >= 0)||(text.indexOf("Atag") >= 0)||(text.indexOf("Nest Th") >= 0)||(text.indexOf("PVOutput") >= 0)||(text.indexOf("Netatmo") >= 0)||(text.indexOf("Thermosmart") >= 0))
             {
                 $("#hardwarecontent #divserial").hide();
                 $("#hardwarecontent #divremote").hide();

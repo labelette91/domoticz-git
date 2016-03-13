@@ -399,6 +399,9 @@
     <Filter Include="Devices\OpenWebNet">
       <UniqueIdentifier>{9cd757d1-3254-4dad-8fa4-bb2ba44472dd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Devices\AtagOne">
+      <UniqueIdentifier>{604bf7b4-5455-4d54-9e9f-1b9deac8e65c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\CMakeLists.txt">
@@ -1816,6 +1819,9 @@
     <ClInclude Include="..\hardware\I2C.h">
       <Filter>Devices\I2C</Filter>
     </ClInclude>
+    <ClInclude Include="..\hardware\AtagOne.h">
+      <Filter>Devices\AtagOne</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\webserver\Base64.cpp">
@@ -2360,6 +2366,9 @@
     </ClCompile>
     <ClCompile Include="..\hardware\I2C.cpp">
       <Filter>Devices\I2C</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\AtagOne.cpp">
+      <Filter>Devices\AtagOne</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

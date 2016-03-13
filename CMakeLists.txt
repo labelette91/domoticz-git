@@ -228,6 +228,7 @@ hardware/ASyncTCP.cpp
 hardware/HomeEasy.cpp
 hardware/RFM69.cpp
 hardware/HomeEasyTransmitter.cpp
+hardware/AtagOne.cpp
 hardware/Comm5TCP.cpp
 hardware/csocket.cpp
 hardware/CurrentCostMeterBase.cpp

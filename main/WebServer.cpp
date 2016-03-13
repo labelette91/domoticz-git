@@ -1061,6 +1061,7 @@ namespace http {
 				(htype == HTYPE_ForecastIO) ||
 				(htype == HTYPE_ICYTHERMOSTAT) ||
 				(htype == HTYPE_TOONTHERMOSTAT) ||
+				(htype == HTYPE_AtagOne) ||
 				(htype == HTYPE_PVOUTPUT_INPUT) ||
 				(htype == HTYPE_NEST) ||
 				(htype == HTYPE_ANNATHERMOSTAT) ||
@@ -1311,6 +1312,7 @@ namespace http {
 				(htype == HTYPE_ForecastIO) ||
 				(htype == HTYPE_ICYTHERMOSTAT) ||
 				(htype == HTYPE_TOONTHERMOSTAT) ||
+				(htype == HTYPE_AtagOne) ||
 				(htype == HTYPE_PVOUTPUT_INPUT) ||
 				(htype == HTYPE_NEST) ||
 				(htype == HTYPE_ANNATHERMOSTAT) ||

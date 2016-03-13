@@ -88,8 +88,8 @@
 #include "../hardware/NefitEasy.h"
 #include "../hardware/HomeEasy.h"
 #include "../hardware/PanasonicTV.h"
-//#include "../hardware/HTU21D.h"
 #include "../hardware/OpenWebNet.h"
+#include "../hardware/AtagOne.h"
 
 // load notifications configuration
 #include "../notifications/NotificationHelper.h"
@@ -816,8 +816,8 @@ bool MainWorker::AddHardwareFromParams(
 		pHardware = new HomeEasy(ID);
 		break;
 	case HTYPE_RaspberryHTU21D:
-			pHardware = new I2C(ID,2);
-			break;
+		pHardware = new I2C(ID,2);
+		break;
 	case HTYPE_Wunderground:
 		pHardware = new CWunderground(ID,Username,Password);
 		break;
@@ -838,6 +838,9 @@ bool MainWorker::AddHardwareFromParams(
 		break;
 	case HTYPE_TOONTHERMOSTAT:
 		pHardware = new CToonThermostat(ID, Username, Password);
+		break;
+	case HTYPE_AtagOne:
+		pHardware = new CAtagOne(ID, Username, Password, Mode1, Mode2, Mode3, Mode4, Mode5, Mode6);
 		break;
 	case HTYPE_NEST:
 		pHardware = new CNest(ID, Username, Password);
@@ -11164,6 +11167,7 @@ bool MainWorker::SetSetPointInt(const std::vector<std::string> &sd, const float 
 		(pHardware->HwdType == HTYPE_OpenThermGatewayTCP) ||
 		(pHardware->HwdType == HTYPE_ICYTHERMOSTAT) ||
 		(pHardware->HwdType == HTYPE_TOONTHERMOSTAT) ||
+		(pHardware->HwdType == HTYPE_AtagOne) ||
 		(pHardware->HwdType == HTYPE_NEST) ||
 		(pHardware->HwdType == HTYPE_ANNATHERMOSTAT) ||
 		(pHardware->HwdType == HTYPE_THERMOSMART) ||
@@ -11191,6 +11195,11 @@ bool MainWorker::SetSetPointInt(const std::vector<std::string> &sd, const float 
 		else if (pHardware->HwdType == HTYPE_TOONTHERMOSTAT)
 		{
 			CToonThermostat *pGateway = reinterpret_cast<CToonThermostat*>(pHardware);
+			pGateway->SetSetpoint(ID4, TempValue);
+		}
+		else if (pHardware->HwdType == HTYPE_AtagOne)
+		{
+			CAtagOne *pGateway = reinterpret_cast<CAtagOne*>(pHardware);
 			pGateway->SetSetpoint(ID4, TempValue);
 		}
 		else if (pHardware->HwdType == HTYPE_NEST)
@@ -11468,6 +11477,12 @@ bool MainWorker::SetThermostatState(const std::string &idx, const int newState)
 	//virtual thermostat set state confor/eco/off/frozen
 	{
 		return m_VirtualThermostat.SetThermostatState(idx,newState);
+	}
+	if (pHardware->HwdType == HTYPE_AtagOne)
+	{
+		//CAtagOne *pGateway = reinterpret_cast<CAtagOne*>(pHardware);
+		//pGateway->SetProgramState(newState);
+		return true;
 	}
 	else if (pHardware->HwdType == HTYPE_NEST)
 	{

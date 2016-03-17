@@ -26,6 +26,8 @@ private:
 	volatile bool m_stoprequested;
 
 	HomeEasyTransmitter *HomeEasyRfTx;
+	int TXPIN ;
+	int RXPIN ;
 
 #ifdef __arm__
 	RFM69 * radio;

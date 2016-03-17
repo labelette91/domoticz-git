@@ -5,12 +5,18 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #ifdef __arm__
-	//#include <linux/i2c-dev.h>
-	//#include <linux/i2c.h> 
-	#include <unistd.h>
-	#include <sys/ioctl.h>
-  #include <sched.h>    
-	#include <wiringPi.h>
+
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <sched.h>    
+#include <wiringPi.h>
+
+#include "RCSwitch.h"
+#include "RcOok.h"
+#include "Sensor.h"
+
+#include "SPI.h"
+
 #endif
 #include "../main/Logger.h"
 #include "../main/localtime_r.h"
@@ -20,8 +26,8 @@
 #include "../main/SQLHelper.h"
 
 #ifdef __arm__
-#include "SPI.h"
 SPIClass SPI;
+RCSwitch *rc ;
 
 #endif
 
@@ -30,8 +36,8 @@ HomeEasy::HomeEasy(const int ID)
 	m_stoprequested=false;
 	m_HwdID=ID;
 
-	int TXPIN = 0;
-	int RXPIN = 0;
+	TXPIN = 0;
+	RXPIN = 0;
 	int SPI_CHAN = 1;
 	int Spi_speed = 500000;
 	HomeEasyRfTx = 0;
@@ -54,19 +60,31 @@ HomeEasy::HomeEasy(const int ID)
 		_log.Log(LOG_ERROR, "failed to initialize wiring pi");
 	}
 	HomeEasyRfTx = new HomeEasyTransmitter(TXPIN, 0);
-	HomeEasyRfTx->initPin();
+	//HomeEasyRfTx->initPin();
 
 	//  spiSetup ( 1, 500000) ;
 	if (SPI.Setup(SPI_CHAN, Spi_speed))
 	{
 		_log.Log(LOG_ERROR, "failed to open the SPI bus: ");
 	}
+	//if receiver declared , init receive pin
+	if ( RXPIN != -1 )
+		pinMode(RXPIN, INPUT);
 
 	radio = new RFM69(0, 0);
 	radio->initialize(RF69_433MHZ, 1, 100);
 	_log.Log(LOG_TRACE, "HERF: RFM69 initialized ", TXPIN, RXPIN);
-	radio->setMode(RF69_MODE_SLEEP);
 
+	if (TXPIN != RXPIN)
+		radio->setMode(RF69_MODE_SLEEP);
+	else
+		radio->setMode(RF69_MODE_RX);
+
+	// if receiver defined
+	if (RXPIN >= 0)
+		rc = new RCSwitch(RXPIN, -1);
+	else
+		rc = 0;
 
 #endif
 }
@@ -113,13 +131,17 @@ bool HomeEasy::WriteToHardware(const char *pdata, const unsigned char length)
 		_log.Log(LOG_TRACE, "HERF: Send Home Easy Id :%08X Unit:%d Cmd:%d" ,id , unit, cmd );
 		if (HomeEasyRfTx){
 #ifdef __arm__
+			HomeEasyRfTx->initPin();
 			radio->setMode(RF69_MODE_TX);
 			//attente une secone max pour emetre si emission en cours -80--> -70
 			radio->WaitCanSend(-70);
-			HomeEasyRfTx->initPin();
 			//send
 			HomeEasyRfTx->setSwitch(cmd, id, unit);   
-			radio->setMode(RF69_MODE_SLEEP);
+			//if same rx/tx pin : goto receive state after transmit
+			if (TXPIN!= RXPIN)
+				radio->setMode(RF69_MODE_SLEEP);
+			else
+				radio->setMode(RF69_MODE_RX);
 
 #endif
 			}
@@ -146,6 +168,27 @@ void HomeEasy::Do_Work()
 		if (sec_counter % 12 == 0) {
 			m_LastHeartbeat = mytime(NULL);
 		}
+
+#ifdef __arm__
+		if (rc!=0)
+			if (rc->OokAvailable())
+			{
+				char message[100];
+
+				rc->getOokCode(message);
+				_log.Log(LOG_TRACE, "%s", message);
+
+				Sensor *s = Sensor::getRightSensor(message);
+				if (s != NULL)
+				{
+					_log.Log(LOG_TRACE, "Temp : %f Humidity : %f Channel : %d ", s->getTemperature(), s->getHumidity(), s->getChannel());
+				}
+				delete s;
+			}
+#endif
+
+
+
 	}
 	_log.Log(LOG_STATUS,"HomeEasy: Worker stopped...");
 }

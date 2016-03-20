@@ -1,9 +1,13 @@
 
 #include "stdafx.h"
+
+//#define  __arm__
+
 #include "HomeEasy.h"
 #include <stdio.h>
 #include <fcntl.h>
 #include <stdlib.h>
+
 #ifdef __arm__
 
 #include <unistd.h>
@@ -20,7 +24,7 @@
 #endif
 #include "../main/Logger.h"
 #include "../main/localtime_r.h"
-#include "../main/mainworker.h"
+#include "../main/RFXtrx.h"
 
 #include "HomeEasyTransmitter.h"
 #include "../main/SQLHelper.h"
@@ -152,6 +156,17 @@ bool HomeEasy::WriteToHardware(const char *pdata, const unsigned char length)
     
     return true;
 }
+void DumpHex (char * data , byte len , char * mesage )
+{
+
+	for (byte i = 0; i < len; i++) {
+		sprintf(mesage, "%02X", data[i]);
+		mesage++;
+		mesage++;
+
+	}
+	*mesage = 0;
+}
 
 void HomeEasy::Do_Work()
 {
@@ -171,14 +186,28 @@ void HomeEasy::Do_Work()
 
 #ifdef __arm__
 		if (rc!=0)
-			if (rc->OokAvailable())
+//			if (rc->OokAvailable())
+			if (!rc->Fifo.Empty())
+
 			{
-				char message[100];
+				char dataStr[100];
+				char data[100];
+				byte len;
+				std::string message;
 
-				rc->getOokCode(message);
-				_log.Log(LOG_TRACE, "%s", message);
+				//rc->getOokCode(message);
+        //strncpy((char*) message,(const char*)rc->Fifo.Get(len),90 ) ;
+				memcpy((char*)data, (const char*)rc->Fifo.Get(len), 90);
+				printf("%x ", data[0]);
 
-				Sensor *s = Sensor::getRightSensor(message);
+				printf("%d \n", len );
+
+				DumpHex(data, len, dataStr);
+				
+				message = "OSV2 " + std::string(dataStr);
+				_log.Log(LOG_TRACE, "OSV2 %s", message.c_str());
+
+				Sensor *s = Sensor::getRightSensor((char*)message.c_str());
 				if (s != NULL)
 				{
 					_log.Log(LOG_TRACE, "Temp : %f Humidity : %f Channel : %d ", s->getTemperature(), s->getHumidity(), s->getChannel());

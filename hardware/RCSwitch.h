@@ -37,8 +37,6 @@
 #ifdef __cplusplus
 extern "C"{
 #endif
-typedef uint8_t boolean;
-typedef uint8_t byte;
 
 #if !defined(NULL)
 #endif
@@ -46,6 +44,9 @@ typedef uint8_t byte;
 }
 #endif
 #endif
+
+#include "fifo.h"
+#include "Record.h"
 
 
 // Number of maximum High/Low changes per packet.
@@ -76,6 +77,9 @@ class RCSwitch {
     static bool getOokCode(char * _dest);
     static void OokResetAvailable();
     void transmit(int nHighPulses, int nLowPulses);
+    
+    static TFifo   Fifo ;
+		static TRecord Record;
 
   private:
 

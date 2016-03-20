@@ -227,6 +227,7 @@ hardware/ASyncSerial.cpp
 hardware/ASyncTCP.cpp
 hardware/HomeEasy.cpp
 hardware/Sensor.cpp
+hardware/Record.cpp
 hardware/RCSwitch.cpp
 hardware/RcOok.cpp
 hardware/RFM69.cpp

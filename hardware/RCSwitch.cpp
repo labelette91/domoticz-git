@@ -1,3 +1,5 @@
+#include "stdafx.h"
+
 /*
   RCSwitch - Arduino libary for remote control outlet switches
   Copyright (c) 2011 Suat Özgür.  All right reserved.
@@ -34,10 +36,16 @@
 
 char RCSwitch::OokReceivedCode[RCSWITCH_MAX_MESS_SIZE];
 bool RCSwitch::OokAvailableCode;
+TFifo RCSwitch::Fifo ;
+TRecord RCSwitch::Record;
 
 OregonDecoderV2 orscV2;
 OregonDecoderV3 orscV3;
 RCSwitch_ rcswp1;
+
+#include "fifo.cpp"
+
+
 //CrestaDecoder cres;
 //KakuDecoder kaku;
 //XrfDecoder xrf;
@@ -62,6 +70,9 @@ RCSwitch::RCSwitch(int rxpin, int txpin) {
 	if (txpin != -1 ) {
 		this->enableTransmit(txpin);
 	} else this->nTransmitterPin = -1;
+	Fifo.Clear();	
+	//initPulse();
+	Record.init();
 }
 
 /**
@@ -146,13 +157,37 @@ void RCSwitch::handleInterrupt() {
   duration = time - lastTime;
   lastTime = time;
   word p = (unsigned short int) duration;
-
+	if (p!=0)
+//		recorPulse(p);
+			Record.put(p);
+	byte dta = digitalRead(5);
+	/*low to high transition : low duration*/
+	if (dta==0)
+			p+=100;
+	else
+			p-=100;
+				
+	
   // Avoid re-entry
-  if ( !OokAvailableCode ) {		// avoid reentrance -- wait until data is read
-	  if (orscV2.nextPulse(p)) 	{ RCSwitch::OokAvailableCode = true; orscV2.sprint("OSV2 ",RCSwitch::OokReceivedCode); orscV2.resetDecoder(); }
-	  if (orscV3.nextPulse(p)) 	{ RCSwitch::OokAvailableCode = true; orscV3.sprint("OSV3 ",RCSwitch::OokReceivedCode); orscV3.resetDecoder(); }
-	  if (rcswp1.nextPulse(p)) 	{ RCSwitch::OokAvailableCode = true; rcswp1.sprint("ALRM ",RCSwitch::OokReceivedCode); rcswp1.resetDecoder(); }
+//  if ( !OokAvailableCode ) 
+  {		// avoid reentrance -- wait until data is read
+	  if (orscV2.nextPulse(p)) 
+      { 
+          
+          //orscV2.sprint("OSV2 ",RCSwitch::OokReceivedCode); 
+          //Fifo.Put(RECORD_ZIZE, (byte*)RCSwitch::OokReceivedCode);
+					byte len;
+					const byte * data = orscV2.getData(len);
+					printf("%x %d \n", data[0],len);
 
+					Fifo.Put(len, (byte*)data );
+
+          orscV2.resetDecoder(); 
+      }
+
+/*	  if (orscV3.nextPulse(p)) 	{ RCSwitch::OokAvailableCode = true; orscV3.sprint("OSV3 ",RCSwitch::OokReceivedCode); orscV3.resetDecoder(); }
+	  if (rcswp1.nextPulse(p)) 	{ RCSwitch::OokAvailableCode = true; rcswp1.sprint("ALRM ",RCSwitch::OokReceivedCode); rcswp1.resetDecoder(); }
+*/
 	//  if (cres.nextPulse(p)) 	{ cres.print("CRES"); cres.resetDecoder(); }
 	//  if (kaku.nextPulse(p)) 	{ kaku.print("KAKU"); kaku.resetDecoder(); }
 	//  if (xrf.nextPulse(p))  	{ xrf.print("XRF"); xrf.resetDecoder(); }

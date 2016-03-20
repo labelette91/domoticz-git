@@ -30,8 +30,7 @@
 #ifndef RCOOK_H_
 #define RCOOK_H_
 
-typedef uint16_t word;
-typedef uint8_t byte;
+#include "deftype.h"
 
 #define OOK_MAX_DATA_LEN 25
 #define OOK_MAX_STR_LEN	 100

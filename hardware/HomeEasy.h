@@ -17,6 +17,10 @@ public:
 	explicit HomeEasy(const int ID);
 	~HomeEasy();
 	bool WriteToHardware(const char *pdata, const unsigned char length);
+	int TXPIN;
+	int RXPIN;
+	void printPulse();
+
 private:
 	bool StartHardware();
 	bool StopHardware();
@@ -26,8 +30,6 @@ private:
 	volatile bool m_stoprequested;
 
 	HomeEasyTransmitter *HomeEasyRfTx;
-	int TXPIN ;
-	int RXPIN ;
 
 #ifdef __arm__
 	RFM69 * radio;

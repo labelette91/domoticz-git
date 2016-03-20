@@ -6210,12 +6210,13 @@ void MainWorker::decode_Security1(const int HwdID, const _eHardwareTypes HwdType
 	unsigned char SignalLevel=pResponse->SECURITY1.rssi;
 	unsigned char BatteryLevel = get_BateryLevel(HwdType,false, pResponse->SECURITY1.battery_level & 0x0F);
 	if (
-		(pResponse->SECURITY1.subtype == sTypeKD101)||
-		(pResponse->SECURITY1.subtype == sTypeSA30)
+		(pResponse->SECURITY1.subtype == sTypeKD101) ||
+		(pResponse->SECURITY1.subtype == sTypeSA30) ||
+		(pResponse->SECURITY1.subtype == sTypeDomoticzSecurity)
 		)
 	{
 		//KD101 & SA30 do not support battery low indication
-		BatteryLevel=255;
+		BatteryLevel = 255;
 	}
 
 	unsigned long long DevRowIdx=m_sql.UpdateValue(HwdID, ID.c_str(),Unit,devType,subType,SignalLevel,BatteryLevel,cmnd, procResult.DeviceName);
@@ -9226,6 +9227,7 @@ void MainWorker::decode_General(const int HwdID, const _eHardwareTypes HwdType, 
 		(subType == sTypeBaro) ||
 		(subType == sTypeDistance) ||
 		(subType == sTypeSoilMoisture) ||
+		(subType == sTypeCustom) ||
 		(subType == sTypeKwh)
 		)
 	{
@@ -9386,6 +9388,14 @@ void MainWorker::decode_General(const int HwdID, const _eHardwareTypes HwdType, 
 		if (DevRowIdx == -1)
 			return;
 	}
+	else if (subType == sTypeCustom)
+	{
+		sprintf(szTmp, "%.4f", pMeter->floatval1);
+		DevRowIdx = m_sql.UpdateValue(HwdID, ID.c_str(), Unit, devType, subType, SignalLevel, BatteryLevel, cmnd, szTmp, procResult.DeviceName);
+		if (DevRowIdx == -1)
+			return;
+		m_notifications.CheckAndHandleNotification(DevRowIdx, procResult.DeviceName, devType, subType, NTYPE_USAGE, pMeter->floatval1);
+	}
 
 	if (m_verboselevel >= EVBL_ALL)
 	{
@@ -9488,6 +9498,11 @@ void MainWorker::decode_General(const int HwdID, const _eHardwareTypes HwdType, 
 		case sTypeAlert:
 			WriteMessage("subtype       = Alert");
 			sprintf(szTmp, "Alert = %d", pMeter->intval1);
+			WriteMessage(szTmp);
+			break;
+		case sTypeCustom:
+			WriteMessage("subtype       = Custom Sensor");
+			sprintf(szTmp, "Value = %g", pMeter->floatval1);
 			WriteMessage(szTmp);
 			break;
 		default:
@@ -11715,6 +11730,15 @@ bool MainWorker::SwitchScene(const unsigned long long idx, const std::string &sw
 						fLevel=100;
 					ilevel=round(fLevel)+1;
 				}
+				if (switchtype == STYPE_Selector) {
+					if (lstatus != "Set Level") {
+						ilevel = 0;
+					}
+					ilevel = round(ilevel/10.0f)*10; // select only multiples of 10
+					if (ilevel == 0) {
+						lstatus ="Off";
+					}
+				}
 			}
 
 			int idx = atoi(sd[0].c_str());
@@ -11898,7 +11922,7 @@ void MainWorker::SetInternalSecStatus()
 	}
 
 	CDomoticzHardwareBase *pHardware = GetHardwareByType(HTYPE_DomoticzInternal);
-	PushAndWaitRxMessage(pHardware, (const unsigned char *)&tsen, "Domoticz Security Panel", 100);
+	PushAndWaitRxMessage(pHardware, (const unsigned char *)&tsen, "Domoticz Security Panel", -1);
 }
 
 void MainWorker::UpdateDomoticzSecurityStatus(const int iSecStatus)
@@ -12141,6 +12165,16 @@ bool MainWorker::UpdateDevice(const int HardwareID, const std::string &DeviceID,
 				gDevice.id = unit;
 				gDevice.intval1 = static_cast<int>(ID);
 				gDevice.intval2 = atoi(sValue.c_str());
+				DecodeRXMessage(pHardware, (const unsigned char *)&gDevice, NULL, batterylevel);
+				return true;
+			}
+			else if (subType == sTypeCustom)
+			{
+				_tGeneralDevice gDevice;
+				gDevice.subtype = sTypeCustom;
+				gDevice.id = unit;
+				gDevice.floatval1 = (float)atof(sValue.c_str());
+				gDevice.intval1 = static_cast<int>(ID);
 				DecodeRXMessage(pHardware, (const unsigned char *)&gDevice, NULL, batterylevel);
 				return true;
 			}

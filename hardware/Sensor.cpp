@@ -242,7 +242,12 @@ return NULL;
 
 OregonSensorV2::OregonSensorV2(char * _strval) : Sensor( ) {
   _sensorClass = SENS_CLASS_OS;
-  _availableInfos.setFlags(decode(_strval));
+//  _availableInfos.setFlags(decode(_strval));
+	if(decode(_strval))
+		_availableInfos.setFlags(isValid);
+	else
+		_availableInfos.unsetFlags(isValid);
+
 }
 
 // —————————————————————————————
@@ -264,7 +269,7 @@ OregonSensorV2::OregonSensorV2(char * _strval) : Sensor( ) {
 //
 // ——————————————————————————————
 bool OregonSensorV2::decode(char * _str) {
-char * pt = & _str[5];
+char * pt = & _str[strlen(_sensorId)];
 int len = strlen(_str);
 char sensorId[5]; int isensorId;
 
@@ -309,6 +314,9 @@ _sensorType=0x2D10;
 return decode_RGR918(pt); break;
  
 default:
+	_sensorType = isensorId;
+	_sensorName = "Unknown sensor id";
+
   std::cout << "Unknown sensor id: " << std::hex << isensorId << std::endl;
   return false;
   break;
@@ -730,7 +738,7 @@ OregonSensorV3::OregonSensorV3(char * _strval) : Sensor( ) {
 }
 
 bool OregonSensorV3::decode(char * _str) {
-  char * pt = & _str[5];
+  char * pt = & _str[strlen(_sensorId)];
   int len = strlen(_str);
   char sensorId[5]; int isensorId;
   

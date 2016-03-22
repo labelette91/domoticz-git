@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-//#define  __arm__
+#define  __arm__
 
 #include "HomeEasy.h"
 #include <stdio.h>
@@ -156,6 +156,34 @@ bool HomeEasy::WriteToHardware(const char *pdata, const unsigned char length)
     
     return true;
 }
+void HomeEasy::printPulse()
+{
+  int p=0;
+  int n;
+  char Mes[128*3];
+//    p=getPulse();
+		p = rc->Record.get();
+    n=0;
+		while(p!=0) 
+		{
+			byte b = p/100;
+			b=b&0xf;
+			sprintf(&Mes[n*2],"%1X",p/100);
+			Mes[n*2+1]=' ';
+    	//p=getPulse();
+			p = rc->Record.get();
+			n++;
+    	if (n>=64)
+    		{
+    			Mes[n*2]=0;
+    			printf("%s\n",Mes);
+    			n=0;	
+    		}
+		}
+		Mes[n*2]=0;
+	  if (n!=0) printf("%s\n",Mes);
+	
+}
 void DumpHex (char * data , byte len , char * mesage )
 {
 
@@ -185,6 +213,7 @@ void HomeEasy::Do_Work()
 		}
 
 #ifdef __arm__
+ //printPulse();
 		if (rc!=0)
 //			if (rc->OokAvailable())
 			if (!rc->Fifo.Empty())
@@ -196,7 +225,10 @@ void HomeEasy::Do_Work()
 				std::string message;
 
 				//rc->getOokCode(message);
-        //strncpy((char*) message,(const char*)rc->Fifo.Get(len),90 ) ;
+        strncpy((char*)dataStr,(const char*)rc->Fifo.Get(len),90 ) ;
+				message = std::string(dataStr);
+
+/*      data binaire 
 				memcpy((char*)data, (const char*)rc->Fifo.Get(len), 90);
 				printf("%x ", data[0]);
 
@@ -204,13 +236,22 @@ void HomeEasy::Do_Work()
 
 				DumpHex(data, len, dataStr);
 				
-				message = "OSV2 " + std::string(dataStr);
-				_log.Log(LOG_TRACE, "OSV2 %s", message.c_str());
+				message = "OSV2" + std::string(dataStr);
+*/
+				_log.Log(LOG_TRACE, "%s", message.c_str());
 
 				Sensor *s = Sensor::getRightSensor((char*)message.c_str());
 				if (s != NULL)
 				{
+					//if correct dcoded sensor 
+					if (s->isDecoded())
+					{
+						SendTempHumSensor(1, s->isBatteryLow(), s->getTemperature(), s->getHumidity(), "Home TempHum", sTypeTH1 );
 					_log.Log(LOG_TRACE, "Temp : %f Humidity : %f Channel : %d ", s->getTemperature(), s->getHumidity(), s->getChannel());
+					}
+					else
+						_log.Log(LOG_TRACE, "Sensor Id :%04X unknown", s->getSensType() );
+
 				}
 				delete s;
 			}

@@ -174,19 +174,20 @@ void RCSwitch::handleInterrupt() {
 	  if (orscV2.nextPulse(p)) 
       { 
           
-          //orscV2.sprint("OSV2 ",RCSwitch::OokReceivedCode); 
-          //Fifo.Put(RECORD_ZIZE, (byte*)RCSwitch::OokReceivedCode);
-					byte len;
+          orscV2.sprint("OSV2",RCSwitch::OokReceivedCode); 
+          Fifo.Put(RECORD_ZIZE, (byte*)RCSwitch::OokReceivedCode);
+
+/*				  byte len;
 					const byte * data = orscV2.getData(len);
 					printf("%x %d \n", data[0],len);
 
 					Fifo.Put(len, (byte*)data );
-
+*/
           orscV2.resetDecoder(); 
       }
 
-/*	  if (orscV3.nextPulse(p)) 	{ RCSwitch::OokAvailableCode = true; orscV3.sprint("OSV3 ",RCSwitch::OokReceivedCode); orscV3.resetDecoder(); }
-	  if (rcswp1.nextPulse(p)) 	{ RCSwitch::OokAvailableCode = true; rcswp1.sprint("ALRM ",RCSwitch::OokReceivedCode); rcswp1.resetDecoder(); }
+/*	  if (orscV3.nextPulse(p)) 	{ RCSwitch::OokAvailableCode = true; orscV3.sprint("OSV3",RCSwitch::OokReceivedCode); orscV3.resetDecoder(); }
+	  if (rcswp1.nextPulse(p)) 	{ RCSwitch::OokAvailableCode = true; rcswp1.sprint("ALRM",RCSwitch::OokReceivedCode); rcswp1.resetDecoder(); }
 */
 	//  if (cres.nextPulse(p)) 	{ cres.print("CRES"); cres.resetDecoder(); }
 	//  if (kaku.nextPulse(p)) 	{ kaku.print("KAKU"); kaku.resetDecoder(); }

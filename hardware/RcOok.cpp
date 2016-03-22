@@ -229,7 +229,7 @@
     }
 
     int OregonDecoderV2::decode (word width) {
-        if (200 <= width && width < 1200) {
+        if (200 <= width && width < 1600) {
             byte w = width >= 700;
             switch (state) {
                 case UNKNOWN:

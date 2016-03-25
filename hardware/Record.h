@@ -12,7 +12,7 @@ void init () ;
 void put(int p);
 std::string ToString() ;
 int get();
-	
+bool empty();	
 TRecord();
 ~TRecord();
 

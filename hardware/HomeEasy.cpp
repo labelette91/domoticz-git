@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-#define  __arm__
+//#define  __arm__
 
 #include "HomeEasy.h"
 #include <stdio.h>
@@ -12,6 +12,7 @@
 
 #include <unistd.h>
 #include <sys/ioctl.h>
+#include <sys/wait.h>
 #include <sched.h>    
 #include <wiringPi.h>
 
@@ -35,6 +36,11 @@ RCSwitch *rc ;
 
 #endif
 
+//typedef map<int, Sensor > T_Map_Sensor;
+//T_Map_Sensor Sensors ;
+
+int  SetGpioInterruptMode(int   bcmGpioPin, int mode);
+
 HomeEasy::HomeEasy(const int ID)
 {
 	m_stoprequested=false;
@@ -54,15 +60,16 @@ HomeEasy::HomeEasy(const int ID)
 	{
 		TXPIN = atoi(result[0][0].c_str());
 		RXPIN = atoi(result[0][1].c_str());
-		_log.Log(LOG_TRACE, "HERF: RXPin:%d TXPin:%d", TXPIN, RXPIN);
+		TXPIN = 5;
+		_log.Log(LOG_TRACE, "HERF: RXPin:%d TXPin:%d",  RXPIN, TXPIN);
 
 	}
-	TXPIN = 5;
 #ifdef __arm__
 	if (wiringPiSetup() == -1)
 	{
 		_log.Log(LOG_ERROR, "failed to initialize wiring pi");
 	}
+
 	HomeEasyRfTx = new HomeEasyTransmitter(TXPIN, 0);
 	//HomeEasyRfTx->initPin();
 
@@ -89,7 +96,8 @@ HomeEasy::HomeEasy(const int ID)
 		rc = new RCSwitch(RXPIN, -1);
 	else
 		rc = 0;
-
+	/* disable interupt */
+	//SetGpioInterruptMode(RXPIN, 0);
 #endif
 }
 
@@ -168,7 +176,7 @@ void HomeEasy::printPulse()
 		{
 			byte b = p/100;
 			b=b&0xf;
-			sprintf(&Mes[n*2],"%1X",p/100);
+			sprintf(&Mes[n*2],"%1X",b);
 			Mes[n*2+1]=' ';
     	//p=getPulse();
 			p = rc->Record.get();
@@ -213,7 +221,13 @@ void HomeEasy::Do_Work()
 		}
 
 #ifdef __arm__
- //printPulse();
+		//ig tace is enable and dump pulse data is enable
+		if (!rc->Record.empty())
+			if (_log.isTraceEnable() )
+				if (!_log.TestFilter("RCDATA") )
+				//printPulse();
+				_log.Log(LOG_TRACE, "RCDATA %s", rc->Record.ToString().c_str());
+
 		if (rc!=0)
 //			if (rc->OokAvailable())
 			if (!rc->Fifo.Empty())
@@ -238,7 +252,7 @@ void HomeEasy::Do_Work()
 				
 				message = "OSV2" + std::string(dataStr);
 */
-				_log.Log(LOG_TRACE, "%s", message.c_str());
+				_log.Log(LOG_TRACE, "RCOOK %s", message.c_str());
 
 				Sensor *s = Sensor::getRightSensor((char*)message.c_str());
 				if (s != NULL)
@@ -246,11 +260,11 @@ void HomeEasy::Do_Work()
 					//if correct dcoded sensor 
 					if (s->isDecoded())
 					{
-						SendTempHumSensor(1, s->isBatteryLow(), s->getTemperature(), s->getHumidity(), "Home TempHum", sTypeTH1 );
-					_log.Log(LOG_TRACE, "Temp : %f Humidity : %f Channel : %d ", s->getTemperature(), s->getHumidity(), s->getChannel());
+						SendTempHumSensor(s->getSensID(), !s->isBatteryLow(), s->getTemperature(), s->getHumidity(), "Home TempHum" /* , sTypeTH1 */ );
+					_log.Log(LOG_TRACE, "RCOOK ID:%X Temp : %f Humidity : %f Channel : %d ", s->getSensID(), s->getTemperature(), s->getHumidity(), s->getChannel());
 					}
 					else
-						_log.Log(LOG_TRACE, "Sensor Id :%04X unknown", s->getSensType() );
+						_log.Log(LOG_TRACE, "RCOOK Sensor Id :%04X unknown", s->getSensType() );
 
 				}
 				delete s;
@@ -280,6 +294,80 @@ void scheduler_standard() {
 	if (sched_setscheduler(0, SCHED_OTHER, &p) == -1) {
 		_log.Log(LOG_ERROR, "Failed to switch to normal scheduler.");
 	}
+}
+
+int wiringPiMode= WPI_MODE_PINS ;
+
+int  SetGpioInterruptMode( int   pin , int mode )
+{
+
+	const char *modeS;
+	char  pinS[8];
+	pid_t pid;
+	int   bcmGpioPin;
+
+	int   model, rev, mem, maker, overVolted;
+
+	piBoardId(&model, &rev, &mem, &maker, &overVolted);
+	_log.Log(LOG_TRACE, "PI Board  model:%d   rev:%d mem:%d maker:%d overVolted:%d", model, rev, mem, maker, overVolted);
+
+	if (model == PI_MODEL_CM)
+		wiringPiMode = WPI_MODE_GPIO;
+	else
+		wiringPiMode = WPI_MODE_PINS;
+
+
+
+	if ((pin < 0) || (pin > 63))
+		return wiringPiFailure(WPI_FATAL, "wiringPiISR: pin must be 0-63 (%d)\n", pin);
+
+	/**/ if (wiringPiMode == WPI_MODE_UNINITIALISED)
+		return wiringPiFailure(WPI_FATAL, "wiringPiISR: wiringPi has not been initialised. Unable to continue.\n");
+	else if (wiringPiMode == WPI_MODE_PINS)
+		bcmGpioPin = wpiPinToGpio(pin);
+	else if (wiringPiMode == WPI_MODE_PHYS)
+		bcmGpioPin = physPinToGpio(pin);
+	else
+		bcmGpioPin = pin;
+
+	// Now export the pin and set the right edge
+	//	We're going to use the gpio program to do this, so it assumes
+	//	a full installation of wiringPi. It's a bit 'clunky', but it
+	//	is a way that will work when we're running in "Sys" mode, as
+	//	a non-root user. (without sudo)
+
+
+if (mode == INT_EDGE_SETUP)
+	modeS = "none";
+else if (mode == INT_EDGE_FALLING)
+	modeS = "falling";
+else if (mode == INT_EDGE_RISING)
+	modeS = "rising";
+else
+	modeS = "both";
+
+sprintf(pinS, "%d", bcmGpioPin);
+
+if ((pid = fork()) < 0)	// Fail
+	return wiringPiFailure(WPI_FATAL, "wiringPiISR: fork failed: %s\n", strerror(errno));
+
+if (pid == 0)	// Child, exec
+{
+	if (access("/usr/local/bin/gpio", X_OK) == 0)
+	{
+		execl("/usr/local/bin/gpio", "gpio", "edge", pinS, modeS, (char *)NULL);
+		return wiringPiFailure(WPI_FATAL, "wiringPiISR: execl failed: %s\n", strerror(errno));
+	}
+	else if (access("/usr/bin/gpio", X_OK) == 0)
+	{
+		execl("/usr/bin/gpio", "gpio", "edge", pinS, modeS, (char *)NULL);
+		return wiringPiFailure(WPI_FATAL, "wiringPiISR: execl failed: %s\n", strerror(errno));
+	}
+	else
+		return wiringPiFailure(WPI_FATAL, "wiringPiISR: Can't find gpio program\n");
+}
+else		// Parent, wait
+	wait(NULL);
 }
 
 #endif

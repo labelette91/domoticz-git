@@ -52,15 +52,17 @@ class Sensor {
   double _direction;
   double _speed;
   double _pressure;
-
+  
   int _channel;
+  int _irolling ;
+  bool _valid ; //true if valid
 
   int _sensorClass; // marque du sensor cf #define
   int _sensorType; // model of sensor
   std::string _sensorName;
 
   //store up to 16 bits
-  Flags<int16_t> _availableInfos;
+  Flags<int> _availableInfos;
   
   // time_t creationTime; // objectCreation time
 
@@ -100,6 +102,7 @@ class Sensor {
   int getChannel() const; // return channel value
   int getSensClass() const; // return sensor class
   int getSensType() const; // return sensor type
+  int getSensID() const{return _irolling;};   // return sensor ID (rolling code )
 
   //time_t getCreationTime(); // return object creation time
 
@@ -110,6 +113,7 @@ class Sensor {
 class OregonSensorV2 : public Sensor {
  public :
   OregonSensorV2(char * _strval);
+  OregonSensorV2();
   static const char _sensorId[];
 					  
  private:
@@ -127,6 +131,7 @@ class OregonSensorV2 : public Sensor {
 class OregonSensorV3 : public Sensor {
  public :
   OregonSensorV3(char * _strval);
+  OregonSensorV3();
   static const char _sensorId[];
 
  private:

@@ -40,6 +40,8 @@ Sensor::Sensor( ) :
   _availableInfos(0)
 // time(&creationTime);
 {
+  _irolling = 0 ;
+  _valid=false ; //true if valid
 }
 
 // —————————————————
@@ -243,11 +245,10 @@ return NULL;
 OregonSensorV2::OregonSensorV2(char * _strval) : Sensor( ) {
   _sensorClass = SENS_CLASS_OS;
 //  _availableInfos.setFlags(decode(_strval));
-	if(decode(_strval))
-		_availableInfos.setFlags(isValid);
-	else
-		_availableInfos.unsetFlags(isValid);
-
+	decode(_strval);
+}
+OregonSensorV2::OregonSensorV2() : Sensor( ) {
+  _sensorClass = SENS_CLASS_OS;
 }
 
 // —————————————————————————————
@@ -286,47 +287,55 @@ switch (isensorId) {
 case 0x5D60:
   _sensorType=0x5D60;
   _sensorName = "BTHG968";
-return decode_BTHG968(pt); break;
+_valid= decode_BTHG968(pt); break;
 
 case 0x1D20:
 _sensorType=0x1D20;
  _sensorName = "THGR122NX"; 
-return decode_THGR122NX(pt); break;
+_valid= decode_THGR122NX(pt); break;
 
 case 0x1D30:
   _sensorType=0x1D30;
   _sensorName="THGRN228NX";
-    return decode_THGRN228NX(pt); break;
+  _valid= decode_THGRN228NX(pt); break;
 
 case 0xEC40:
 _sensorType=0xEC40;
  _sensorName = "THN132N";
- return decode_THN132N(pt); break;
+ _valid= decode_THN132N(pt); break;
 
 case 0x3D00:
 _sensorType=0x3D00;
  _sensorName = "WGR918";
-return decode_WGR918(pt); break;
+_valid= decode_WGR918(pt); break;
 
 case 0x2D10:
 _sensorType=0x2D10;
  _sensorName = "RGR918";
-return decode_RGR918(pt); break;
+_valid= decode_RGR918(pt); break;
  
 default:
 	_sensorType = isensorId;
 	_sensorName = "Unknown sensor id";
 
-  std::cout << "Unknown sensor id: " << std::hex << isensorId << std::endl;
-  return false;
+//  std::cout << "Unknown sensor id: " << std::hex << isensorId << std::endl;
+  _valid= false;
   break;
 }
  
  }
  else {
-  std::cout << "OSV2 - decode: bad length" << std::endl; 
+  //std::cout << "OSV2 - decode: bad length" << std::endl; 
+	 _sensorName = "OSV2 - decode: bad length";
+ _valid= false;
  }
- return false;
+
+ if(_valid)
+    _availableInfos.setFlags(isValid);
+ else
+    _availableInfos.unsetFlags(isValid);
+ return _valid ;
+
 }
 
 // —————————————————————————————
@@ -485,7 +494,7 @@ return false;
 bool OregonSensorV2::decode_THGRN228NX(char * pt) {
 
 char channel; int ichannel; // values 1,2,4
-char rolling[3]; int irolling;
+char rolling[3]; 
 char battery; int ibattery; // value & 0x4
 char temp[4]; double dtemp; // Temp in BCD
 char tempS; int itempS; // Sign 0 = positif
@@ -510,7 +519,7 @@ printf("OSV2 – decode : id(%s) ch(%c) bat(%c) temp(%s) sign(%c) humid(%s) cksu
 
 // Conversion to int value
 ichannel = getIntFromChar(channel);
-irolling = getIntFromString(rolling);
+_irolling = getIntFromString(rolling);
 ibattery = getIntFromChar(battery);
 itempS = getIntFromChar(tempS) & 0x08;
 ichecksum = getIntFromString(checksum);
@@ -551,7 +560,7 @@ return false;
 bool OregonSensorV2::decode_THGR122NX(char * pt) {
 
 char channel; int ichannel; // values 1,2,4
-char rolling[3]; int irolling;
+char rolling[3]; 
 char battery; int ibattery; // value & 0x4
 char temp[4]; double dtemp; // Temp in BCD
 char tempS; int itempS; // Sign 0 = positif
@@ -576,7 +585,7 @@ printf("OSV2 – decode : id(%s) ch(%c) bat(%c) temp(%s) sign(%c) humid(%s) cksu
 
 // Conversion to int value
 ichannel = getIntFromChar(channel);
-irolling = getIntFromString(rolling);
+_irolling = getIntFromString(rolling);
 ibattery = getIntFromChar(battery);
 itempS = getIntFromChar(tempS) & 0x08;
 ichecksum = getIntFromString(checksum);
@@ -617,7 +626,7 @@ return false;
 bool OregonSensorV2::decode_THN132N(char * pt) {
 
 char channel; int ichannel; // values 1,2,4
-char rolling[3]; int irolling;
+char rolling[3]; 
 char battery; int ibattery; // value & 0x4
 char temp[4]; double dtemp; // Temp in BCD
 char tempS; int itempS; // Sign 0 = positif
@@ -639,7 +648,7 @@ printf("OSV2 – decode : id(%s) ch(%c) bat(%c) temp(%s) sign(%c) cksum(%s) \n",
 
 // Conversion to int value
 ichannel = getIntFromChar(channel);
-irolling = getIntFromString(rolling);
+_irolling = getIntFromString(rolling);
 ibattery = getIntFromChar(battery) & 0x04;
 itempS = getIntFromChar(tempS) & 0x08;
 ichecksum = getIntFromString(checksum);
@@ -736,6 +745,9 @@ OregonSensorV3::OregonSensorV3(char * _strval) : Sensor( ) {
   _sensorClass = SENS_CLASS_OS;
   _availableInfos.setFlags(decode(_strval));
 }
+OregonSensorV3::OregonSensorV3() : Sensor( ) {
+  _sensorClass = SENS_CLASS_OS;
+}
 
 bool OregonSensorV3::decode(char * _str) {
   char * pt = & _str[strlen(_sensorId)];
@@ -754,17 +766,27 @@ bool OregonSensorV3::decode(char * _str) {
     case 0xF824:
       _sensorType=0xF824;
       _sensorName = "THGR810";
-      return decode_THGR810(pt); break;
+      _valid= decode_THGR810(pt); break;
     default:
-      std::cout << "Unknown sensor id: " << std::hex << isensorId << std::endl;
-      return false;
+			_sensorType = isensorId;
+			_sensorName = "Unknown sensor id";
+			
+			//std::cout << "Unknown sensor id: " << std::hex << isensorId << std::endl;
+      _valid= false;
       break;
     }
   }
   else {
-    std::cout << "OSV3 - decode: bad length" << std::endl; 
+    //std::cout << "OSV3 - decode: bad length" << std::endl; 
+		_sensorName = "OSV3 - decode: bad length";
+		_valid= false;
   }
-  return false;
+ if(_valid)
+    _availableInfos.setFlags(isValid);
+ else
+    _availableInfos.unsetFlags(isValid);
+ return _valid ;
+
 }
 // —————————————————————————————
 // Decode OregonScientific V3 protocol for specific
@@ -774,7 +796,7 @@ bool OregonSensorV3::decode(char * _str) {
 bool OregonSensorV3::decode_THGR810(char * pt) {
 
   char channel; int ichannel; // values 1,2,4
-  char rolling[3]; int irolling;
+  char rolling[3]; 
   char battery; int ibattery; // value & 0x4
   char temp[4]; double dtemp; // Temp in BCD
   char tempS; int itempS; // Sign 0 = positif
@@ -799,7 +821,7 @@ bool OregonSensorV3::decode_THGR810(char * pt) {
 
     // Conversion to int value
     ichannel = getIntFromChar(channel);
-    irolling = getIntFromString(rolling);
+    _irolling = getIntFromString(rolling);
     ibattery = getIntFromChar(battery);
     itempS = getIntFromChar(tempS) & 0x08;
     ichecksum = getIntFromString(checksum);

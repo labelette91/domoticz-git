@@ -16,6 +16,10 @@ PWr=0;
 PRd=0;
 
 }
+bool TRecord::empty()
+{
+return(PWr==PRd);
+}
 void TRecord::put(int p)
 {
     Pulse[PWr++]=p;
@@ -45,7 +49,7 @@ std::string TRecord::ToString()
 		{
 			unsigned char  b = p/100;
 			b=b&0xf;
-			sprintf(&Mes[n*2],"%1X",p/100);
+			sprintf(&Mes[n*2],"%1X",b);
 			Mes[n*2+1]=' ';
     	p=get();
     	n++;
@@ -60,8 +64,6 @@ std::string TRecord::ToString()
 		Mes[n*2]=0;
 	  if (n!=0) 
 		{
-			Mes[n * 2] = '\n';
-			Mes[n * 2 + 1] = 0;
 			mes += Mes;
 		}
 		return mes;

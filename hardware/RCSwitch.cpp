@@ -33,6 +33,7 @@
 
 #include "RCSwitch.h"
 #include "RcOok.h"
+#include "DecodeHomeEasy.h"
 
 char RCSwitch::OokReceivedCode[RCSWITCH_MAX_MESS_SIZE];
 bool RCSwitch::OokAvailableCode;
@@ -42,6 +43,8 @@ TRecord RCSwitch::Record;
 OregonDecoderV2 orscV2;
 OregonDecoderV3 orscV3;
 RCSwitch_ rcswp1;
+
+DecodeHomeEasy HEasy(1);
 
 #include "fifo.cpp"
 
@@ -146,6 +149,7 @@ void RCSwitch::OokResetAvailable() {
 	RCSwitch::OokAvailableCode = false;
 }
 
+extern void DumpHex(byte * data, byte len, char * mesage);
 // ==============================================
 // Interrupt Handler to manage the different protocols
 void RCSwitch::handleInterrupt() {
@@ -161,11 +165,6 @@ void RCSwitch::handleInterrupt() {
 //		recorPulse(p);
 			Record.put(p);
 	byte dta = digitalRead(5);
-	/*low to high transition : low duration*/
-	if (dta==0)
-			p+=100;
-	else
-			p-=100;
 				
 	
   // Avoid re-entry
@@ -173,7 +172,12 @@ void RCSwitch::handleInterrupt() {
   {		// avoid reentrance -- wait until data is read
 	  if (orscV2.nextPulse(p)) 
       { 
-          
+				/*low to high transition : low duration*/
+				if (dta == 0)
+					p += 100;
+				else
+					p -= 100;
+
           orscV2.sprint("OSV2",RCSwitch::OokReceivedCode); 
           Fifo.Put(RECORD_ZIZE, (byte*)RCSwitch::OokReceivedCode);
 
@@ -185,6 +189,16 @@ void RCSwitch::handleInterrupt() {
 */
           orscV2.resetDecoder(); 
       }
+		if (HEasy.nextPulse(p,dta))
+		{
+			if (dta == 0) dta = 1;  else dta = 0 ;
+			DumpHex((byte*)HEasy.getData(), HEasy.getBytes(), RCSwitch::OokReceivedCode);
+			Fifo.Put(RECORD_ZIZE, (byte*)RCSwitch::OokReceivedCode);
+
+			HEasy.resetDecoder();
+		}
+		
+
 
 /*	  if (orscV3.nextPulse(p)) 	{ RCSwitch::OokAvailableCode = true; orscV3.sprint("OSV3",RCSwitch::OokReceivedCode); orscV3.resetDecoder(); }
 	  if (rcswp1.nextPulse(p)) 	{ RCSwitch::OokAvailableCode = true; rcswp1.sprint("ALRM",RCSwitch::OokReceivedCode); rcswp1.resetDecoder(); }

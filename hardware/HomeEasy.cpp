@@ -192,7 +192,7 @@ void HomeEasy::printPulse()
 	  if (n!=0) printf("%s\n",Mes);
 	
 }
-void DumpHex (char * data , byte len , char * mesage )
+void DumpHex (byte * data , byte len , char * mesage )
 {
 
 	for (byte i = 0; i < len; i++) {

@@ -1,3 +1,4 @@
+#include "stdafx.h"
 /* ===================================================
 Sensor.cpp
 * ====================================================
@@ -22,8 +23,8 @@ Sensor.cpp
 //#define SENSORDEBUG // Large debug trace
 //#define SENSORTRACE // Small debug trace to verify error only
 
-const char OregonSensorV2::_sensorId[] = "OSV2";
-const char OregonSensorV3::_sensorId[] = "OSV3";
+const char OregonSensorV2::_sensorId[] = "OSV2 ";
+const char OregonSensorV3::_sensorId[] = "OSV3 ";
 // ——————————————————
 // Construction – init variable then call decode function
 Sensor::Sensor( ) :
@@ -43,6 +44,16 @@ Sensor::Sensor( ) :
   _irolling = 0 ;
   _valid=false ; //true if valid
 }
+
+
+bool Sensor::available(int flag )  { // return true if valid && parameter flag
+  return (_availableInfos.isFlagsSet(isValid | flag));
+}
+
+bool Sensor::availableOnOff() const { // return true if valid && have OnOff
+  return (_availableInfos.isFlagsSet(isValid | haveOnOff));
+}
+
 
 // —————————————————
 // availablePressure() – return true if valid && have wind speed
@@ -234,7 +245,7 @@ printf("Sensor::getRightSensor – create OregonSensorV3\n");
  }
 #endif 
  } else {
-  std::cout << "[Sensor::getRightSensor] dont know how to decode: " << s << std::endl;
+//  std::cout << "[Sensor::getRightSensor] dont know how to decode: " << s << std::endl;
  }
  
 return NULL;
@@ -283,6 +294,20 @@ printf("OSV2 – decode : id(%s)(0x%4X)\n",sensorId, isensorId);
 #endif
 
 switch (isensorId) {
+
+  /*power */
+case 0x3081 :
+  _sensorType = 0x3081;
+  _sensorName = "POWER";
+  _valid = decode_POWER(pt); break;
+
+
+
+case 0x3B80 :
+  _sensorType = 0x3B80;
+  _sensorName = "HOMEEASY";
+  _valid = decode_HOMEEASY(pt); break;
+
 
 case 0x5D60:
   _sensorType=0x5D60;
@@ -336,6 +361,102 @@ default:
     _availableInfos.unsetFlags(isValid);
  return _valid ;
 
+}
+
+int HexDec1digit(char  hexV)
+{
+  if ((hexV >= '0') && (hexV <= '9')) return (hexV - '0');
+  if ((hexV >= 'A') && (hexV <= 'F')) return (hexV - 'A'+10);
+  return 0;
+}
+
+int HexDec(char * hexv, int nbdigit )
+{
+
+  int res = 0;
+  for (int i = 0; i < nbdigit; i++)
+  {
+    res *= 16;
+    res += HexDec1digit(*hexv++);
+  }
+  return res;
+}
+
+// —————————————————————————————
+// Decode decode_POWER CM80 
+//data[0.1] device type
+//data[2] packet type 0   : power + total power
+//               type 1..4 : power
+//data[3..4] power : 2 byte watt
+//data[5..8] total power : 4 byte watt / s
+// 3A8001E2020025E7154000
+// ——————————————————————————————
+bool OregonSensorV2::decode_POWER(char * pt) {
+
+  int len = strlen(pt);
+
+  if (len >= 20) {
+
+
+    //data[3..4] power : 2 byte watt
+     _power = HexDec(&pt[4 * 2], 2) * 256 + HexDec(&pt[3 * 2], 2) ;
+
+    //data[5..8] total power : 4 byte watt / s
+     _total_power = HexDec(&pt[8*2], 2)*256* 256 * 256 + HexDec(&pt[7 * 2], 2) * 256 * 256 + HexDec(&pt[6 * 2], 2) * 256 + +HexDec(&pt[5 * 2], 2);
+
+		_channel=HexDec(&pt[5], 1) ;
+
+    _valid = true; //true if valid
+    _availableInfos.setFlags(havePower);
+
+#ifdef SENSORDEBUG
+    printf("OSV2 – decode : id(0x%04X) Power:%d Total Power:%d \n", 0x3A80, _power, _total_power);
+#endif
+
+    return true;
+    // } else return false;
+
+  }
+  return false;
+}
+
+
+
+// —————————————————————————————
+// Decode decode_HOMEEASY switch 
+// ——————————————————————————————
+bool OregonSensorV2::decode_HOMEEASY(char * pt) {
+
+  int len = strlen(pt);
+
+  if (len >= 20) {
+
+    //unit code     data[3] 
+    int UnitCode = HexDec(&pt[3*2],2 );
+
+    //switch value     data[4] 
+    int OnOff  = HexDec(&pt[4 * 2], 2);
+    //group value     data[5] 
+    int Group = HexDec(&pt[5 * 2], 2);
+
+    // ID data[6..9]
+    int CodeId = HexDec(&pt[6 * 2], 8);
+
+    _channel = UnitCode ;
+    _irolling= CodeId ;
+    _OnOff   = (OnOff!=0) ;
+    _valid   = true ; //true if valid
+    _availableInfos.setFlags(haveOnOff);
+
+#ifdef SENSORDEBUG
+    printf("OSV2 – decode : id(0x%04X) Unit:%d OnOff:%d Group:%d ID:%04X  \n", 0x3b80 , UnitCode , OnOff , Group , CodeId );
+#endif
+
+    return true;
+    // } else return false;
+
+  }
+  return false;
 }
 
 // —————————————————————————————

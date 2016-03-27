@@ -65,6 +65,7 @@ public:
     void done ();
     void print (const char* s);
     void sprint(const char * s, char * d);
+		static void sprint(const char * s, const byte* data, byte pos, char * d);
 
     virtual void gotBit (char value);
 

@@ -147,6 +147,20 @@
      * d minimal size is : OOK_MAX_STR_LEN
      * s recommended size : 3 char
      */
+		void DecodeOOK::sprint(const char * s, const byte* data, byte pos, char * d) {
+
+			char v[] = { '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F' };
+			sprintf(d, "%s ", s);
+			d += strlen(s);
+			for (byte i = 0; i < pos; ++i) {
+				*d =  v[data[i] >> 4]  ; d++;
+				*d =  v[data[i] & 0x0F]; d++;
+			}
+			*d = '\0';
+
+		}
+
+
     void DecodeOOK::sprint(const char * s, char * d) {
     	char v[] = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
 #ifdef TRACE_RCOOK

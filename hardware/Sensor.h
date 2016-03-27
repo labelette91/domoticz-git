@@ -30,7 +30,7 @@
 
 class Sensor {
 
- protected:
+ public:
     enum {
     battery		= 1 << 0,
     haveTemperature	= 1 << 1,
@@ -42,9 +42,11 @@ class Sensor {
     haveRain		= 1 << 7,
     haveTrain		= 1 << 8,
     havePressure	= 1 << 9,
-    isValid		= 1 << 10
+    haveOnOff     = 1 << 10,
+    havePower     = 1 << 11,
+    isValid		= 1 << 12
   } eInfo;
-
+protected:
   double _temperature;
   double _humidity;
   double _rain;
@@ -55,7 +57,12 @@ class Sensor {
   
   int _channel;
   int _irolling ;
+  bool _OnOff ;
   bool _valid ; //true if valid
+
+  int _power ;
+  int _total_power ;
+
 
   int _sensorClass; // marque du sensor cf #define
   int _sensorType; // model of sensor
@@ -80,6 +87,7 @@ class Sensor {
 
   virtual ~Sensor() { };
   
+  bool available(int flag); // return true if valid && parameter flag
   bool availableTemp() const; // return true if valid && have Temp
   bool availableHumidity() const; // return true if valid && have Humidity
   bool isBatteryLow() const; // return true if valid && haveBattery && flag set.
@@ -103,6 +111,11 @@ class Sensor {
   int getSensClass() const; // return sensor class
   int getSensType() const; // return sensor type
   int getSensID() const{return _irolling;};   // return sensor ID (rolling code )
+  int getOnOff()  { return _OnOff; };   // return switch valur
+  bool availableOnOff() const; // return true if valid && have OnOff
+
+  int getPower() { return _power; };   
+  int getTotalPower() { return _total_power; };
 
   //time_t getCreationTime(); // return object creation time
 
@@ -126,6 +139,9 @@ class OregonSensorV2 : public Sensor {
   bool decode_THGRN228NX(char * pt); // decode sensor informations
   bool decode_WGR918(char * pt); // decode sensor informations
   bool validate(char * _str, int _len, int _CRC, int _SUM); // Verify CRC & CKSUM
+  bool decode_HOMEEASY(char * pt);
+  bool decode_POWER(char * pt);
+  
 };
 
 class OregonSensorV3 : public Sensor {

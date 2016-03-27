@@ -34,6 +34,8 @@
 #include "RCSwitch.h"
 #include "RcOok.h"
 #include "DecodeHomeEasy.h"
+#include "Sensor.h"
+
 
 char RCSwitch::OokReceivedCode[RCSWITCH_MAX_MESS_SIZE];
 bool RCSwitch::OokAvailableCode;
@@ -165,20 +167,20 @@ void RCSwitch::handleInterrupt() {
 //		recorPulse(p);
 			Record.put(p);
 	byte dta = digitalRead(5);
-				
+	/*low to high transition : low duration*/
+	if (dta == 0)
+		p += 100;
+	else
+		p -= 100;
+
 	
   // Avoid re-entry
 //  if ( !OokAvailableCode ) 
   {		// avoid reentrance -- wait until data is read
 	  if (orscV2.nextPulse(p)) 
       { 
-				/*low to high transition : low duration*/
-				if (dta == 0)
-					p += 100;
-				else
-					p -= 100;
 
-          orscV2.sprint("OSV2",RCSwitch::OokReceivedCode); 
+          orscV2.sprint(OregonSensorV2::_sensorId,RCSwitch::OokReceivedCode);
           Fifo.Put(RECORD_ZIZE, (byte*)RCSwitch::OokReceivedCode);
 
 /*				  byte len;
@@ -191,8 +193,9 @@ void RCSwitch::handleInterrupt() {
       }
 		if (HEasy.nextPulse(p,dta))
 		{
-			if (dta == 0) dta = 1;  else dta = 0 ;
-			DumpHex((byte*)HEasy.getData(), HEasy.getBytes(), RCSwitch::OokReceivedCode);
+			orscV2.sprint(OregonSensorV2::_sensorId, HEasy.getData(), HEasy.getBytes(), RCSwitch::OokReceivedCode);
+
+//			DumpHex((byte*)HEasy.getData(), HEasy.getBytes(), RCSwitch::OokReceivedCode);
 			Fifo.Put(RECORD_ZIZE, (byte*)RCSwitch::OokReceivedCode);
 
 			HEasy.resetDecoder();

@@ -148,7 +148,7 @@ bool HomeEasy::WriteToHardware(const char *pdata, const unsigned char length)
 			//attente une secone max pour emetre si emission en cours -80--> -70
 			radio->WaitCanSend(-70);
 			//send
-			HomeEasyRfTx->setSwitch(cmd, id, unit);   
+			HomeEasyRfTx->setSwitch(cmd!=0, id, unit);   
 			//if same rx/tx pin : goto receive state after transmit
 			if (TXPIN!= RXPIN)
 				radio->setMode(RF69_MODE_SLEEP);
@@ -166,6 +166,7 @@ bool HomeEasy::WriteToHardware(const char *pdata, const unsigned char length)
 }
 void HomeEasy::printPulse()
 {
+#ifdef __arm__
   int p=0;
   int n;
   char Mes[128*3];
@@ -191,6 +192,7 @@ void HomeEasy::printPulse()
 		Mes[n*2]=0;
 	  if (n!=0) printf("%s\n",Mes);
 	
+#endif
 }
 void DumpHex (byte * data , byte len , char * mesage )
 {
@@ -258,15 +260,31 @@ void HomeEasy::Do_Work()
 				if (s != NULL)
 				{
 					//if correct dcoded sensor 
-					if (s->isDecoded())
-					{
-						SendTempHumSensor(s->getSensID(), !s->isBatteryLow(), s->getTemperature(), s->getHumidity(), "Home TempHum" /* , sTypeTH1 */ );
-					_log.Log(LOG_TRACE, "RCOOK ID:%X Temp : %f Humidity : %f Channel : %d ", s->getSensID(), s->getTemperature(), s->getHumidity(), s->getChannel());
-					}
+          if (s->isDecoded())
+          {
+            if (s->available(Sensor::haveTemperature))
+            {
+              SendTempHumSensor(s->getSensID(), !s->isBatteryLow(), s->getTemperature(), s->getHumidity(), "Home TempHum" /* , sTypeTH1 */);
+              _log.Log(LOG_TRACE, "RCOOK %s ID Code:%04X  Rolling:%0X Temp : %f Humidity : %f Channel : %d ", s->getSensorName().c_str(), s->getSensType(), s->getSensID(), s->getTemperature(), s->getHumidity(), s->getChannel());
+            }
+            if (s->available(Sensor::haveOnOff))
+            {
+              SendSwitch(s->getSensID() , s->getChannel() , 0xff , s->getOnOff()!=0 , 0  ,  "HomeEasy");
+              _log.Log(LOG_TRACE, "RCOOK %s ID Code:%04X  Rolling:%08X OnOff : %d Unit : %d ", s->getSensorName().c_str(), s->getSensType(), s->getSensID(), s->getOnOff(), s->getChannel());
+            }
+            if (s->available(Sensor::havePower))
+            {
+              SendKwhMeter(s->getSensType(), s->getChannel(), 0xff, s->getPower(), s->getTotalPower()/1000.0/ 223.666, "POWER");
+                _log.Log(LOG_TRACE, "RCOOK %s Code:%04X  Power : %d Total : %d ", s->getSensorName().c_str(), s->getSensType(),  s->getPower(), s->getTotalPower() );
+            }
+
+          }
 					else
 						_log.Log(LOG_TRACE, "RCOOK Sensor Id :%04X unknown", s->getSensType() );
 
 				}
+				else
+					_log.Log(LOG_TRACE, "RCOOK Sensor unknown" );
 				delete s;
 			}
 #endif

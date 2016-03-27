@@ -20,7 +20,7 @@ class Print
 	static int PRINT (long mes , int base , bool lf)
 	{
 			switch (base) {
-					case BIN : printf("%b",mes) ;
+					case BIN : printf("%d",mes) ;
 					break;
 					case OCT:  printf("%o",mes) ;
 					break;

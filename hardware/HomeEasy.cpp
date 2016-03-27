@@ -58,9 +58,8 @@ HomeEasy::HomeEasy(const int ID)
 	TSqlQueryResult result = m_sql.Query("SELECT Mode1, Mode2, Mode3, Mode4, Mode5, Mode6 FROM Hardware WHERE (ID='%d')", ID );
 	if (result.size() > 0)
 	{
-		TXPIN = atoi(result[0][0].c_str());
-		RXPIN = atoi(result[0][1].c_str());
-		TXPIN = 5;
+		RXPIN = atoi(result[0][0].c_str());
+		TXPIN = atoi(result[0][1].c_str());
 		_log.Log(LOG_TRACE, "HERF: RXPin:%d TXPin:%d",  RXPIN, TXPIN);
 
 	}
@@ -280,7 +279,7 @@ void HomeEasy::Do_Work()
 
           }
 					else
-						_log.Log(LOG_TRACE, "RCOOK Sensor Id :%04X unknown", s->getSensType() );
+						_log.Log(LOG_TRACE, "RCOOK Sensor Id :%04X checksum error", s->getSensType() );
 
 				}
 				else

@@ -39,6 +39,8 @@
 
 char RCSwitch::OokReceivedCode[RCSWITCH_MAX_MESS_SIZE];
 bool RCSwitch::OokAvailableCode;
+int RCSwitch::nReceiverInterrupt;
+
 TFifo RCSwitch::Fifo ;
 TRecord RCSwitch::Record;
 
@@ -164,15 +166,14 @@ void RCSwitch::handleInterrupt() {
   lastTime = time;
   word p = (unsigned short int) duration;
 	if (p!=0)
-//		recorPulse(p);
 			Record.put(p);
-	byte dta = digitalRead(5);
+
+  byte dta = digitalRead(RCSwitch::nReceiverInterrupt);
 	/*low to high transition : low duration*/
 	if (dta == 0)
 		p += 100;
 	else
 		p -= 100;
-
 	
   // Avoid re-entry
 //  if ( !OokAvailableCode ) 

@@ -84,7 +84,7 @@ class RCSwitch {
   private:
 
     static void handleInterrupt();
-    int nReceiverInterrupt;
+    static int nReceiverInterrupt;
     int nTransmitterPin;
 
     static char OokReceivedCode[RCSWITCH_MAX_MESS_SIZE];

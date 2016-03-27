@@ -392,6 +392,7 @@ int HexDec(char * hexv, int nbdigit )
 // 3A8001E2020025E7154000
 // ——————————————————————————————
 bool OregonSensorV2::decode_POWER(char * pt) {
+  char checksum[3]; int ichecksum;
 
   int len = strlen(pt);
 
@@ -413,7 +414,14 @@ bool OregonSensorV2::decode_POWER(char * pt) {
     printf("OSV2 – decode : id(0x%04X) Power:%d Total Power:%d \n", 0x3A80, _power, _total_power);
 #endif
 
-    return true;
+    checksum[0] = pt[18]; checksum[1] = pt[19]; checksum[2] = '\0';
+    ichecksum = getIntFromString(checksum);
+    // Check SUM & CRC
+    if (validate(pt, 18, 0, ichecksum) == true) {
+      return true;
+    }
+
+    return false;
     // } else return false;
 
   }

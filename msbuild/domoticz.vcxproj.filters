@@ -2373,17 +2373,14 @@
     <ClCompile Include="..\hardware\AtagOne.cpp">
       <Filter>Devices\AtagOne</Filter>
     </ClCompile>
-    <ClCompile Include="..\hardware\RcOok.cpp">
-      <Filter>Devices\HomeEasy</Filter>
-    </ClCompile>
-    <ClCompile Include="..\hardware\RCSwitch.cpp">
-      <Filter>Devices\HomeEasy</Filter>
-    </ClCompile>
     <ClCompile Include="..\hardware\Sensor.cpp">
       <Filter>Devices\HomeEasy</Filter>
     </ClCompile>
     <ClCompile Include="..\webserver\fastcgi.cpp">
       <Filter>Webserver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\vspde.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

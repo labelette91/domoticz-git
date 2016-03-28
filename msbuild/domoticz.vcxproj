@@ -668,8 +668,6 @@
     <ClCompile Include="..\hardware\Pinger.cpp" />
     <ClCompile Include="..\hardware\PVOutput_Input.cpp" />
     <ClCompile Include="..\hardware\Razberry.cpp" />
-    <ClCompile Include="..\hardware\RcOok.cpp" />
-    <ClCompile Include="..\hardware\RCSwitch.cpp" />
     <ClCompile Include="..\hardware\RFLinkBase.cpp" />
     <ClCompile Include="..\hardware\RFLinkSerial.cpp" />
     <ClCompile Include="..\hardware\RFLinkTCP.cpp" />
@@ -690,6 +688,7 @@
     <ClCompile Include="..\hardware\Thermosmart.cpp" />
     <ClCompile Include="..\hardware\ToonThermostat.cpp" />
     <ClCompile Include="..\hardware\VolcraftCO20.cpp" />
+    <ClCompile Include="..\hardware\vspde.cpp" />
     <ClCompile Include="..\hardware\Winddelen.cpp" />
     <ClCompile Include="..\hardware\WOL.cpp" />
     <ClCompile Include="..\hardware\Wunderground.cpp" />

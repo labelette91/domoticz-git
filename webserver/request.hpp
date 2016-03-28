@@ -7,7 +7,7 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-
+#pragma once
 #ifndef HTTP_REQUEST_HPP
 #define HTTP_REQUEST_HPP
 
@@ -22,7 +22,8 @@ namespace server {
 class request
 {
 public:
-	std::string host;
+	std::string host_address;
+	std::string host_port;
 	std::string method;
 	std::string uri;
 	int http_version_major;

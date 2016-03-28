@@ -3500,21 +3500,25 @@ define(['app'], function (app) {
             $( "#dialog-createevohomesensor" ).dialog( "open" );
         }
 
+		function OnDummySensorTypeChange()
+		{
+			var stype=$("#dialog-createsensor #sensortype option:selected").val();
+			$("#dialog-createsensor #sensoraxis").val("");
+			if (stype == 1004) {
+				$("#dialog-createsensor #vsensoraxis").show();
+			}
+			else {
+				$("#dialog-createsensor #vsensoraxis").hide();
+			}
+		}
+
         CreateDummySensors = function(idx,name)
         {
-            $.devIdx=idx;
             $("#dialog-createsensor #vsensoraxis").hide();
             $("#dialog-createsensor #sensoraxis").val("");
             
 			$("#dialog-createsensor #sensortype").change(function() { 
-				var stype=$("#dialog-createsensor #sensortype option:selected").val();
-				$("#dialog-createsensor #sensoraxis").val("");
-				if (stype == 1004) {
-					$("#dialog-createsensor #vsensoraxis").show();
-				}
-				else {
-					$("#dialog-createsensor #vsensoraxis").hide();
-				}
+				OnDummySensorTypeChange();
 			});
             
             $( "#dialog-createsensor" ).dialog({
@@ -3580,6 +3584,7 @@ define(['app'], function (app) {
 
             $( "#dialog-createsensor" ).i18n();
             $( "#dialog-createsensor" ).dialog( "open" );
+            OnDummySensorTypeChange();
         }
 
         RefreshHardwareTable = function()

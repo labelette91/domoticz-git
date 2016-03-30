@@ -1259,6 +1259,9 @@
     <None Include="..\www\app\ihmSetpointTimers.js">
       <Filter>www\app</Filter>
     </None>
+    <None Include="..\www\app\ihmShowTimers.js">
+      <Filter>www\app</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\webserver\Base64.h">

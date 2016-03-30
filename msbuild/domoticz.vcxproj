@@ -123,6 +123,7 @@
     <None Include="..\www\app\HardwareController.js" />
     <None Include="..\www\app\HistoryController.js" />
     <None Include="..\www\app\ihmSetpointTimers.js" />
+    <None Include="..\www\app\ihmShowTimers.js" />
     <None Include="..\www\app\LightsController.js" />
     <None Include="..\www\app\LogController.js" />
     <None Include="..\www\app\LoginController.js" />

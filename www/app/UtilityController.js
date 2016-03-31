@@ -1599,12 +1599,14 @@ define(['app'], function (app) {
 							xhtm+='<a class="btnsmall" onclick="ShowTempLog(\'#utilitycontent\',\'ShowUtilities\',' + item.idx + ',\'' + escape(item.Name) + '\');" data-i18n="Log">Log</a> ';
 							xhtm+='<a class="btnsmall" onclick="EditSetPoint(' + item.idx + ',\'' + escape(item.Name) + '\',\'' + escape(item.Description) + '\', ' + item.SetPoint + ',' + item.Protected + ',' + item.TempIdx + ',' + item.SwitchIdx + ',' + isVirtualThermostat(item) + ',' + item.AddjMulti + ',' + item.AddjValue + ',' + item.AddjValue2 + ',' + item.AddjMulti2 +');" data-i18n="Edit">Edit</a> ';
 							if (item.Timers == "true") {
-								xhtm+='<a class="btnsmall-sel" onclick="ShowSetpointTimers(' + item.idx + ',\'' + escape(item.Name) + '\');" oncontextmenu="ShowIhmSetpointTimers(' + item.idx + ',\'' + item.Name + '\');" data-i18n="Timers">Timers</a> ';
-							}
+								xhtm+='<a class="btnsmall-sel" onclick="ShowSetpointTimers(' + item.idx + ',\'' + escape(item.Name) + '\');" data-i18n="Timers">Timers</a> ';
+								xhtm+='<a class="btnsmall-sel" onclick="ShowIhmSetpointTimers(' + item.idx + ',\'' + escape(item.Name) + '\');" data-i18n="Prog">Prog</a> ';
+                            }
 							else {
-								xhtm+='<a class="btnsmall" onclick="ShowSetpointTimers(' + item.idx + ',\'' + escape(item.Name) + '\');" oncontextmenu="ShowIhmSetpointTimers(' + item.idx + ',\'' + item.Name + '\');" data-i18n="Timers">Timers</a> ';
-							}
-						}
+								xhtm+='<a class="btnsmall" onclick="ShowSetpointTimers(' + item.idx + ',\'' + escape(item.Name) + '\');" data-i18n="Timers">Timers</a> ';
+								xhtm+='<a class="btnsmall" onclick="ShowIhmSetpointTimers(' + item.idx + ',\'' + escape(item.Name) + '\');" data-i18n="Prog">Prog</a> ';
+                            }
+                        }
 				  }
 				  else if (item.Type == "Radiator 1") {
 						if (permissions.hasPermission("Admin")) {

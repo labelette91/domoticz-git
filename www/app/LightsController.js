@@ -2939,14 +2939,17 @@ define(['app'], function (app) {
 							'<a class="btnsmall" onclick="EditLightDevice(' + item.idx + ',\'' + escape(item.Name) + '\',\'' + escape(item.Description) + '\', ' + '\'' + item.Type + '\', ' + item.SwitchTypeVal + ', ' + item.AddjValue + ', ' + item.AddjValue2 + ', ' + item.IsSubDevice + ', ' + item.CustomImage + ', \'' + item.SubType + '\', \'' + item.StrParam1 + '\', \'' + item.StrParam2 + '\',' + item.Protected + ',' + item.Unit + ',' + item.Log + ');" data-i18n="Edit">Edit</a> ';
 								if (bAddTimer == true) {
 											if (item.Timers == "true") {
-												xhtm+='<a class="btnsmall-sel" ';
+												xhtm+='<a class="btnsmall-sel" onclick="ShowTimers(' + item.idx + ',\'' + escape(item.Name) + '\',' + bIsDimmer + ',\'' + item.Type + '\'' + ', \'' + item.SubType + '\');" data-i18n="Timers">Timers</a> ';
 											}
 											else {
-											    xhtm+='<a class="btnsmall"     ' ; 
+												xhtm+='<a class="btnsmall" onclick="ShowTimers(' + item.idx + ',\'' + escape(item.Name) + '\',' + bIsDimmer + ',\'' + item.Type + '\'' + ', \'' + item.SubType + '\');" data-i18n="Timers">Timers</a> ';
 											}
-											xhtm += 'onclick="ShowTimers(' + item.idx + ',\'' + escape(item.Name) + '\',' + bIsDimmer + ',\'' + item.Type + '\'' + ', \'' + item.SubType + '\');" ' ;
-											xhtm += 'oncontextmenu="ShowIhmTimers(' + item.idx + ',\'' + escape(item.Name) + '\',' + bIsDimmer + ',\'' + item.Type + '\'' + ', \'' + item.SubType + '\');" ';
-											xhtm += ' data-i18n="Timers">Timers</a> ';
+											if (item.Timers == "true") {
+											    xhtm += '<a class="btnsmall-sel" onclick="ShowIhmTimers(' + item.idx + ',\'' + escape(item.Name) + '\',' + bIsDimmer + ',\'' + item.Type + '\'' + ', \'' + item.SubType + '\');" data-i18n="Prog">Prog</a> ';
+											}
+											else {
+											    xhtm += '<a class="btnsmall" onclick="ShowIhmTimers(' + item.idx + ',\'' + escape(item.Name) + '\',' + bIsDimmer + ',\'' + item.Type + '\'' + ', \'' + item.SubType + '\');" data-i18n="Prog">Prog</a> ';
+											}
                                         }
 								if (item.SwitchType == "Smoke Detector") {
 									if (

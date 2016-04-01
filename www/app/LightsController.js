@@ -883,7 +883,7 @@ define(['app'], function (app) {
 		    $('#lightcontent').html(htmlcontent);
 		    $('#lightcontent').i18n();
 
-		    ShowIhmTimersInt(id, name, isdimmer, stype, devsubtype);
+		    IhmShowTimer.ShowIhmTimersInt(id, name, isdimmer, stype, devsubtype);
 
 		    $('#modal').hide();
 		}

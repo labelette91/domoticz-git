@@ -1,4 +1,8 @@
-function GetTimersSettings (days , hour,min,val)
+// define module
+var IhmShowTimer  = (function () {
+
+
+function GetTimersSettings(days, hour, min, val)
 {
     //days : bit 0: Monday 1:Tuesday ... 6:  sunday
 	var tsettings = {};
@@ -117,32 +121,6 @@ function ProgAddTimer (devIdx,days,hour,min,val)
 				ShowNotify($.t('Problem addsetpointtimer timers!'), 2500, true);
 		 }     
 	});
-}
-function ProgAddTimersBtn(devIdx) {
-	ClearTimersInt(devIdx);
-	var lastValue = [];
-	for (var hour = 0; hour < 24; hour++) {
-		var tdays = 0;
-		var lastHourValue = DayTimer[0][hour];
-		var DayHourValue = 0;
-		for (day = 0; day < 7; day++) {
-			var Value = DayTimer[day][hour];
-			if (Value != lastValue[day]) {
-				if (lastHourValue != Value) {
-					ProgAddTimer(devIdx, tdays, hour, 0, lastHourValue);
-					tdays = 0;
-					lastHourValue = Value;
-				}
-				tdays |= (1 << day);
-				lastValue[day] = Value;
-				DayHourValue = Value;
-			}
-		}
-		if (tdays != 0)
-			ProgAddTimer(devIdx, tdays, hour, 0, DayHourValue);
-	}
-	//            $.each($("button.btn-timer."+entry), function(i,item) {CreateTimer(devIdx,day,i,item);	});        
-	ShowNotify($.t('Sensor Timer added!'), 2500, true);
 }
 //update the DAY/hours timer data array value
 function setDayTimer(day,hour,value)
@@ -343,86 +321,6 @@ function SetBtn(obj)
 //    cb.val() //the value of the selected option
     
 }
-function ShowIhmTimersInt(devIdx, name, isdimmer, stype, devsubtype)
-{
-  $.MouseDown = false ;
-  $.DayDeb = 0 ;
-  $.DayEnd = 0 ;
-  $.HourDeb = 0 ;
-  $.HourEnd = 0 ;
-  $.GlobalValue = 1 ;
-  //init button On	
-  SetBtn($('#lightcontent #BtnOn'));
-
-  $.WeekDays = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]; 
-  DayTimer  = new Array(7); 
-  clearDayTimer() ;
-  getTimers(devIdx);
-  DisplayTimerValues();
-  
-  $("button.btn-timer").mouseover(function () {
-     if ($.MouseDown){
-//        SetHoursValue( $(this).prop("name"),$(this).prop("id"), GetCmdValue() );  
-         $.DayCur = $(this).prop("name");
-         $.HourCur = $(this).prop("id");
-         if (istSelectedDay()) {
-             for (var day = $.DayDeb; day <= $.DayCur; day++)
-                 for (var hour = $.HourDeb; hour <= $.HourCur; hour++)
-                     if ((day != $.DayDeb) || (hour != $.HourDeb))
-                         SetOnBkgd(getItem(day, hour));
-         }
-     }
-  });
-  
-  $("button.btn-timer").mousedown(function () {
-    $.MouseDown = true ;
-	$.DayDeb = $(this).prop("name") ;
-	$.HourDeb = $(this).prop("id") ;
-    SetHoursValue($.DayDeb,$.HourDeb , GetCmdValue() );  
-  });
-  
-  $("button.btn-timer").mouseup(function () {
-    $.MouseDown = false ;
-	$.DayEnd = $(this).prop("name") ;
-	$.HourEnd = $(this).prop("id") ;
-	if (istSelectedDay()){
-		for (var day=$.DayDeb;day<=$.DayEnd;day++)
-			for (var hour=$.HourDeb;hour<=$.HourEnd;hour++)
-			    if ( (day != $.DayDeb)||(hour!=$.HourDeb))
-			        SetDayHourValue(day, hour, GetCmdValue());
-	}
-  });
-  
-  $(window).mouseup(function(){
-    $.MouseDown = false ;
-  });
-  $("#lightcontent #when1").click(function() {
-  	SetDays("Everyday",false);                    
-  });                                                              
-  $("#lightcontent #when2").click(function() {
-  	SetDays("Weekdays",false);                    
-  });                                                              
-  $("#lightcontent #when3").click(function() {
-  	SetDays("Weekends",false);                    
-  });                                                              
-  $("#lightcontent #when4").click(function() {
-  	SetDays("",false);                           
-  });         
-
-   $("#lightcontent #tConf").click(function() {
-    
-  });                                                              
-   $("#lightcontent #tEco").click(function() {
-   
-  });                                                              
-
-/*
-    $("#lightcontent #combocommand").change(function() {
-    	var cval=$("#lightcontent #combocommand").val()
-    	SetCmdValue( cval);
-    });*/
-
-}
 function createDayHourTable()
 {
     var Days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]; 
@@ -450,7 +348,10 @@ function createDayHourTable()
     html+='</table>\n';
     return html;
 }
-function ProgCopyTimersBtn(idx)
+
+return {
+
+    ProgCopyTimersBtn: function(idx)
 {
 			$.devIdx=idx;
 			$( "#dialog-copy" ).dialog({
@@ -490,5 +391,115 @@ function ProgCopyTimersBtn(idx)
 			$( "#dialog-copy" ).i18n();
 			$( "#dialog-copy" ).dialog( "open" );
 }
+    , 
+    ShowIhmTimersInt :function(devIdx, name, isdimmer, stype, devsubtype) {
+    $.MouseDown = false;
+    $.DayDeb = 0;
+    $.DayEnd = 0;
+    $.HourDeb = 0;
+    $.HourEnd = 0;
+    $.GlobalValue = 1;
+    //init button On	
+    SetBtn($('#lightcontent #BtnOn'));
 
+    $.WeekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    DayTimer = new Array(7);
+    clearDayTimer();
+    getTimers(devIdx);
+    DisplayTimerValues();
+
+    $("button.btn-timer").mouseover(function () {
+        if ($.MouseDown) {
+            //        SetHoursValue( $(this).prop("name"),$(this).prop("id"), GetCmdValue() );  
+            $.DayCur = $(this).prop("name");
+            $.HourCur = $(this).prop("id");
+            if (istSelectedDay()) {
+                for (var day = $.DayDeb; day <= $.DayCur; day++)
+                    for (var hour = $.HourDeb; hour <= $.HourCur; hour++)
+                        if ((day != $.DayDeb) || (hour != $.HourDeb))
+                            SetOnBkgd(getItem(day, hour));
+            }
+        }
+    });
+
+    $("button.btn-timer").mousedown(function () {
+        $.MouseDown = true;
+        $.DayDeb = $(this).prop("name");
+        $.HourDeb = $(this).prop("id");
+        SetHoursValue($.DayDeb, $.HourDeb, GetCmdValue());
+    });
+
+    $("button.btn-timer").mouseup(function () {
+        $.MouseDown = false;
+        $.DayEnd = $(this).prop("name");
+        $.HourEnd = $(this).prop("id");
+        if (istSelectedDay()) {
+            for (var day = $.DayDeb; day <= $.DayEnd; day++)
+                for (var hour = $.HourDeb; hour <= $.HourEnd; hour++)
+                    if ((day != $.DayDeb) || (hour != $.HourDeb))
+                        SetDayHourValue(day, hour, GetCmdValue());
+        }
+    });
+
+    $(window).mouseup(function () {
+        $.MouseDown = false;
+    });
+    $("#lightcontent #when1").click(function () {
+        SetDays("Everyday", false);
+    });
+    $("#lightcontent #when2").click(function () {
+        SetDays("Weekdays", false);
+    });
+    $("#lightcontent #when3").click(function () {
+        SetDays("Weekends", false);
+    });
+    $("#lightcontent #when4").click(function () {
+        SetDays("", false);
+    });
+
+    $("#lightcontent #tConf").click(function () {
+
+    });
+    $("#lightcontent #tEco").click(function () {
+
+    });
+
+    /*
+        $("#lightcontent #combocommand").change(function() {
+            var cval=$("#lightcontent #combocommand").val()
+            SetCmdValue( cval);
+        });*/
+
+}
+    ,
+    ProgAddTimersBtn: function (devIdx) {
+    ClearTimersInt(devIdx);
+    var lastValue = [];
+    for (var hour = 0; hour < 24; hour++) {
+        var tdays = 0;
+        var lastHourValue = DayTimer[0][hour];
+        var DayHourValue = 0;
+        for (day = 0; day < 7; day++) {
+            var Value = DayTimer[day][hour];
+            if (Value != lastValue[day]) {
+                if (lastHourValue != Value) {
+                    ProgAddTimer(devIdx, tdays, hour, 0, lastHourValue);
+                    tdays = 0;
+                    lastHourValue = Value;
+                }
+                tdays |= (1 << day);
+                lastValue[day] = Value;
+                DayHourValue = Value;
+            }
+        }
+        if (tdays != 0)
+            ProgAddTimer(devIdx, tdays, hour, 0, DayHourValue);
+    }
+    //            $.each($("button.btn-timer."+entry), function(i,item) {CreateTimer(devIdx,day,i,item);	});        
+    ShowNotify($.t('Sensor Timer added!'), 2500, true);
+}
+
+};
+
+})();
 

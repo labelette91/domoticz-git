@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-//#define  __arm__
+#define  __arm__
 
 #include "HomeEasy.h"
 #include <stdio.h>
@@ -13,7 +13,7 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/wait.h>
-#include <sched.h>    
+#include "sched.h"    
 #include <wiringPi.h>
 
 #include "RCSwitch.h"
@@ -235,7 +235,7 @@ void HomeEasy::Do_Work()
 
 			{
 				char dataStr[100];
-				char data[100];
+				//char data[100];
 				byte len;
 				std::string message;
 
@@ -258,34 +258,51 @@ void HomeEasy::Do_Work()
 				Sensor *s = Sensor::getRightSensor((char*)message.c_str());
 				if (s != NULL)
 				{
-					//if correct dcoded sensor 
-          if (s->isDecoded())
+          //if correct decoded sensor and different value since last receive
+          if (s->isDecoded()) 
           {
-            if (s->available(Sensor::haveTemperature))
-            {
-              SendTempHumSensor(s->getSensID(), !s->isBatteryLow(), s->getTemperature(), s->getHumidity(), "Home TempHum" /* , sTypeTH1 */);
-              _log.Log(LOG_TRACE, "RCOOK %s ID Code:%04X  Rolling:%0X Temp : %f Humidity : %f Channel : %d ", s->getSensorName().c_str(), s->getSensType(), s->getSensID(), s->getTemperature(), s->getHumidity(), s->getChannel());
-            }
-            if (s->available(Sensor::haveOnOff))
-            {
-              SendSwitch(s->getSensID() , s->getChannel() , 0xff , s->getOnOff()!=0 , 0  ,  "HomeEasy");
-              _log.Log(LOG_TRACE, "RCOOK %s ID Code:%04X  Rolling:%08X OnOff : %d Unit : %d ", s->getSensorName().c_str(), s->getSensType(), s->getSensID(), s->getOnOff(), s->getChannel());
-            }
-            if (s->available(Sensor::havePower))
-            {
-              SendKwhMeter(s->getSensType(), s->getChannel(), 0xff, s->getPower(), s->getTotalPower()/1000.0/ 223.666, "POWER");
-                _log.Log(LOG_TRACE, "RCOOK %s Code:%04X  Power : %d Total : %d ", s->getSensorName().c_str(), s->getSensType(),  s->getPower(), s->getTotalPower() );
+            //find sensor
+            Sensor * sensor = FindSensor(s->getSensID());
+            if (sensor == 0) {
+              //            Sensors[s->getSensID()] = sensor;
+              _log.Log(LOG_TRACE, "SENSOR: new sensor added %s ID:%08X", s->getSensorName().c_str(), s->getSensID());
             }
 
+            //if sensor value as changed
+            if ( (sensor == 0) || (*sensor != *s) )
+            {
+              //update current sensor value
+              Sensors[s->getSensID()] = s ;
+              if (s->available(Sensor::haveTemperature))
+              {
+                SendTempHumSensor(s->getSensID(), !s->isBatteryLow(), (float)s->getTemperature(), (int)s->getHumidity(), "Home TempHum" /* , sTypeTH1 */);
+                _log.Log(LOG_TRACE, "RCOOK %s ID Code:%04X  Rolling:%0X Temp : %f Humidity : %f Channel : %d ", s->getSensorName().c_str(), s->getSensType(), s->getSensID(), s->getTemperature(), s->getHumidity(), s->getChannel());
+              }
+              if (s->available(Sensor::haveOnOff))
+              {
+                SendSwitch(s->getSensID() , s->getChannel() , 0xff , s->getOnOff()!=0 , 0  ,  "HomeEasy");
+                _log.Log(LOG_TRACE, "RCOOK %s ID Code:%04X  Rolling:%08X OnOff : %d Unit : %d ", s->getSensorName().c_str(), s->getSensType(), s->getSensID(), s->getOnOff(), s->getChannel());
+              }
+              if (s->available(Sensor::havePower))
+              {
+                SendKwhMeter(s->getSensType(), s->getChannel(), 0xff, s->getPower(), s->getTotalPower()/1000.0/ 223.666, "POWER");
+                  _log.Log(LOG_TRACE, "RCOOK %s Code:%04X  Power : %d Total : %d ", s->getSensorName().c_str(), s->getSensType(),  s->getPower(), s->getTotalPower() );
+              }
+              //delete old value
+              if (sensor != 0) delete sensor;
+            }
+            else
+              delete s;
           }
-					else
-						_log.Log(LOG_TRACE, "RCOOK Sensor Id :%04X checksum error", s->getSensType() );
-
-				}
-				else
-					_log.Log(LOG_TRACE, "RCOOK Sensor unknown" );
-				delete s;
-			}
+          else
+          {
+            delete s;
+            _log.Log(LOG_TRACE, "RCOOK Sensor Id :%04X checksum error", s->getSensType());
+          }
+        }
+        else
+          _log.Log(LOG_TRACE, "RCOOK Sensor unknown" );
+      }
 #endif
 
 

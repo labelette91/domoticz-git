@@ -18,33 +18,40 @@
 #define SENS_TYP_MTP_CPU 0 // cpu temperature
 #define SENS_TYP_MTP_INT 1 // internal temperature
 
-#define SENS_TYP_OS_1D20 0x1D20 // THGR122NX
-#define SENS_TYP_OS_EC40 0xEC40 // THN132N
-#define SENS_TYP_OS_1D30 0x1D30 // THGRN228NX
-#define SENS_TYP_OS_3D00 0x3D00 // WGR9180
-#define SENS_TYP_OS_2D10 0x2D10 // STR928N
-#define SENS_TYP_OS_5D60 0x5D60 // BTHG968
+#define SENS_THGR122NX  0x1D20 // THGR122NX
+#define SENS_THN132N    0xEC40 // THN132N
+#define SENS_THGRN228NX 0x1D30 // THGRN228NX
+#define SENS_WGR918     0x3D00 // WGR918       ANEMOMETER
+#define SENS_STR928N    0x2D10 // STR928N      RGR918 PLUVIOMETRE
+#define SENS_BTHG968    0x5D60 // BTHG968      BTHG968 temperature + hygro + pression atmospherique
+
+#define SENS_POWER      0x3081 // CM180/119
+#define SENS_HOMEEASY   0x3B80 // homeeasy
+
+
 
 #include <string>
 #include "Flag.h"
+#include <map>
 
 class Sensor {
 
  public:
     enum {
-    battery		= 1 << 0,
-    haveTemperature	= 1 << 1,
-    haveHumidity	= 1 << 2,
-    haveBattery		= 1 << 3,
-    haveChannel		= 1 << 4,
-    haveDirection	= 1 << 5,
-    haveSpeed		= 1 << 6,
-    haveRain		= 1 << 7,
-    haveTrain		= 1 << 8,
-    havePressure	= 1 << 9,
-    haveOnOff     = 1 << 10,
-    havePower     = 1 << 11,
-    isValid		= 1 << 12
+    battery		    = 0,
+    haveTemperature	= 1,
+    haveHumidity	= 2,
+    haveBattery		= 3,
+    haveChannel		= 4,
+    haveDirection	= 5,
+    haveSpeed		= 6,
+    haveRain		= 7,
+    haveTrain		= 8,
+    havePressure	= 9,
+    haveOnOff       = 10,
+    havePower       = 11,
+    haveTotal_power = 12,
+    isValid		    = 13
   } eInfo;
 protected:
   double _temperature;
@@ -58,10 +65,11 @@ protected:
   int _channel;
   int _irolling ;
   bool _OnOff ;
-  bool _valid ; //true if valid
-
   int _power ;
   int _total_power ;
+  
+  bool _valid ; //true if valid
+  long _ID;     //iuniq IDentifier 
 
 
   int _sensorClass; // marque du sensor cf #define
@@ -73,7 +81,7 @@ protected:
   
   // time_t creationTime; // objectCreation time
 
-  virtual bool decode ( char * _str) = 0; // decode the string and set the variable
+  virtual bool decode ( char * _str) {return false;} ; // decode the string and set the variable
 
  protected:
   int getIntFromChar(char c) const ; // transform a Hex value in char into a number
@@ -84,6 +92,9 @@ protected:
  public:
 
   Sensor(); // construct and decode value
+  Sensor(Sensor &pS ); // construct and decode value
+
+  bool operator!=(const Sensor& ps ) const;
 
   virtual ~Sensor() { };
   
@@ -110,7 +121,7 @@ protected:
   int getChannel() const; // return channel value
   int getSensClass() const; // return sensor class
   int getSensType() const; // return sensor type
-  int getSensID() const{return _irolling;};   // return sensor ID (rolling code )
+  int getSensID() const{return _ID;};   // return sensor ID (rolling code )
   int getOnOff()  { return _OnOff; };   // return switch valur
   bool availableOnOff() const; // return true if valid && have OnOff
 
@@ -156,5 +167,13 @@ class OregonSensorV3 : public Sensor {
 
   bool decode_THGR810(char* pt); // decode sensor informations
 };
+
+
+
+typedef std::map<unsigned long, Sensor*> TSensorMap;
+
+Sensor * FindSensor(unsigned long ID);
+
+extern TSensorMap Sensors;
 
 #endif /* SENSOR_H_ */

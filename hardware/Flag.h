@@ -24,6 +24,7 @@ template<class eType> class Flags {
   eType _flags;
 };
 
+#define BIT(flags)(1<<flags)
 
 template<class eType> Flags<eType>::Flags(eType init) :
 _flags(init)
@@ -33,17 +34,17 @@ _flags(init)
 
 template<class eType> void Flags<eType>::setFlags(eType flags)
 {
-  _flags |= flags;
+  _flags |= BIT(flags);
 }
 
 template<class eType> void Flags<eType>::unsetFlags(eType flags)
 {
-  _flags &= ~flags;
+  _flags &= ~BIT(flags);
 }
 
 template<class eType> bool Flags<eType>::isFlagsSet(eType flags) const
 {
-  return ((_flags & flags) == flags);
+  return ((_flags & BIT(flags)) != 0 );
 }
 
 template<class eType> void Flags<eType>::reset()

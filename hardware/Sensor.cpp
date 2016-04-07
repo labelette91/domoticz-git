@@ -18,6 +18,7 @@ Sensor.cpp
 #include <time.h>
 #include <sstream>
 #include <iostream>
+#include <map>
 #include "Sensor.h"
 
 //#define SENSORDEBUG // Large debug trace
@@ -25,6 +26,8 @@ Sensor.cpp
 
 const char OregonSensorV2::_sensorId[] = "OSV2 ";
 const char OregonSensorV3::_sensorId[] = "OSV3 ";
+
+TSensorMap Sensors ;
 // ——————————————————
 // Construction – init variable then call decode function
 Sensor::Sensor( ) :
@@ -43,54 +46,123 @@ Sensor::Sensor( ) :
 {
   _irolling = 0 ;
   _valid=false ; //true if valid
+  _ID = 0;
+}
+
+Sensor::Sensor(Sensor &pS )
+{
+ _temperature=    pS._temperature;
+  _humidity=      pS._humidity;
+  _rain=          pS._rain;
+  _train=         pS._train;
+  _direction=     pS._direction;
+  _speed=         pS._speed;
+  _pressure=      pS._pressure;
+  _channel=       pS._channel;
+  _sensorClass=   pS._sensorClass;
+  _sensorType=    pS._sensorType;
+  _availableInfos=pS._availableInfos;
+  _irolling =     pS._irolling ; 
+  _valid=         pS._valid;
+  _sensorName=    pS._sensorName;
+  _OnOff =        pS._OnOff ;
+  _power =        pS._power ;
+  _total_power =  pS._total_power ;
+  _ID = pS._ID;
+
+}
+
+
+#define TEST_FLAG(FLAGNAME,FLAGVAR)     if ( _availableInfos.isFlagsSet(FLAGNAME) ) if (FLAGVAR != ps.FLAGVAR ) result|= true;
+
+//return true if different
+bool Sensor::operator!=(const Sensor& ps ) const
+{
+bool result = false ;
+switch (_sensorType){
+
+
+case SENS_THGR122NX  :
+case SENS_THGRN228NX :
+    TEST_FLAG(haveTemperature,_temperature ) ;
+    TEST_FLAG(haveHumidity,_humidity ) ;
+
+    break;
+case SENS_THN132N    :
+    TEST_FLAG(haveTemperature,_temperature ) ;
+break;
+case SENS_WGR918    :
+    TEST_FLAG(haveDirection,_direction ) ;
+    TEST_FLAG(haveSpeed,_speed ) ;
+break;
+case SENS_STR928N    :
+    TEST_FLAG(haveRain,_rain ) ;
+
+break;
+case SENS_BTHG968    :
+    TEST_FLAG(haveTemperature,_temperature ) ;
+    TEST_FLAG(haveHumidity,_humidity ) ;
+    TEST_FLAG(havePressure, _pressure) ;
+break;
+case SENS_POWER      :
+    TEST_FLAG(havePower,_power ) ;
+    TEST_FLAG(haveTotal_power,_total_power ) ;
+break;
+case SENS_HOMEEASY   :
+    TEST_FLAG(haveOnOff,_channel ) ;
+    TEST_FLAG(haveOnOff,_OnOff ) ;
+break;
+
+};
+return result;
 }
 
 
 bool Sensor::available(int flag )  { // return true if valid && parameter flag
-  return (_availableInfos.isFlagsSet(isValid | flag));
+  return (_availableInfos.isFlagsSet(isValid)  && _availableInfos.isFlagsSet( flag));
 }
 
 bool Sensor::availableOnOff() const { // return true if valid && have OnOff
-  return (_availableInfos.isFlagsSet(isValid | haveOnOff));
+  return (_availableInfos.isFlagsSet(isValid)  && _availableInfos.isFlagsSet( haveOnOff));
 }
 
 
 // —————————————————
 // availablePressure() – return true if valid && have wind speed
 bool Sensor::availablePressure() const {
-return (_availableInfos.isFlagsSet(isValid|havePressure));
+return (_availableInfos.isFlagsSet(isValid)  && _availableInfos.isFlagsSet(havePressure));
 }
 // —————————————————
 // availableSpeed() – return true if valid && have wind speed
 bool Sensor::availableSpeed() const{
-  return (_availableInfos.isFlagsSet(isValid|haveSpeed));
+  return (_availableInfos.isFlagsSet(isValid)  && _availableInfos.isFlagsSet(haveSpeed));
 }
 
 // —————————————————
 // availableDirection() – return true if valid && have wind direction
 bool Sensor::availableDirection() const{
-  return (_availableInfos.isFlagsSet(isValid|haveDirection));
+  return (_availableInfos.isFlagsSet(isValid)  && _availableInfos.isFlagsSet(haveDirection));
 }
 // —————————————————
 // availableRain() – return true if valid && have Rain
 bool Sensor::availableRain() const{
-  return (_availableInfos.isFlagsSet(isValid|haveRain));
+  return (_availableInfos.isFlagsSet(isValid)  && _availableInfos.isFlagsSet(haveRain));
 }
 
 // —————————————————
 // availableTemp() – return true if valid && have Temp
 bool Sensor::availableTemp() const{
-  return (_availableInfos.isFlagsSet(isValid|haveTemperature));
+  return (_availableInfos.isFlagsSet(isValid)  && _availableInfos.isFlagsSet(haveTemperature));
 }
 // —————————————————
 // availableHumidity() – return true if valid && have Humidity
 bool Sensor::availableHumidity()  const{
-  return (_availableInfos.isFlagsSet(isValid|haveHumidity));
+  return (_availableInfos.isFlagsSet(isValid)  && _availableInfos.isFlagsSet(haveHumidity));
 }
 // —————————————————
 // isBatteryLow() – return true if valid && haveBattery && flag set
 bool Sensor::isBatteryLow() const{
-  return (_availableInfos.isFlagsSet(isValid|haveBattery|battery));
+  return (_availableInfos.isFlagsSet(isValid)  && _availableInfos.isFlagsSet(haveBattery|battery));
 }
 // —————————————————
 // getPressure() – return Wind speed in Mb
@@ -127,7 +199,7 @@ return _humidity;
 // —————————————————
 // haveChannel() – return true if valid && haveChannel
 bool Sensor::hasChannel() const{
-  return (_availableInfos.isFlagsSet(isValid|haveChannel));
+  return (_availableInfos.isFlagsSet(isValid)  && _availableInfos.isFlagsSet(haveChannel));
 }
 // —————————————————
 // isDecoded() – return true if valid
@@ -383,7 +455,7 @@ int HexDec(char * hexv, int nbdigit )
 }
 
 // —————————————————————————————
-// Decode decode_POWER CM80 
+// Decode decode_POWER CM180 / CM119
 //data[0.1] device type
 //data[2] packet type 0   : power + total power
 //               type 1..4 : power
@@ -409,6 +481,9 @@ bool OregonSensorV2::decode_POWER(char * pt) {
 
     _valid = true; //true if valid
     _availableInfos.setFlags(havePower);
+    _availableInfos.setFlags(haveTotal_power);
+    
+    _ID = (_sensorType << 8) +  _channel;
 
 #ifdef SENSORDEBUG
     printf("OSV2 – decode : id(0x%04X) Power:%d Total Power:%d \n", 0x3A80, _power, _total_power);
@@ -459,6 +534,7 @@ bool OregonSensorV2::decode_HOMEEASY(char * pt) {
 #ifdef SENSORDEBUG
     printf("OSV2 – decode : id(0x%04X) Unit:%d OnOff:%d Group:%d ID:%04X  \n", 0x3b80 , UnitCode , OnOff , Group , CodeId );
 #endif
+    _ID = CodeId ;
 
     return true;
     // } else return false;
@@ -516,6 +592,8 @@ _humidity = dhumid;
  _availableInfos.setFlags(havePressure);
 _pressure = (856 + ipressure);
 
+_ID = (_sensorType << 16) + (_irolling << 8) + _channel;
+
 return true;
 // } else return false;
 
@@ -560,6 +638,8 @@ printf("OSV2 – decode : id(0x%04X) rain(%f) cksum(0x%02X) crc(0x%02X) \n", 0x2
 // now we can decode the important flag and fill the object
  _availableInfos.setFlags(haveRain);
 _rain = (10 * irain);
+_ID = (_sensorType << 16) + (_irolling << 8) + _channel;
+
 return true;
 
 // } else return false;
@@ -608,6 +688,7 @@ printf("OSV2 – decode : id(0x%04X) dir(%f) speed(%f) cksum(0x%02X) crc(0x%02X)
 _direction = (10 * idir);
  _availableInfos.setFlags(haveSpeed);
 _speed = (0.1 * ispeed)* 3.6;
+_ID = (_sensorType << 16) + (_irolling << 8) + _channel;
 return true;
 // } else return false;
 
@@ -674,6 +755,9 @@ _channel = (ichannel != 4)?ichannel:3;
 _temperature = (itempS == 0)?dtemp:-dtemp;
  _availableInfos.setFlags(haveHumidity);
 _humidity = dhumid;
+
+_ID = (_irolling << 8) + _channel;
+
 return true;
 } else return false;
 
@@ -740,6 +824,8 @@ _channel = (ichannel != 4)?ichannel:3;
 _temperature = (itempS == 0)?dtemp:-dtemp;
  _availableInfos.setFlags(haveHumidity);
 _humidity = dhumid;
+_ID =  (_irolling << 8) + _channel;
+
 return true;
 } else return false;
 
@@ -803,7 +889,8 @@ _channel = (ichannel != 4)?ichannel:3;
  _availableInfos.setFlags(haveTemperature);
  _temperature = (itempS == 0)?dtemp:-dtemp;
  _availableInfos.setFlags(haveHumidity);
-return true;
+ _ID = (_irolling << 8) + _channel;
+ return true;
 } else return false;
 
 }
@@ -977,6 +1064,7 @@ bool OregonSensorV3::decode_THGR810(char * pt) {
       _temperature = (itempS == 0)?dtemp:-dtemp;
       _availableInfos.setFlags(haveHumidity);
       _humidity = dhumid;
+      _ID =  (_irolling << 8) + _channel;
       return true;
     }
     else
@@ -1044,3 +1132,18 @@ printf("OSV3 – validate err (%s) SUM : 0x%02X(0x%02X) CRC : 0x%02X(0x%02X)\n",
 }
 return false;
 }
+
+
+Sensor * FindSensor(unsigned long ID) 
+{
+
+
+	TSensorMap::const_iterator itt = Sensors.find(ID);
+	if (itt == Sensors.end())
+	{
+        return 0;
+	}
+	return itt->second;
+}
+
+

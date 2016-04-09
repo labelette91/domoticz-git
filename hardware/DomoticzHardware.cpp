@@ -184,13 +184,13 @@ void CDomoticzHardwareBase::SendBaroSensor(const int NodeID, const int ChildID, 
 	sDecodeRXMessage(this, (const unsigned char *)&gdevice, defaultname.c_str(), BatteryLevel);
 }
 
-void CDomoticzHardwareBase::SendTempHumSensor(const int NodeID, const int BatteryLevel, const float temperature, const int humidity, const std::string &defaultname)
+void CDomoticzHardwareBase::SendTempHumSensor(const int NodeID, const int BatteryLevel, const float temperature, const int humidity, const std::string &defaultname,int psubtype)
 {
 	RBUF tsen;
 	memset(&tsen, 0, sizeof(RBUF));
 	tsen.TEMP_HUM.packetlength = sizeof(tsen.TEMP_HUM) - 1;
 	tsen.TEMP_HUM.packettype = pTypeTEMP_HUM;
-	tsen.TEMP_HUM.subtype = sTypeTH5;
+	tsen.TEMP_HUM.subtype = psubtype;
 	tsen.TEMP_HUM.battery_level = BatteryLevel;
 	tsen.TEMP_HUM.rssi = 12;
 	tsen.TEMP_HUM.id1 = (NodeID&0xFF00)>>8;

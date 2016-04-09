@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-#define  __arm__
+//#define  __arm__
 
 #include "HomeEasy.h"
 #include <stdio.h>
@@ -142,6 +142,7 @@ char * CmdStr[] = {
 
 };
 
+#ifdef __arm__
 void hagerSends(byte id4, byte cmnd)
 {
   _log.Log(LOG_TRACE, "HERF: Send HAGER  Id :%08X Cmd:%s Cmd:%d", id4 , CmdStr[cmnd] , cmnd );
@@ -180,7 +181,7 @@ void ManageHager( byte unitcode, byte id4 , byte cmnd )
       hagerSends(id4,cmnd);
 	}		
 }
-
+#endif
 
 
 bool HomeEasy::WriteToHardware(const char *pdata, const unsigned char length)
@@ -342,7 +343,7 @@ void HomeEasy::Do_Work()
               Sensors[s->getSensID()] = s ;
               if (s->available(Sensor::haveTemperature))
               {
-                SendTempHumSensor(s->getSensID(), !s->isBatteryLow(), (float)s->getTemperature(), (int)s->getHumidity(), "Home TempHum" /* , sTypeTH1 */);
+                SendTempHumSensor(s->getSensID(), !s->isBatteryLow(), (float)s->getTemperature(), (int)s->getHumidity(), "Home TempHum"  , sTypeTH1 );
                 _log.Log(LOG_TRACE, "RCOOK %s ID Code:%04X  Rolling:%0X Temp : %f Humidity : %f Channel : %d ", s->getSensorName().c_str(), s->getSensType(), s->getSensID(), s->getTemperature(), s->getHumidity(), s->getChannel());
               }
               if (s->available(Sensor::haveOnOff))

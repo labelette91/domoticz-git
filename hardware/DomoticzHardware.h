@@ -2,6 +2,7 @@
 
 #include <boost/signals2.hpp>
 #include "../main/RFXNames.h"
+#include "../main/RFXtrx.h"
 
 //Base class with functions all notification systems should have
 #define RX_BUFFER_SIZE 40
@@ -51,7 +52,7 @@ protected:
 	void SendTempSensor(const int NodeID, const int BatteryLevel, const float temperature, const std::string &defaultname);
 	void SendHumiditySensor(const int NodeID, const int BatteryLevel, const int humidity, const std::string &defaultname);
 	void SendBaroSensor(const int NodeID, const int ChildID, const int BatteryLevel, const float pressure, const int forecast, const std::string &defaultname);
-	void SendTempHumSensor(const int NodeID, const int BatteryLevel, const float temperature, const int humidity, const std::string &defaultname);
+	void SendTempHumSensor(const int NodeID, const int BatteryLevel, const float temperature, const int humidity, const std::string &defaultname, int psubtype= sTypeTH5);
 	void SendTempHumBaroSensor(const int NodeID, const int BatteryLevel, const float temperature, const int humidity, const float pressure, int forecast, const std::string &defaultname);
 	void SendTempHumBaroSensorFloat(const int NodeID, const int BatteryLevel, const float temperature, const int humidity, const float pressure, int forecast, const std::string &defaultname);
 	void SendSetPointSensor(const int NodeID, const int ChildID, const unsigned char SensorID, const float Temp, const std::string &defaultname);

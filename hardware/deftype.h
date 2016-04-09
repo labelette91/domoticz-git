@@ -9,4 +9,13 @@ typedef unsigned int   uint32_t;
 typedef unsigned int size_t   ;
 typedef unsigned short word;
 
+#define PROGMEM
+
+#define cli() scheduler_realtime()
+#define sei() scheduler_standard() 
+
+extern "C" void delayMicrosecondsHard(unsigned int howLong);
+extern void scheduler_realtime();
+extern void scheduler_standard();
+
 #endif

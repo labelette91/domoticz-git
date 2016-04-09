@@ -25,7 +25,6 @@ Sensor.cpp
 //#define SENSORTRACE // Small debug trace to verify error only
 
 const char OregonSensorV2::_sensorId[] = "OSV2 ";
-const char OregonSensorV3::_sensorId[] = "OSV3 ";
 
 TSensorMap Sensors ;
 // ——————————————————
@@ -296,26 +295,10 @@ double Sensor::getDoubleFromString(char * s) const {
 Sensor * Sensor::getRightSensor(char * s) {
   int len = strlen(s);
 if (len > 4) {
-#ifdef SENSORDEBUG
-printf("Sensor::getRightSensor – create of (%s)\n",s);
-#endif
  
  if(strncmp(s, OregonSensorV2::_sensorId, strlen(OregonSensorV2::_sensorId)) == 0) {
-#ifdef SENSORDEBUG
-printf("Sensor::getRightSensor – create OregonSensorV2\n");
-#endif
  return new OregonSensorV2(s);
- } else if ( strncmp(s, OregonSensorV3::_sensorId, strlen(OregonSensorV3::_sensorId)) == 0) {
-#ifdef SENSORDEBUG
-printf("Sensor::getRightSensor – create OregonSensorV3\n");
-#endif
- return new OregonSensorV3(s);
- }
-#ifdef SENSORDEBUG
- else {
-   std::cout << "[Sensor::getRightSensor] right length but unknown signature:" << s << std::endl;
- }
-#endif 
+ } 
  } else {
 //  std::cout << "[Sensor::getRightSensor] dont know how to decode: " << s << std::endl;
  }
@@ -373,13 +356,10 @@ case 0x3081 :
   _sensorName = "POWER";
   _valid = decode_POWER(pt); break;
 
-
-
 case 0x3B80 :
   _sensorType = 0x3B80;
   _sensorName = "HOMEEASY";
   _valid = decode_HOMEEASY(pt); break;
-
 
 case 0x5D60:
   _sensorType=0x5D60;
@@ -410,7 +390,12 @@ case 0x2D10:
 _sensorType=0x2D10;
  _sensorName = "RGR918";
 _valid= decode_RGR918(pt); break;
- 
+
+case 0xF824:
+  _sensorType = 0xF824;
+  _sensorName = "THGR810";
+  _valid = decode_THGR810(pt); break;
+
 default:
 	_sensorType = isensorId;
 	_sensorName = "Unknown sensor id";
@@ -502,8 +487,6 @@ bool OregonSensorV2::decode_POWER(char * pt) {
   }
   return false;
 }
-
-
 
 // —————————————————————————————
 // Decode decode_HOMEEASY switch 
@@ -956,63 +939,15 @@ printf("OSV2 – validate err (%s) SUM : 0x%02X(0x%02X) CRC : 0x%02X(0x%02X)\n",
 }
 return false;
 }
-
-OregonSensorV3::OregonSensorV3(char * _strval) : Sensor( ) {
-  _sensorClass = SENS_CLASS_OS;
-  _availableInfos.setFlags(decode(_strval));
-}
-OregonSensorV3::OregonSensorV3() : Sensor( ) {
-  _sensorClass = SENS_CLASS_OS;
-}
-
-bool OregonSensorV3::decode(char * _str) {
-  char * pt = & _str[strlen(_sensorId)];
-  int len = strlen(_str);
-  char sensorId[5]; int isensorId;
-  
-  // Proceed the right sensor
-  if (len > 11) {
-    sensorId[0] = pt[0];sensorId[1] = pt[3];sensorId[2] = pt[2];sensorId[3] = pt[5];sensorId[4] ='\0';
-    isensorId = getIntFromString(sensorId);
-#ifdef SENSORDEBUG
-    printf("OSV3 – decode : id(%s)(0x%4X)\n",sensorId, isensorId);
-#endif
-    
-    switch (isensorId) {
-    case 0xF824:
-      _sensorType=0xF824;
-      _sensorName = "THGR810";
-      _valid= decode_THGR810(pt); break;
-    default:
-			_sensorType = isensorId;
-			_sensorName = "Unknown sensor id";
-			
-			//std::cout << "Unknown sensor id: " << std::hex << isensorId << std::endl;
-      _valid= false;
-      break;
-    }
-  }
-  else {
-    //std::cout << "OSV3 - decode: bad length" << std::endl; 
-		_sensorName = "OSV3 - decode: bad length";
-		_valid= false;
-  }
- if(_valid)
-    _availableInfos.setFlags(isValid);
- else
-    _availableInfos.unsetFlags(isValid);
- return _valid ;
-
-}
 // —————————————————————————————
 // Decode OregonScientific V3 protocol for specific
 // Oregon Devices
 // – THGR810 : Temp + Humidity
 // ——————————————————————————————
-bool OregonSensorV3::decode_THGR810(char * pt) {
+bool OregonSensorV2::decode_THGR810(char * pt) {
 
   char channel; int ichannel; // values 1,2,4
-  char rolling[3]; 
+  char rolling[3];
   char battery; int ibattery; // value & 0x4
   char temp[4]; double dtemp; // Temp in BCD
   char tempS; int itempS; // Sign 0 = positif
@@ -1021,18 +956,18 @@ bool OregonSensorV3::decode_THGR810(char * pt) {
   char crc[3]; int icrc;
   int len = strlen(pt);
 
-  if ( len == 20 ) {
+  if (len == 20) {
     channel = pt[4];
-    rolling[0]=pt[7]; rolling[1]=pt[6]; rolling[2]='\0';
+    rolling[0] = pt[7]; rolling[1] = pt[6]; rolling[2] = '\0';
     battery = pt[9];
-    temp[0] = pt[10] ; temp[1] = pt[11] ; temp[2] = pt[8] ; temp[3] ='\0';
+    temp[0] = pt[10]; temp[1] = pt[11]; temp[2] = pt[8]; temp[3] = '\0';
     tempS = pt[13];
-    humid[0] = pt[15] ; humid[1] = pt[12]; humid[2] = '0' ; humid[3] ='\0';
-    checksum[0] = pt[16]; checksum[1] = pt[17]; checksum[2] ='\0';
-    crc[0] = pt[18] ; crc[1] = pt[19] ; crc[2] ='\0';
+    humid[0] = pt[15]; humid[1] = pt[12]; humid[2] = '0'; humid[3] = '\0';
+    checksum[0] = pt[16]; checksum[1] = pt[17]; checksum[2] = '\0';
+    crc[0] = pt[18]; crc[1] = pt[19]; crc[2] = '\0';
 
 #ifdef SENSORDEBUG
-    printf("OSV3 – decode : id(%s) ch(%c) bat(%c) temp(%s) sign(%c) humid(%s) cksum(%s) crc(%s)\n","A824",channel,battery,temp,tempS,humid, checksum, crc);
+    printf("OSV3 – decode : id(%s) ch(%c) bat(%c) temp(%s) sign(%c) humid(%s) cksum(%s) crc(%s)\n", "A824", channel, battery, temp, tempS, humid, checksum, crc);
 #endif
 
     // Conversion to int value
@@ -1046,25 +981,25 @@ bool OregonSensorV3::decode_THGR810(char * pt) {
     dhumid = getDoubleFromString(humid);
 
 #ifdef SENSORDEBUG
-    printf("OSV3 – decode : id(0x%04X) ch(%d) bat(%d) temp(%f) sign(%d) humid(%f) cksum(0x%02X) crc(0x%02X)\n",0x1D30,ichannel,ibattery,dtemp,itempS,dhumid, ichecksum, icrc);
+    printf("OSV3 – decode : id(0x%04X) ch(%d) bat(%d) temp(%f) sign(%d) humid(%f) cksum(0x%02X) crc(0x%02X)\n", 0x1D30, ichannel, ibattery, dtemp, itempS, dhumid, ichecksum, icrc);
 #endif
 
     // Check SUM & CRC
-    if ( validate(pt,16,icrc,ichecksum) == true ) {
+    if (validate(pt, 16, icrc, ichecksum) == true) {
 
       // now we can decode the important flag and fill the object
       _availableInfos.setFlags(haveChannel);
       _channel = ichannel;
       _availableInfos.setFlags(haveBattery);
-  
-      if(ibattery & 0x4) {
-	_availableInfos.setFlags(battery);
+
+      if (ibattery & 0x4) {
+        _availableInfos.setFlags(battery);
       }
       _availableInfos.setFlags(haveTemperature);
-      _temperature = (itempS == 0)?dtemp:-dtemp;
+      _temperature = (itempS == 0) ? dtemp : -dtemp;
       _availableInfos.setFlags(haveHumidity);
       _humidity = dhumid;
-      _ID =  (_irolling << 8) + _channel;
+      _ID = (_irolling << 8) + _channel;
       return true;
     }
     else
@@ -1072,65 +1007,6 @@ bool OregonSensorV3::decode_THGR810(char * pt) {
 
   }
   return false;
-}
-
-// —————————————————–
-// Validate CRC and Checksum value from the signal
-// Starts at the Sync header digit
-// return true if both are valid
-// seems to be the same as OSV2 ???
-bool OregonSensorV3::validate(char * _str, int _len, int _CRC, int _SUM) {
-  int i,j,c,CRC,SUM;
-  CRC =0x43;
-  int CCIT_POLY = 0x07;
-  SUM = 0x00;
-  
-  // swap each 2 digit
-  char __str[100];
-  for (j=0 ; j < _len ; j+=2){
-    __str[j] = _str[j+1];
-    __str[j+1] = _str[j];
-  }
-  __str[_len]='\0'; // recopie de
-  
-  for (j=1; j< _len; j++)
-    {
-      c = getIntFromChar(__str[j]);
-      SUM += c;
-      CRC ^= c;
-      
-      // Because we have to skip the rolling value in the CRC computation
-      if ( j != 6 && j != 7 ) {
-	for(i = 0; i < 4; i++) {
-	  if( (CRC & 0x80) != 0 )
-	    CRC = ( (CRC << 1) ^ CCIT_POLY ) & 0xFF;
-	  else
-	    CRC = (CRC << 1 ) & 0xFF;
-	}
-      }
-    }
-// CRC is 8b but the len is quartet based and we start are digit 1
-if ( ! (_len & 1) ) {
-for(i = 0; i<4; i++) {
-if( (CRC & 0x80) != 0 )
-CRC = ( (CRC << 1) ^ CCIT_POLY ) & 0xFF;
-else
-CRC = (CRC << 1 ) & 0xFF;
-}
-}
-
-#ifdef SENSORDEBUG
-printf("Validate OOK – SUM : 0x%02X(0x%02X) CRC : 0x%02X(0x%02X)\n",SUM,_SUM,CRC,_CRC);
-#endif
-// Do not check crc anymore as depend on sensor it is not working as expected
-if ( SUM == _SUM /* && CRC == _CRC */ ) return true;
-else {
-
-#ifdef SENSORTRACE
-printf("OSV3 – validate err (%s) SUM : 0x%02X(0x%02X) CRC : 0x%02X(0x%02X)\n",_str,SUM,_SUM,CRC,_CRC);
-#endif
-}
-return false;
 }
 
 

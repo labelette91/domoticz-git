@@ -13,7 +13,7 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/wait.h>
-#include "sched.h"    
+#include <sched.h>    
 #include <wiringPi.h>
 
 #include "RCSwitch.h"
@@ -29,6 +29,7 @@
 
 #include "HomeEasyTransmitter.h"
 #include "../main/SQLHelper.h"
+#include "hager.h"
 
 #ifdef __arm__
 SPIClass SPI;
@@ -71,6 +72,9 @@ HomeEasy::HomeEasy(const int ID)
 
 	HomeEasyRfTx = new HomeEasyTransmitter(TXPIN, 0);
 	//HomeEasyRfTx->initPin();
+
+  //set hager TX led pin
+  HagerSetPin(TXPIN, 0);
 
 	//  spiSetup ( 1, 500000) ;
 	if (SPI.Setup(SPI_CHAN, Spi_speed))
@@ -128,6 +132,57 @@ bool HomeEasy::StopHardware()
 	return true;
 }
 
+char * CmdStr[] = {
+
+"CMD_ECO    ", 
+"CMD_CONFOR ", 
+"CMD_HGEL   ", 
+"CMD_ARRET  ", 
+"CMD_CONFIG ", 
+
+};
+
+void hagerSends(byte id4, byte cmnd)
+{
+  _log.Log(LOG_TRACE, "HERF: Send HAGER  Id :%08X Cmd:%s Cmd:%d", id4 , CmdStr[cmnd] , cmnd );
+  HagerSends(id4, cmnd);
+
+}
+
+//unit code = 0 : configuration
+//unit code = 1 : cmnd = 0 eco   1: confor
+//unit code = 2 : cmnd = 0 hgel  1: confor
+//unit code = 3 : cmnd = 0 arret 1: confor
+void ManageHager( byte unitcode, byte id4 , byte cmnd )
+{
+	//unit code = 0 : configuration
+	if (unitcode==16)
+    hagerSends(id4, CMD_CONFIG);
+	//unit code = 1 : cmnd = 0 eco   1: confor
+	else if(unitcode==1)
+    hagerSends(id4,cmnd);
+	//unit code = 2 : cmnd = 0 hgel  1: confor
+	else if(unitcode==2)
+	{
+		if (cmnd==0)
+      hagerSends(id4,CMD_HGEL);
+		else
+			//confor
+      hagerSends(id4,cmnd);
+	}	
+	//unit code = 3 : cmnd = 0 arret 1: confor
+	else if(unitcode==3)
+	{
+		if (cmnd==0)
+      hagerSends(id4,CMD_ARRET);
+		else
+			//confor
+      hagerSends(id4,cmnd);
+	}		
+}
+
+
+
 bool HomeEasy::WriteToHardware(const char *pdata, const unsigned char length)
 {
 	unsigned char devType=pdata[1];
@@ -139,29 +194,41 @@ bool HomeEasy::WriteToHardware(const char *pdata, const unsigned char length)
 		int unit=pResponse->LIGHTING2.unitcode;
 		long id = pResponse->LIGHTING2.id1 << 24 | pResponse->LIGHTING2.id2 << 16 | pResponse->LIGHTING2.id3 << 8 | pResponse->LIGHTING2.id4;
 		int cmd = pResponse->LIGHTING2.cmnd;
-		_log.Log(LOG_TRACE, "HERF: Send Home Easy Id :%08X Unit:%d Cmd:%d" ,id , unit, cmd );
-		if (HomeEasyRfTx){
+    byte id4 = pResponse->LIGHTING2.id4;
+
+    if (HomeEasyRfTx) {
 #ifdef __arm__
-			HomeEasyRfTx->initPin();
-			radio->setMode(RF69_MODE_TX);
-			//attente une secone max pour emetre si emission en cours -80--> -70
-			radio->WaitCanSend(-70);
-			//send
-			HomeEasyRfTx->setSwitch(cmd!=0, id, unit);   
-			//if same rx/tx pin : goto receive state after transmit
-			if (TXPIN!= RXPIN)
-				radio->setMode(RF69_MODE_SLEEP);
-			else
-				radio->setMode(RF69_MODE_RX);
+      HomeEasyRfTx->initPin();
+      radio->setMode(RF69_MODE_TX);
+      //attente une secone max pour emetre si emission en cours -80--> -70
+      radio->WaitCanSend(-70);
+      //send
+
+      if (subType == sTypeHEU) {
+        HomeEasyRfTx->setSwitch(cmd != 0, id, unit);
+        _log.Log(LOG_TRACE, "HERF: Send Home Easy Id :%08X Unit:%d Cmd:%d", id, unit, cmd);
+      }
+      else 		if (subType == sTypeAC)
+      {
+        ManageHager(unit, id4, cmd);
+      }
+      HomeEasyRfTx->deactivatePin();
+
+      //if same rx/tx pin : goto receive state after transmit
+      if (TXPIN != RXPIN)
+        radio->setMode(RF69_MODE_SLEEP);
+      else
+        radio->setMode(RF69_MODE_RX);
+
 
 #endif
-			}
-		else
-			_log.Log(LOG_ERROR, "HomeEasyRfTx not initialized");
+    }
+    else
+      _log.Log(LOG_ERROR, "HomeEasyRfTx not initialized");
 
-	}
+  }
     
-    return true;
+  return true;
 }
 void HomeEasy::printPulse()
 {

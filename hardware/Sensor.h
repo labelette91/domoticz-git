@@ -152,23 +152,9 @@ class OregonSensorV2 : public Sensor {
   bool validate(char * _str, int _len, int _CRC, int _SUM); // Verify CRC & CKSUM
   bool decode_HOMEEASY(char * pt);
   bool decode_POWER(char * pt);
-  
-};
-
-class OregonSensorV3 : public Sensor {
- public :
-  OregonSensorV3(char * _strval);
-  OregonSensorV3();
-  static const char _sensorId[];
-
- private:
-  bool decode( char * _str ); // wrapper to right decode method
-  bool validate(char * _str, int _len, int _CRC, int _SUM); // Verify CRC & CKSUM
-
   bool decode_THGR810(char* pt); // decode sensor informations
+
 };
-
-
 
 typedef std::map<unsigned long, Sensor*> TSensorMap;
 

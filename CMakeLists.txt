@@ -233,6 +233,7 @@ hardware/RCSwitch.cpp
 hardware/RcOok.cpp
 hardware/RFM69.cpp
 hardware/HomeEasyTransmitter.cpp
+hardware/hager.cpp
 hardware/AtagOne.cpp
 hardware/Comm5TCP.cpp
 hardware/csocket.cpp

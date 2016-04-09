@@ -17,3 +17,5 @@ backups/
 domocookie.txt
 domoticz.exe
 *.bak
+/hardware/test
+/hardware/ipch

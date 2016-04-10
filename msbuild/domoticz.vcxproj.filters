@@ -2385,6 +2385,15 @@
     <ClCompile Include="..\hardware\vspde.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\hardware\DecodeHomeEasy.cpp">
+      <Filter>Devices\HomeEasy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\RcOok.cpp">
+      <Filter>Devices\HomeEasy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\RCSwitch.cpp">
+      <Filter>Devices\HomeEasy</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="domoticz.rc">

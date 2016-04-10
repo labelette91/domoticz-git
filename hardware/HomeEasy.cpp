@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-//#define  __arm__
+#define  __arm__
 
 #include "HomeEasy.h"
 #include <stdio.h>
@@ -299,7 +299,7 @@ void HomeEasy::Do_Work()
 
 		if (rc!=0)
 //			if (rc->OokAvailable())
-			if (!rc->Fifo.Empty())
+			while (!rc->Fifo.Empty())
 
 			{
 				char dataStr[100];

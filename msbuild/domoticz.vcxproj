@@ -621,6 +621,7 @@
     <ClCompile Include="..\hardware\CurrentCostMeterSerial.cpp" />
     <ClCompile Include="..\hardware\CurrentCostMeterTCP.cpp" />
     <ClCompile Include="..\hardware\DavisLoggerSerial.cpp" />
+    <ClCompile Include="..\hardware\DecodeHomeEasy.cpp" />
     <ClCompile Include="..\hardware\Dummy.cpp" />
     <ClCompile Include="..\hardware\EcoDevices.cpp" />
     <ClCompile Include="..\hardware\EnOceanESP2.cpp" />
@@ -669,6 +670,8 @@
     <ClCompile Include="..\hardware\Pinger.cpp" />
     <ClCompile Include="..\hardware\PVOutput_Input.cpp" />
     <ClCompile Include="..\hardware\Razberry.cpp" />
+    <ClCompile Include="..\hardware\RcOok.cpp" />
+    <ClCompile Include="..\hardware\RCSwitch.cpp" />
     <ClCompile Include="..\hardware\RFLinkBase.cpp" />
     <ClCompile Include="..\hardware\RFLinkSerial.cpp" />
     <ClCompile Include="..\hardware\RFLinkTCP.cpp" />

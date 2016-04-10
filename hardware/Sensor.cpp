@@ -83,6 +83,7 @@ switch (_sensorType){
 
 case SENS_THGR122NX  :
 case SENS_THGRN228NX :
+case SENS_OTIO:
     TEST_FLAG(haveTemperature,_temperature ) ;
     TEST_FLAG(haveHumidity,_humidity ) ;
 
@@ -350,6 +351,12 @@ printf("OSV2 – decode : id(%s)(0x%4X)\n",sensorId, isensorId);
 
 switch (isensorId) {
 
+  /*otio */
+case SENS_OTIO :
+  _sensorType = isensorId;
+  _sensorName = "otio";
+  _valid = decode_OTIO(pt); break;
+
   /*power */
 case 0x3081 :
   _sensorType = 0x3081;
@@ -440,6 +447,49 @@ int HexDec(char * hexv, int nbdigit )
 }
 
 // —————————————————————————————
+// Decode decode_otio tEMPERATURE 
+//data[0.1.2] device type
+//data[3] : ID
+//data[4..5] Temperature
+//data[6] battery 
+// ——————————————————————————————
+bool OregonSensorV2::decode_OTIO(char * pt) {
+
+  int len = strlen(pt);
+
+  if (len >= 12) {
+
+    //ID data[3] : ID
+    _irolling = HexDec(&pt[3 * 2], 2);
+    
+    int ibattery = HexDec(&pt[6 * 2], 2);
+
+    short int temp = HexDec(&pt[4 * 2],  4 );
+
+    _valid = true; //true if valid
+
+    _availableInfos.setFlags(haveChannel);
+    _channel = 1;
+    _availableInfos.setFlags(haveBattery);
+    if (ibattery != 0) {
+      _availableInfos.setFlags(battery);
+    }
+    _availableInfos.setFlags(haveTemperature);
+    _temperature = temp ;
+    _temperature /= 10.0;
+
+    _ID = (_sensorType << 8) + _irolling ;
+
+#ifdef SENSORDEBUG
+    printf("OSV2 – decode : type(0x%04X) ID: %2X Temp:%f Bat:%d\n", _sensorType, _irolling, _temperature , ibattery);
+#endif
+
+    return true;
+
+  }
+  return false;
+}
+// —————————————————————————————
 // Decode decode_POWER CM180 / CM119
 //data[0.1] device type
 //data[2] packet type 0   : power + total power
@@ -457,18 +507,18 @@ bool OregonSensorV2::decode_POWER(char * pt) {
 
 
     //data[3..4] power : 2 byte watt
-     _power = HexDec(&pt[4 * 2], 2) * 256 + HexDec(&pt[3 * 2], 2) ;
+    _power = HexDec(&pt[4 * 2], 2) * 256 + HexDec(&pt[3 * 2], 2);
 
     //data[5..8] total power : 4 byte watt / s
-     _total_power = HexDec(&pt[8*2], 2)*256* 256 * 256 + HexDec(&pt[7 * 2], 2) * 256 * 256 + HexDec(&pt[6 * 2], 2) * 256 + +HexDec(&pt[5 * 2], 2);
+    _total_power = HexDec(&pt[8 * 2], 2) * 256 * 256 * 256 + HexDec(&pt[7 * 2], 2) * 256 * 256 + HexDec(&pt[6 * 2], 2) * 256 + +HexDec(&pt[5 * 2], 2);
 
-		_channel=HexDec(&pt[5], 1) ;
+    _channel = HexDec(&pt[5], 1);
 
     _valid = true; //true if valid
     _availableInfos.setFlags(havePower);
     _availableInfos.setFlags(haveTotal_power);
-    
-    _ID = (_sensorType << 8) +  _channel;
+
+    _ID = (_sensorType << 8) + _channel;
 
 #ifdef SENSORDEBUG
     printf("OSV2 – decode : id(0x%04X) Power:%d Total Power:%d \n", 0x3A80, _power, _total_power);

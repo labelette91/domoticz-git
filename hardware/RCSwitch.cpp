@@ -34,6 +34,7 @@
 #include "RCSwitch.h"
 #include "RcOok.h"
 #include "DecodeHomeEasy.h"
+#include "DecodeOTIO.h"
 #include "Sensor.h"
 
 
@@ -49,6 +50,8 @@ OregonDecoderV3 orscV3;
 RCSwitch_ rcswp1;
 
 DecodeHomeEasy HEasy(1);
+
+DecodeOTIO     Otio(5) ;
 
 #include "fifo.cpp"
 
@@ -168,13 +171,15 @@ void RCSwitch::handleInterrupt() {
 	if (p!=0)
 			Record.put(p);
 
-  byte dta = digitalRead(RCSwitch::nReceiverInterrupt);
+  byte pinData = digitalRead(RCSwitch::nReceiverInterrupt);
 	/*low to high transition : low duration*/
-	if (dta == 0)
+	if (pinData == 0)
 		p += 100;
 	else
 		p -= 100;
 	
+  //pinData : input signal value before interrupt
+//  if (pinData == 0) pinData = 1; else pinData=0;
   // Avoid re-entry
 //  if ( !OokAvailableCode ) 
   {		// avoid reentrance -- wait until data is read
@@ -192,7 +197,7 @@ void RCSwitch::handleInterrupt() {
 */
           orscV2.resetDecoder(); 
       }
-		if (HEasy.nextPulse(p,dta))
+		if (HEasy.nextPulse(p,pinData))
 		{
 			orscV2.sprint(OregonSensorV2::_sensorId, HEasy.getData(), HEasy.getBytes(), RCSwitch::OokReceivedCode);
 
@@ -201,7 +206,15 @@ void RCSwitch::handleInterrupt() {
 
 			HEasy.resetDecoder();
 		}
-		
+
+    if (Otio.nextPulse(p,pinData))
+    {
+      orscV2.sprint(OregonSensorV2::_sensorId, Otio.getData(), Otio.getBytes(), RCSwitch::OokReceivedCode);
+      Fifo.Put(RECORD_ZIZE, (byte*)RCSwitch::OokReceivedCode);
+      Otio.resetDecoder();
+    }
+    
+
 
 
 /*	  if (orscV3.nextPulse(p)) 	{ RCSwitch::OokAvailableCode = true; orscV3.sprint("OSV3",RCSwitch::OokReceivedCode); orscV3.resetDecoder(); }

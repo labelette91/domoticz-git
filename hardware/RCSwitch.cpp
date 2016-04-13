@@ -37,6 +37,8 @@
 #include "DecodeOTIO.h"
 #include "Sensor.h"
 
+#include "Print.h"
+#include "HagerDecoder.h"
 
 char RCSwitch::OokReceivedCode[RCSWITCH_MAX_MESS_SIZE];
 bool RCSwitch::OokAvailableCode;
@@ -53,6 +55,8 @@ DecodeHomeEasy HEasy(1);
 
 DecodeOTIO     Otio(5) ;
 
+HagerDecoder   hager;
+ 
 #include "fifo.cpp"
 
 
@@ -157,22 +161,60 @@ void RCSwitch::OokResetAvailable() {
 }
 
 extern void DumpHex(byte * data, byte len, char * mesage);
+
+byte buildHagerDataMessage(byte* Data )
+{
+byte* data = hager.getData();
+byte  cmnd;
+byte  mode;
+mode = GetMode(data) ;
+ 
+if ( mode == CONFOR)              
+		cmnd       = 1 ;       
+else                                      
+		cmnd       = 0 ;       
+
+//Id 0x3D00
+Data[0]  = 0x3A;  //nible inverse + synchro A : A3E000  --> 3A 0E 00 //synchro
+Data[1]  = 0x0E;
+Data[2]  = 00;
+Data[3]  = data[0];            /* id1 emetteur 0..3  */    
+Data[4]  = data[1];            /* id2 emetteur 0..FF */    
+Data[5]  = data[2];            /* id3 emetteur 0..FF */    
+Data[6]  = 0      ;            /* id4 emetteur 0..FF */    
+Data[7]  = GetZone(data);   	 /* unitcode = zone 1..3  */       
+Data[8]  = cmnd;               /* command */
+Data[9]  = mode ;              /* mode ECO/CONFOR/... */   
+Data[10] = data[3];            /* debug */
+Data[11] = data[4];     
+Data[12] = data[5]; 
+Data[13] = data[6]; 
+
+return  14 ;
+}
+
 // ==============================================
 // Interrupt Handler to manage the different protocols
 void RCSwitch::handleInterrupt() {
 
   static unsigned int duration;
   static unsigned long lastTime;
+  byte Data[64];
 
   long time = micros();
   duration = time - lastTime;
   lastTime = time;
   word p = (unsigned short int) duration;
-	if (p!=0)
-			Record.put(p);
 
   byte pinData = digitalRead(RCSwitch::nReceiverInterrupt);
-	/*low to high transition : low duration*/
+  if (p != 0) {
+    if (pinData ==0)
+      Record.put(-p);
+    else
+      Record.put(p);
+  }
+  
+  /*low to high transition : low duration*/
 	if (pinData == 0)
 		p += 100;
 	else
@@ -214,7 +256,14 @@ void RCSwitch::handleInterrupt() {
       Otio.resetDecoder();
     }
     
-
+/*    if (hager.nextPulse(p))
+    {
+      int nb = buildHagerDataMessage(Data ) ;
+      orscV2.sprint(OregonSensorV2::_sensorId, Data, nb, RCSwitch::OokReceivedCode);
+      Fifo.Put(RECORD_ZIZE, (byte*)RCSwitch::OokReceivedCode);
+      hager.resetDecoder();
+    }
+    */
 
 
 /*	  if (orscV3.nextPulse(p)) 	{ RCSwitch::OokAvailableCode = true; orscV3.sprint("OSV3",RCSwitch::OokReceivedCode); orscV3.resetDecoder(); }

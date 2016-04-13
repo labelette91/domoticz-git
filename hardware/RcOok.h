@@ -52,6 +52,10 @@ public:
     bool isDone() const;
 
     const byte* getData (byte& count) const;
+    byte* getData()  {
+      return data;
+    };
+    byte getBytes(){return pos;};
     void resetDecoder ();
 
     // store a bit using Manchester encoding

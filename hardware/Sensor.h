@@ -28,7 +28,7 @@
 #define SENS_POWER      0x3081 // CM180/119
 #define SENS_HOMEEASY   0x3B80 // homeeasy
 #define SENS_OTIO       0x3C00 // oytio
-
+#define SENS_HAGER      0x3E00 // hager
 
 
 #include <string>
@@ -155,6 +155,8 @@ class OregonSensorV2 : public Sensor {
   bool decode_POWER(char * pt);
   bool decode_THGR810(char* pt); // decode sensor informations
   bool decode_OTIO(char * pt);
+  bool decode_HAGER(char * pt);
+  
 };
 
 typedef std::map<unsigned long, Sensor*> TSensorMap;

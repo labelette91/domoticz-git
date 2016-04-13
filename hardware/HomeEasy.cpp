@@ -132,7 +132,7 @@ bool HomeEasy::StopHardware()
 	return true;
 }
 
-char * CmdStr[] = {
+std::string CmdStr[] = {
 
 "CMD_ECO    ", 
 "CMD_CONFOR ", 
@@ -145,7 +145,7 @@ char * CmdStr[] = {
 #ifdef __arm__
 void hagerSends(byte id4, byte cmnd)
 {
-  _log.Log(LOG_TRACE, "HERF: Send HAGER  Id :%08X Cmd:%s Cmd:%d", id4 , CmdStr[cmnd] , cmnd );
+  _log.Log(LOG_TRACE, "HERF: Send HAGER  Id :%08X Cmd:%s Cmd:%d", id4 , CmdStr[cmnd].c_str() , cmnd );
   HagerSends(id4, cmnd);
 
 }

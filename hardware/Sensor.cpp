@@ -109,6 +109,7 @@ case SENS_POWER      :
     TEST_FLAG(haveTotal_power,_total_power ) ;
 break;
 case SENS_HOMEEASY   :
+case SENS_HAGER      :
     TEST_FLAG(haveOnOff,_channel ) ;
     TEST_FLAG(haveOnOff,_OnOff ) ;
 break;
@@ -351,6 +352,13 @@ printf("OSV2 – decode : id(%s)(0x%4X)\n",sensorId, isensorId);
 
 switch (isensorId) {
 
+
+  /*SENS_HAGER */
+case SENS_HAGER :
+  _sensorType = isensorId;
+  _sensorName = "HAGER";
+  _valid = decode_HAGER(pt); break;
+
   /*otio */
 case SENS_OTIO :
   _sensorType = isensorId;
@@ -521,7 +529,7 @@ bool OregonSensorV2::decode_POWER(char * pt) {
     _ID = (_sensorType << 8) + _channel;
 
 #ifdef SENSORDEBUG
-    printf("OSV2 – decode : id(0x%04X) Power:%d Total Power:%d \n", 0x3A80, _power, _total_power);
+    printf("OSV2 – decode : id(0x%04X) Power:%d Total Power:%d \n", _sensorType, _power, _total_power);
 #endif
 
     checksum[0] = pt[18]; checksum[1] = pt[19]; checksum[2] = '\0';
@@ -537,6 +545,46 @@ bool OregonSensorV2::decode_POWER(char * pt) {
   }
   return false;
 }
+
+// —————————————————————————————
+// Decode HAGER switch 
+// ——————————————————————————————
+bool OregonSensorV2::decode_HAGER(char * pt) {
+
+  int len = strlen(pt);
+
+  if (len >= 20) {
+
+    //unit code     
+    int UnitCode = HexDec(&pt[7*2],2 );
+
+    //switch value     
+    int OnOff    = HexDec(&pt[8*2], 2);
+
+    //group value     
+    int Group    = HexDec(&pt[9*2], 2);
+
+    // ID data[3..6]
+    int CodeId   = HexDec(&pt[3*2], 8);
+
+    _channel = UnitCode ;
+    _irolling= CodeId ;
+    _OnOff   = (OnOff!=0) ;
+    _valid   = true ; //true if valid
+    _availableInfos.setFlags(haveOnOff);
+
+//#ifdef SENSORDEBUG
+    printf("OSV2 – decode HAGER : id(0x%04X) Unit:%d OnOff:%d Group:%d ID:%04X  \n", _sensorType, UnitCode , OnOff , Group , CodeId );
+//#endif
+    _ID = CodeId + UnitCode ;
+
+    return true;
+    // } else return false;
+
+  }
+  return false;
+}
+
 
 // —————————————————————————————
 // Decode decode_HOMEEASY switch 
@@ -565,7 +613,7 @@ bool OregonSensorV2::decode_HOMEEASY(char * pt) {
     _availableInfos.setFlags(haveOnOff);
 
 #ifdef SENSORDEBUG
-    printf("OSV2 – decode : id(0x%04X) Unit:%d OnOff:%d Group:%d ID:%04X  \n", 0x3b80 , UnitCode , OnOff , Group , CodeId );
+    printf("OSV2 – decode : id(0x%04X) Unit:%d OnOff:%d Group:%d ID:%04X  \n", _sensorType, UnitCode , OnOff , Group , CodeId );
 #endif
     _ID = CodeId ;
 

@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-#define  __arm__
+//#define  __arm__
 
 #include "HomeEasy.h"
 #include <stdio.h>

@@ -2388,15 +2388,6 @@
     <ClCompile Include="..\webserver\fastcgi.cpp">
       <Filter>Webserver</Filter>
     </ClCompile>
-    <ClCompile Include="..\hardware\DecodeHomeEasy.cpp">
-      <Filter>Devices\HomeEasy</Filter>
-    </ClCompile>
-    <ClCompile Include="..\hardware\RcOok.cpp">
-      <Filter>Devices\HomeEasy</Filter>
-    </ClCompile>
-    <ClCompile Include="..\hardware\RCSwitch.cpp">
-      <Filter>Devices\HomeEasy</Filter>
-    </ClCompile>
     <ClCompile Include="..\hardware\Sterbox.cpp">
       <Filter>Devices\Sterbox</Filter>
     </ClCompile>

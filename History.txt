@@ -1,4 +1,4 @@
-Version 3.xxxx (March xx 2016)
+Version 3.xxxx (May xx 2016)
 - Implemented: Atag One Thermostat support
 - Implemented: Blockly/Lua Camera device, to send camera snapshots with subject after xx seconds
 - Implemented: Blockly upgraded to latest version (fixed and cleaned some code as well), this fixes problem with long sensor lists
@@ -8,7 +8,10 @@ Version 3.xxxx (March xx 2016)
 - Implemented: Nefit Easy, User Mode (as switch, On=Clock, Off=Manual), Flow Temperature
 - Implemented: OpenZWave, Aeotec ZWave+ USB Controller, Enable/Disable blinking mode (@Schmart, Thanks for the magic codes!)
 - Implemented: OpenZWave, Node table, now also displays Manufacturer, Product ID and Product Type
+- Implemented: OpenZWave, When including Thermostat Setpoints, the zwave Label will be used as Name by default
+- Implemented: RFLink: Displaying firmware version in the hardware setup
 - Implemented: RFXCom, Blinds T12 (Confexx)
+- Changed: OpenZWave, Better support for Thermostat Modes
 - Changed: Stable ID generation for Philips Hue scenes (you need to delete all scenes and restart the hue hardware or domoticz)
 - Fixed: Better handling of white listed commands/urls
 - Fixed: Database backup is now only possible for admin users
@@ -105,7 +108,6 @@ Version 3.4834 (March 2nd 2016)
 - Fixed: Fix webserver initialization failure if the local network interface is not IPv6 (due to wrong initialization sequence).
 - Fixed: Fix abandoned connections not removed because the method connection_manager::check_timeout is never called [Security/Performance].
 - Updated: OpenZWave, configuration files
-- Updated: SQLite3 v3.11.0.
 - Updated: SQLite3 v3.11.1.
 
 Version 2.3530 (November 1th 2015)

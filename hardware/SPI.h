@@ -99,7 +99,7 @@ public:
   // Disable the SPI bus
   void end()
   {
-		close (spiFd) ;
+//		close (spiFd) ;
   };
 
   // This function is deprecated.  New applications should use

@@ -1,14 +1,14 @@
 
 #include "stdafx.h"
 
-//#define  __arm__
+//#define  WITH_GPIO
 
 #include "HomeEasy.h"
 #include <stdio.h>
 #include <fcntl.h>
 #include <stdlib.h>
 
-#ifdef __arm__
+#ifdef WITH_GPIO
 
 #include <unistd.h>
 #include <sys/ioctl.h>
@@ -20,9 +20,9 @@
 #include "RcOok.h"
 #include "Sensor.h"
 
-#include "SPI.h"
 
 #endif
+#include "SPI.h"
 #include "../main/Logger.h"
 #include "../main/localtime_r.h"
 #include "../main/RFXtrx.h"
@@ -31,8 +31,8 @@
 #include "../main/SQLHelper.h"
 #include "hager.h"
 
-#ifdef __arm__
 SPIClass SPI;
+#ifdef WITH_GPIO
 RCSwitch *rc ;
 
 #endif
@@ -64,7 +64,7 @@ HomeEasy::HomeEasy(const int ID)
 		_log.Log(LOG_TRACE, "HERF: RXPin:%d TXPin:%d",  RXPIN, TXPIN);
 
 	}
-#ifdef __arm__
+#ifdef WITH_GPIO
 	if (wiringPiSetup() == -1)
 	{
 		_log.Log(LOG_ERROR, "failed to initialize wiring pi");
@@ -110,7 +110,7 @@ HomeEasy::~HomeEasy()
 
 bool HomeEasy::StartHardware()
 {
-#ifndef __arm__
+#ifndef WITH_GPIO
 //	return false;
 #endif
 	m_stoprequested=false;
@@ -142,7 +142,7 @@ std::string CmdStr[] = {
 
 };
 
-#ifdef __arm__
+#ifdef WITH_GPIO
 void hagerSends(byte id4, byte cmnd)
 {
   _log.Log(LOG_TRACE, "HERF: Send HAGER  Id :%08X Cmd:%s Cmd:%d", id4 , CmdStr[cmnd].c_str() , cmnd );
@@ -198,7 +198,7 @@ bool HomeEasy::WriteToHardware(const char *pdata, const unsigned char length)
     byte id4 = pResponse->LIGHTING2.id4;
 
     if (HomeEasyRfTx) {
-#ifdef __arm__
+#ifdef WITH_GPIO
       HomeEasyRfTx->initPin();
       radio->setMode(RF69_MODE_TX);
       //attente une secone max pour emetre si emission en cours -80--> -70
@@ -233,7 +233,7 @@ bool HomeEasy::WriteToHardware(const char *pdata, const unsigned char length)
 }
 void HomeEasy::printPulse()
 {
-#ifdef __arm__
+#ifdef WITH_GPIO
   int p=0;
   int n;
   char Mes[128*3];
@@ -289,7 +289,7 @@ void HomeEasy::Do_Work()
 			m_LastHeartbeat = mytime(NULL);
 		}
 
-#ifdef __arm__
+#ifdef WITH_GPIO
 		//ig tace is enable and dump pulse data is enable
 		if (!rc->Record.empty())
 			if (_log.isTraceEnable() )
@@ -379,27 +379,30 @@ void HomeEasy::Do_Work()
 	_log.Log(LOG_STATUS,"HomeEasy: Worker stopped...");
 }
 
-#ifdef __arm__
 void scheduler_realtime() {
 
+#ifdef WITH_GPIO
 	struct sched_param p;
 	p.__sched_priority = sched_get_priority_max(SCHED_RR);
 	if (sched_setscheduler(0, SCHED_RR, &p) == -1) {
 		_log.Log(LOG_ERROR, "Failed to switch to realtime scheduler.");
 	}
+#endif
 }
 
 void scheduler_standard() {
-
+#ifdef WITH_GPIO
 	struct sched_param p;
 	p.__sched_priority = 0;
 	if (sched_setscheduler(0, SCHED_OTHER, &p) == -1) {
 		_log.Log(LOG_ERROR, "Failed to switch to normal scheduler.");
 	}
+#endif
 }
 
-int wiringPiMode= WPI_MODE_PINS ;
 
+#ifdef WITH_GPIO
+int wiringPiMode = WPI_MODE_PINS;
 int  SetGpioInterruptMode( int   pin , int mode )
 {
 

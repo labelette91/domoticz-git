@@ -227,6 +227,7 @@ hardware/AnnaThermostat.cpp
 hardware/ASyncSerial.cpp
 hardware/ASyncTCP.cpp
 hardware/HomeEasy.cpp
+hardware/dummywiringPi.cpp
 hardware/DecodeHomeEasy.cpp
 hardware/Sensor.cpp
 hardware/Record.cpp

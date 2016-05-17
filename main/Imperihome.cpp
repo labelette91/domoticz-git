@@ -587,6 +587,7 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
 	          SetKey(0,"Watts"     ,sValueGlb[0] ,"W" ,true );
 	          SetKey(1,"ConsoTotal",sValueGlb[1] ,"kWh" ,false );
             updateRoot( iroot++ , row , DevElectricity );
+			break;
 
         case pTypeAirQuality :
 	          SetKey(0,"Value"     ,nValueGlb ,"ppm" ,false );
@@ -1448,7 +1449,11 @@ bool  ImperiHome::Request( std::string &request_path , std::string &rep_content)
 bool  ImperiHomeRequest( std::string &request_path , std::string &rep_content)
 {
   ImperiHome m_ImperiHome ;
-  return m_ImperiHome.Request( request_path , rep_content);
+  bool ret = m_ImperiHome.Request( request_path , rep_content);
+  if (ret)
+	if (_log.isTraceEnable()) _log.Log(LOG_TRACE, "IMPA: %s", rep_content.c_str());
+
+  return ret;
 }
 
 void getGraphic(std::string &idx , std::string TableName , std::string FieldName , std::string KeyName , time_t DateStart , time_t  DateEnd, std::string &rep_content )

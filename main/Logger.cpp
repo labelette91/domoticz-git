@@ -14,7 +14,7 @@
 #include "mainworker.h"
 
 #define MAX_LOG_LINE_BUFFER 100
-#define MAX_LOG_LINE_LENGTH 2048
+#define MAX_LOG_LINE_LENGTH (2048*3)
 
 extern bool g_bRunAsDaemon;
 extern bool g_bUseSyslog;

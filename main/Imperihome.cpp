@@ -61,6 +61,8 @@ private:
 	Json::Value params;
 	std::vector<std::string> sValueGlb;
   std::string nValueGlb ;
+  int iroot;
+
 
 	const char * GetTypeDevice(DeviceTypeEnum dev);
 	void ManageAction (std::string &device , std::string &action	 , std::string &actionType	 , std::string actionValue	 );
@@ -76,7 +78,7 @@ private:
   void SetParams( int KeyNum , const char * KeyName , bool KeyValue);
   void SetKey( int KeyNum , const char * KeyName , std::string KeyValue);
   void SetKey( int KeyNum , const char * KeyName , std::string KeyValue , std::string Unit, bool graphable ) ;
-	DeviceTypeEnum manageTypeGeneral( TSqlRowQuery * row  , Json::Value &params );
+	void manageTypeGeneral( TSqlRowQuery * row  , Json::Value &params );
 	void Histo(std::string &rep_content, std::string &from );
 	void ManageHisto (std::string &device , std::string &value	 , std::string &histo	 , std::string &from	 , std::string &to , std::string &rep_content);
 	void getDeviceCamera(int &iroot);
@@ -84,6 +86,9 @@ public:
 	bool Request( std::string &request_path , std::string &rep_content);
   void getGraphTemperature(std::string &idx ,  time_t  tmDateStart , time_t  tmDateEnd ,std::string &rep_content);
 	void getScenes(int &iroot);
+  void setGenericSensor(TSqlRowQuery * row) ;
+  void setKeyGenericSensor() ;
+
 };
 
 void getGraphic(std::string &idx , std::string TableName , std::string FieldName , std::string KeyName , time_t DateStart , time_t  DateEnd, std::string &rep_content );
@@ -117,7 +122,19 @@ std::string DeviceTypeString[]={
 "DevTempHygro"
 
 };	
-  
+void ImperiHome::setKeyGenericSensor() {
+   
+  if (sValueGlb[0].length() !=0)
+    SetKey(0,"value" ,sValueGlb[0] );
+  else
+    SetKey(0,"value" ,nValueGlb    );
+}
+
+void ImperiHome::setGenericSensor(TSqlRowQuery * row) {
+  setKeyGenericSensor();
+  updateRoot( iroot++ , row , DevGenericSensor);
+}
+
 const char * ImperiHome::GetTypeDevice(DeviceTypeEnum dev)
 { 
   return DeviceTypeString[dev].c_str();
@@ -258,82 +275,149 @@ void ImperiHome::SetKey( int KeyNum , const char * KeyName , std::string KeyValu
 }
 
 //manage pTypeGeneral
-DeviceTypeEnum ImperiHome::manageTypeGeneral( TSqlRowQuery * row  , Json::Value &params )
+void ImperiHome::manageTypeGeneral( TSqlRowQuery * row  , Json::Value &params )
 {
-	 DeviceTypeEnum ApType = DevSwitch;
 
-	 int dSubType = atoi((*row)[SubType].c_str());
+	int dSubType = atoi((*row)[SubType].c_str());
 
 	if (dSubType == sTypeVisibility)
 	{
+		setGenericSensor(row);
 		//							float vis = (float)atof(sValue.c_str());
 		//							root["result"][ii]["SwitchTypeVal"] = metertype;
 	}
 	else if (dSubType == sTypeSolarRadiation)
 	{
+		setGenericSensor(row);
 		//							float radiation = (float)atof(sValue.c_str());
 		//							root["result"][ii]["SwitchTypeVal"] = metertype;
 	}
 	else if (dSubType == sTypeSoilMoisture)
 	{
+		setGenericSensor(row);
 		//							sprintf(szTmp, "%d cb", nValue);
 		//							root["result"][ii]["SwitchTypeVal"] = metertype;
 	}
 	else if (dSubType == sTypeLeafWetness)
 	{
+		setGenericSensor(row);
 		//							sprintf(szTmp, "%d", nValue);
 		//							root["result"][ii]["SwitchTypeVal"] = metertype;
 	}
 	else if (dSubType == sTypeSystemTemp)
 	{
+		setGenericSensor(row);
 		//							double tvalue = ConvertTemperature(atof(sValue.c_str()), tempsign);
 		//							root["result"][ii]["Type"] = "temperature";
 	}
 	else if (dSubType == sTypePercentage)
 	{
+		setGenericSensor(row);
 		//							sprintf(szData, "%.2f%%", atof(sValue.c_str()));
 		//							root["result"][ii]["TypeImg"] = "hardware";
 	}
 	else if (dSubType == sTypeFan)
 	{
+		setGenericSensor(row);
 		//							sprintf(szData, "%d RPM", atoi(sValue.c_str()));
 		//							root["result"][ii]["Type"] = "Fan";
 	}
 	else if (dSubType == sTypeVoltage)
 	{
+		setGenericSensor(row);
 		//							sprintf(szData, "%.3f V", atof(sValue.c_str()));
 		//							root["result"][ii]["Voltage"] = atof(sValue.c_str());
-	}
-	else if (dSubType == sTypeTextStatus)
-	{
-		//							root["result"][ii]["Data"] = sValue;//
-
-	}
-	else if (dSubType == sTypeAlert)
-	{
-		//							root["result"][ii]["Data"] = sValue;//
-
 	}
 	else if (dSubType == sTypePressure)
 	{
           SetKey(0,"value" ,sValueGlb[0] ,"bar" , false);
+          updateRoot( iroot++ , row , DevPressure );
+
 		//							sprintf(szData, "%.1f Bar", atof(sValue.c_str()));
 		//							root["result"][ii]["Pressure"] = atof(sValue.c_str());
 	}
-	else if (dSubType == sTypeZWaveClock)
+	else if (dSubType == sTypeSetPoint)
 	{
+	  setGenericSensor(row);
+	}
+	else if (dSubType == sTypeTemperature)
+	{
+	  setGenericSensor(row);
+	}
+  else if (dSubType == sTypeZWaveClock)
+	{
+		setGenericSensor(row);
 		//								day = atoi(tstrarray[0].c_str());
 		//								hour = atoi(tstrarray[1].c_str());
 		//								minute = atoi(tstrarray[2].c_str());
 		//							root["result"][ii]["DayTime"] = sValue;
 	}
+	else if (dSubType == sTypeTextStatus)
+	{
+		setGenericSensor(row);
+		//							root["result"][ii]["Data"] = sValue;//
+
+	}
+
 	else if (dSubType == sTypeZWaveThermostatMode)
 	{
+		setGenericSensor(row);
 		//							sprintf(szData, "%s", ZWave_Thermostat_Modes[nValue]);
 		//							root["result"][ii]["Data"] = szData;
 		//							root["result"][ii]["Mode"] = nValue;
 	}
-	return ApType;
+	else if (dSubType == sTypeZWaveThermostatFanMode)
+	{
+	  setGenericSensor(row);
+	  
+	}
+	else if (dSubType == sTypeAlert)
+	{
+		setGenericSensor(row);
+		//							root["result"][ii]["Data"] = sValue;//
+
+	}
+	else if (dSubType == sTypeCurrent		)
+	{
+	  setGenericSensor(row);
+	}
+	else if (dSubType == sTypeSoundLevel	)
+	{
+	  setGenericSensor(row);
+	  
+	}
+	else if (dSubType == sTypeBaro				)
+	{
+    SetKey(0,"value" ,sValueGlb[0] ,"bar" , false);
+    updateRoot( iroot++ , row , DevPressure );
+	  
+	}
+	else if (dSubType == sTypeDistance		)
+	{
+	  setGenericSensor(row);
+	  
+	}
+	else if (dSubType == sTypeCounterIncremental		)
+	{
+	  setGenericSensor(row);
+	  
+	}
+	else if (dSubType == sTypeKwh					)
+	{
+      SetKey(0,"Watts"     ,sValueGlb[0] ,"W" ,true );
+      SetKey(1,"ConsoTotal",sValueGlb[1] ,"kWh" ,false );
+      updateRoot( iroot++ , row , DevElectricity );
+	}
+	else if (dSubType == sTypeWaterflow		)
+	{
+	  setGenericSensor(row);
+	}
+	else if (dSubType == sTypeCustom					)
+	{
+	  setGenericSensor(row);
+	}
+	else
+	  setGenericSensor(row);
 }
 
 DeviceTypeEnum ImperiHome::LightType( TSqlRowQuery * row  , Json::Value &params )
@@ -454,7 +538,7 @@ void ImperiHome::updateRoot(int ii , TSqlRowQuery * row , DeviceTypeEnum ApType 
 void ImperiHome::DeviceContent3(std::string &rep_content)
 {
   int dtype,dSubType=0;
-  int iroot=0;
+  iroot=0;
 	root.clear();
 
   TSqlQueryResult result=m_sql.Query("SELECT ID,Name,nValue,Type,SubType,sValue,SwitchType,LastLevel,RoomTemp,SwitchIdx,AddjValue,AddjValue2  FROM DeviceStatus where (used==1)"  ) ;
@@ -614,7 +698,7 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
           }
           break;
         case pTypeGeneral :
-					 updateRoot( iroot++ , row , manageTypeGeneral(  row  , params ) );
+					 manageTypeGeneral(  row  , params ) ;
 
           break;
         case pTypeLux :
@@ -631,6 +715,7 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
 
 
         default:
+			setGenericSensor(row);
           break;
 
     }
@@ -1451,7 +1536,9 @@ bool  ImperiHomeRequest( std::string &request_path , std::string &rep_content)
   ImperiHome m_ImperiHome ;
   bool ret = m_ImperiHome.Request( request_path , rep_content);
   if (ret)
-	if (_log.isTraceEnable()) _log.Log(LOG_TRACE, "IMPA: %s", rep_content.c_str());
+	if (_log.isTraceEnable()) 
+		if (!_log.TestFilter("IMPA"))
+			_log.Log(LOG_TRACE, "IMPA: %s", rep_content.c_str());
 
   return ret;
 }

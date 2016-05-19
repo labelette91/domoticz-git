@@ -202,7 +202,7 @@ void MainWorker::AddAllDomoticzHardware()
 	//Add Hardware devices
 	std::vector<std::vector<std::string> > result;
 	result = m_sql.safe_query(
-		"SELECT ID, Name, Enabled, Type, Address, Port, SerialPort, Username, Password, Extra, Mode1, Mode2, Mode3, Mode4, Mode5, Mode6, DataTimeout FROM Hardware ORDER BY ID ASC");
+		"SELECT ID, Name, Enabled, Type, Address, Port, SerialPort, Username, Password, Extra, Mode1, Mode2, Mode3, Mode4, Mode5, Mode6, DataTimeout, RestartType FROM Hardware ORDER BY ID ASC");
 	if (result.size() > 0)
 	{
 		std::vector<std::vector<std::string> >::const_iterator itt;
@@ -228,7 +228,8 @@ void MainWorker::AddAllDomoticzHardware()
 			int mode5 = atoi(sd[14].c_str());
 			int mode6 = atoi(sd[15].c_str());
 			int DataTimeout = atoi(sd[16].c_str());
-			AddHardwareFromParams(ID, Name, Enabled, Type, Address, Port, SerialPort, Username, Password, Extra, mode1, mode2, mode3, mode4, mode5, mode6, DataTimeout, false);
+			TRestartType RestartType = (TRestartType)atoi(sd[17].c_str());
+			AddHardwareFromParams(ID, Name, Enabled, Type, Address, Port, SerialPort, Username, Password, Extra, mode1, mode2, mode3, mode4, mode5, mode6, DataTimeout, RestartType, false);
 		}
 		m_hardwareStartCounter = 0;
 		m_bStartHardware = true;
@@ -537,7 +538,7 @@ bool MainWorker::RestartHardware(const std::string &idx)
 {
 	std::vector<std::vector<std::string> > result;
 	result = m_sql.safe_query(
-		"SELECT Name, Enabled, Type, Address, Port, SerialPort, Username, Password, Extra, Mode1, Mode2, Mode3, Mode4, Mode5, Mode6, DataTimeout FROM Hardware WHERE (ID=='%q')",
+		"SELECT Name, Enabled, Type, Address, Port, SerialPort, Username, Password, Extra, Mode1, Mode2, Mode3, Mode4, Mode5, Mode6, DataTimeout , RestartType FROM Hardware WHERE (ID=='%q')",
 		idx.c_str());
 	if (result.size()<1)
 		return false;
@@ -558,8 +559,10 @@ bool MainWorker::RestartHardware(const std::string &idx)
 	int Mode5 = atoi(sd[13].c_str());
 	int Mode6 = atoi(sd[14].c_str());
 	int DataTimeout = atoi(sd[15].c_str());
+	TRestartType RestartType = (TRestartType)atoi(sd[16].c_str());
 
-	return AddHardwareFromParams(atoi(idx.c_str()), Name, (senabled == "true") ? true : false, htype, address, port, serialport, username, password, extra, Mode1, Mode2, Mode3, Mode4, Mode5, Mode6, DataTimeout, true);
+
+	return AddHardwareFromParams(atoi(idx.c_str()), Name, (senabled == "true") ? true : false, htype, address, port, serialport, username, password, extra, Mode1, Mode2, Mode3, Mode4, Mode5, Mode6, DataTimeout, RestartType, true);
 }
 
 bool MainWorker::AddHardwareFromParams(
@@ -577,6 +580,7 @@ bool MainWorker::AddHardwareFromParams(
 	const int Mode5,
 	const int Mode6,
 	const int DataTimeout,
+	const TRestartType RestartType,
 	const bool bDoStart
 	)
 {
@@ -913,6 +917,7 @@ bool MainWorker::AddHardwareFromParams(
 		pHardware->HwdType=Type;
 		pHardware->Name=Name;
 		pHardware->m_DataTimeout = DataTimeout;
+		pHardware->m_RestartType = RestartType;
 		AddDomoticzHardware(pHardware);
 
 		if (bDoStart)
@@ -12091,9 +12096,40 @@ void MainWorker::HeartbeatCheck()
 						}
 
 						_log.Log(LOG_ERROR, "%s hardware (%d) nothing received for more then %d %s!....", sd[0].c_str(), pHardware->m_HwdID, totNum, sDataTimeout.c_str());
-						m_devicestorestart.push_back(pHardware->m_HwdID);
+
+						TRestartType restarttype = RestartDeviceHardware;
+							if (pHardware->m_RestartType == ShutDownRestart) {
+							if(RestartCount[pHardware->m_HwdID]>=2)
+								restarttype = ShutDownRestart;
+						}
+						if (pHardware->m_RestartType == RestartApplication) {
+							if (RestartCount[pHardware->m_HwdID] >= 2)
+								restarttype = RestartApplication;
+						}
+						RestartCount[pHardware->m_HwdID]++;
+						if (restarttype == RestartDeviceHardware) {
+							_log.Log(LOG_STATUS, "%s hardware (%d) restarted!", sd[0].c_str(), pHardware->m_HwdID);
+							m_devicestorestart.push_back(pHardware->m_HwdID);
+						}
+						else if (restarttype == ShutDownRestart) {
+							_log.Log(LOG_STATUS, "%s hardware (%d) ShutDown Restart!", sd[0].c_str(), pHardware->m_HwdID);
+#ifdef WIN32
+							int ret = system("shutdown -r -f -t 1 -d up:125:1");
+#else
+							int ret = system("sudo shutdown -r now");
+#endif
+							if (ret != 0)
+							{
+								_log.Log(LOG_ERROR, "Error executing reboot command. returned: %d", ret);
+							}
+						}
+						else {
+								_log.Log(LOG_STATUS, "Restart Domoticz application !");
+						}
 					}
 				}
+//				else
+//					RestartCount[pHardware->m_HwdID]=0;
 			}
 
 		}

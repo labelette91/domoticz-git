@@ -7,6 +7,17 @@
 //Base class with functions all notification systems should have
 #define RX_BUFFER_SIZE 40
 
+//in casee of device Timeout , type restart
+// 0 first restart device 
+// 1 first restart domoticz 
+// 2 first restart system 
+
+enum TRestartType {
+	RestartDeviceHardware = 0,	//restart hardware component
+	RestartApplication,		//restart domoticz application 
+	ShutDownRestart,		//ShutDown / Restart
+
+};
 class CDomoticzHardwareBase
 {
 	friend class MainWorker;
@@ -38,6 +49,8 @@ public:
 	boost::signals2::signal<void(CDomoticzHardwareBase *pDevice)> sOnConnected;
 	void *m_pUserData;
 	bool m_bOutputLog;
+	TRestartType m_RestartType;
+
 protected:
 
 	virtual bool StartHardware()=0;

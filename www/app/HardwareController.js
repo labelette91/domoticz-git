@@ -42,6 +42,7 @@ define(['app'], function (app) {
             var bEnabled=$('#hardwarecontent #hardwareparamstable #enabled').is(":checked");
 
             var datatimeout=$('#hardwarecontent #hardwareparamstable #combodatatimeout').val();
+            var restarttype = $('#hardwarecontent #hardwareparamstable #comborestarttype').val();
 
             var text = $("#hardwarecontent #hardwareparamstable #combotype option:selected").text();
             if (text.indexOf("HomeEasy RF") >= 0)
@@ -74,6 +75,7 @@ define(['app'], function (app) {
                         "&enabled=" + bEnabled +
                         "&idx=" + idx +
                         "&datatimeout=" + datatimeout +
+                        "&restarttype=" + restarttype +
                         "&Mode1=" + Mode1 + "&Mode2=" + Mode2 + "&Mode3=" + Mode3 + "&Mode4=" + Mode4 + "&Mode5=" + Mode5 + "&Mode6=" + Mode6,
                      async: false,
                      dataType: 'json',
@@ -127,6 +129,7 @@ define(['app'], function (app) {
                         "&enabled=" + bEnabled +
                         "&idx=" + idx +
                         "&datatimeout=" + datatimeout +
+                        "&restarttype=" + restarttype +
                         "&Mode1=" + Mode1 + "&Mode2=" + Mode2 + "&Mode3=" + Mode3 + "&Mode4=" + Mode4 + "&Mode5=" + Mode5 + "&Mode6=" + Mode6,
                      async: false,
                      dataType: 'json',
@@ -176,6 +179,7 @@ define(['app'], function (app) {
                         "&enabled=" + bEnabled +
                         "&idx=" + idx +
                         "&datatimeout=" + datatimeout +
+                        "&restarttype=" + restarttype +
                         "&Mode1=" + Mode1 + "&Mode2=" + Mode2 + "&Mode3=" + Mode3 + "&Mode4=" + Mode4 + "&Mode5=" + Mode5 + "&Mode6=" + Mode6,
                      async: false,
                      dataType: 'json',
@@ -216,6 +220,7 @@ define(['app'], function (app) {
                         "&enabled=" + bEnabled +
                         "&idx=" + idx +
                         "&datatimeout=" + datatimeout +
+                        "&restarttype=" + restarttype +
                         "&Mode1=" + Mode1 + "&Mode2=" + Mode2 + "&Mode3=" + Mode3 + "&Mode4=" + Mode4 + "&Mode5=" + Mode5 + "&Mode6=" + Mode6,
                      async: false,
                      dataType: 'json',
@@ -274,6 +279,7 @@ define(['app'], function (app) {
                         "&enabled=" + bEnabled +
                         "&idx=" + idx +
                         "&datatimeout=" + datatimeout +
+                        "&restarttype=" + restarttype +
                         "&Mode1=" + Mode1 + "&Mode2=" + Mode2 + "&Mode3=" + Mode3 + "&Mode4=" + Mode4 + "&Mode5=" + Mode5 + "&Mode6=" + Mode6,
                      async: false,
                      dataType: 'json',
@@ -319,6 +325,7 @@ define(['app'], function (app) {
                         "&enabled=" + bEnabled +
                         "&idx=" + idx +
                         "&datatimeout=" + datatimeout +
+                        "&restarttype=" + restarttype +
                         "&Mode1=" + Mode1 + "&Mode2=" + Mode2 + "&Mode3=" + Mode3 + "&Mode4=" + Mode4 + "&Mode5=" + Mode5 + "&Mode6=" + Mode6,
                      async: false,
                      dataType: 'json',
@@ -357,6 +364,7 @@ define(['app'], function (app) {
                        "&enabled=" + bEnabled +
                        "&idx=" + idx +
                        "&datatimeout=" + datatimeout +
+                        "&restarttype=" + restarttype +
                        "&address=" + encodeURIComponent(url) +
                        "&extra=" + encodeURIComponent(script) +
                        "&Mode1=" + Mode1 + "&Mode2=" + Mode2 + "&Mode3=" + Mode3 + "&Mode4=" + Mode4 + "&Mode5=" + Mode5 + "&Mode6=" + Mode6,
@@ -393,6 +401,7 @@ define(['app'], function (app) {
                         "&enabled=" + bEnabled +
                         "&idx=" + idx +
                         "&datatimeout=" + datatimeout +
+                        "&restarttype=" + restarttype +
                         "&Mode1=" + Mode1 + "&Mode2=" + Mode2 + "&Mode3=" + Mode3 + "&Mode4=" + Mode4 + "&Mode5=" + Mode5 + "&Mode6=" + Mode6,
                      async: false,
                      dataType: 'json',
@@ -433,6 +442,7 @@ define(['app'], function (app) {
                         "&name=" + encodeURIComponent(name) +
                         "&enabled=" + bEnabled +
                         "&idx=" + idx +
+                        "&restarttype=" + restarttype +
                         "&datatimeout=" + datatimeout +
                         "&Mode1=" + siteid,
                      async: false,
@@ -460,6 +470,7 @@ define(['app'], function (app) {
                         "&name=" + encodeURIComponent(name) +
                         "&enabled=" + bEnabled +
                         "&idx=" + idx +
+                        "&restarttype=" + restarttype +
                         "&datatimeout=" + datatimeout +
                         "&Mode1=" + Mode1 + "&Mode2=" + Mode2 + "&Mode3=" + Mode3 + "&Mode4=" + Mode4 + "&Mode5=" + Mode5 + "&Mode6=" + Mode6,
                      async: false,
@@ -483,6 +494,7 @@ define(['app'], function (app) {
                        "&name=" + encodeURIComponent(name) +
                        "&enabled=" + bEnabled +
                        "&idx=" + idx +
+                        "&restarttype=" + restarttype +
                        "&datatimeout=" + datatimeout +
                        "&Mode1=" + Mode1 + "&Mode2=" + Mode2 + "&Mode3=" + Mode3 + "&Mode4=" + Mode4 + "&Mode5=" + Mode5 + "&Mode6=" + Mode6,
                     async: false,
@@ -513,6 +525,7 @@ define(['app'], function (app) {
                        "&Mode1=" + encodeURIComponent(mill_id) +
                        "&enabled=" + bEnabled +
                        "&idx=" + idx +
+                        "&restarttype=" + restarttype +
                        "&datatimeout=" + datatimeout +
                        "&Mode2=" + Mode2 + "&Mode3=" + Mode3 + "&Mode4=" + Mode4 + "&Mode5=" + Mode5 + "&Mode6=" + Mode6,
                      async: false,
@@ -556,6 +569,7 @@ define(['app'], function (app) {
                         "&name=" + encodeURIComponent(name) +
                         "&enabled=" + bEnabled +
                         "&idx=" + idx +
+                        "&restarttype=" + restarttype +
                         "&datatimeout=" + datatimeout +
                         "&Mode1=" + Mode1 + "&Mode2=" + Mode2 + "&Mode3=" + Mode3 + "&Mode4=" + Mode4 + "&Mode5=" + Mode5 + "&Mode6=" + Mode6,
                      async: false,
@@ -596,6 +610,7 @@ define(['app'], function (app) {
                         "&name=" + encodeURIComponent(name) +
                         "&enabled=" + bEnabled +
                         "&idx=" + idx +
+                        "&restarttype=" + restarttype +
                         "&datatimeout=" + datatimeout +
                         "&Mode1=" + Mode1 + "&Mode2=" + Mode2 + "&Mode3=" + Mode3 + "&Mode4=" + Mode4 + "&Mode5=" + Mode5 + "&Mode6=" + Mode6,
                      async: false,
@@ -627,6 +642,7 @@ define(['app'], function (app) {
 
             var bEnabled=$('#hardwarecontent #hardwareparamstable #enabled').is(":checked");
             var datatimeout=$('#hardwarecontent #hardwareparamstable #combodatatimeout').val();
+            var restarttype = $('#hardwarecontent #hardwareparamstable #comborestarttype').val();
 
             var text = $("#hardwarecontent #hardwareparamstable #combotype option:selected").text();
 
@@ -648,7 +664,7 @@ define(['app'], function (app) {
 				)
             {
                 $.ajax({
-                     url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&port=1&name=" + encodeURIComponent(name) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout,
+                     url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&port=1&name=" + encodeURIComponent(name) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout + "&restarttype=" + restarttype, 
                      async: false,
                      dataType: 'json',
                      success: function(data) {
@@ -674,7 +690,7 @@ define(['app'], function (app) {
                     return;
                 }
                 $.ajax({
-                     url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&port=1&name=" + encodeURIComponent(name) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout + "&mode1=" + inputport + "&mode2=" + outputport ,
+                     url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&port=1&name=" + encodeURIComponent(name) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout + "&restarttype=" + restarttype + "&mode1=" + inputport + "&mode2=" + outputport ,
                      async: false,
                      dataType: 'json',
                      success: function(data) {
@@ -709,7 +725,7 @@ define(['app'], function (app) {
                 }
 
                 $.ajax({
-                     url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&port=" + encodeURIComponent(serialport) + "&name=" + encodeURIComponent(name) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout +
+                     url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&port=" + encodeURIComponent(serialport) + "&name=" + encodeURIComponent(name) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout + "&restarttype=" + restarttype +
                           "&Mode1=" + Mode1,
                      async: false,
                      dataType: 'json',
@@ -752,7 +768,7 @@ define(['app'], function (app) {
                     return;
                 }
                 $.ajax({
-                     url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&address=" + address + "&port=" + port + "&name=" + encodeURIComponent(name) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout,
+                     url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&address=" + address + "&port=" + port + "&name=" + encodeURIComponent(name) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout + "&restarttype=" + restarttype,
                      async: false,
                      dataType: 'json',
                      success: function(data) {
@@ -784,7 +800,7 @@ define(['app'], function (app) {
                 }
                 var password=encodeURIComponent($("#hardwarecontent #divlogin #password").val());
                 $.ajax({
-                     url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&address=" + address + "&port=" + port + "&name=" + encodeURIComponent(name) + "&password=" + encodeURIComponent(password) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout,
+                     url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&address=" + address + "&port=" + port + "&name=" + encodeURIComponent(name) + "&password=" + encodeURIComponent(password) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout + "&restarttype=" + restarttype,
                      async: false,
                      dataType: 'json',
                      success: function(data) {
@@ -821,7 +837,7 @@ define(['app'], function (app) {
                     return;
                 }
                 $.ajax({
-                     url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&address=" + address + "&port=" + port + "&username=" + encodeURIComponent(username) + "&name=" + encodeURIComponent(name) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout,
+                     url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&address=" + address + "&port=" + port + "&username=" + encodeURIComponent(username) + "&name=" + encodeURIComponent(name) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout + "&restarttype=" + restarttype,
                      async: false,
                      dataType: 'json',
                      success: function(data) {
@@ -880,7 +896,7 @@ define(['app'], function (app) {
                 }
 
                 $.ajax({
-                     url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&address=" + address + "&port=" + port + "&username=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password) + "&name=" + encodeURIComponent(name) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout + "&extra=" + encodeURIComponent(extra) + "&mode1=" + mode1,
+                     url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&address=" + address + "&port=" + port + "&username=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password) + "&name=" + encodeURIComponent(name) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout + "&restarttype=" + restarttype + "&extra=" + encodeURIComponent(extra) + "&mode1=" + mode1,
                      async: false,
                      dataType: 'json',
                      success: function(data) {
@@ -906,7 +922,7 @@ define(['app'], function (app) {
                     return;
                 }
                 $.ajax({
-                     url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&port=1" + "&username=" + encodeURIComponent(apikey) + "&password=" + encodeURIComponent(location) + "&name=" + encodeURIComponent(name) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout,
+                     url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&port=1" + "&username=" + encodeURIComponent(apikey) + "&password=" + encodeURIComponent(location) + "&name=" + encodeURIComponent(name) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout + "&restarttype=" + restarttype,
                      async: false,
                      dataType: 'json',
                      success: function(data) {
@@ -936,7 +952,7 @@ define(['app'], function (app) {
                 var username = $("#hardwarecontent #divlogin #username").val();
                 var password = $("#hardwarecontent #divlogin #password").val();
                 $.ajax({
-                    url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&port=" + refresh + "&username=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password) + "&name=" + encodeURIComponent(name) + "&address=" + encodeURIComponent(url) + "&extra=" + encodeURIComponent(script) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout,
+                    url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&port=" + refresh + "&username=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password) + "&name=" + encodeURIComponent(name) + "&address=" + encodeURIComponent(url) + "&extra=" + encodeURIComponent(script) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout + "&restarttype=" + restarttype,
                     async: false,
                     dataType: 'json',
                     success: function (data) {
@@ -961,7 +977,7 @@ define(['app'], function (app) {
                         "&username=" + encodeURIComponent(configlocation) +
                         "&name=" + encodeURIComponent(name) +
                         "&enabled=" + bEnabled +
-                        "&datatimeout=" + datatimeout,
+                        "&datatimeout=" + datatimeout + "&restarttype=" + restarttype,
                      async: false,
                      dataType: 'json',
                      success: function(data) {
@@ -989,7 +1005,7 @@ define(['app'], function (app) {
                      "&port=" + encodeURIComponent(nrofwinddelen) +
                      "&Mode1=" + encodeURIComponent(mill_id) +
                      "&enabled=" + bEnabled +
-                     "&datatimeout=" + datatimeout,
+                     "&datatimeout=" + datatimeout + "&restarttype=" + restarttype,
                      async: false,
                      dataType: 'json',
                      success: function(data) {
@@ -1028,7 +1044,7 @@ define(['app'], function (app) {
                         "&password=" + encodeURIComponent(apikey) +
                         "&enabled=" + bEnabled +
                         "&idx=" + idx +
-                        "&datatimeout=" + datatimeout +
+                        "&datatimeout=" + datatimeout + "&restarttype=" + restarttype +
                         "&Mode1=" + siteid,
                      async: false,
                      dataType: 'json',
@@ -1051,7 +1067,7 @@ define(['app'], function (app) {
                      "&password=" + encodeURIComponent(password) +
                      "&name=" + encodeURIComponent(name) +
                      "&enabled=" + bEnabled +
-                     "&datatimeout=" + datatimeout,
+                     "&datatimeout=" + datatimeout + "&restarttype=" + restarttype,
                      async: false,
                      dataType: 'json',
                      success: function(data) {
@@ -1091,7 +1107,7 @@ define(['app'], function (app) {
                 $.ajax({
                      url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&address=" + address + "&port=" + port +
 					 //"&username=" + encodeURIComponent(username) +
-					 "&name=" + encodeURIComponent(name) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout,
+					 "&name=" + encodeURIComponent(name) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout + "&restarttype=" + restarttype,
                      async: false,
                      dataType: 'json',
                      success: function(data) {
@@ -3954,6 +3970,7 @@ define(['app'], function (app) {
                         "Address": item.Address,
                         "Port": SerialName,
                         "DataTimeout": item.DataTimeout,
+                        "RestartType": item.RestartType,
                         "0": item.idx,
                         "1": item.Name,
                         "2": enabledstr,
@@ -3992,6 +4009,7 @@ define(['app'], function (app) {
 
                         $('#hardwarecontent #hardwareparamstable #enabled').prop('checked',(data["Enabled"]=="true"));
                         $('#hardwarecontent #hardwareparamstable #combodatatimeout').val(data["DataTimeout"]);
+                        $('#hardwarecontent #hardwareparamstable #comborestarttype').val(data["RestartType"]);
 
                         UpdateHardwareParamControls();
 

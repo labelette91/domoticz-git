@@ -261,6 +261,7 @@ const char *sqlCreateHardware =
 "[Mode4] CHAR DEFAULT 0, "
 "[Mode5] CHAR DEFAULT 0, "
 "[Mode6] CHAR DEFAULT 0, "
+"[RestartType] INTEGER DEFAULT 0, "           //type of restart in case of timeout 
 "[DataTimeout] INTEGER DEFAULT 0);";
 
 const char *sqlCreateUsers =
@@ -1149,6 +1150,8 @@ bool CSQLHelper::OpenDatabase()
 			query("ALTER TABLE DeviceStatus ADD COLUMN [SwitchIdx]  INTEGER    DEFAULT 0");
 			query("ALTER TABLE DeviceStatus ADD COLUMN [DeltaTemp]  float      DEFAULT 0");
 			query("ALTER TABLE DeviceStatus ADD COLUMN [Log]        INTEGER    DEFAULT 1");
+			query("ALTER TABLE Hardware ADD COLUMN [RestartType] INTEGER default 0");
+
 		}
 		if (dbversion < 52)
 		{

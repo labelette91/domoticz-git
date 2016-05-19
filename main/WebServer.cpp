@@ -917,6 +917,7 @@ namespace http {
 				{
 					bDoAdd = false;
 				}
+				if (ii == HTYPE_HomeEasy) bDoAdd = false;
 #endif
 				if ((ii == HTYPE_1WIRE) && (!C1Wire::Have1WireSystem()))
 					bDoAdd = false;
@@ -948,6 +949,7 @@ namespace http {
 			std::string password = CURLEncode::URLDecode(request::findValue(&req, "password"));
 			std::string extra = CURLEncode::URLDecode(request::findValue(&req, "extra"));
 			std::string sdatatimeout = request::findValue(&req, "datatimeout");
+			std::string sRestartType = request::findValue(&req, "restarttype");
 			if (
 				(name == "") ||
 				(senabled == "") ||
@@ -958,6 +960,7 @@ namespace http {
 			_eHardwareTypes htype = (_eHardwareTypes)atoi(shtype.c_str());
 
 			int iDataTimeout = atoi(sdatatimeout.c_str());
+			TRestartType iRestartType = (TRestartType)atoi(sRestartType.c_str());
 			int mode1 = 0;
 			int mode2 = 0;
 			int mode3 = 0;
@@ -1162,7 +1165,7 @@ namespace http {
 			}
 
 			m_sql.safe_query(
-				"INSERT INTO Hardware (Name, Enabled, Type, Address, Port, SerialPort, Username, Password, Extra, Mode1, Mode2, Mode3, Mode4, Mode5, Mode6, DataTimeout) VALUES ('%q',%d, %d,'%q',%d,'%q','%q','%q','%q',%d,%d,%d,%d,%d,%d,%d)",
+				"INSERT INTO Hardware (Name, Enabled, Type, Address, Port, SerialPort, Username, Password, Extra, Mode1, Mode2, Mode3, Mode4, Mode5, Mode6, DataTimeout, RestartType) VALUES ('%q',%d, %d,'%q',%d,'%q','%q','%q','%q',%d,%d,%d,%d,%d,%d,%d,%d)",
 				name.c_str(),
 				(senabled == "true") ? 1 : 0,
 				htype,
@@ -1173,7 +1176,8 @@ namespace http {
 				password.c_str(),
 				extra.c_str(),
 				mode1, mode2, mode3, mode4, mode5, mode6,
-				iDataTimeout
+				iDataTimeout,
+				iRestartType
 				);
 
 			//add the device for real in our system
@@ -1183,7 +1187,7 @@ namespace http {
 				std::vector<std::string> sd = result[0];
 				int ID = atoi(sd[0].c_str());
 
-				m_mainworker.AddHardwareFromParams(ID, name, (senabled == "true") ? true : false, htype, address, port, sport, username, password, extra, mode1, mode2, mode3, mode4, mode5, mode6, iDataTimeout, true);
+				m_mainworker.AddHardwareFromParams(ID, name, (senabled == "true") ? true : false, htype, address, port, sport, username, password, extra, mode1, mode2, mode3, mode4, mode5, mode6, iDataTimeout, iRestartType, true);
 			}
 		}
 
@@ -1204,6 +1208,7 @@ namespace http {
 			std::string password = CURLEncode::URLDecode(request::findValue(&req, "password"));
 			std::string extra = CURLEncode::URLDecode(request::findValue(&req, "extra"));
 			std::string sdatatimeout = request::findValue(&req, "datatimeout");
+			std::string sRestartType = request::findValue(&req, "restarttype");
 
 			if (
 				(name == "") ||
@@ -1216,6 +1221,7 @@ namespace http {
 
 			_eHardwareTypes htype = (_eHardwareTypes)atoi(shtype.c_str());
 			int iDataTimeout = atoi(sdatatimeout.c_str());
+			TRestartType iRestartType = (TRestartType)atoi(sRestartType.c_str());
 
 			int port = atoi(sport.c_str());
 
@@ -1394,7 +1400,7 @@ namespace http {
 			else
 			{
 				m_sql.safe_query(
-					"UPDATE Hardware SET Name='%q', Enabled=%d, Type=%d, Address='%q', Port=%d, SerialPort='%q', Username='%q', Password='%q', Extra='%q', Mode1=%d, Mode2=%d, Mode3=%d, Mode4=%d, Mode5=%d, Mode6=%d, DataTimeout=%d WHERE (ID == '%q')",
+					"UPDATE Hardware SET Name='%q', Enabled=%d, Type=%d, Address='%q', Port=%d, SerialPort='%q', Username='%q', Password='%q', Extra='%q', Mode1=%d, Mode2=%d, Mode3=%d, Mode4=%d, Mode5=%d, Mode6=%d, DataTimeout=%d, RestartType=%d WHERE (ID == '%q')",
 					name.c_str(),
 					(bEnabled == true) ? 1 : 0,
 					htype,
@@ -1406,13 +1412,14 @@ namespace http {
 					extra.c_str(),
 					mode1, mode2, mode3, mode4, mode5, mode6,
 					iDataTimeout,
+					iRestartType,
 					idx.c_str()
 					);
 			}
 
 			//re-add the device in our system
 			int ID = atoi(idx.c_str());
-			m_mainworker.AddHardwareFromParams(ID, name, bEnabled, htype, address, port, sport, username, password, extra, mode1, mode2, mode3, mode4, mode5, mode6, iDataTimeout, true);
+			m_mainworker.AddHardwareFromParams(ID, name, bEnabled, htype, address, port, sport, username, password, extra, mode1, mode2, mode3, mode4, mode5, mode6, iDataTimeout, iRestartType, true);
 		}
 
 		void CWebServer::Cmd_GetDeviceValueOptions(WebEmSession & session, const request& req, Json::Value &root)
@@ -9819,7 +9826,7 @@ namespace http {
 #endif
 
 			std::vector<std::vector<std::string> > result;
-			result = m_sql.safe_query("SELECT ID, Name, Enabled, Type, Address, Port, SerialPort, Username, Password, Extra, Mode1, Mode2, Mode3, Mode4, Mode5, Mode6, DataTimeout FROM Hardware ORDER BY ID ASC");
+			result = m_sql.safe_query("SELECT ID, Name, Enabled, Type, Address, Port, SerialPort, Username, Password, Extra, Mode1, Mode2, Mode3, Mode4, Mode5, Mode6, DataTimeout, RestartType FROM Hardware ORDER BY ID ASC");
 			if (result.size() > 0)
 			{
 				std::vector<std::vector<std::string> >::const_iterator itt;
@@ -9849,6 +9856,7 @@ namespace http {
 					root["result"][ii]["Mode5"] = atoi(sd[14].c_str());
 					root["result"][ii]["Mode6"] = atoi(sd[15].c_str());
 					root["result"][ii]["DataTimeout"] = atoi(sd[16].c_str());
+					root["result"][ii]["RestartType"] = atoi(sd[17].c_str());
 
 					//Special case for openzwave (status for nodes queried)
 					CDomoticzHardwareBase *pHardware = m_mainworker.GetHardware(atoi(sd[0].c_str()));

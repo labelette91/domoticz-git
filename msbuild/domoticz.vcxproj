@@ -626,6 +626,7 @@
     <ClCompile Include="..\hardware\CurrentCostMeterTCP.cpp" />
     <ClCompile Include="..\hardware\DavisLoggerSerial.cpp" />
     <ClCompile Include="..\hardware\Dummy.cpp" />
+    <ClCompile Include="..\hardware\dummywiringPi.cpp" />
     <ClCompile Include="..\hardware\EcoDevices.cpp" />
     <ClCompile Include="..\hardware\EnOceanESP2.cpp" />
     <ClCompile Include="..\hardware\EnOceanESP3.cpp" />

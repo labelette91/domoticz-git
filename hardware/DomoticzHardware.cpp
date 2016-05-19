@@ -23,6 +23,7 @@ CDomoticzHardwareBase::CDomoticzHardwareBase()
 	mytime(&m_LastHeartbeat);
 	mytime(&m_LastHeartbeatReceive);
 	m_DataTimeout = 0;
+	m_RestartType = RestartDeviceHardware;
 	m_bSkipReceiveCheck = false;
 	m_bOutputLog = true;
 	m_iHBCounter = 0;

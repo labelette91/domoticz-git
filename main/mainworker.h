@@ -87,20 +87,21 @@ public:
 	bool RestartHardware(const std::string &idx);
 
 	bool AddHardwareFromParams(
-				const int ID,
-				const std::string &Name,
-				const bool Enabled,
-				const _eHardwareTypes Type,
-				const std::string &Address, const unsigned short Port, const std::string &SerialPort,
-				const std::string &Username, const std::string &Password, 
-				const std::string &Filename,
-				const int Mode1,
-				const int Mode2,
-				const int Mode3,
-				const int Mode4,
-				const int Mode5,
-				const int Mode6,
-				const int DataTimeout,
+		const int ID,
+		const std::string &Name,
+		const bool Enabled,
+		const _eHardwareTypes Type,
+		const std::string &Address, const unsigned short Port, const std::string &SerialPort,
+		const std::string &Username, const std::string &Password,
+		const std::string &Filename,
+		const int Mode1,
+		const int Mode2,
+		const int Mode3,
+		const int Mode4,
+		const int Mode5,
+		const int Mode6,
+		const int DataTimeout,
+		const TRestartType RestartType,
 				const bool bDoStart
 				);
 
@@ -161,6 +162,7 @@ private:
 	time_t m_ScheduleLastHourTime;
 	time_t m_ScheduleLastDayTime;
 
+	std::map< int , int> RestartCount;
 
 	boost::mutex m_devicemutex;
 

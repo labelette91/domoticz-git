@@ -124,7 +124,9 @@ std::string DeviceTypeString[]={
 };	
 void ImperiHome::setKeyGenericSensor() {
    
-  if (sValueGlb[0].length() !=0)
+  if (nValueGlb!="0")
+    SetKey(0,"value" ,nValueGlb    );
+  else if (sValueGlb[0].length() !=0)
     SetKey(0,"value" ,sValueGlb[0] );
   else
     SetKey(0,"value" ,nValueGlb    );
@@ -279,145 +281,127 @@ void ImperiHome::manageTypeGeneral( TSqlRowQuery * row  , Json::Value &params )
 {
 
 	int dSubType = atoi((*row)[SubType].c_str());
+  switch(dSubType)
+  {
 
-	if (dSubType == sTypeVisibility)
-	{
-		setGenericSensor(row);
-		//							float vis = (float)atof(sValue.c_str());
-		//							root["result"][ii]["SwitchTypeVal"] = metertype;
-	}
-	else if (dSubType == sTypeSolarRadiation)
-	{
-		setGenericSensor(row);
-		//							float radiation = (float)atof(sValue.c_str());
-		//							root["result"][ii]["SwitchTypeVal"] = metertype;
-	}
-	else if (dSubType == sTypeSoilMoisture)
-	{
-		setGenericSensor(row);
-		//							sprintf(szTmp, "%d cb", nValue);
-		//							root["result"][ii]["SwitchTypeVal"] = metertype;
-	}
-	else if (dSubType == sTypeLeafWetness)
-	{
-		setGenericSensor(row);
-		//							sprintf(szTmp, "%d", nValue);
-		//							root["result"][ii]["SwitchTypeVal"] = metertype;
-	}
-	else if (dSubType == sTypeSystemTemp)
-	{
-		setGenericSensor(row);
-		//							double tvalue = ConvertTemperature(atof(sValue.c_str()), tempsign);
-		//							root["result"][ii]["Type"] = "temperature";
-	}
-	else if (dSubType == sTypePercentage)
-	{
-		setGenericSensor(row);
-		//							sprintf(szData, "%.2f%%", atof(sValue.c_str()));
-		//							root["result"][ii]["TypeImg"] = "hardware";
-	}
-	else if (dSubType == sTypeFan)
-	{
-		setGenericSensor(row);
-		//							sprintf(szData, "%d RPM", atoi(sValue.c_str()));
-		//							root["result"][ii]["Type"] = "Fan";
-	}
-	else if (dSubType == sTypeVoltage)
-	{
-		setGenericSensor(row);
-		//							sprintf(szData, "%.3f V", atof(sValue.c_str()));
-		//							root["result"][ii]["Voltage"] = atof(sValue.c_str());
-	}
-	else if (dSubType == sTypePressure)
-	{
-          SetKey(0,"value" ,sValueGlb[0] ,"bar" , false);
-          updateRoot( iroot++ , row , DevPressure );
-
-		//							sprintf(szData, "%.1f Bar", atof(sValue.c_str()));
-		//							root["result"][ii]["Pressure"] = atof(sValue.c_str());
-	}
-	else if (dSubType == sTypeSetPoint)
-	{
-	  setGenericSensor(row);
-	}
-	else if (dSubType == sTypeTemperature)
-	{
-	  setGenericSensor(row);
-	}
-  else if (dSubType == sTypeZWaveClock)
-	{
-		setGenericSensor(row);
-		//								day = atoi(tstrarray[0].c_str());
-		//								hour = atoi(tstrarray[1].c_str());
-		//								minute = atoi(tstrarray[2].c_str());
-		//							root["result"][ii]["DayTime"] = sValue;
-	}
-	else if (dSubType == sTypeTextStatus)
-	{
-		setGenericSensor(row);
-		//							root["result"][ii]["Data"] = sValue;//
-
-	}
-
-	else if (dSubType == sTypeZWaveThermostatMode)
-	{
-		setGenericSensor(row);
-		//							sprintf(szData, "%s", ZWave_Thermostat_Modes[nValue]);
-		//							root["result"][ii]["Data"] = szData;
-		//							root["result"][ii]["Mode"] = nValue;
-	}
-	else if (dSubType == sTypeZWaveThermostatFanMode)
-	{
-	  setGenericSensor(row);
-	  
-	}
-	else if (dSubType == sTypeAlert)
-	{
-		setGenericSensor(row);
-		//							root["result"][ii]["Data"] = sValue;//
-
-	}
-	else if (dSubType == sTypeCurrent		)
-	{
-	  setGenericSensor(row);
-	}
-	else if (dSubType == sTypeSoundLevel	)
-	{
-	  setGenericSensor(row);
-	  
-	}
-	else if (dSubType == sTypeBaro				)
-	{
+  case  sTypeVisibility :
+    setGenericSensor(row);
+    //							float vis = (float)atof(sValue.c_str());
+    //							root["result"][ii]["SwitchTypeVal"] = metertype;
+    break;
+  case  sTypeSolarRadiation :
+    setGenericSensor(row);
+    //							float radiation = (float)atof(sValue.c_str());
+    //							root["result"][ii]["SwitchTypeVal"] = metertype;
+    break;
+  case  sTypeSoilMoisture :
+    setGenericSensor(row);
+    //							sprintf(szTmp, "%d cb", nValue);
+    //							root["result"][ii]["SwitchTypeVal"] = metertype;
+    break;
+  case  sTypeLeafWetness :
+    setGenericSensor(row);
+    //							sprintf(szTmp, "%d", nValue);
+    //							root["result"][ii]["SwitchTypeVal"] = metertype;
+    break;
+  case  sTypeSystemTemp :
+    setGenericSensor(row);
+    //							double tvalue = ConvertTemperature(atof(sValue.c_str()), tempsign);
+    //							root["result"][ii]["Type"] = "temperature";
+    break;
+  case  sTypePercentage :
+    setGenericSensor(row);
+    //							sprintf(szData, "%.2f%%", atof(sValue.c_str()));
+    //							root["result"][ii]["TypeImg"] = "hardware";
+    break;
+  case  sTypeFan :
+    setGenericSensor(row);
+    //							sprintf(szData, "%d RPM", atoi(sValue.c_str()));
+    //							root["result"][ii]["Type"] = "Fan";
+    break;
+  case  sTypeVoltage :
+    setGenericSensor(row);
+    //							sprintf(szData, "%.3f V", atof(sValue.c_str()));
+    //							root["result"][ii]["Voltage"] = atof(sValue.c_str());
+    break;
+  case  sTypePressure :
     SetKey(0,"value" ,sValueGlb[0] ,"bar" , false);
     updateRoot( iroot++ , row , DevPressure );
-	  
-	}
-	else if (dSubType == sTypeDistance		)
-	{
-	  setGenericSensor(row);
-	  
-	}
-	else if (dSubType == sTypeCounterIncremental		)
-	{
-	  setGenericSensor(row);
-	  
-	}
-	else if (dSubType == sTypeKwh					)
-	{
-      SetKey(0,"Watts"     ,sValueGlb[0] ,"W" ,true );
-      SetKey(1,"ConsoTotal",sValueGlb[1] ,"kWh" ,false );
-      updateRoot( iroot++ , row , DevElectricity );
-	}
-	else if (dSubType == sTypeWaterflow		)
-	{
-	  setGenericSensor(row);
-	}
-	else if (dSubType == sTypeCustom					)
-	{
-	  setGenericSensor(row);
-	}
-	else
-	  setGenericSensor(row);
+
+    //							sprintf(szData, "%.1f Bar", atof(sValue.c_str()));
+    //							root["result"][ii]["Pressure"] = atof(sValue.c_str());
+    break;
+  case  sTypeSetPoint :
+    setGenericSensor(row);
+    break;
+  case  sTypeTemperature :
+    setGenericSensor(row);
+    break;
+  case  sTypeZWaveClock :
+    setGenericSensor(row);
+    //								day = atoi(tstrarray[0].c_str());
+    //								hour = atoi(tstrarray[1].c_str());
+    //								minute = atoi(tstrarray[2].c_str());
+    //							root["result"][ii]["DayTime"] = sValue;
+    break;
+  case  sTypeTextStatus :
+    setGenericSensor(row);
+    //							root["result"][ii]["Data"] = sValue;//
+
+
+    break;
+  case  sTypeZWaveThermostatMode :
+    setGenericSensor(row);
+    //							sprintf(szData, "%s", ZWave_Thermostat_Modes[nValue]);
+    //							root["result"][ii]["Data"] = szData;
+    //							root["result"][ii]["Mode"] = nValue;
+    break;
+  case  sTypeZWaveThermostatFanMode :
+    setGenericSensor(row);
+
+    break;
+  case  sTypeAlert :
+    setGenericSensor(row);
+    //							root["result"][ii]["Data"] = sValue;//
+
+    break;
+  case  sTypeCurrent		 :
+    setGenericSensor(row);
+    break;
+  case  sTypeSoundLevel	 :
+    setGenericSensor(row);
+
+    break;
+  case  sTypeBaro				 :
+    SetKey(0,"value" ,sValueGlb[0] ,"bar" , false);
+    updateRoot( iroot++ , row , DevPressure );
+
+    break;
+  case  sTypeDistance		 :
+    setGenericSensor(row);
+
+    break;
+  case  sTypeCounterIncremental		 :
+    setGenericSensor(row);
+
+    break;
+  case  sTypeKwh					 :
+    SetKey(0,"Watts"     ,sValueGlb[0] ,"W" ,true );
+    SetKey(1,"ConsoTotal",sValueGlb[1] ,"kWh" ,false );
+    updateRoot( iroot++ , row , DevElectricity );
+    break;
+  case  sTypeWaterflow		 :
+    setGenericSensor(row);
+    break;
+  case  sTypeCustom					 :
+    setGenericSensor(row);
+    break;
+  default:
+    setGenericSensor(row);
+    break;
+
+  }
+
 }
 
 DeviceTypeEnum ImperiHome::LightType( TSqlRowQuery * row  , Json::Value &params )
@@ -699,7 +683,10 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
           break;
         case pTypeGeneral :
 					 manageTypeGeneral(  row  , params ) ;
-
+          break;
+        case pTypeGeneralSwitch:
+          SetKey(0,"Status",nValueGlb) ;
+		  updateRoot(iroot++, row, DevSwitch);
           break;
         case pTypeLux :
           SetKey(0,"value" ,sValueGlb[0] , "lux",false );
@@ -1538,6 +1525,7 @@ bool  ImperiHomeRequest( std::string &request_path , std::string &rep_content)
   if (ret)
 	if (_log.isTraceEnable()) 
 		if (!_log.TestFilter("IMPA"))
+			if (rep_content.length())
 			_log.Log(LOG_TRACE, "IMPA: %s", rep_content.c_str());
 
   return ret;

@@ -1858,6 +1858,9 @@
     <ClInclude Include="..\hardware\RAVEn.h">
       <Filter>Devices\Raven</Filter>
     </ClInclude>
+    <ClInclude Include="..\hardware\S0MeterTCP.h">
+      <Filter>Devices\S0 Meter</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\webserver\Base64.cpp">
@@ -2432,6 +2435,9 @@
     </ClCompile>
     <ClCompile Include="..\hardware\RAVEn.cpp">
       <Filter>Devices\Raven</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\S0MeterTCP.cpp">
+      <Filter>Devices\S0 Meter</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

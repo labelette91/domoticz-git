@@ -302,6 +302,7 @@
 				<th align="80" data-i18n="Name">Name</th>
 				<th data-i18n="Values">Values</th>
 				<th width="80" align="left" data-i18n="Ack">Ack</th>
+				<th width="100" align="left" data-i18n="Ack Timeout">Ack Timeout</th>
 				<th width="160" align="left" data-i18n="Last Seen">Last Seen</th>
 			</tr>
 		</thead>
@@ -321,8 +322,12 @@
 	<div id="trChildSettings">
 		<table id="mchildsettings" border="0" cellpadding="0" cellspacing="0" width="100%">
 			<tr>
-				<td align="right" style="width:80px"><label for="Ack"><span data-i18n="Ack"></span>:</label></td>
+				<td align="right" style="width:120px"><label for="Ack"><span data-i18n="Ack"></span>:</label></td>
 				<td><input type="checkbox" id="Ack" /></td>
+			</tr>
+			<tr>
+				<td align="right"><label for="Ack"><span data-i18n="Ack Timeout"></span>:</label></td>
+				<td><input type="text" id="AckTimeout" style="width: 100px; padding: .2em;" class="text ui-widget-content ui-corner-all" />&nbsp;(ms)</td>
 			</tr>
 		</table>
 	</div>
@@ -1003,6 +1008,23 @@
 				</td>
 			</tr>
 		</table>
+		<div id="div1wire">
+			<br>
+			<table class="display" id="hardwareparams1wire" border="0" cellpadding="0" cellspacing="20">
+				<tr>
+					<td align="right" style="width:110px"><label><span data-i18n="OWFS Path">OWFS Path</span>:</label></td>
+					<td><input type="text" id="owfspath" style="width: 170px; padding: .2em;" class="text ui-widget-content ui-corner-all" value="/mnt/1wire" /></td>
+				</tr>
+				<tr>
+					<td align="right" style="width:110px"><label><span data-i18n="Sensor Poll Period">Sensor Poll Period</span>:</label></td>
+					<td><input type="text" id="OneWireSensorPollPeriod" style="width: 200px; padding: .2em;" class="text ui-widget-content ui-corner-all" value="300000" />(<span data-i18n="milliseconds"></span>)</td>
+				</tr>
+				<tr>
+					<td align="right" style="width:110px"><label><span data-i18n="Switch Poll Period">Switch Poll Period</span>:</label></td>
+					<td><input type="text" id="OneWireSwitchPollPeriod" style="width: 200px; padding: .2em;" class="text ui-widget-content ui-corner-all" value="100" />(<span data-i18n="milliseconds"></span>)</td>
+				</tr>
+			</table>
+		</div>
 		<div id="divserial">
 			<br>
 			<table class="display" id="hardwareparamsserial" border="0" cellpadding="0" cellspacing="20">

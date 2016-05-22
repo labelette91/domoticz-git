@@ -2,6 +2,11 @@
 
 #include "Record.h"
 
+void Increment(int &index)
+{
+	(index)++;
+	if (index >= NBPULSE) index = 0;
+}
 TRecord::TRecord()
 {
 	init();
@@ -93,17 +98,20 @@ std::string TRecord::ToString()
 	int p = 0;
 	int n;
 	std::string mes;
+	int RdIndex = PRd;
+
 
 	char Mes[128 * 3];
-	p = get();
 	n = 0;
 	int nbcar = 0;
-	while (p != 0)
+	while (PWr != RdIndex)
 	{
+		p = Pulse[RdIndex];
+		Increment(RdIndex);
+
 		int  b = p / 100;
 
-		nbcar += sprintf(&Mes[nbcar],"%d ",b);
-		p = get();
+		nbcar += sprintf_s(&Mes[nbcar],128,"%d ",b);
 		n++;
 		if (n >= 64)
 		{
@@ -119,4 +127,9 @@ std::string TRecord::ToString()
 		mes += Mes;
 	}
 	return mes;
+}
+
+void TRecord::clear()
+{
+	PRd = PWr;
 }

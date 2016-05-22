@@ -2,7 +2,7 @@
 #define _RECORD
 
 #include <stdio.h>
-#include <string.h>
+#include <string>
 
 
 class TRecord {
@@ -15,6 +15,7 @@ int get();
 bool empty();	
 TRecord();
 ~TRecord();
+void clear();
 
 #define NBPULSE 20000
 int Pulse[NBPULSE];

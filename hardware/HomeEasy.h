@@ -2,7 +2,7 @@
 
 #include "DomoticzHardware.h"
 #include "HomeEasyTransmitter.h"
-#ifdef __arm__
+#ifdef WITH_GPIO
 
 #define SS 0
 #define RF69_IRQ_PIN 0 
@@ -18,12 +18,12 @@ public:
 	~HomeEasy();
 	bool WriteToHardware(const char *pdata, const unsigned char length);
 	int TXPIN;
-	int RXPIN;
-	void printPulse();
+	static int RXPIN;
 
 private:
 	bool StartHardware();
 	bool StopHardware();
+	static void handleInterrupt();
 
 	void Do_Work();
 	boost::shared_ptr<boost::thread> m_thread;
@@ -31,7 +31,7 @@ private:
 
 	HomeEasyTransmitter *HomeEasyRfTx;
 
-#ifdef __arm__
+#ifdef WITH_GPIO
 	RFM69 * radio;
 
 #endif

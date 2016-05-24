@@ -141,7 +141,7 @@ public:
 // Number of maximum High/Low changes per packet.
 // We can handle up to (unsigned long) => 32 bit * 2 H/L changes per bit + 2 for sync
 #define RCSWITCH_MAX_CHANGES 67
-
+/*
 class RCSwitch_ : public DecodeOOK {
 public:
 	RCSwitch_();
@@ -179,5 +179,5 @@ protected:
 	char * dec2binWzerofill(unsigned long Dec, unsigned int bitLength);
 
 };
-
+*/
 #endif /* RCOOK_H_ */

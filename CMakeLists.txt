@@ -231,7 +231,6 @@ hardware/dummywiringPi.cpp
 hardware/DecodeHomeEasy.cpp
 hardware/Sensor.cpp
 hardware/Record.cpp
-hardware/RCSwitch.cpp
 hardware/RcOok.cpp
 hardware/RFM69.cpp
 hardware/HomeEasyTransmitter.cpp

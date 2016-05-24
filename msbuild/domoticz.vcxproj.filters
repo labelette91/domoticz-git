@@ -2439,6 +2439,15 @@
     <ClCompile Include="..\hardware\S0MeterTCP.cpp">
       <Filter>Devices\S0 Meter</Filter>
     </ClCompile>
+    <ClCompile Include="..\hardware\Record.cpp">
+      <Filter>Devices\HomeEasy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\RCSwitch.cpp">
+      <Filter>Devices\HomeEasy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\RcOok.cpp">
+      <Filter>Devices\HomeEasy</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="domoticz.rc">

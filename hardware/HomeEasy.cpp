@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-//#define  WITH_GPIO
+#define  WITH_GPIO
 
 #include "HomeEasy.h"
 #include <stdio.h>
@@ -16,7 +16,7 @@
 #include <sched.h>    
 #include <wiringPi.h>
 
-#include "RCSwitch.h"
+//#include "RCSwitch.h"
 #include "RcOok.h"
 #include "Sensor.h"
 
@@ -31,16 +31,41 @@
 #include "../main/SQLHelper.h"
 #include "hager.h"
 
-SPIClass SPI;
-#ifdef WITH_GPIO
-RCSwitch *rc ;
+#include "RcOok.h"
+#include "DecodeHomeEasy.h"
+#include "DecodeOTIO.h"
+#include "Sensor.h"
 
-#endif
+#include "Print.h"
+#include "HagerDecoder.h"
+#include "Record.h"
+
+
+SPIClass SPI;
 
 //typedef map<int, Sensor > T_Map_Sensor;
 //T_Map_Sensor Sensors ;
 
 int  SetGpioInterruptMode(int   bcmGpioPin, int mode);
+
+int HomeEasy::RXPIN;
+
+char OokReceivedCode[128];
+
+
+OregonDecoderV2 orscV2;
+
+DecodeHomeEasy HEasy(1);
+
+DecodeOTIO     Otio(5);
+
+HagerDecoder   hager;
+
+#include "fifo.cpp"
+
+TFifo Fifo;
+TRecord Record;
+
 
 HomeEasy::HomeEasy(const int ID)
 {
@@ -52,6 +77,9 @@ HomeEasy::HomeEasy(const int ID)
 	int SPI_CHAN = 1;
 	int Spi_speed = 500000;
 	HomeEasyRfTx = 0;
+
+	Fifo.Clear();
+	Record.init();
 
 	//input pin in mode1
 	//output pin in mode2
@@ -96,11 +124,12 @@ HomeEasy::HomeEasy(const int ID)
 
 	// if receiver defined
 	if (RXPIN >= 0)
-		rc = new RCSwitch(RXPIN, -1);
+		wiringPiISR(RXPIN, INT_EDGE_BOTH, &handleInterrupt);
 	else
-		rc = 0;
-	/* disable interupt */
-	//SetGpioInterruptMode(RXPIN, 0);
+	{
+		/* disable interupt */
+		//SetGpioInterruptMode(RXPIN, 0);
+	}
 #endif
 }
 
@@ -231,36 +260,7 @@ bool HomeEasy::WriteToHardware(const char *pdata, const unsigned char length)
     
   return true;
 }
-void HomeEasy::printPulse()
-{
-#ifdef WITH_GPIO
-  int p=0;
-  int n;
-  char Mes[128*3];
-//    p=getPulse();
-		p = rc->Record.get();
-    n=0;
-		while(p!=0) 
-		{
-			byte b = p/100;
-			b=b&0xf;
-			sprintf(&Mes[n*2],"%1X",b);
-			Mes[n*2+1]=' ';
-    	//p=getPulse();
-			p = rc->Record.get();
-			n++;
-    	if (n>=64)
-    		{
-    			Mes[n*2]=0;
-    			printf("%s\n",Mes);
-    			n=0;	
-    		}
-		}
-		Mes[n*2]=0;
-	  if (n!=0) printf("%s\n",Mes);
-	
-#endif
-}
+
 void DumpHex (byte * data , byte len , char * mesage )
 {
 
@@ -291,86 +291,69 @@ void HomeEasy::Do_Work()
 
 #ifdef WITH_GPIO
 		//ig tace is enable and dump pulse data is enable
-		if (!rc->Record.empty())
-			if (_log.isTraceEnable() )
-				if (!_log.TestFilter("RCDATA") )
-				//printPulse();
-				_log.Log(LOG_TRACE, "RCDATA %s", rc->Record.ToString().c_str());
+		if (!Record.empty())
+			if (_log.isTraceEnable())
+				if (!_log.TestFilter("RCDATA"))
+					_log.Log(LOG_TRACE, "RCDATA %s", Record.ToString().c_str());
 
-		if (rc!=0)
-//			if (rc->OokAvailable())
-			while (!rc->Fifo.Empty())
+		while (!Fifo.Empty())
+		{
+			char dataStr[100];
+			byte len;
+			std::string message;
 
+			strncpy((char*)dataStr, (const char*)Fifo.Get(len), 90);
+			message = std::string(dataStr);
+			_log.Log(LOG_TRACE, "RCOOK %s", message.c_str());
+
+			Sensor *s = Sensor::getRightSensor((char*)message.c_str());
+			if (s != NULL)
 			{
-				char dataStr[100];
-				//char data[100];
-				byte len;
-				std::string message;
-
-				//rc->getOokCode(message);
-        strncpy((char*)dataStr,(const char*)rc->Fifo.Get(len),90 ) ;
-				message = std::string(dataStr);
-
-/*      data binaire 
-				memcpy((char*)data, (const char*)rc->Fifo.Get(len), 90);
-				printf("%x ", data[0]);
-
-				printf("%d \n", len );
-
-				DumpHex(data, len, dataStr);
-				
-				message = "OSV2" + std::string(dataStr);
-*/
-				_log.Log(LOG_TRACE, "RCOOK %s", message.c_str());
-
-				Sensor *s = Sensor::getRightSensor((char*)message.c_str());
-				if (s != NULL)
+				//if correct decoded sensor and different value since last receive
+				if (s->isDecoded())
 				{
-          //if correct decoded sensor and different value since last receive
-          if (s->isDecoded()) 
-          {
-            //find sensor
-            Sensor * sensor = FindSensor(s->getSensID());
-            if (sensor == 0) {
-              //            Sensors[s->getSensID()] = sensor;
-              _log.Log(LOG_TRACE, "SENSOR: new sensor added %s ID:%08X", s->getSensorName().c_str(), s->getSensID());
-            }
+					//find sensor
+					Sensor * sensor = FindSensor(s->getSensID());
+					if (sensor == 0) {
+						//            Sensors[s->getSensID()] = sensor;
+						_log.Log(LOG_TRACE, "SENSOR: new sensor added %s ID:%08X", s->getSensorName().c_str(), s->getSensID());
+					}
 
-            //if sensor value as changed
-            if ( (sensor == 0) || (*sensor != *s) )
-            {
-              //update current sensor value
-              Sensors[s->getSensID()] = s ;
-              if (s->available(Sensor::haveTemperature))
-              {
-                SendTempHumSensor(s->getSensID(), !s->isBatteryLow(), (float)s->getTemperature(), (int)s->getHumidity(), "Home TempHum"  , sTypeTH1 );
-                _log.Log(LOG_TRACE, "RCOOK %s ID Code:%04X  Rolling:%0X Temp : %f Humidity : %f Channel : %d ", s->getSensorName().c_str(), s->getSensType(), s->getSensID(), s->getTemperature(), s->getHumidity(), s->getChannel());
-              }
-              if (s->available(Sensor::haveOnOff))
-              {
-                SendSwitch(s->getSensID() , s->getChannel() , 0xff , s->getOnOff()!=0 , 0  ,  "HomeEasy");
-                _log.Log(LOG_TRACE, "RCOOK %s ID Code:%04X  Rolling:%08X OnOff : %d Unit : %d ", s->getSensorName().c_str(), s->getSensType(), s->getSensID(), s->getOnOff(), s->getChannel());
-              }
-              if (s->available(Sensor::havePower))
-              {
-                SendKwhMeter(s->getSensType(), s->getChannel(), 0xff, s->getPower(), s->getTotalPower()/1000.0/ 223.666, "POWER");
-                  _log.Log(LOG_TRACE, "RCOOK %s Code:%04X  Power : %d Total : %d ", s->getSensorName().c_str(), s->getSensType(),  s->getPower(), s->getTotalPower() );
-              }
-              //delete old value
-              if (sensor != 0) delete sensor;
-            }
-            else
-              delete s;
-          }
-          else
-          {
-            delete s;
-            _log.Log(LOG_TRACE, "RCOOK Sensor Id :%04X checksum error", s->getSensType());
-          }
-        }
-        else
-          _log.Log(LOG_TRACE, "RCOOK Sensor unknown" );
-      }
+					//if sensor value as changed
+					if ((sensor == 0) || (*sensor != *s))
+					{
+						//update current sensor value
+						Sensors[s->getSensID()] = s;
+						if (s->available(Sensor::haveTemperature))
+						{
+							SendTempHumSensor(s->getSensID(), !s->isBatteryLow(), (float)s->getTemperature(), (int)s->getHumidity(), "Home TempHum", sTypeTH1);
+							_log.Log(LOG_TRACE, "RCOOK %s ID Code:%04X  Rolling:%0X Temp : %f Humidity : %f Channel : %d ", s->getSensorName().c_str(), s->getSensType(), s->getSensID(), s->getTemperature(), s->getHumidity(), s->getChannel());
+						}
+						if (s->available(Sensor::haveOnOff))
+						{
+							SendSwitch(s->getSensID(), s->getChannel(), 0xff, s->getOnOff() != 0, 0, "HomeEasy");
+							_log.Log(LOG_TRACE, "RCOOK %s ID Code:%04X  Rolling:%08X OnOff : %d Unit : %d ", s->getSensorName().c_str(), s->getSensType(), s->getSensID(), s->getOnOff(), s->getChannel());
+						}
+						if (s->available(Sensor::havePower))
+						{
+							SendKwhMeter(s->getSensType(), s->getChannel(), 0xff, s->getPower(), s->getTotalPower() / 1000.0 / 223.666, "POWER");
+							_log.Log(LOG_TRACE, "RCOOK %s Code:%04X  Power : %d Total : %d ", s->getSensorName().c_str(), s->getSensType(), s->getPower(), s->getTotalPower());
+						}
+						//delete old value
+						if (sensor != 0) delete sensor;
+					}
+					else
+						delete s;
+				}
+				else
+				{
+					delete s;
+					_log.Log(LOG_TRACE, "RCOOK Sensor Id :%04X checksum error", s->getSensType());
+				}
+			}
+			else
+				_log.Log(LOG_TRACE, "RCOOK Sensor unknown");
+		}
 #endif
 
 
@@ -475,5 +458,75 @@ else		// Parent, wait
 	wait(NULL);
 }
 
+void HomeEasy::handleInterrupt() {
+
+	static unsigned int duration;
+	static unsigned long lastTime;
+
+	long time = micros();
+	duration = time - lastTime;
+	lastTime = time;
+	word p = (unsigned short int) duration;
+
+	byte pinData = digitalRead(HomeEasy::RXPIN);
+	if (p != 0) {
+		if (pinData == 0)
+			Record.put(-p);
+		else
+			Record.put(p);
+	}
+
+	/*low to high transition : low duration*/
+	if (pinData == 0)
+		p += 100;
+	else
+		p -= 100;
+
+	//pinData : input signal value before interrupt
+	//  if (pinData == 0) pinData = 1; else pinData=0;
+	// Avoid re-entry
+	{		// avoid reentrance -- wait until data is read
+		if (orscV2.nextPulse(p))
+		{
+
+			orscV2.sprint(OregonSensorV2::_sensorId, OokReceivedCode);
+			Fifo.Put(RECORD_ZIZE, (byte*)OokReceivedCode);
+
+			/*				  byte len;
+			const byte * data = orscV2.getData(len);
+			printf("%x %d \n", data[0],len);
+
+			Fifo.Put(len, (byte*)data );
+			*/
+			orscV2.resetDecoder();
+		}
+		if (HEasy.nextPulse(p, pinData))
+		{
+			orscV2.sprint(OregonSensorV2::_sensorId, HEasy.getData(), HEasy.getBytes(), OokReceivedCode);
+
+			//			DumpHex((byte*)HEasy.getData(), HEasy.getBytes(), RCSwitch::OokReceivedCode);
+			Fifo.Put(RECORD_ZIZE, (byte*)OokReceivedCode);
+
+			HEasy.resetDecoder();
+		}
+
+		if (Otio.nextPulse(p, pinData))
+		{
+			orscV2.sprint(OregonSensorV2::_sensorId, Otio.getData(), Otio.getBytes(), OokReceivedCode);
+			Fifo.Put(RECORD_ZIZE, (byte*)OokReceivedCode);
+			Otio.resetDecoder();
+		}
+
+		/*    if (hager.nextPulse(p))
+		{
+		int nb = buildHagerDataMessage(Data ) ;
+		orscV2.sprint(OregonSensorV2::_sensorId, Data, nb, RCSwitch::OokReceivedCode);
+		Fifo.Put(RECORD_ZIZE, (byte*)RCSwitch::OokReceivedCode);
+		hager.resetDecoder();
+		}
+		*/
+
+	}
+}
 #endif
 

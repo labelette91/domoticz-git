@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-#define  WITH_GPIO
+//#define  WITH_GPIO
 
 #include "HomeEasy.h"
 #include <stdio.h>
@@ -20,6 +20,8 @@
 #include "RcOok.h"
 #include "Sensor.h"
 
+#include "DecodeOTIO.h"
+#include "HagerDecoder.h"
 
 #endif
 #include "SPI.h"
@@ -33,11 +35,8 @@
 
 #include "RcOok.h"
 #include "DecodeHomeEasy.h"
-#include "DecodeOTIO.h"
-#include "Sensor.h"
 
 #include "Print.h"
-#include "HagerDecoder.h"
 #include "Record.h"
 
 
@@ -52,6 +51,7 @@ int HomeEasy::RXPIN;
 
 char OokReceivedCode[128];
 
+#ifdef WITH_GPIO
 
 OregonDecoderV2 orscV2;
 
@@ -60,6 +60,8 @@ DecodeHomeEasy HEasy(1);
 DecodeOTIO     Otio(5);
 
 HagerDecoder   hager;
+
+#endif
 
 #include "fifo.cpp"
 

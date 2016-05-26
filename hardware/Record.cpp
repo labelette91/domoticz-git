@@ -93,7 +93,7 @@ int TRecord::get()
 }
 */
 
-std::string TRecord::ToString()
+std::string TRecord::ToString(int div )
 {
 	int p = 0;
 	int n;
@@ -109,9 +109,9 @@ std::string TRecord::ToString()
 		p = Pulse[RdIndex];
 		Increment(RdIndex);
 
-		int  b = p / 100;
+		int  b = p / div;
 
-		nbcar += sprintf_s(&Mes[nbcar],128,"%d ",b);
+		nbcar += sprintf(&Mes[nbcar],"%d ",b);
 		n++;
 		if (n >= 64)
 		{

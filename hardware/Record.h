@@ -10,7 +10,7 @@ class TRecord {
 public:
 void init () ;
 void put(int p);
-std::string ToString() ;
+std::string ToString(int div) ;
 int get();
 bool empty();	
 TRecord();

@@ -8,6 +8,8 @@
 #include <fcntl.h>
 #include <stdlib.h>
 
+#include "Print.h"
+
 #ifdef WITH_GPIO
 
 #include <unistd.h>
@@ -36,7 +38,6 @@
 #include "RcOok.h"
 #include "DecodeHomeEasy.h"
 
-#include "Print.h"
 #include "Record.h"
 
 

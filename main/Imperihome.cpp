@@ -184,7 +184,6 @@ void ImperiHome::ManageHisto (std::string &device , std::string &value	 , std::s
 		DateEndSec	= atol(to.c_str());
 
 //	Histo(rep_content, to )	;
-
 //	getGraphic(ID , "TEMPERATURE" , "Temperature" , "value" , DateStartSec ,  DateEndSec, rep_content );
 	//if power graphics 
 	if (value=="Watts")
@@ -1536,6 +1535,9 @@ void getGraphic(std::string &idx , std::string TableName , std::string FieldName
 	TSqlQueryResult result;
 	char DateStartStr[40];
 	char DateEndStr[40];
+	int dType = 0;
+	int dSubType = 0;
+
 	
  AsciiTime ( DateStart, DateStartStr );
  AsciiTime ( DateEnd ,  DateEndStr );
@@ -1544,12 +1546,30 @@ rep_content = "";
 rep_content += "{";
 rep_content += "  \"values\": [";
 
+
+result = m_sql.Query("SELECT Type,SubType  FROM DeviceStatus where (ID==%s)", idx.c_str());
+if (result.size()>0)
+{
+	TSqlRowQuery * row = &result[0];
+	dType = atoi((*row)[0].c_str());
+	dSubType = atoi((*row)[1].c_str());
+}
+
+
+
 result=m_sql.Query ( "SELECT %s , Date FROM %s WHERE (DeviceRowID==%s AND Date>='%s' AND Date<='%s' ) ORDER BY Date ASC" ,FieldName.c_str(), TableName.c_str(),idx.c_str(),DateStartStr,DateEndStr);
 for (unsigned int i=0;i<result.size();i++)
 {
 	TSqlRowQuery * sd = &result[i] ;
 	time_t timeSec = DateAsciiToTime_t((*sd)[1]);
-	double tvalue = ConvertTemperature(atof((*sd)[0].c_str()), m_sql.m_tempsign[0]);
+	double tvalue = atof((*sd)[0].c_str());
+
+	if ((dType == pTypeGeneral) && (dSubType == sTypeKwh))
+		tvalue /= 10.0f;
+	else
+		tvalue = ConvertTemperature(tvalue, m_sql.m_tempsign[0]);
+
+
 	char tv[14];
 	sprintf (tv ,"%3.1f", tvalue); 
 	if (i>0)

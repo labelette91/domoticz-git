@@ -11426,6 +11426,7 @@ namespace http {
 #endif
 				else if (Key == "MyDomoticzSubsystems") {
 					root["MyDomoticzSubsystems"] = nValue;
+				}
 				else {
 					root[Key]=sValue;
 				}

@@ -285,7 +285,7 @@ FastWriter::writeValue( const Value &value )
 
 StyledWriter::StyledWriter()
    : rightMargin_( 74 )
-   , indentSize_( 3 )
+   , indentSize_( 0 )
    , addChildValues_()
 {
 }

@@ -2263,7 +2263,7 @@ define(['app'], function (app) {
 						}
 					}
 					else if (item.SwitchType == "TPI") {
-						var RO=(item.Unit>100)?true:false;
+						var RO=(item.Unit>0)?true:false;
 						isdimmer=true;
 						if (
 								(item.Status == 'On')
@@ -2809,7 +2809,7 @@ define(['app'], function (app) {
 									 }
 							}
 							else if (item.SwitchType == "TPI") {
-									var RO=(item.Unit>100)?true:false;
+									var RO=(item.Unit>0)?true:false;
 									bIsDimmer=true;
 									if (item.Status == 'On')
 									{
@@ -2894,7 +2894,7 @@ define(['app'], function (app) {
 					}
 					else if (item.SwitchType == "TPI") {
 						xhtm+='<br><br><div style="margin-left:60px;" class="dimslider" id="slider" data-idx="' + item.idx + '" data-type="relay" data-maxlevel="' + item.MaxDimLevel + '" data-isprotected="' + item.Protected + '" data-svalue="' + item.LevelInt + '"';
-						if(item.Unit>100)
+						if(item.Unit>0)
 							xhtm+=' data-disabled="true"';
 						xhtm+='></div>';
 					}

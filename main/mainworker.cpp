@@ -5904,7 +5904,14 @@ void MainWorker::decode_evohome2(const int HwdID, const _eHardwareTypes HwdType,
 
 	//Get Device details
 	std::vector<std::vector<std::string> > result;
-	if(pEvo->EVOHOME2.zone)//if unit number is available the id3 will be the controller device id
+	if (pEvo->EVOHOME2.type == pTypeEvohomeZone && pEvo->EVOHOME2.zone > 12) //Allow for additional Zone Temp devices which require DeviceID
+	{
+		result = m_sql.safe_query(
+			"SELECT HardwareID, DeviceID,Unit,Type,SubType,sValue,BatteryLevel "
+			"FROM DeviceStatus WHERE (HardwareID==%d) AND (DeviceID == '%x') AND (Type==%d)",
+			HwdID, (int)RFX_GETID3(pEvo->EVOHOME2.id1, pEvo->EVOHOME2.id2, pEvo->EVOHOME2.id3), (int)pEvo->EVOHOME2.type);
+	}
+	else if (pEvo->EVOHOME2.zone)//if unit number is available the id3 will be the controller device id
 	{
 		result = m_sql.safe_query(
 			"SELECT HardwareID, DeviceID,Unit,Type,SubType,sValue,BatteryLevel "
@@ -5915,14 +5922,15 @@ void MainWorker::decode_evohome2(const int HwdID, const _eHardwareTypes HwdType,
 	{
 		result = m_sql.safe_query(
 			"SELECT HardwareID, DeviceID,Unit,Type,SubType,sValue,BatteryLevel "
-			"FROM DeviceStatus WHERE (HardwareID==%d) AND (DeviceID == '%x')",
-			HwdID, (int)RFX_GETID3(pEvo->EVOHOME2.id1,pEvo->EVOHOME2.id2,pEvo->EVOHOME2.id3));
+			"FROM DeviceStatus WHERE (HardwareID==%d) AND (DeviceID == '%x') AND (Type==%d)",
+			HwdID, (int)RFX_GETID3(pEvo->EVOHOME2.id1,pEvo->EVOHOME2.id2,pEvo->EVOHOME2.id3), (int)pEvo->EVOHOME2.type);
 	}
 	if (result.size()<1 && !pEvo->EVOHOME2.zone)
 		return;
 
 	bool bNewDev=false;
 	std::string name,szDevID;
+	std::stringstream szID;
 	unsigned char Unit;
 	unsigned char dType;
 	unsigned char dSubType;
@@ -5944,11 +5952,16 @@ void MainWorker::decode_evohome2(const int HwdID, const _eHardwareTypes HwdType,
 		dType=pEvo->EVOHOME2.type;
 		dSubType=pEvo->EVOHOME2.subtype;
 
+		szID << std::hex << (int)RFX_GETID3(pEvo->EVOHOME2.id1, pEvo->EVOHOME2.id2, pEvo->EVOHOME2.id3);
+		szDevID = szID.str();
+
 		CEvohome *pEvoHW = reinterpret_cast<CEvohome*>(GetHardware(HwdID));
 		if(!pEvoHW)
 			return;
 		if(dType==pTypeEvohomeWater)
 			name="Hot Water";
+		else if (dType == pTypeEvohomeZone && !szDevID.empty())
+			name = "Zone Temp";
 		else
 			name=pEvoHW->GetZoneName(Unit-1);
 		if(name.empty())
@@ -6003,7 +6016,7 @@ void MainWorker::decode_evohome2(const int HwdID, const _eHardwareTypes HwdType,
 			else
 				strarray[0]=szTmp;
 			szUpdateStat=boost::algorithm::join(strarray, ";");
-		}
+		}		
 	}
 	unsigned long long DevRowIdx=m_sql.UpdateValue(HwdID, szDevID.c_str(),Unit,dType,dSubType,SignalLevel,BatteryLevel,cmnd,szUpdateStat.c_str(), procResult.DeviceName);
 	if (DevRowIdx == -1)
@@ -6111,10 +6124,10 @@ void MainWorker::decode_evohome3(const int HwdID, const _eHardwareTypes HwdType,
 	szID << std::hex << nDevID;
 	std::string ID(szID.str());
 	unsigned char Unit=pEvo->EVOHOME3.devno;
-	unsigned char cmnd=(pEvo->EVOHOME3.demand==200)?light1_sOn:light1_sOff;
+	unsigned char cmnd=(pEvo->EVOHOME3.demand>0)?light1_sOn:light1_sOff;
 	sprintf(szTmp, "%d", pEvo->EVOHOME3.demand);
 	std::string szDemand(szTmp);
-
+	
 	if(Unit==0xFF && nDevID==0)
 		return;
 	//Get Device details (devno or devid not available)
@@ -6128,8 +6141,8 @@ void MainWorker::decode_evohome3(const int HwdID, const _eHardwareTypes HwdType,
 	else
 		result = m_sql.safe_query(
 			"SELECT HardwareID,DeviceID,Unit,Type,SubType,nValue,sValue "
-			"FROM DeviceStatus WHERE (HardwareID==%d) AND (Unit == '%d') AND (Type==%d)",
-			HwdID, (int) Unit, (int) pEvo->EVOHOME3.type);
+			"FROM DeviceStatus WHERE (HardwareID==%d) AND (Unit == '%d') AND (Type==%d) AND (DeviceID == '%q')",
+			HwdID, (int) Unit, (int) pEvo->EVOHOME3.type, ID.c_str());
 	if (result.size()>0)
 	{
 		if(pEvo->EVOHOME3.demand==0xFF)//we sometimes get a 0418 message after the initial device creation but it will mess up the logging as we don't have a demand
@@ -6145,19 +6158,11 @@ void MainWorker::decode_evohome3(const int HwdID, const _eHardwareTypes HwdType,
 		else if(nDevID==0)
 		{
 			ID=result[0][1];
-			cmnd=cur_cmnd;
-			if(szDemand==result[0][6])
-				return;
-		}
-		else //we have all info (calls from frontend/API)
-		{
-			if(cmnd==cur_cmnd && szDemand==result[0][6])
-				return;
 		}
 	}
 	else
 	{
-		if(Unit==0xFF || nDevID==0)
+		if(Unit==0xFF || (nDevID==0 && Unit > 12))
 			return;
 		bNewDev=true;
 		if(pEvo->EVOHOME3.demand==0xFF)//0418 allows us to associate unit and deviceid but no state information other messages only contain one or the other
@@ -6171,7 +6176,7 @@ void MainWorker::decode_evohome3(const int HwdID, const _eHardwareTypes HwdType,
 	if (DevRowIdx == -1)
 		return;
 
-	if(bNewDev && (Unit==0xF9 || Unit==0xFA || Unit==0xFC))
+	if(bNewDev && (Unit==0xF9 || Unit==0xFA || Unit==0xFC || Unit <=12))
 	{
 		if(Unit==0xF9)
 			procResult.DeviceName = "CH Valve";
@@ -6179,6 +6184,8 @@ void MainWorker::decode_evohome3(const int HwdID, const _eHardwareTypes HwdType,
 			procResult.DeviceName = "DHW Valve";
 		else if(Unit==0xFC)
 			procResult.DeviceName = "Boiler";
+		else if (Unit <= 12)
+			procResult.DeviceName = "Zone";
 		std::vector<std::vector<std::string> > result;
 		result = m_sql.safe_query(
 			"UPDATE DeviceStatus SET Name='%q' WHERE (ID == %llu)",

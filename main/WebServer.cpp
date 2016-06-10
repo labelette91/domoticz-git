@@ -11424,11 +11424,10 @@ namespace http {
 					root["MyDomoticzSubsystems"] = nValue;
 				}
 #endif
+				else if (Key == "MyDomoticzSubsystems") {
+					root["MyDomoticzSubsystems"] = nValue;
 				else {
 					root[Key]=sValue;
-#ifdef _DEBUG
-					_log.Log(LOG_ERROR, "Unknown preferences detected: '%s'", Key.c_str());
-#endif
 				}
 			}
 		}

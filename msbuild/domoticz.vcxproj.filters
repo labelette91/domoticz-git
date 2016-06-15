@@ -2442,9 +2442,6 @@
     <ClCompile Include="..\hardware\Record.cpp">
       <Filter>Devices\HomeEasy</Filter>
     </ClCompile>
-    <ClCompile Include="..\hardware\RCSwitch.cpp">
-      <Filter>Devices\HomeEasy</Filter>
-    </ClCompile>
     <ClCompile Include="..\hardware\RcOok.cpp">
       <Filter>Devices\HomeEasy</Filter>
     </ClCompile>

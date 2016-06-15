@@ -681,7 +681,6 @@
     <ClCompile Include="..\hardware\RAVEn.cpp" />
     <ClCompile Include="..\hardware\Razberry.cpp" />
     <ClCompile Include="..\hardware\RcOok.cpp" />
-    <ClCompile Include="..\hardware\RCSwitch.cpp" />
     <ClCompile Include="..\hardware\Record.cpp" />
     <ClCompile Include="..\hardware\RFLinkBase.cpp" />
     <ClCompile Include="..\hardware\RFLinkSerial.cpp" />

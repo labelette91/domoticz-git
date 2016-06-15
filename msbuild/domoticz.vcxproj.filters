@@ -414,6 +414,9 @@
     <Filter Include="Devices\Raven">
       <UniqueIdentifier>{0854a79e-fd9c-4b55-a9fd-93077f3bad23}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Devices\Denkovi">
+      <UniqueIdentifier>{fbed8d30-c2ae-4545-a422-68ebe2c781c3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\CMakeLists.txt">
@@ -1861,6 +1864,9 @@
     <ClInclude Include="..\hardware\S0MeterTCP.h">
       <Filter>Devices\S0 Meter</Filter>
     </ClInclude>
+    <ClInclude Include="..\hardware\DenkoviSmartdenLan.h">
+      <Filter>Devices\Denkovi</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\webserver\Base64.cpp">
@@ -2444,6 +2450,9 @@
     </ClCompile>
     <ClCompile Include="..\hardware\RcOok.cpp">
       <Filter>Devices\HomeEasy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\DenkoviSmartdenLan.cpp">
+      <Filter>Devices\Denkovi</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

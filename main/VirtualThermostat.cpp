@@ -146,11 +146,17 @@ try
 
 		if (SwitchIdx<=0){
  				_log.Log(LOG_ERROR,"No Switch device associted to Thermostat  name =%s", ThermostatSwitchName);
-		  continue;
+		}
+		else if (ThermostatTemperatureSet == 0)
+		{
+			if ((Minute % 10) == 0 )
+				if (_log.isTraceEnable())
+					_log.Log(LOG_TRACE, "THER: Mn:%02d  Therm:%-10s(%2s) SetPoint:%4.1f POWER OFF LightId(%2ld):%d ", Minute, ThermostatSwitchName, idxThermostat, ThermostatTemperatureSet, SwitchIdx, SwitchValue);
+
 		}
 		//retrieve corresponding Temperature device name    
 		//the temperture corresponding device is stored in LightSubDevice table
-		if ( atoi(TemperatureId.c_str()) > 0  )
+		else if ( atoi(TemperatureId.c_str()) > 0  )
 		{
 			//get current room temperature  
 			if ( m_sql.GetLastValue( TemperatureId.c_str(), nValue, sValue,  LastUpdateTime) )
@@ -343,6 +349,10 @@ bool VirtualThermostat::SetMode ( const std::string &idx,VirtualThermostatMode m
 		m_mainworker.SetSetPoint(idx, (float)m_VirtualThermostat.GetConfortTemp(idx.c_str()));
   else   if (mode==Eco)
 	  m_mainworker.SetSetPoint(idx, (float)m_VirtualThermostat.GetEcoTemp(idx.c_str()));
+  else   if (mode == FrostProtection)
+	  m_mainworker.SetSetPoint(idx, m_sql.ConvertTemperatureUnit((float)TEMPERATURE_HG));
+  else   if (mode == Off)
+	  m_mainworker.SetSetPoint(idx, m_sql.ConvertTemperatureUnit((float)TEMPERATURE_OFF));
   return true;
 }
 bool VirtualThermostat::SetMode ( const std::string &idx,const char * strMode )

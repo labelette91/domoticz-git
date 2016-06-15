@@ -4089,11 +4089,8 @@ void CSQLHelper::UpdateRainLog()
 			if (splitresults.size()<2)
 				continue; //impossible
 
-			float total=0;
-			int rate=0;
-
-			rate=atoi(splitresults[0].c_str());
-			total = static_cast<float>(atof(splitresults[1].c_str()));
+			int rate=atoi(splitresults[0].c_str());
+			float total = static_cast<float>(atof(splitresults[1].c_str()));
 
 			//insert record
 			safe_query(
@@ -4201,7 +4198,10 @@ void CSQLHelper::UpdateUVLog()
 	GetPreferencesVar("SensorTimeout", SensorTimeOut);
 
 	std::vector<std::vector<std::string> > result;
-	result=safe_query("SELECT ID,Type,SubType,nValue,sValue,LastUpdate FROM DeviceStatus WHERE (Type=%d)", pTypeUV);
+	result=safe_query("SELECT ID,Type,SubType,nValue,sValue,LastUpdate FROM DeviceStatus WHERE (Type=%d) OR (Type=%d AND SubType=%d)", 
+		pTypeUV,
+		pTypeGeneral, sTypeUV
+	);
 	if (result.size()>0)
 	{
 		std::vector<std::vector<std::string> >::const_iterator itt;
@@ -4241,7 +4241,7 @@ void CSQLHelper::UpdateUVLog()
 			//insert record
 			safe_query(
 				"INSERT INTO UV (DeviceRowID, Level) "
-				"VALUES ('%llu', '%.1f')",
+				"VALUES ('%llu', '%g')",
 				ID,
 				level
 				);
@@ -5460,7 +5460,7 @@ void CSQLHelper::AddCalendarUpdateUV()
 			//insert into calendar table
 			result=safe_query(
 				"INSERT INTO UV_Calendar (DeviceRowID, Level, Date) "
-				"VALUES ('%llu', '%.2f', '%q')",
+				"VALUES ('%llu', '%g', '%q')",
 				ID,
 				level,
 				szDateStart

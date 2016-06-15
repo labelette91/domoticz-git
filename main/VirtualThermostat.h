@@ -7,6 +7,11 @@ typedef std::map<int,  float  > T_Map_LastRoomTemp ;
 //duratoiopn of integration window in min
 #define INTEGRAL_DURATION 10
 
+// hors gel temperature celcius
+#define TEMPERATURE_HG   8
+// of temperature celcius
+#define TEMPERATURE_OFF  0
+
 enum VirtualThermostatMode {
 	Eco=0,
 	Confor,

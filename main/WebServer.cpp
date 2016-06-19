@@ -10681,6 +10681,22 @@ namespace http {
 			//now delete the NEW device
 			m_sql.DeleteDevices(newidx);
 
+			std::vector<std::string> sd = result[0];
+
+			result = m_sql.safe_query(
+				"UPDATE DeviceStatus SET  DeviceID='%s' , nValue=%s , sValue='%s' WHERE (ID == %q) ",
+				sd[1].c_str(), sd[8].c_str(), sd[9].c_str(), sidx.c_str());
+
+
+/* old
+szQuery << "UPDATE DeviceStatus SET "
+				"HardwareID=" << sd[0] << ", DeviceID='" << sd[1] << "', Unit=" << sd[2] <<
+				 ", Type=" << sd[4] << ", SubType=" << sd[5] <<
+				", SignalLevel=" << sd[6] << ", BatteryLevel=" << sd[7] <<
+				", nValue=" << sd[8] << ", sValue='" << sd[9] << "' WHERE (ID == " << sidx << ")";
+			m_sql.query(szQuery.str());
+*/
+
 			m_mainworker.m_scheduler.ReloadSchedules();
 		}
 

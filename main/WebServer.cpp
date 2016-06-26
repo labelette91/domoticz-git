@@ -19,6 +19,7 @@
 #include "../hardware/EnOceanESP3.h"
 #include "../hardware/Wunderground.h"
 #include "../hardware/ForecastIO.h"
+#include "../hardware/AccuWeather.h"
 #include "../hardware/Kodi.h"
 #include "../hardware/LogitechMediaServer.h"
 #include "../hardware/MySensorsBase.h"
@@ -1082,6 +1083,7 @@ namespace http {
 			else if (
 				(htype == HTYPE_Wunderground) ||
 				(htype == HTYPE_ForecastIO) ||
+				(htype == HTYPE_AccuWeather) ||
 				(htype == HTYPE_ICYTHERMOSTAT) ||
 				(htype == HTYPE_TOONTHERMOSTAT) ||
 				(htype == HTYPE_AtagOne) ||
@@ -1340,6 +1342,7 @@ namespace http {
 			else if (
 				(htype == HTYPE_Wunderground) ||
 				(htype == HTYPE_ForecastIO) ||
+				(htype == HTYPE_AccuWeather) ||
 				(htype == HTYPE_ICYTHERMOSTAT) ||
 				(htype == HTYPE_TOONTHERMOSTAT) ||
 				(htype == HTYPE_AtagOne) ||
@@ -7505,6 +7508,15 @@ namespace http {
 								root["result"][ii]["forecast_url"] = base64_encode((const unsigned char*)forecast_url.c_str(), forecast_url.size());
 							}
 						}
+						else if (pHardware->HwdType == HTYPE_AccuWeather)
+						{
+							CAccuWeather *pWHardware = reinterpret_cast<CAccuWeather*>(pHardware);
+							std::string forecast_url = pWHardware->GetForecastURL();
+							if (forecast_url != "")
+							{
+								root["result"][ii]["forecast_url"] = base64_encode((const unsigned char*)forecast_url.c_str(), forecast_url.size());
+							}
+						}
 					}
 
 					sprintf(szData, "%04X", (unsigned int)atoi(sd[1].c_str()));
@@ -7935,10 +7947,14 @@ namespace http {
 							}
 							if (dType == pTypeEvohomeZone)
 							{
-								if (strarray.size()>=4)
-									sprintf(szData,"%.1f %c, (%.1f %c), %s until %s", temp,tempsign,tempSetPoint,tempsign,strstatus.c_str(),strarray[3].c_str());
+								if (tempCelcius == 325.1)
+									sprintf(szTmp, "Off");
 								else
-									sprintf(szData,"%.1f %c, (%.1f %c), %s", temp,tempsign,tempSetPoint,tempsign,strstatus.c_str());
+									sprintf(szTmp, "%.1f %c", tempSetPoint, tempsign);
+								if (strarray.size()>=4)
+									sprintf(szData,"%.1f %c, (%s), %s until %s", temp,tempsign,szTmp,strstatus.c_str(),strarray[3].c_str());
+								else
+									sprintf(szData,"%.1f %c, (%s), %s", temp,tempsign,szTmp,strstatus.c_str());
 							}
 							else
 								if (strarray.size()>=4)

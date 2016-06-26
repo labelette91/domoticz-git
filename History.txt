@@ -1,4 +1,5 @@
 Version 3.xxxx (June xx 2016)
+- Implemented: AccuWeather support
 - Implemented: Atag One Thermostat support
 - Implemented: Blockly/Lua Camera device, to send camera snapshots with subject after xx seconds
 - Implemented: Blockly upgraded to latest version (fixed and cleaned some code as well), this fixes problem with long sensor lists
@@ -19,6 +20,7 @@ Version 3.xxxx (June xx 2016)
 - Changed: EventSystem, weather/rain value is now the rain-rate
 - Changed: OpenZWave, Better support for Thermostat Modes
 - Changed: Stable ID generation for Philips Hue scenes (you need to delete all scenes and restart the hue hardware or domoticz)
+- Changed: TE923, Rain counter devided by 2
 - Changed: Wind Direction graph (now does not display directions when speed was equal to zero)
 - Fixed: Better handling of white listed commands/urls
 - Fixed: Database backup is now only possible for admin users
@@ -30,6 +32,7 @@ Version 3.xxxx (June xx 2016)
 - Fixed: Manual Light/Switch, when created, Add it to the EventSystem
 - Fixed: Wind Speed/Gust graph, Plotbands
 - Fixed: Added grid lines to percentage/lux/general graphs
+- Updated: SQLite3 v3.13.0
 
 Version 3.4834 (March 2nd 2016)
 - Implemented: Blockly, now possible to use expressions in notifications/email/SMS like "My temperature is {{temperaturedevice[1234]}} degrees" (see http://www.domoticz.com/wiki/Events)

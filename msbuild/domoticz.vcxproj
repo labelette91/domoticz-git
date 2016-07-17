@@ -726,7 +726,6 @@
     <ClCompile Include="..\hardware\DomoticzInternal.cpp" />
     <ClCompile Include="..\hardware\DomoticzTCP.cpp" />
     <ClCompile Include="..\main\EventSystem.cpp" />
-    <ClCompile Include="..\main\HttpPush.cpp" />
     <ClCompile Include="..\main\Imperihome.cpp" />
     <ClCompile Include="..\main\localtime_r.cpp" />
     <ClCompile Include="..\hardware\P1MeterBase.cpp" />

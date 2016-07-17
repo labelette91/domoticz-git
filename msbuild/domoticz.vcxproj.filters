@@ -5,10 +5,6 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
     <Filter Include="crosscompile">
       <UniqueIdentifier>{52d21c18-6d21-4d97-9a96-e7a3f33b1dd5}</UniqueIdentifier>
     </Filter>
@@ -428,6 +424,10 @@
     </Filter>
     <Filter Include="Pushers\FibaroLink">
       <UniqueIdentifier>{b108db7e-5f5a-44df-8dfd-bea4d48f48b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HTTPClient\Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -1358,52 +1358,52 @@
       <Filter>Webserver</Filter>
     </ClInclude>
     <ClInclude Include="..\main\appversion.h">
-      <Filter>Header Files</Filter>
+      <Filter>HTTPClient\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\main\CmdLine.h">
-      <Filter>Header Files</Filter>
+      <Filter>HTTPClient\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\main\Helper.h">
-      <Filter>Header Files</Filter>
+      <Filter>HTTPClient\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\main\localtime_r.h">
-      <Filter>Header Files</Filter>
+      <Filter>HTTPClient\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\main\mainworker.h">
-      <Filter>Header Files</Filter>
+      <Filter>HTTPClient\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
+      <Filter>HTTPClient\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\main\RFXNames.h">
-      <Filter>Header Files</Filter>
+      <Filter>HTTPClient\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\main\RFXtrx.h">
-      <Filter>Header Files</Filter>
+      <Filter>HTTPClient\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\main\Scheduler.h">
-      <Filter>Header Files</Filter>
+      <Filter>HTTPClient\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\main\SQLHelper.h">
-      <Filter>Header Files</Filter>
+      <Filter>HTTPClient\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\main\stdafx.h">
-      <Filter>Header Files</Filter>
+      <Filter>HTTPClient\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\main\SunRiseSet.h">
-      <Filter>Header Files</Filter>
+      <Filter>HTTPClient\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\main\targetver.h">
-      <Filter>Header Files</Filter>
+      <Filter>HTTPClient\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\main\WebServer.h">
-      <Filter>Header Files</Filter>
+      <Filter>HTTPClient\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WindowsHelper.h">
       <Filter>Windows</Filter>
     </ClInclude>
     <ClInclude Include="..\main\Logger.h">
-      <Filter>Header Files</Filter>
+      <Filter>HTTPClient\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\main\Camera.h">
       <Filter>Camera</Filter>
@@ -1418,7 +1418,7 @@
       <Filter>Devices\TE923</Filter>
     </ClInclude>
     <ClInclude Include="..\main\WindCalculation.h">
-      <Filter>Header Files</Filter>
+      <Filter>HTTPClient\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\hardware\Rego6XXSerial.h">
       <Filter>Devices\Rego6XX</Filter>
@@ -1448,7 +1448,7 @@
       <Filter>Devices\wunderground.com</Filter>
     </ClInclude>
     <ClInclude Include="..\main\mainstructs.h">
-      <Filter>Header Files</Filter>
+      <Filter>HTTPClient\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\hardware\Dummy.h">
       <Filter>Devices\Dummy</Filter>
@@ -1499,7 +1499,7 @@
       <Filter>Devices\1-Wire</Filter>
     </ClInclude>
     <ClInclude Include="Version.h">
-      <Filter>Header Files</Filter>
+      <Filter>HTTPClient\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\main\GZipHelper.h">
       <Filter>zlib</Filter>
@@ -1796,7 +1796,7 @@
       <Filter>Devices\Nest</Filter>
     </ClInclude>
     <ClInclude Include="..\main\concurrent_queue.h">
-      <Filter>Header Files</Filter>
+      <Filter>HTTPClient\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\hardware\Netatmo.h">
       <Filter>Devices\Netatmo</Filter>
@@ -1856,7 +1856,7 @@
       <Filter>Devices\Comm5 MA-5XXX</Filter>
     </ClInclude>
     <ClInclude Include="..\main\LuaHandler.h">
-      <Filter>Header Files</Filter>
+      <Filter>HTTPClient\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\hardware\HttpPoller.h">
       <Filter>Devices\HttpPoller</Filter>

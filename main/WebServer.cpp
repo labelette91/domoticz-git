@@ -20,6 +20,7 @@
 #include "../hardware/Wunderground.h"
 #include "../hardware/ForecastIO.h"
 #include "../hardware/AccuWeather.h"
+#include "../hardware/OpenWeatherMap.h"
 #include "../hardware/Kodi.h"
 #include "../hardware/LogitechMediaServer.h"
 #include "../hardware/MySensorsBase.h"
@@ -391,6 +392,13 @@ namespace http {
 			RegisterCommandCode("panasonicremovenode", boost::bind(&CWebServer::Cmd_PanasonicRemoveNode, this, _1, _2, _3));
 			RegisterCommandCode("panasonicclearnodes", boost::bind(&CWebServer::Cmd_PanasonicClearNodes, this, _1, _2, _3));
 			RegisterCommandCode("panasonicmediacommand", boost::bind(&CWebServer::Cmd_PanasonicMediaCommand, this, _1, _2, _3));
+
+			RegisterCommandCode("bleboxsetmode", boost::bind(&CWebServer::Cmd_BleBoxSetMode, this, _1, _2, _3));
+			RegisterCommandCode("bleboxgetnodes", boost::bind(&CWebServer::Cmd_BleBoxGetNodes, this, _1, _2, _3));
+			RegisterCommandCode("bleboxaddnode", boost::bind(&CWebServer::Cmd_BleBoxAddNode, this, _1, _2, _3));
+			RegisterCommandCode("bleboxupdatenode", boost::bind(&CWebServer::Cmd_BleBoxUpdateNode, this, _1, _2, _3));
+			RegisterCommandCode("bleboxremovenode", boost::bind(&CWebServer::Cmd_BleBoxRemoveNode, this, _1, _2, _3));
+			RegisterCommandCode("bleboxclearnodes", boost::bind(&CWebServer::Cmd_BleBoxClearNodes, this, _1, _2, _3));
 
 			RegisterCommandCode("lmssetmode", boost::bind(&CWebServer::Cmd_LMSSetMode, this, _1, _2, _3));
 			RegisterCommandCode("lmsgetnodes", boost::bind(&CWebServer::Cmd_LMSGetNodes, this, _1, _2, _3));
@@ -1087,10 +1095,14 @@ namespace http {
 			else if (htype == HTYPE_HTTPPOLLER) {
 				//all fine here!
 			}
+			else if (htype == HTYPE_BleBox) {
+				//all fine here!
+			}
 			else if (
 				(htype == HTYPE_Wunderground) ||
 				(htype == HTYPE_ForecastIO) ||
 				(htype == HTYPE_AccuWeather) ||
+				(htype == HTYPE_OpenWeatherMap) ||
 				(htype == HTYPE_ICYTHERMOSTAT) ||
 				(htype == HTYPE_TOONTHERMOSTAT) ||
 				(htype == HTYPE_AtagOne) ||
@@ -1346,10 +1358,14 @@ namespace http {
 			else if (htype == HTYPE_HTTPPOLLER) {
 				//all fine here!
 			}
+			else if (htype == HTYPE_BleBox) {
+				//All fine here
+			}
 			else if (
 				(htype == HTYPE_Wunderground) ||
 				(htype == HTYPE_ForecastIO) ||
 				(htype == HTYPE_AccuWeather) ||
+				(htype == HTYPE_OpenWeatherMap) ||
 				(htype == HTYPE_ICYTHERMOSTAT) ||
 				(htype == HTYPE_TOONTHERMOSTAT) ||
 				(htype == HTYPE_AtagOne) ||
@@ -7387,7 +7403,6 @@ namespace http {
 								(dType != pTypeEvohomeZone) &&
 								(dType != pTypeEvohomeWater) &&
 								(!((dType == pTypeWIND) && (dSubType == sTypeWIND4))) &&
-								(!((dType == pTypeWIND) && (dSubType == sTypeWINDNoTemp))) &&
 								(!((dType == pTypeUV) && (dSubType == sTypeUV3))) &&
 								(!((dType == pTypeGeneral) && (dSubType == sTypeSystemTemp))) &&
 								(dType != pTypeThermostat1) &&
@@ -7541,6 +7556,15 @@ namespace http {
 						else if (pHardware->HwdType == HTYPE_AccuWeather)
 						{
 							CAccuWeather *pWHardware = reinterpret_cast<CAccuWeather*>(pHardware);
+							std::string forecast_url = pWHardware->GetForecastURL();
+							if (forecast_url != "")
+							{
+								root["result"][ii]["forecast_url"] = base64_encode((const unsigned char*)forecast_url.c_str(), forecast_url.size());
+							}
+						}
+						else if (pHardware->HwdType == HTYPE_OpenWeatherMap)
+						{
+							COpenWeatherMap *pWHardware = reinterpret_cast<COpenWeatherMap*>(pHardware);
 							std::string forecast_url = pWHardware->GetForecastURL();
 							if (forecast_url != "")
 							{

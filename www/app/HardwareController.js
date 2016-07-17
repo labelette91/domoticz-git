@@ -78,6 +78,7 @@ define(['app'], function (app) {
             else if (
 				(text.indexOf("Panasonic") >= 0) ||
 				(text.indexOf("HomeEasy RF") >= 0) || 				
+        (text.indexOf("BleBox") >= 0) ||
 				(text.indexOf("TE923") >= 0) ||
 				(text.indexOf("Volcraft") >= 0) ||
 				(text.indexOf("GPIO") >= 0) ||
@@ -424,7 +425,7 @@ define(['app'], function (app) {
                     }
                 });
             }
-            else if ((text.indexOf("Underground") >= 0)||(text.indexOf("Forecast") >= 0)||(text.indexOf("AccuWeather") >= 0))
+            else if ((text.indexOf("Underground") >= 0) || (text.indexOf("Forecast") >= 0) || (text.indexOf("AccuWeather") >= 0) || (text.indexOf("Open Weather Map") >= 0))
             {
                 var apikey=$("#hardwarecontent #divunderground #apikey").val();
                 if (apikey=="")
@@ -526,9 +527,32 @@ define(['app'], function (app) {
                      }
                 });
             }
+            else if (text.indexOf("Toon") >= 0)  
+            {
+                var username = $("#hardwarecontent #divlogin #username").val();
+                var password = encodeURIComponent($("#hardwarecontent #divlogin #password").val());
+                var agreement = $("#hardwarecontent #divenecotoon #agreement").val();
+                $.ajax({
+                    url: "json.htm?type=command&param=updatehardware&htype=" + hardwaretype +
+                       "&username=" + encodeURIComponent(username) +
+                       "&password=" + encodeURIComponent(password) +
+                       "&name=" + encodeURIComponent(name) +
+                       "&enabled=" + bEnabled +
+                       "&idx=" + idx +
+                       "&datatimeout=" + datatimeout +
+                       "&Mode1=" + agreement,
+                    async: false,
+                    dataType: 'json',
+                    success: function (data) {
+                        RefreshHardwareTable();
+                    },
+                    error: function () {
+                        ShowNotify($.t('Problem updating hardware!'), 2500, true);
+                    }
+                });
+            }
             else if (
 				(text.indexOf("ICY") >= 0) ||
-				(text.indexOf("Toon") >= 0) ||
 				(text.indexOf("Atag") >= 0) ||
 				(text.indexOf("Nest Th") >= 0) ||
 				(text.indexOf("PVOutput") >= 0) ||
@@ -782,10 +806,11 @@ define(['app'], function (app) {
             }
             else if (
 				(text.indexOf("Panasonic") >= 0) ||
+                (text.indexOf("BleBox") >= 0) ||
 				(text.indexOf("TE923") >= 0) ||
 				(text.indexOf("Volcraft") >= 0) ||
 				(text.indexOf("BMP085") >= 0) ||
-        (text.indexOf("HTU21D") >= 0) ||
+                (text.indexOf("HTU21D") >= 0) ||
 				(text.indexOf("Dummy") >= 0) ||
 				(text.indexOf("System Alive") >= 0) ||
 				(text.indexOf("Kodi") >= 0) ||
@@ -1057,7 +1082,7 @@ define(['app'], function (app) {
                      }
                 });
             }
-            else if ((text.indexOf("Underground") >= 0)||(text.indexOf("Forecast") >= 0)||(text.indexOf("AccuWeather") >= 0))
+            else if ((text.indexOf("Underground") >= 0) || (text.indexOf("Forecast") >= 0) || (text.indexOf("AccuWeather") >= 0) || (text.indexOf("Open Weather Map") >= 0))
             {
                 var apikey=$("#hardwarecontent #divunderground #apikey").val();
                 if (apikey=="")
@@ -1204,9 +1229,31 @@ define(['app'], function (app) {
                      }
                 });
             }
+            else if (text.indexOf("Toon") >= 0) 
+	     {
+                var username=$("#hardwarecontent #divlogin #username").val();
+                var password=encodeURIComponent($("#hardwarecontent #divlogin #password").val());
+                var agreement=encodeURIComponent($("#hardwarecontent #divenecotoon #agreement").val());
+                $.ajax({
+                     url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype +
+                     "&username=" + encodeURIComponent(username) +
+                     "&password=" + encodeURIComponent(password) +
+                     "&name=" + encodeURIComponent(name) +
+                     "&enabled=" + bEnabled +
+                     "&datatimeout=" + datatimeout+
+                     "&Mode1=" + agreement,
+                     async: false,
+                     dataType: 'json',
+                     success: function(data) {
+                        RefreshHardwareTable();
+                     },
+                     error: function(){
+                            ShowNotify($.t('Problem adding hardware!'), 2500, true);
+                     }
+                });
+	    }
             else if (
 				(text.indexOf("ICY") >= 0) ||
-				(text.indexOf("Toon") >= 0) ||
 				(text.indexOf("Atag") >= 0) ||
 				(text.indexOf("Nest Th") >= 0) ||
 				(text.indexOf("PVOutput") >= 0) ||
@@ -2597,6 +2644,227 @@ define(['app'], function (app) {
         }
 
         /* End of Panasonic Plugin Code */
+
+        /* Start of BleBox Plugin Code */
+
+        BleBoxAddNode = function () {
+            var name = $("#hardwarecontent #bleboxnodeparamstable #nodename").val();
+            if (name == "") {
+                ShowNotify($.t('Please enter a Name!'), 2500, true);
+                return;
+            }
+            var ip = $("#hardwarecontent #bleboxnodeparamstable #nodeip").val();
+            if (ip == "") {
+                ShowNotify($.t('Please enter a IP Address!'), 2500, true);
+                return;
+            }
+
+            $.ajax({
+                url: "json.htm?type=command&param=bleboxaddnode" +
+                   "&idx=" + $.devIdx +
+                   "&name=" + encodeURIComponent(name) +
+                   "&ip=" + ip,
+                async: false,
+                dataType: 'json',
+                success: function (data) {
+                    RefreshBleBoxNodeTable();
+                },
+                error: function () {
+                    ShowNotify($.t('Problem Adding Node!'), 2500, true);
+                }
+            });
+        }
+
+        BleBoxDeleteNode = function (nodeid) {
+            if ($('#updelclr #nodedelete').attr("class") == "btnstyle3-dis") {
+                return;
+            }
+            bootbox.confirm($.t("Are you sure to remove this Node?"), function (result) {
+                if (result == true) {
+                    $.ajax({
+                        url: "json.htm?type=command&param=bleboxremovenode" +
+                           "&idx=" + $.devIdx +
+                           "&nodeid=" + nodeid,
+                        async: false,
+                        dataType: 'json',
+                        success: function (data) {
+                            RefreshBleBoxNodeTable();
+                        },
+                        error: function () {
+                            ShowNotify($.t('Problem Deleting Node!'), 2500, true);
+                        }
+                    });
+                }
+            });
+        }
+
+        BleBoxClearNodes = function () {
+            bootbox.confirm($.t("Are you sure to delete ALL Nodes?\n\nThis action can not be undone!"), function (result) {
+                if (result == true) {
+                    $.ajax({
+                        url: "json.htm?type=command&param=bleboxclearnodes" +
+                           "&idx=" + $.devIdx,
+                        async: false,
+                        dataType: 'json',
+                        success: function (data) {
+                            RefreshBleBoxNodeTable();
+                        }
+                    });
+                }
+            });
+        }
+
+        BleBoxUpdateNode = function (nodeid) {
+            if ($('#updelclr #nodedelete').attr("class") == "btnstyle3-dis") {
+                return;
+            }
+
+            var name = $("#hardwarecontent #bleboxnodeparamstable #nodename").val();
+            if (name == "") {
+                ShowNotify($.t('Please enter a Name!'), 2500, true);
+                return;
+            }
+            var ip = $("#hardwarecontent #bleboxnodeparamstable #nodeip").val();
+            if (ip == "") {
+                ShowNotify($.t('Please enter a IP Address!'), 2500, true);
+                return;
+            }
+
+            $.ajax({
+                url: "json.htm?type=command&param=bleboxupdatenode" +
+                   "&idx=" + $.devIdx +
+                   "&nodeid=" + nodeid +
+                   "&name=" + encodeURIComponent(name) +
+                   "&ip=" + ip,
+                async: false,
+                dataType: 'json',
+                success: function (data) {
+                    RefreshBleBoxNodeTable();
+                },
+                error: function () {
+                    ShowNotify($.t('Problem Updating Node!'), 2500, true);
+                }
+            });
+        }
+
+        RefreshBleBoxNodeTable = function () {
+            $('#modal').show();
+            $('#updelclr #nodeupdate').attr("class", "btnstyle3-dis");
+            $('#updelclr #nodedelete').attr("class", "btnstyle3-dis");
+            $("#hardwarecontent #bleboxnodeparamstable #nodename").val("");
+            $("#hardwarecontent #bleboxnodeparamstable #nodeip").val("");
+
+            var oTable = $('#bleboxnodestable').dataTable();
+            oTable.fnClearTable();
+
+            $.ajax({
+                url: "json.htm?type=command&param=bleboxgetnodes&idx=" + $.devIdx,
+                async: false,
+                dataType: 'json',
+                success: function (data) {
+                    if (typeof data.result != 'undefined') {
+                        $.each(data.result, function (i, item) {
+                            var addId = oTable.fnAddData({
+                                "DT_RowId": item.idx,
+                                "Name": item.Name,
+                                "IP": item.IP,
+                                "0": item.idx,
+                                "1": item.Name,
+                                "2": item.IP
+                            });
+                        });
+                    }
+                }
+            });
+
+            /* Add a click handler to the rows - this could be used as a callback */
+            $("#bleboxnodestable tbody").off();
+            $("#bleboxnodestable tbody").on('click', 'tr', function () {
+                $('#updelclr #nodedelete').attr("class", "btnstyle3-dis");
+                if ($(this).hasClass('row_selected')) {
+                    $(this).removeClass('row_selected');
+                    $('#updelclr #nodeupdate').attr("class", "btnstyle3-dis");
+                    $("#hardwarecontent #bleboxnodeparamstable #nodename").val("");
+                    $("#hardwarecontent #bleboxnodeparamstable #nodeip").val("");
+                }
+                else {
+                    var oTable = $('#bleboxnodestable').dataTable();
+                    oTable.$('tr.row_selected').removeClass('row_selected');
+                    $(this).addClass('row_selected');
+                    $('#updelclr #nodeupdate').attr("class", "btnstyle3");
+                    var anSelected = fnGetSelected(oTable);
+                    if (anSelected.length !== 0) {
+                        var data = oTable.fnGetData(anSelected[0]);
+                        var idx = data["DT_RowId"];
+                        $("#updelclr #nodeupdate").attr("href", "javascript:BleBoxUpdateNode(" + idx + ")");
+                        $('#updelclr #nodedelete').attr("class", "btnstyle3");
+                        $("#updelclr #nodedelete").attr("href", "javascript:BleBoxDeleteNode(" + idx + ")");
+                        $("#hardwarecontent #bleboxnodeparamstable #nodename").val(data["1"]);
+                        $("#hardwarecontent #bleboxnodeparamstable #nodeip").val(data["2"]);
+                    }
+                }
+            });
+
+            $('#modal').hide();
+        }
+
+        SetBleBoxSettings = function () {
+            var Mode1 = parseInt($("#hardwarecontent #bleboxsettingstable #pollinterval").val());
+            if (Mode1 < 1)
+                Mode1 = 30;
+            var Mode2 = parseInt($("#hardwarecontent #bleboxsettingstable #pingtimeout").val());
+            if (Mode2 < 1000)
+                Mode2 = 1000;
+            $.ajax({
+                url: "json.htm?type=command&param=bleboxsetmode" +
+                   "&idx=" + $.devIdx +
+                   "&mode1=" + Mode1 +
+                   "&mode2=" + Mode2,
+                async: false,
+                dataType: 'json',
+                success: function (data) {
+                    bootbox.alert($.t('Settings saved'));
+                },
+                error: function () {
+                    ShowNotify($.t('Problem Updating Settings!'), 2500, true);
+                }
+            });
+        }
+
+        EditBleBox = function (idx, name, Mode1, Mode2, Mode3, Mode4, Mode5, Mode6) {
+            $.devIdx = idx;
+            cursordefault();
+            var htmlcontent = '';
+            htmlcontent = '<p><center><h2><span data-i18n="Device"></span>: ' + name + '</h2></center></p>\n';
+            htmlcontent += $('#blebox').html();
+            $('#hardwarecontent').html(GetBackbuttonHTMLTable('ShowHardware') + htmlcontent);
+            $('#hardwarecontent').i18n();
+
+            $("#hardwarecontent #bleboxsettingstable #pollinterval").val(Mode1);
+            $("#hardwarecontent #bleboxsettingstable #pingtimeout").val(Mode2);
+
+            var oTable = $('#bleboxnodestable').dataTable({
+                "sDom": '<"H"lfrC>t<"F"ip>',
+                "oTableTools": {
+                    "sRowSelect": "single",
+                },
+                "aaSorting": [[0, "desc"]],
+                "bSortClasses": false,
+                "bProcessing": true,
+                "bStateSave": true,
+                "bJQueryUI": true,
+                "aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
+                "iDisplayLength": 25,
+                "sPaginationType": "full_numbers",
+                language: $.DataTableLanguage
+            });
+
+            $('#hardwarecontent #idx').val(idx);
+
+            RefreshBleBoxNodeTable();
+        }
+
+        /* End of BleBox Plugin Code */
 
         RefreshLMSNodeTable = function () {
             $('#modal').show();
@@ -4007,6 +4275,9 @@ define(['app'], function (app) {
                     else if (HwTypeStr.indexOf("Panasonic") >= 0) {
                         HwTypeStr += ' <span class="label label-info lcursor" onclick="EditPanasonic(' + item.idx + ',\'' + item.Name + '\',' + item.Mode1 + ',' + item.Mode2 + ',' + item.Mode3 + ',' + item.Mode4 + ',' + item.Mode5 + ',' + item.Mode6 + ');">' + $.t("Setup") + '</span>';
                     }
+                    else if (HwTypeStr.indexOf("BleBox") >= 0) {
+                        HwTypeStr += ' <span class="label label-info lcursor" onclick="EditBleBox(' + item.idx + ',\'' + item.Name + '\',' + item.Mode1 + ',' + item.Mode2 + ',' + item.Mode3 + ',' + item.Mode4 + ',' + item.Mode5 + ',' + item.Mode6 + ');">' + $.t("Setup") + '</span>';
+                    }
                     else if (HwTypeStr.indexOf("Logitech Media Server") >= 0) {
                         HwTypeStr += ' <span class="label label-info lcursor" onclick="EditLMS(' + item.idx + ',\'' + item.Name + '\',' + item.Mode1 + ',' + item.Mode2 + ',' + item.Mode3 + ',' + item.Mode4 + ',' + item.Mode5 + ',' + item.Mode6 + ');">' + $.t("Setup") + '</span>';
                     }
@@ -4195,7 +4466,7 @@ define(['app'], function (app) {
                             $("#hardwarecontent #hardwareparamsremote #tcpport").val(data["Port"]);
                             $("#hardwarecontent #hardwareparamslogin #password").val(data["Password"]);
                         }
-                        else if ((data["Type"].indexOf("Underground") >= 0)||(data["Type"].indexOf("Forecast") >= 0)||(data["Type"].indexOf("AccuWeather") >= 0)) {
+                        else if ((data["Type"].indexOf("Underground") >= 0) || (data["Type"].indexOf("Forecast") >= 0) || (data["Type"].indexOf("AccuWeather") >= 0) || (data["Type"].indexOf("Open Weather Map") >= 0)) {
                             $("#hardwarecontent #hardwareparamsunderground #apikey").val(data["Username"]);
                             $("#hardwarecontent #hardwareparamsunderground #location").val(data["Password"]);
                         }
@@ -4211,6 +4482,9 @@ define(['app'], function (app) {
                             $("#hardwarecontent #hardwareparamssolaredgeapi #siteid").val(data["Mode1"]);
                             $("#hardwarecontent #hardwareparamssolaredgeapi #serial").val(data["Username"]);
                             $("#hardwarecontent #hardwareparamssolaredgeapi #apikey").val(data["Password"]);
+                        }
+                        else if (data["Type"].indexOf("Toon") >= 0) {
+                            $("#hardwarecontent #hardwareparamsenecotoon #agreement").val(data["Mode1"]);
                         }
                         else if (data["Type"].indexOf("Philips Hue") >= 0) {
                             $("#hardwarecontent #hardwareparamsremote #tcpaddress").val(data["Address"]);
@@ -4229,8 +4503,8 @@ define(['app'], function (app) {
                         if (
                             (data["Type"].indexOf("Domoticz") >= 0)||
                             (data["Type"].indexOf("ICY") >= 0) ||
+                            (data["Type"].indexOf("Toon") >= 0) ||
                             (data["Type"].indexOf("Harmony") >= 0)||
-                            (data["Type"].indexOf("Toon") >= 0)||
                             (data["Type"].indexOf("Atag") >= 0)||
                             (data["Type"].indexOf("Nest Th") >= 0)||
                             (data["Type"].indexOf("PVOutput") >= 0)||
@@ -4314,6 +4588,7 @@ define(['app'], function (app) {
             $("#hardwarecontent #divmqtt").hide();
             $("#hardwarecontent #divsolaredgeapi").hide();
             $("#hardwarecontent #divrftransmitter").hide();
+            $("#hardwarecontent #divenecotoon").hide();
             $("#hardwarecontent #div1wire").hide();
 
             if ((text.indexOf("TE923") >= 0)||
@@ -4397,6 +4672,15 @@ define(['app'], function (app) {
                 $("#hardwarecontent #divunderground").hide();
                 $("#hardwarecontent #divhttppoller").hide();
             }
+            else if (text.indexOf("Toon") >= 0)
+            {
+		$("#hardwarecontent #divlogin").show();
+		$("#hardwarecontent #divenecotoon").show();
+                $("#hardwarecontent #divremote").hide();
+                $("#hardwarecontent #divserial").hide();
+                $("#hardwarecontent #divunderground").hide();
+                $("#hardwarecontent #divhttppoller").hide();
+            }
             else if (text.indexOf("SBFSpot") >= 0)
             {
                 $("#hardwarecontent #divlocation").show();
@@ -4410,7 +4694,6 @@ define(['app'], function (app) {
             }
             else if (
 				(text.indexOf("ICY") >= 0) ||
-				(text.indexOf("Toon") >= 0) ||
 				(text.indexOf("Atag") >= 0) ||
 				(text.indexOf("Nest Th") >= 0) ||
 				(text.indexOf("PVOutput") >= 0) ||
@@ -4432,13 +4715,17 @@ define(['app'], function (app) {
                 $("#hardwarecontent #divhttppoller").show();
                 $("#hardwarecontent #hardwareparamshttp #refresh").val(300);
             }
-            else if ((text.indexOf("Underground") >= 0)||(text.indexOf("Forecast") >= 0)||(text.indexOf("AccuWeather") >= 0))
+            else if ((text.indexOf("Underground") >= 0) || (text.indexOf("Forecast") >= 0) || (text.indexOf("AccuWeather") >= 0) || (text.indexOf("Open Weather Map") >= 0))
             {
                 $("#hardwarecontent #divserial").hide();
                 $("#hardwarecontent #divremote").hide();
                 $("#hardwarecontent #divlogin").hide();
                 $("#hardwarecontent #divunderground").show();
                 $("#hardwarecontent #divhttppoller").hide();
+                if (text.indexOf("Open Weather Map") >= 0)
+                {
+                    $("#hardwarecontent #hardwareparamsunderground #location").val("lat=53.40&lon=14.58");
+                }
             }
             else if (text.indexOf("Philips Hue") >= 0)
             {

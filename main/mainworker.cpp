@@ -97,7 +97,9 @@
 #include "../hardware/RAVEn.h"
 #include "../hardware/DenkoviSmartdenLan.h"
 #include "../hardware/AccuWeather.h"
+#include "../hardware/BleBox.h"
 #include "../hardware/Ec3kMeterTCP.h"
+#include "../hardware/OpenWeatherMap.h"
 
 // load notifications configuration
 #include "../notifications/NotificationHelper.h"
@@ -827,7 +829,7 @@ bool MainWorker::AddHardwareFromParams(
 		pHardware = new CICYThermostat(ID,Username,Password);
 		break;
 	case HTYPE_TOONTHERMOSTAT:
-		pHardware = new CToonThermostat(ID, Username, Password);
+		pHardware = new CToonThermostat(ID, Username, Password, Mode1);
 		break;
 	case HTYPE_AtagOne:
 		pHardware = new CAtagOne(ID, Username, Password, Mode1, Mode2, Mode3, Mode4, Mode5, Mode6);
@@ -886,6 +888,12 @@ bool MainWorker::AddHardwareFromParams(
 		break;
 	case HTYPE_OpenWebNet:
 		pHardware = new COpenWebNet(ID, Address, Port);
+		break;
+	case HTYPE_BleBox:
+		pHardware = new BleBox(ID, Mode1, Mode2);
+		break;
+	case HTYPE_OpenWeatherMap:
+		pHardware = new COpenWeatherMap(ID, Username, Password);
 		break;
 	case HTYPE_Ec3kMeterTCP:
 		pHardware = new Ec3kMeterTCP(ID, Address, Port);

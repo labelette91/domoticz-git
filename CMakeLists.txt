@@ -238,6 +238,7 @@ hardware/RFM69.cpp
 hardware/HomeEasyTransmitter.cpp
 hardware/hager.cpp
 hardware/AtagOne.cpp
+hardware/BleBox.cpp
 hardware/Comm5TCP.cpp
 hardware/Comm5Serial.cpp
 hardware/csocket.cpp
@@ -282,6 +283,7 @@ hardware/NefitEasy.cpp
 hardware/Nest.cpp
 hardware/Netatmo.cpp
 hardware/HttpPoller.cpp
+hardware/OpenWeatherMap.cpp
 hardware/OpenWebNet.cpp
 hardware/openwebnet/bt_openwebnet.cpp
 hardware/OpenZWave.cpp

@@ -458,6 +458,7 @@
     <ClInclude Include="..\hardware\NefitEasy.h" />
     <ClInclude Include="..\hardware\Nest.h" />
     <ClInclude Include="..\hardware\Netatmo.h" />
+    <ClInclude Include="..\hardware\OpenWeatherMap.h" />
     <ClInclude Include="..\hardware\OpenWebNet.h" />
     <ClInclude Include="..\hardware\openwebnet\bt_openwebnet.h" />
     <ClInclude Include="..\hardware\OpenZWave.h" />
@@ -569,6 +570,7 @@
     <ClInclude Include="..\zip\ioapi.h" />
     <ClInclude Include="..\zip\unzip.h" />
     <ClInclude Include="..\zip\zip.h" />
+    <ClInclude Include="..\hardware\BleBox.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="..\main\Scheduler.h" />
     <ClInclude Include="..\main\SQLHelper.h" />
@@ -671,6 +673,7 @@
     <ClCompile Include="..\hardware\NefitEasy.cpp" />
     <ClCompile Include="..\hardware\Nest.cpp" />
     <ClCompile Include="..\hardware\Netatmo.cpp" />
+    <ClCompile Include="..\hardware\OpenWeatherMap.cpp" />
     <ClCompile Include="..\hardware\OpenWebNet.cpp" />
     <ClCompile Include="..\hardware\openwebnet\bt_openwebnet.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
@@ -878,6 +881,7 @@
     <ClCompile Include="..\webserver\request_handler.cpp" />
     <ClCompile Include="..\webserver\request_parser.cpp" />
     <ClCompile Include="..\webserver\server.cpp" />
+    <ClCompile Include="..\hardware\BleBox.cpp" />
     <ClCompile Include="WindowsHelper.cpp" />
     <ClCompile Include="..\hardware\YouLess.cpp" />
   </ItemGroup>

@@ -238,6 +238,7 @@ hardware/HomeEasyTransmitter.cpp
 hardware/hager.cpp
 hardware/AtagOne.cpp
 hardware/Comm5TCP.cpp
+hardware/Comm5Serial.cpp
 hardware/csocket.cpp
 hardware/CurrentCostMeterBase.cpp
 hardware/CurrentCostMeterSerial.cpp

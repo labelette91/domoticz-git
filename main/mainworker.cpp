@@ -82,6 +82,7 @@
 #include "../hardware/SatelIntegra.h"
 #include "../hardware/LogitechMediaServer.h"
 #include "../hardware/Comm5TCP.h"
+#include "../hardware/Comm5Serial.h"
 #include "../hardware/CurrentCostMeterSerial.h"
 #include "../hardware/CurrentCostMeterTCP.h"
 #include "../hardware/SolarEdgeAPI.h"
@@ -658,6 +659,9 @@ bool MainWorker::AddHardwareFromParams(
 		break;
     case HTYPE_RAVEn:
 		pHardware = new RAVEn(ID, SerialPort);
+		break;
+	case HTYPE_Comm5Serial:
+		pHardware = new Comm5Serial(ID, SerialPort);
 		break;
 	case HTYPE_RFXLAN:
 		//LAN
@@ -2961,7 +2965,7 @@ void MainWorker::decode_Wind(const int HwdID, const _eHardwareTypes HwdType, con
 		{
 			temp=-(float(((pResponse->WIND.temperatureh & 0x7F) * 256) + pResponse->WIND.temperaturel) / 10.0f);
 		}
-		if ((temp<-60)||(temp>380))
+		if ((temp<-200)||(temp>380))
 		{
 			WriteMessage(" Invalid Temperature");
 			return;
@@ -2999,7 +3003,7 @@ void MainWorker::decode_Wind(const int HwdID, const _eHardwareTypes HwdType, con
 		{
 			temp=-(float(((pResponse->WIND.temperatureh & 0x7F) * 256) + pResponse->WIND.temperaturel) / 10.0f);
 		}
-		if ((temp<-60)||(temp>380))
+		if ((temp<-200)||(temp>380))
 		{
 			WriteMessage(" Invalid Temperature");
 			return;
@@ -3149,7 +3153,7 @@ void MainWorker::decode_Temp(const int HwdID, const _eHardwareTypes HwdType, con
 	{
 		temp=-(float(((pResponse->TEMP.temperatureh & 0x7F) * 256) + pResponse->TEMP.temperaturel) / 10.0f);
 	}
-	if ((temp<-60)||(temp>380))
+	if ((temp<-200)||(temp>380))
 	{
 		WriteMessage(" Invalid Temperature");
 		return;
@@ -3445,7 +3449,7 @@ void MainWorker::decode_TempHum(const int HwdID, const _eHardwareTypes HwdType, 
 	{
 		temp=-(float(((pResponse->TEMP_HUM.temperatureh & 0x7F) * 256) + pResponse->TEMP_HUM.temperaturel) / 10.0f);
 	}
-	if ((temp<-60)||(temp>380))
+	if ((temp<-200)||(temp>380))
 	{
 		WriteMessage(" Invalid Temperature");
 		return;
@@ -3640,7 +3644,7 @@ void MainWorker::decode_TempHumBaro(const int HwdID, const _eHardwareTypes HwdTy
 	{
 		temp=-(float(((pResponse->TEMP_HUM_BARO.temperatureh & 0x7F) * 256) + pResponse->TEMP_HUM_BARO.temperaturel) / 10.0f);
 	}
-	if ((temp<-60)||(temp>380))
+	if ((temp<-200)||(temp>380))
 	{
 		WriteMessage(" Invalid Temperature");
 		return;
@@ -3809,7 +3813,7 @@ void MainWorker::decode_TempBaro(const int HwdID, const _eHardwareTypes HwdType,
 	BatteryLevel=100;
 
 	float temp=pTempBaro->temp;
-	if ((temp<-60)||(temp>380))
+	if ((temp<-200)||(temp>380))
 	{
 		WriteMessage(" Invalid Temperature");
 		return;
@@ -3920,7 +3924,7 @@ void MainWorker::decode_TempRain(const int HwdID, const _eHardwareTypes HwdType,
 	m_sql.GetAddjustment(HwdID, ID.c_str(),Unit,pTypeTEMP,sTypeTEMP3,AddjValue,AddjMulti);
 	temp+=AddjValue;
 
-	if ((temp<-60)||(temp>380))
+	if ((temp<-200)||(temp>380))
 	{
 		WriteMessage(" Invalid Temperature");
 		return;
@@ -4005,7 +4009,7 @@ void MainWorker::decode_UV(const int HwdID, const _eHardwareTypes HwdType, const
 		{
 			temp = -(float(((pResponse->UV.temperatureh & 0x7F) * 256) + pResponse->UV.temperaturel) / 10.0f);
 		}
-		if ((temp<-60)||(temp>380))
+		if ((temp<-200)||(temp>380))
 		{
 			WriteMessage(" Invalid Temperature");
 			return;

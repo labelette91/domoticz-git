@@ -97,6 +97,7 @@
 #include "../hardware/RAVEn.h"
 #include "../hardware/DenkoviSmartdenLan.h"
 #include "../hardware/AccuWeather.h"
+#include "../hardware/Ec3kMeterTCP.h"
 
 // load notifications configuration
 #include "../notifications/NotificationHelper.h"
@@ -886,6 +887,8 @@ bool MainWorker::AddHardwareFromParams(
 	case HTYPE_OpenWebNet:
 		pHardware = new COpenWebNet(ID, Address, Port);
 		break;
+	case HTYPE_Ec3kMeterTCP:
+		pHardware = new Ec3kMeterTCP(ID, Address, Port);
 	}
 
 	if (pHardware)
@@ -918,6 +921,7 @@ bool MainWorker::Start()
 	AddAllDomoticzHardware();
 	m_datapush.Start();
 	m_httppush.Start();
+	m_googlepubsubpush.Start();
 #ifdef PARSE_RFXCOM_DEVICE_LOG
 	if (m_bStartHardware==false)
 		m_bStartHardware=true;
@@ -949,6 +953,7 @@ bool MainWorker::Stop()
 		m_eventsystem.StopEventSystem();
 		m_datapush.Stop();
 		m_httppush.Stop();
+		m_googlepubsubpush.Stop();
 
 		//    m_cameras.StopCameraGrabber();
 

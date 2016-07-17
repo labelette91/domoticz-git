@@ -197,15 +197,12 @@ domoticz_SRCS
 main/stdafx.cpp
 main/CmdLine.cpp
 main/Camera.cpp
-main/DataPush.cpp
 main/domoticz.cpp
 main/EventSystem.cpp
 main/Helper.cpp
-main/HttpPush.cpp
 main/localtime_r.cpp
 main/Logger.cpp
 main/mainworker.cpp
-main/Push.cpp
 main/RFXNames.cpp
 main/Scheduler.cpp
 main/SQLHelper.cpp
@@ -216,6 +213,10 @@ main/WebServerHelper.cpp
 main/WindCalculation.cpp
 main/VirtualThermostat.cpp
 main/Imperihome.cpp
+push/Push.cpp
+push/DataPush.cpp
+push/HttpPush.cpp
+push/GooglePubSubPush.cpp
 httpclient/HTTPClient.cpp
 httpclient/UrlEncode.cpp
 hardware/1Wire.cpp
@@ -252,6 +253,7 @@ hardware/Dummy.cpp
 hardware/EcoDevices.cpp
 hardware/EnOceanESP2.cpp
 hardware/EnOceanESP3.cpp
+hardware/Ec3kMeterTCP.cpp
 hardware/evohome.cpp
 hardware/ETH8020.cpp
 hardware/Fitbit.cpp

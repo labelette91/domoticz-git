@@ -424,6 +424,7 @@
     <ClInclude Include="..\hardware\DavisLoggerSerial.h" />
     <ClInclude Include="..\hardware\DenkoviSmartdenLan.h" />
     <ClInclude Include="..\hardware\Dummy.h" />
+    <ClInclude Include="..\hardware\Ec3kMeterTCP.h" />
     <ClInclude Include="..\hardware\EcoDevices.h" />
     <ClInclude Include="..\hardware\EnOceanESP2.h" />
     <ClInclude Include="..\hardware\EnOceanESP3.h" />
@@ -508,11 +509,9 @@
     <ClInclude Include="..\hardware\DomoticzTCP.h" />
     <ClInclude Include="..\hardware\hardwaretypes.h" />
     <ClInclude Include="..\main\concurrent_queue.h" />
-    <ClInclude Include="..\main\DataPush.h" />
     <ClInclude Include="..\main\dirent_windows.h" />
     <ClInclude Include="..\main\EventSystem.h" />
     <ClInclude Include="..\main\GZipHelper.h" />
-    <ClInclude Include="..\main\HttpPush.h" />
     <ClInclude Include="..\main\localtime_r.h" />
     <ClInclude Include="..\hardware\P1MeterBase.h" />
     <ClInclude Include="..\hardware\P1MeterSerial.h" />
@@ -520,7 +519,6 @@
     <ClInclude Include="..\main\Logger.h" />
     <ClInclude Include="..\main\LuaHandler.h" />
     <ClInclude Include="..\main\mainstructs.h" />
-    <ClInclude Include="..\main\Push.h" />
     <ClInclude Include="..\main\unzip.h" />
     <ClInclude Include="..\main\unzip_iterator.h" />
     <ClInclude Include="..\main\unzip_stream.h" />
@@ -560,6 +558,10 @@
     <ClInclude Include="..\notifications\NotificationPushbullet.h" />
     <ClInclude Include="..\notifications\NotificationPushover.h" />
     <ClInclude Include="..\notifications\NotificationSMS.h" />
+    <ClInclude Include="..\push\DataPush.h" />
+    <ClInclude Include="..\push\GooglePubSubPush.h" />
+    <ClInclude Include="..\push\HttpPush.h" />
+    <ClInclude Include="..\push\Push.h" />
     <ClInclude Include="..\webserver\fastcgi.hpp" />
     <ClInclude Include="..\webserver\GZipHelper.h" />
     <ClInclude Include="..\webserver\proxyclient.h" />
@@ -636,6 +638,7 @@
     <ClCompile Include="..\hardware\DenkoviSmartdenLan.cpp" />
     <ClCompile Include="..\hardware\Dummy.cpp" />
     <ClCompile Include="..\hardware\dummywiringPi.cpp" />
+    <ClCompile Include="..\hardware\Ec3kMeterTCP.cpp" />
     <ClCompile Include="..\hardware\EcoDevices.cpp" />
     <ClCompile Include="..\hardware\EnOceanESP2.cpp" />
     <ClCompile Include="..\hardware\EnOceanESP3.cpp" />
@@ -722,7 +725,6 @@
     <ClCompile Include="..\hardware\DomoticzHardware.cpp" />
     <ClCompile Include="..\hardware\DomoticzInternal.cpp" />
     <ClCompile Include="..\hardware\DomoticzTCP.cpp" />
-    <ClCompile Include="..\main\DataPush.cpp" />
     <ClCompile Include="..\main\EventSystem.cpp" />
     <ClCompile Include="..\main\HttpPush.cpp" />
     <ClCompile Include="..\main\Imperihome.cpp" />
@@ -732,7 +734,6 @@
     <ClCompile Include="..\hardware\P1MeterTCP.cpp" />
     <ClCompile Include="..\main\Logger.cpp" />
     <ClCompile Include="..\main\LuaHandler.cpp" />
-    <ClCompile Include="..\main\Push.cpp" />
     <ClCompile Include="..\main\Scheduler.cpp" />
     <ClCompile Include="..\main\SQLHelper.cpp" />
     <ClCompile Include="..\main\Helper.cpp" />
@@ -837,6 +838,10 @@
     <ClCompile Include="..\notifications\NotificationPushbullet.cpp" />
     <ClCompile Include="..\notifications\NotificationPushover.cpp" />
     <ClCompile Include="..\notifications\NotificationSMS.cpp" />
+    <ClCompile Include="..\push\DataPush.cpp" />
+    <ClCompile Include="..\push\GooglePubSubPush.cpp" />
+    <ClCompile Include="..\push\HttpPush.cpp" />
+    <ClCompile Include="..\push\Push.cpp" />
     <ClCompile Include="..\smtpclient\SMTPClient.cpp" />
     <ClCompile Include="..\sqlite\sqlite3.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>

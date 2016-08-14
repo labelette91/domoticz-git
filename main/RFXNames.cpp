@@ -162,7 +162,7 @@ const char *Hardware_Type_Desc(int hType)
 		{ HTYPE_DavisVantage, "Davis Vantage Weather Station USB" },
 		{ HTYPE_VOLCRAFTCO20, "Volcraft CO-20 USB air quality sensor" },
 		{ HTYPE_1WIRE, "1-Wire (System)" },
-		{ HTYPE_RaspberryBMP085, "I2C sensor BMP085/180 Temp+Baro" },
+		{ HTYPE_RaspberryBMP085, "Local I2C sensor BMP085/180 Temp+Baro" },
 		{ HTYPE_Wunderground, "Weather Underground" },
 		{ HTYPE_ForecastIO, "Forecast IO (Weather Lookup)" },
 		{ HTYPE_Dummy, "Dummy (Does nothing, use for virtual switches only)" },
@@ -221,7 +221,7 @@ const char *Hardware_Type_Desc(int hType)
 		{ HTYPE_HomeEasy, "HomeEasy RF Transmiter" },
 		{ HTYPE_NefitEastLAN, "Nefit Easy HTTP server over LAN interface" },
 		{ HTYPE_OpenWebNet, "MyHome OpenWebNet" },
-		{ HTYPE_RaspberryHTU21D, "I2C sensor HTU21D(F)/SI702x Humidity+Temp" },
+		{ HTYPE_RaspberryHTU21D, "Local I2C sensor HTU21D(F)/SI702x Humidity+Temp" },
 		{ HTYPE_AtagOne, "Atag One Thermostat" },
 		{ HTYPE_Sterbox, "Sterbox v2-3 PLC with LAN interface" },
 		{ HTYPE_HTTPPOLLER, "HTTP/HTTPS poller" },
@@ -234,6 +234,7 @@ const char *Hardware_Type_Desc(int hType)
 		{ HTYPE_Ec3kMeterTCP, "Energy Count 3000/ NETBSEM4/ La Crosse RT-10 LAN" },
 		{ HTYPE_OpenWeatherMap, "Open Weather Map" },
 		{ HTYPE_GoodweAPI, "Goodwe solar inverter via Web API" },
+		{ HTYPE_RaspberryTSL2561, "Local I2C sensor TSL2561 Illuminance" },
 		{ 0, NULL, NULL }
 	};
 	return findTableIDSingle1 (Table, hType);

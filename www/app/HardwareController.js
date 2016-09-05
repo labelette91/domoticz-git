@@ -153,12 +153,18 @@ define(['app'], function (app) {
                     }
 
                     Mode1 = baudrate;
+                    Mode2 = $("#hardwarecontent #divcrcp1 #disablecrcp1").prop("checked")?0:1;
                 }
 
                 var extra="";
                 if (text.indexOf("S0 Meter") >= 0)
                 {
 					extra = $.devExtra;
+                }
+
+                if (text.indexOf("P1 Smart Meter") >= 0)
+                {
+                    Mode2 = $("#hardwarecontent #divcrcp1 #disablecrcp1").prop("checked")?0:1;
                 }
 
                 $.ajax({
@@ -218,6 +224,11 @@ define(['app'], function (app) {
 					extra = $.devExtra;
                 }
 
+                if (text.indexOf("P1 Smart Meter") >= 0)
+                {
+                    Mode2 = $("#hardwarecontent #divcrcp1 #disablecrcp1").prop("checked")?0:1;
+                }
+ 
                 $.ajax({
                      url: "json.htm?type=command&param=updatehardware&htype=" + hardwaretype +
                         "&address=" + address +
@@ -938,6 +949,7 @@ define(['app'], function (app) {
                     }
 
                     Mode1 = baudrate;
+                    Mode2 = $("#hardwarecontent #divcrcp1 #disablecrcp1").prop("checked")?0:1;
                 }
 
                 $.ajax({
@@ -4522,6 +4534,15 @@ define(['app'], function (app) {
                             if (data["Type"].indexOf("P1 Smart Meter") >= 0)
                             {
                                 $("#hardwarecontent #divbaudratep1 #combobaudratep1").val(data["Mode1"]);
+                                $("#hardwarecontent #divcrcp1 #disablecrcp1").prop("checked",data["Mode2"]==0);
+                                if (data["Mode1"]==0)
+                                {
+                                    $("#hardwarecontent #divcrcp1").hide();
+                                }
+                                else
+                                {
+                                    $("#hardwarecontent #divcrcp1").show();
+                                }
                             }
                         }
                         else if (data["Type"].indexOf("HomeEasy RF") >= 0) {
@@ -4656,6 +4677,7 @@ define(['app'], function (app) {
 
             $("#hardwarecontent #divbaudratemysensors").hide();
             $("#hardwarecontent #divbaudratep1").hide();
+            $("#hardwarecontent #divcrcp1").hide();
             $("#hardwarecontent #divlocation").hide();
             $("#hardwarecontent #divphilipshue").hide();
             $("#hardwarecontent #divwinddelen").hide();
@@ -4704,7 +4726,8 @@ define(['app'], function (app) {
                 if (text.indexOf("P1 Smart Meter") >= 0)
                 {
                     $("#hardwarecontent #divbaudratep1").show();
-                }
+                    $("#hardwarecontent #divcrcp1").show();
+                 }
                 $("#hardwarecontent #divserial").show();
                 $("#hardwarecontent #divremote").hide();
                 $("#hardwarecontent #divlogin").hide();
@@ -4718,6 +4741,10 @@ define(['app'], function (app) {
                 $("#hardwarecontent #divlogin").hide();
                 $("#hardwarecontent #divunderground").hide();
                 $("#hardwarecontent #divhttppoller").hide();
+                if (text.indexOf("P1 Smart Meter") >= 0)
+                {
+                    $("#hardwarecontent #divcrcp1").show();
+                }
             }
             else if (text.indexOf("LAN") >= 0 && (text.indexOf("YouLess") >= 0 || text.indexOf("Denkovi") >= 0 || text.indexOf("Integra") >= 0))
             {
@@ -4916,6 +4943,19 @@ define(['app'], function (app) {
 
             $("#hardwarecontent #hardwareparamstable #combotype").change(function() {
                 UpdateHardwareParamControls();
+            });
+
+            $("#hardwarecontent #divbaudratep1 #combobaudratep1").change(function() {
+                if ($("#hardwarecontent #divbaudratep1 #combobaudratep1 option:selected").val() == 0)
+                {
+                    $("#hardwarecontent #divcrcp1 #disablecrcp1").prop("checked",0);
+                    $("#hardwarecontent #divcrcp1").hide();
+                }
+                else
+                {
+                    $("#hardwarecontent #divcrcp1 #disablecrcp1").prop("checked",1);
+                    $("#hardwarecontent #divcrcp1").show();
+                }
             });
 
             $('#modal').hide();

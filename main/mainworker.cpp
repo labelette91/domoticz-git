@@ -623,7 +623,7 @@ bool MainWorker::AddHardwareFromParams(
 		pHardware = new RFXComSerial(ID, SerialPort, 38400);
 		break;
 	case HTYPE_P1SmartMeter:
-		pHardware = new P1MeterSerial(ID,SerialPort, (Mode1==1) ? 115200 : 9600);
+		pHardware = new P1MeterSerial(ID,SerialPort, (Mode1==1) ? 115200 : 9600, Mode2);
 		break;
 	case HTYPE_Rego6XX:
 		pHardware = new CRego6XXSerial(ID,SerialPort, Mode1);
@@ -696,7 +696,7 @@ bool MainWorker::AddHardwareFromParams(
 		break;
 	case HTYPE_P1SmartMeterLAN:
 		//LAN
-		pHardware = new P1MeterTCP(ID, Address, Port);
+		pHardware = new P1MeterTCP(ID, Address, Port, Mode2);
 		break;
 	case HTYPE_WOL:
 		//LAN
@@ -1057,11 +1057,14 @@ bool MainWorker::StartThread()
 
 bool MainWorker::IsUpdateAvailable(const bool bIsForced)
 {
-	int nValue = 0;
-	m_sql.GetPreferencesVar("UseAutoUpdate", nValue);
-	if (nValue != 1)
+	if (!bIsForced)
 	{
-		return false;
+		int nValue = 0;
+		m_sql.GetPreferencesVar("UseAutoUpdate", nValue);
+		if (nValue != 1)
+		{
+			return false;
+		}
 	}
 
 	utsname my_uname;
@@ -1098,6 +1101,7 @@ bool MainWorker::IsUpdateAvailable(const bool bIsForced)
 	}
 	m_LastUpdateCheck = atime;
 
+	int nValue;
 	m_sql.GetPreferencesVar("ReleaseChannel", nValue);
 	bool bIsBetaChannel = (nValue != 0);
 

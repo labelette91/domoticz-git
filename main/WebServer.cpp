@@ -11534,9 +11534,9 @@ szQuery << "UPDATE DeviceStatus SET "
 				}
 				else if (Key == "SendErrorsAsNotification") {
 					root["SendErrorsAsNotification"] = nValue;
-				else {
-					root[Key]=sValue;
 				}
+				else 
+					root[Key]=sValue;
 			}
 		}
 

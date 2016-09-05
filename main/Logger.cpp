@@ -426,20 +426,20 @@ void CLogger::SetLogPreference (std::string  LogFilter, std::string  LogFileName
 	SetOutputFile (LogFileName.c_str());
 	setLogVerboseLevel(atoi(LogLevel.c_str()));
 }
-void CLogger::GetLogPreference ()
+void CLogger::GetLogPreference()
 {
-	std::string LogFilter,LogFileName,LogLevel;
+	std::string LogFilter, LogFileName, LogLevel;
 
-	m_sql.GetPreferencesVar("LogFilter"  , LogFilter );
-	m_sql.GetPreferencesVar("LogFileName", LogFileName );
-	m_sql.GetPreferencesVar("LogLevel"   , LogLevel    );
-	SetFilterString (LogFilter);
-	SetOutputFile (LogFileName.c_str());
-	if (LogLevel.length()!=0)
+	m_sql.GetPreferencesVar("LogFilter", LogFilter);
+	m_sql.GetPreferencesVar("LogFileName", LogFileName);
+	m_sql.GetPreferencesVar("LogLevel", LogLevel);
+	SetFilterString(LogFilter);
+	SetOutputFile(LogFileName.c_str());
+	if (LogLevel.length() != 0)
 		setLogVerboseLevel(atoi(LogLevel.c_str()));
 	else
 		SetVerboseLevel(VBL_ALL);
-
+}
 std::list<CLogger::_tLogLineStruct> CLogger::GetNotificationLogs()
 {
 	boost::unique_lock< boost::mutex > lock(m_mutex);

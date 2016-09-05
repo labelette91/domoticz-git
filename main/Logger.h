@@ -55,16 +55,23 @@ public:
 	void setLogVerboseLevel(int LogLevel);
   void SetLogPreference (std::string  LogFilter, std::string  LogFileName , std::string  LogLevel );
   void GetLogPreference ();
+	void ForwardErrorsToNotificationSystem(const bool bDoForward);
 
 	std::list<_tLogLineStruct> GetLog(const _eLogLevel lType);
+
+	std::list<_tLogLineStruct> GetNotificationLogs();
+	bool NotificationLogsEnabled();
 private:
 	boost::mutex m_mutex;
 	std::ofstream m_outputfile;
 	std::deque<_tLogLineStruct> m_lastlog;
 	std::deque<_tLogLineStruct> m_last_status_log;
 	std::deque<_tLogLineStruct> m_last_error_log;
+	std::deque<_tLogLineStruct> m_notification_log;
 	bool m_bInSequenceMode;
 	bool m_bEnableLogTimestamps;
+	bool m_bEnableErrorsToNotificationSystem;
+	time_t m_LastLogNotificationsSend;
 	std::stringstream m_sequencestring;
 	std::string FilterString;
 	std::vector<std::string> FilterStringList;

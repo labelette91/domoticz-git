@@ -5,6 +5,8 @@
 #include <time.h>
 #include "localtime_r.h"
 #include "Helper.h"
+#include "mainworker.h"
+
 #ifndef WIN32
 	#include <syslog.h>
 	#include <errno.h>
@@ -32,8 +34,9 @@ CLogger::CLogger(void)
 	m_bInSequenceMode=false;
 	m_bEnableLogTimestamps=true;
 	m_verbose_level=VBL_ALL;
+	m_bEnableErrorsToNotificationSystem = false;
+	m_LastLogNotificationsSend = 0;
 }
-
 
 CLogger::~CLogger(void)
 {
@@ -67,6 +70,13 @@ void CLogger::SetOutputFile(const char *OutputFile)
 void CLogger::SetVerboseLevel(_eLogFileVerboseLevel vLevel)
 {
 	m_verbose_level=vLevel;
+}
+
+void CLogger::ForwardErrorsToNotificationSystem(const bool bDoForward)
+{
+	m_bEnableErrorsToNotificationSystem = bDoForward;
+	if (!bDoForward)
+		m_notification_log.clear();
 }
 
 void CLogger::Log(const _eLogLevel level, const char* logline, ...)
@@ -151,6 +161,17 @@ void CLogger::Log(const _eLogLevel level, const char* logline, ...)
 		if (m_last_error_log.size() >= MAX_LOG_LINE_BUFFER)
 			m_last_error_log.erase(m_last_error_log.begin());
 		m_last_error_log.push_back(_tLogLineStruct(level, sstr.str()));
+
+		if (m_bEnableErrorsToNotificationSystem)
+		{
+			if (m_notification_log.size() >= MAX_LOG_LINE_BUFFER)
+				m_notification_log.erase(m_last_error_log.begin());
+			m_notification_log.push_back(_tLogLineStruct(level, sstr.str()));
+			if ((m_notification_log.size() == 1) && (mytime(NULL) - m_LastLogNotificationsSend >= 5))
+			{
+				m_mainworker.ForceLogNotificationCheck();
+			}
+		}
 	}
 
 	if (!g_bRunAsDaemon)
@@ -227,6 +248,17 @@ void CLogger::LogNoLF(const _eLogLevel level, const char* logline, ...)
 		if (m_last_error_log.size() >= MAX_LOG_LINE_BUFFER)
 			m_last_error_log.erase(m_last_error_log.begin());
 		m_last_error_log.push_back(_tLogLineStruct(level, message));
+
+		if (m_bEnableErrorsToNotificationSystem)
+		{
+			if (m_notification_log.size() >= MAX_LOG_LINE_BUFFER)
+				m_notification_log.erase(m_last_error_log.begin());
+			m_notification_log.push_back(_tLogLineStruct(level, message));
+			if ((m_notification_log.size() == 1) && (mytime(NULL) - m_LastLogNotificationsSend >= 5))
+			{
+				m_mainworker.ForceLogNotificationCheck();
+			}
+		}
 	}
 
 	if (!g_bRunAsDaemon)
@@ -408,4 +440,22 @@ void CLogger::GetLogPreference ()
 	else
 		SetVerboseLevel(VBL_ALL);
 
+std::list<CLogger::_tLogLineStruct> CLogger::GetNotificationLogs()
+{
+	boost::unique_lock< boost::mutex > lock(m_mutex);
+	std::list<_tLogLineStruct> mlist;
+	std::deque<_tLogLineStruct>::const_iterator itt;
+	for (itt = m_notification_log.begin(); itt != m_notification_log.end(); ++itt)
+	{
+		mlist.push_back(*itt);
+	};
+	m_notification_log.clear();
+	if (!mlist.empty())
+		m_LastLogNotificationsSend = mytime(NULL);
+	return mlist;
+}
+
+bool CLogger::NotificationLogsEnabled()
+{
+	return m_bEnableErrorsToNotificationSystem;
 }

@@ -931,12 +931,8 @@ namespace http {
 					bDoAdd = false;
 #endif
 #ifndef WITH_GPIO
-				if (
-					(ii == HTYPE_RaspberryGPIO)
-					)
-				{
+				if (ii == HTYPE_RaspberryGPIO)
 					bDoAdd = false;
-				}
 				if (ii == HTYPE_HomeEasy) bDoAdd = false;
 #endif
 				if ((ii == HTYPE_1WIRE) && (!C1Wire::Have1WireSystem()))
@@ -6695,6 +6691,11 @@ namespace http {
 			int iShowUpdateEffect = (ShowUpdateEffect == "on" ? 1 : 0);
 			m_sql.UpdatePreferencesVar("ShowUpdateEffect", iShowUpdateEffect);
 
+			std::string SendErrorsAsNotification = request::findValue(&req, "SendErrorsAsNotification");
+			int iSendErrorsAsNotification = (SendErrorsAsNotification == "on" ? 1 : 0);
+			m_sql.UpdatePreferencesVar("SendErrorsAsNotification", iSendErrorsAsNotification);
+			_log.ForwardErrorsToNotificationSystem(iSendErrorsAsNotification != 0);
+
 			std::string DegreeDaysBaseTemperature = request::findValue(&req, "DegreeDaysBaseTemperature");
 			m_sql.UpdatePreferencesVar("DegreeDaysBaseTemperature", DegreeDaysBaseTemperature);
 
@@ -6801,6 +6802,8 @@ namespace http {
 #endif
 
 			m_sql.UpdatePreferencesVar("OneWireSensorPollPeriod", atoi(request::findValue(&req, "OneWireSensorPollPeriod").c_str()));
+			m_sql.UpdatePreferencesVar("OneWireSwitchPollPeriod", atoi(request::findValue(&req, "OneWireSwitchPollPeriod").c_str()));
+
 			m_sql.UpdatePreferencesVar("OneWireSwitchPollPeriod", atoi(request::findValue(&req, "OneWireSwitchPollPeriod").c_str()));
 
 			m_notifications.LoadConfig();
@@ -11529,6 +11532,8 @@ szQuery << "UPDATE DeviceStatus SET "
 				else if (Key == "MyDomoticzSubsystems") {
 					root["MyDomoticzSubsystems"] = nValue;
 				}
+				else if (Key == "SendErrorsAsNotification") {
+					root["SendErrorsAsNotification"] = nValue;
 				else {
 					root[Key]=sValue;
 				}
@@ -13652,8 +13657,8 @@ szQuery << "UPDATE DeviceStatus SET "
 					//add today (have to calculate it)
 					result = m_sql.safe_query(
 						"SELECT MIN(Temperature), MAX(Temperature),"
-						" MIN(Chill), MAX(Chill), MAX(Humidity),"
-						" MAX(Barometer), AVG(Temperature), MIN(SetPoint),"
+						" MIN(Chill), MAX(Chill), AVG(Humidity),"
+						" AVG(Barometer), AVG(Temperature), MIN(SetPoint),"
 						" MAX(SetPoint), AVG(SetPoint) "
 						"FROM Temperature WHERE (DeviceRowID==%llu"
 						" AND Date>='%q')",
@@ -14200,7 +14205,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						root["status"] = "OK";
 						root["title"] = "Graph " + sensor + " " + srange;
 
-						result = m_sql.safe_query("SELECT Value1,Value2, Date FROM %s WHERE (DeviceRowID==%llu AND Date>='%q' AND Date<='%q') ORDER BY Date ASC", dbasetable.c_str(), idx, szDateStart, szDateEnd);
+						result = m_sql.safe_query("SELECT Value1,Value2,Value3,Date FROM %s WHERE (DeviceRowID==%llu AND Date>='%q' AND Date<='%q') ORDER BY Date ASC", dbasetable.c_str(), idx, szDateStart, szDateEnd);
 						if (result.size() > 0)
 						{
 							std::vector<std::vector<std::string> >::const_iterator itt;
@@ -14208,9 +14213,24 @@ szQuery << "UPDATE DeviceStatus SET "
 							{
 								std::vector<std::string> sd = *itt;
 
-								root["result"][ii]["d"] = sd[2].substr(0, 16);
+								root["result"][ii]["d"] = sd[3].substr(0, 16);
 								root["result"][ii]["co2_min"] = sd[0];
 								root["result"][ii]["co2_max"] = sd[1];
+								root["result"][ii]["co2_avg"] = sd[2];
+								ii++;
+							}
+						}
+						result = m_sql.safe_query("SELECT Value2,Date FROM %s WHERE (DeviceRowID==%llu AND Date>='%q' AND Date<='%q') ORDER BY Date ASC", dbasetable.c_str(), idx, szDateStartPrev, szDateEndPrev);
+						if (result.size() > 0)
+						{
+							ii = 0;
+							std::vector<std::vector<std::string> >::const_iterator itt;
+							for (itt = result.begin(); itt != result.end(); ++itt)
+							{
+								std::vector<std::string> sd = *itt;
+
+								root["resultprev"][ii]["d"] = sd[1].substr(0, 16);
+								root["resultprev"][ii]["co2_max"] = sd[0];
 								ii++;
 							}
 						}
@@ -14820,13 +14840,14 @@ szQuery << "UPDATE DeviceStatus SET "
 					else if (dType == pTypeAirQuality)
 					{
 						result = m_sql.safe_query(
-							"SELECT MIN(Value), MAX(Value) FROM Meter WHERE (DeviceRowID==%llu AND Date>='%q')",
+							"SELECT MIN(Value), MAX(Value), AVG(Value) FROM Meter WHERE (DeviceRowID==%llu AND Date>='%q')",
 							idx, szDateEnd);
 						if (result.size() > 0)
 						{
 							root["result"][ii]["d"] = szDateEnd;
 							root["result"][ii]["co2_min"] = result[0][0];
 							root["result"][ii]["co2_max"] = result[0][1];
+							root["result"][ii]["co2_avg"] = result[0][2];
 							ii++;
 						}
 					}
@@ -15347,8 +15368,8 @@ szQuery << "UPDATE DeviceStatus SET "
 						//add today (have to calculate it)
 						result = m_sql.safe_query(
 							"SELECT MIN(Temperature), MAX(Temperature),"
-							" MIN(Chill), MAX(Chill), MAX(Humidity),"
-							" MAX(Barometer), MIN(DewPoint), AVG(Temperature),"
+							" MIN(Chill), MAX(Chill), AVG(Humidity),"
+							" AVG(Barometer), MIN(DewPoint), AVG(Temperature),"
 							" MIN(SetPoint), MAX(SetPoint), AVG(SetPoint) "
 							"FROM Temperature WHERE (DeviceRowID==%llu AND Date>='%q')",
 							idx, szDateEnd.c_str());

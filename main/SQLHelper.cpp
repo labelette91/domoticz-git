@@ -2473,6 +2473,10 @@ bool CSQLHelper::OpenDatabase()
 		nValue = 5;
 		UpdatePreferencesVar("ShortLogInterval", nValue);
 	}
+	if (nValue < 1)
+		nValue = 5;
+	m_ShortLogInterval = nValue;
+
 	if (!GetPreferencesVar("SendErrorsAsNotification", nValue))
 	{
 		UpdatePreferencesVar("SendErrorsAsNotification", 0);
@@ -2480,9 +2484,6 @@ bool CSQLHelper::OpenDatabase()
 	}
 	_log.ForwardErrorsToNotificationSystem(nValue != 0);
 
-	if (nValue < 1)
-		nValue = 5;
-	m_ShortLogInterval = nValue;
 	//Start background thread
 	if (!StartThread())
 		return false;
@@ -7575,7 +7576,7 @@ std::map<std::string, std::string> CSQLHelper::GetDeviceOptions(const std::strin
 }
 
 bool CSQLHelper::SetDeviceOptions(const unsigned long long idx, const std::map<std::string, std::string> & optionsMap) {
-	if (idx < 0) {
+	if (idx < 1) {
 		_log.Log(LOG_ERROR, "Cannot set options on device %llu", idx);
 		return false;
 	}

@@ -421,6 +421,7 @@
     <ClInclude Include="..\hardware\CurrentCostMeterBase.h" />
     <ClInclude Include="..\hardware\CurrentCostMeterSerial.h" />
     <ClInclude Include="..\hardware\CurrentCostMeterTCP.h" />
+    <ClInclude Include="..\hardware\Daikin.h" />
     <ClInclude Include="..\hardware\DavisLoggerSerial.h" />
     <ClInclude Include="..\hardware\DenkoviSmartdenLan.h" />
     <ClInclude Include="..\hardware\Dummy.h" />
@@ -637,6 +638,7 @@
     <ClCompile Include="..\hardware\CurrentCostMeterBase.cpp" />
     <ClCompile Include="..\hardware\CurrentCostMeterSerial.cpp" />
     <ClCompile Include="..\hardware\CurrentCostMeterTCP.cpp" />
+    <ClCompile Include="..\hardware\Daikin.cpp" />
     <ClCompile Include="..\hardware\DavisLoggerSerial.cpp" />
     <ClCompile Include="..\hardware\DenkoviSmartdenLan.cpp" />
     <ClCompile Include="..\hardware\Dummy.cpp" />
@@ -1288,4 +1290,3 @@
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
 </Project>
-

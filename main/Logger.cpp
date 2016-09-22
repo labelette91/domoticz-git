@@ -440,6 +440,14 @@ void CLogger::GetLogPreference()
 	else
 		SetVerboseLevel(VBL_ALL);
 }
+void CLogger::ClearLog()
+{
+	boost::unique_lock< boost::mutex > lock(m_mutex);
+	m_lastlog.clear();
+	m_last_status_log.clear();
+	m_last_error_log.clear();
+}
+
 std::list<CLogger::_tLogLineStruct> CLogger::GetNotificationLogs()
 {
 	boost::unique_lock< boost::mutex > lock(m_mutex);

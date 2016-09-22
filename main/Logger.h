@@ -58,6 +58,7 @@ public:
 	void ForwardErrorsToNotificationSystem(const bool bDoForward);
 
 	std::list<_tLogLineStruct> GetLog(const _eLogLevel lType);
+	void ClearLog();
 
 	std::list<_tLogLineStruct> GetNotificationLogs();
 	bool NotificationLogsEnabled();

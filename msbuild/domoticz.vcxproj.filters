@@ -1644,6 +1644,9 @@
     <ClInclude Include="..\notifications\NotificationPushover.h">
       <Filter>Notifications</Filter>
     </ClInclude>
+    <ClInclude Include="..\notifications\NotificationPushsafer.h">
+      <Filter>Notifications</Filter>
+    </ClInclude>	
     <ClInclude Include="..\notifications\NotificationSMS.h">
       <Filter>Notifications</Filter>
     </ClInclude>
@@ -2210,6 +2213,9 @@
     <ClCompile Include="..\notifications\NotificationPushover.cpp">
       <Filter>Notifications</Filter>
     </ClCompile>
+    <ClCompile Include="..\notifications\NotificationPushsafer.cpp">
+      <Filter>Notifications</Filter>
+    </ClCompile>	
     <ClCompile Include="..\notifications\NotificationSMS.cpp">
       <Filter>Notifications</Filter>
     </ClCompile>

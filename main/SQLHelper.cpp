@@ -1431,6 +1431,7 @@ bool CSQLHelper::OpenDatabase()
 			UpdatePreferencesVar("ProwlEnabled", 1);
 			UpdatePreferencesVar("PushALotEnabled", 1);
 			UpdatePreferencesVar("PushoverEnabled", 1);
+			UpdatePreferencesVar("PushsaferEnabled", 1);
 			UpdatePreferencesVar("ClickatellEnabled", 1);
 		}
 		if (dbversion < 68)

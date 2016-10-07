@@ -17,7 +17,7 @@
 #endif
 
 #define BUFFER_LENGHT 100
-#define MULTIFUN_POLL_INTERVAL 10
+#define MULTIFUN_POLL_INTERVAL 10 //TODO - to settings on www
 
 #define round(a) ( int ) ( a + .5 )
 
@@ -26,7 +26,7 @@ typedef struct sensorType {
 	float div;
 } Model;
 
-#define sensorsCount 12
+#define sensorsCount 16
 #define registersCount 34
 
 typedef std::map<int, std::string> dictionary;
@@ -81,7 +81,11 @@ static sensorType sensors[sensorsCount] =
 	{ "Flue gas", 10.0 },
 	{ "Module", 10.0 },
 	{ "Boiler", 10.0 },
-	{ "Feeder", 10.0 }
+	{ "Feeder", 10.0 },
+	{ "Calculated Boiler", 10.0 },
+	{ "Calculated H.W.U.", 10.0 },
+	{ "Calculated C.H.1", 10.0 },
+	{ "Calculated C.H.2", 10.0 }
 };
 
 static dictionary quickAccessType = boost::assign::map_list_of
@@ -125,7 +129,7 @@ MultiFun::~MultiFun()
 bool MultiFun::StartHardware()
 {
 #ifdef DEBUG_MultiFun
-	_log.Log(LOG_STATUS, "MultiFuna: Start hardware");
+	_log.Log(LOG_STATUS, "MultiFun: Start hardware");
 #endif
 
 	m_thread = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&MultiFun::Do_Work, this)));
@@ -234,12 +238,12 @@ bool MultiFun::WriteToHardware(const char *pdata, const unsigned char length)
 	{
 		const _tThermostat *therm = reinterpret_cast<const _tThermostat*>(pdata);
 
-		int temp = therm->temp;
+		float temp = therm->temp;
 
 		if (therm->id2 == 0x1F || therm->id2 == 0x20)
 		{
 			temp = temp * 5;
-			temp = temp | 0x8000;
+			temp = (int)temp | 0x8000;
 		}
 
 		unsigned char buffer[100];
@@ -336,14 +340,17 @@ void MultiFun::GetTemperatures()
 		{
 			for (int i = 0; i < sensorsCount; i++)
 			{
-				if (buffer[i * 2 + 1] != 254)
-				{
-					float temp = (buffer[i * 2 + 1] * 256 + buffer[i * 2 + 2]) / sensors[i].div;
-					SendTempSensor(i, 255, temp, sensors[i].name);
+				unsigned int val = (buffer[i * 2 + 1] & 127) * 256 + buffer[i * 2 + 2];
+				int signedVal = (((buffer[i * 2 + 1] & 128) >> 7) * -32768) + val;
+				float temp = signedVal / sensors[i].div;
+
+				if ((temp > -39) && (temp < 1000))
+				{			
+					SendTempSensor(i, -1, temp, sensors[i].name);
 				}
 				if ((i == 1) || (i == 2))
 				{
-					m_isSensorExists[i - 1] = (buffer[i * 2 + 1] != 254);
+					m_isSensorExists[i - 1] = ((temp > -39) && (temp < 1000));
 				}
 			}
 		}
@@ -393,13 +400,17 @@ void MultiFun::GetRegisters(bool firstTime)
 					{
 						if (((*it).first & value) && !((*it).first & m_LastAlarms))
 						{
-							SendTextSensor(1, 0, 255, (*it).second, "Alarms");
+							SendTextSensor(1, 0, -1, (*it).second, "Alarms");
 						}
 						else
 							if (!((*it).first & value) && ((*it).first & m_LastAlarms))
 							{
-								SendTextSensor(1, 0, 255, "End - " + (*it).second, "Alarms");
+								SendTextSensor(1, 0, -1, "End - " + (*it).second, "Alarms");
 							}
+					}
+					if (((bool)m_LastAlarms != bool(value)) || firstTime)
+					{
+						SendAlertSensor(0, -1, value ? 4 : 1, "Alarm");
 					}
 					m_LastAlarms = value;
 					break;
@@ -411,13 +422,17 @@ void MultiFun::GetRegisters(bool firstTime)
 					{
 						if (((*it).first & value) && !((*it).first & m_LastWarnings))
 						{
-							SendTextSensor(1, 1, 255, (*it).second, "Warnings");
+							SendTextSensor(1, 1, -1, (*it).second, "Warnings");
 						}
 						else
 							if (!((*it).first & value) && ((*it).first & m_LastWarnings))
 							{
-								SendTextSensor(1, 1, 255, "End - " + (*it).second, "Warnings");
+								SendTextSensor(1, 1, -1, "End - " + (*it).second, "Warnings");
 							}
+					}
+					if (((bool)m_LastWarnings != bool(value)) || firstTime)
+					{
+						SendAlertSensor(1, -1, value ? 3 : 1, "Warning");
 					}
 					m_LastWarnings = value;
 					break;
@@ -429,18 +444,18 @@ void MultiFun::GetRegisters(bool firstTime)
 					{
 						if (((*it).first & value) && !((*it).first & m_LastDevices))
 						{
-							SendGeneralSwitchSensor(2, 255, true, (*it).second.c_str(), (*it).first);
+							SendGeneralSwitchSensor(2, -1, true, (*it).second.c_str(), (*it).first);
 						}
 						else
 							if (!((*it).first & value) && ((*it).first & m_LastDevices))
 							{
-								SendGeneralSwitchSensor(2, 255, false, (*it).second.c_str(), (*it).first);
+								SendGeneralSwitchSensor(2, -1, false, (*it).second.c_str(), (*it).first);
 							}
 					}
 					m_LastDevices = value;
 
 					float level = (value & 0xFC00) >> 10;
-					SendPercentageSensor(2, 1, 255, level, "BLOWER POWER");
+					SendPercentageSensor(2, 1, -1, level, "BLOWER POWER");
 					break;
 				}
 				case 0x03:
@@ -450,18 +465,18 @@ void MultiFun::GetRegisters(bool firstTime)
 					{
 						if (((*it).first & value) && !((*it).first & m_LastState))
 						{
-							SendTextSensor(3, 1, 255, (*it).second, "State");
+							SendTextSensor(3, 1, -1, (*it).second, "State");
 						}
 						else
 							if (!((*it).first & value) && ((*it).first & m_LastState))
 							{
-								SendTextSensor(3, 1, 255, "End - " + (*it).second, "State");
+								SendTextSensor(3, 1, -1, "End - " + (*it).second, "State");
 							}
 					}
 					m_LastState = value;
 
 					float level = (value & 0xFC00) >> 10;
-					SendPercentageSensor(3, 1, 255, level, "Fuel Level");
+					SendPercentageSensor(3, 1, -1, level, "Fuel Level");
 					break;
 				}
 
@@ -499,7 +514,7 @@ void MultiFun::GetRegisters(bool firstTime)
 					}
 					else
 					{
-						//SendGeneralSwitchSensor(i, 255, value, name, 1); // TODO - send level (dimmer)
+						//SendGeneralSwitchSensor(i, -1, value, name, 1); // TODO - send level (dimmer)
 					}					
 					break;
 				}
@@ -511,12 +526,12 @@ void MultiFun::GetRegisters(bool firstTime)
 					{
 						if (((*it).first & value) && !((*it).first & m_LastQuickAccess))
 						{
-							SendGeneralSwitchSensor(0x21, 255, true, (*it).second.c_str(), (*it).first);
+							SendGeneralSwitchSensor(0x21, -1, true, (*it).second.c_str(), (*it).first);
 						}
 						else
 							if ((!((*it).first & value) && ((*it).first & m_LastQuickAccess)) || firstTime)
 							{
-								SendGeneralSwitchSensor(0x21, 255, false, (*it).second.c_str(), (*it).first);
+								SendGeneralSwitchSensor(0x21, -1, false, (*it).second.c_str(), (*it).first);
 							}
 					}
 					m_LastQuickAccess = value;

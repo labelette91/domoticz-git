@@ -113,7 +113,7 @@
 		<script type="text/javascript" charset="utf-8" src="app/ihmSetpointTimers.js"></script>
 		<script type="text/javascript" charset="utf-8" src="app/ihmShowTimers.js"></script>
 		<script type="text/javascript" charset="utf-8" src="js/jquery-ui-timepicker-addon.js"></script>
-
+		
 		<script data-main="app/main" src="js/require.js"></script>
 <script type="text/javascript" charset="utf-8" id="init-code">
 
@@ -370,6 +370,12 @@ $(document).ready(function() {
 		e.preventDefault();
 		$.myglobals.historytype=1;
 		SwitchLayout('History');
+	});
+	
+	$('a#cMoreOptions').click(function(e) {
+		e.preventDefault();
+		e.stopPropagation();
+		$('a#cMoreOptions').trigger('mouseenter');
 	});
 
 	//Highcharts.getOptions().exporting.buttons.contextButton.menuItems.push({

@@ -331,6 +331,7 @@ namespace http {
 			m_pWebEm->RegisterActionCode("setrego6xxtype", boost::bind(&CWebServer::SetRego6XXType, this, _1, _2, _3));
 			m_pWebEm->RegisterActionCode("sets0metertype", boost::bind(&CWebServer::SetS0MeterType, this, _1, _2, _3));
 			m_pWebEm->RegisterActionCode("setlimitlesstype", boost::bind(&CWebServer::SetLimitlessType, this, _1, _2, _3));
+			m_pWebEm->RegisterActionCode("setyeelighttype", boost::bind(&CWebServer::SetYeelightType, this, _1, _2, _3));
 
 			m_pWebEm->RegisterActionCode("setopenthermsettings", boost::bind(&CWebServer::SetOpenThermSettings, this, _1, _2, _3));
 			RegisterCommandCode("sendopenthermcommand", boost::bind(&CWebServer::Cmd_SendOpenThermCommand, this, _1, _2, _3), true);
@@ -1109,6 +1110,9 @@ namespace http {
 			else if (htype == HTYPE_HEOS) {
 				//all fine here!
 			}
+			else if (htype == HTYPE_Yeelight) {
+				//all fine here!
+			}
 			else if (
 				(htype == HTYPE_Wunderground) ||
 				(htype == HTYPE_DarkSky) ||
@@ -1388,6 +1392,9 @@ namespace http {
 				//All fine here
 			}
 			else if (htype == HTYPE_HEOS) {
+				//All fine here
+			}
+			else if (htype == HTYPE_Yeelight) {
 				//All fine here
 			}
 			else if (
@@ -3308,6 +3315,7 @@ namespace http {
 						case pTypeRadiator1:
 						case pTypeGeneralSwitch:
 						case pTypeHomeConfort:
+						case pTypeYeelight:
 							bdoAdd = true;
 							if (!used)
 							{
@@ -3405,6 +3413,7 @@ namespace http {
 							case pTypeRemote:
 							case pTypeGeneralSwitch:
 							case pTypeHomeConfort:
+							case pTypeYeelight:
 								root["result"][ii]["type"] = 0;
 								root["result"][ii]["idx"] = ID;
 								root["result"][ii]["Name"] = "[Light/Switch] " + Name;
@@ -4527,6 +4536,7 @@ namespace http {
 					(dType == pTypeLighting5) ||
 					(dType == pTypeLighting6) ||
 					(dType == pTypeLimitlessLights) ||
+					(dType == pTypeYeelight) ||
 					(dType == pTypeSecurity1) ||
 					(dType == pTypeSecurity2) ||
 					(dType == pTypeEvohome) ||
@@ -5438,6 +5448,7 @@ namespace http {
 					(dType != pTypeLighting6) &&
 					(dType != pTypeFan) &&
 					(dType != pTypeLimitlessLights) &&
+					(dType != pTypeYeelight) &&
 					(dType != pTypeSecurity1) &&
 					(dType != pTypeSecurity2) &&
 					(dType != pTypeEvohome) &&
@@ -7445,6 +7456,7 @@ namespace http {
 								(dType != pTypeLighting6) &&
 								(dType != pTypeFan) &&
 								(dType != pTypeLimitlessLights) &&
+								(dType != pTypeYeelight) &&
 								(dType != pTypeSecurity1) &&
 								(dType != pTypeSecurity2) &&
 								(dType != pTypeEvohome) &&
@@ -7714,6 +7726,7 @@ namespace http {
 						(dType == pTypeLighting6) ||
 						(dType == pTypeFan) ||
 						(dType == pTypeLimitlessLights) ||
+						(dType == pTypeYeelight) ||
 						(dType == pTypeCurtain) ||
 						(dType == pTypeBlinds) ||
 						(dType == pTypeRFY) ||
@@ -7774,7 +7787,7 @@ namespace http {
 							root["result"][ii]["Level"] = LastLevel;
 							int iLevel = round((float(maxDimLevel) / 100.0f)*LastLevel);
 							root["result"][ii]["LevelInt"] = iLevel;
-							if (dType == pTypeLimitlessLights)
+							if ((dType == pTypeLimitlessLights) || (dType == pTypeYeelight))
 							{
 								llevel = LastLevel;
 								if (lstatus == "Set Level")
@@ -11618,6 +11631,7 @@ szQuery << "UPDATE DeviceStatus SET "
 				(dType != pTypeLighting6) &&
 				(dType != pTypeFan) &&
 				(dType != pTypeLimitlessLights) &&
+				(dType != pTypeYeelight) &&
 				(dType != pTypeSecurity1) &&
 				(dType != pTypeSecurity2) &&
 				(dType != pTypeEvohome) &&

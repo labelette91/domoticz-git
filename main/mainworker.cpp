@@ -969,6 +969,7 @@ bool MainWorker::Start()
 	//set the log preference
 	_log.GetLogPreference();
 
+	HTTPClient::SetUserAgent(GenerateUserAgent());
 	m_notifications.Init();
 	GetSunSettings();
 	GetAvailableWebThemes();

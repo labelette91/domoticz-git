@@ -132,9 +132,10 @@ private:
 	//std::string reciprocalAction (std::string Action);
 	std::vector<_tEventItem> m_events;
 
+	typedef std::map<std::string, _tUserVariable> TUserVariableMap;
 
 	std::map<unsigned long long, _tDeviceStatus> m_devicestates;
-	std::map<unsigned long long, _tUserVariable> m_uservariables;
+	TUserVariableMap                             m_uservariables;
 	std::map<unsigned long long, _tScenesGroups> m_scenesgroups;
 	std::map<std::string, float> m_tempValuesByName;
 	std::map<std::string, float> m_dewValuesByName;

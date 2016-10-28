@@ -26,7 +26,7 @@ FanTimeOn = tonumber(uservariables[FAN_TIME_ON])
 if  (FanTimeOn  == nil) then
     print('Create variables ' .. FAN_TIME_ON .. ' / humCounter / humThresHold integer ' 	)
     commandArray['Variable:'..FAN_TIME_ON] = '0 CREATE'
-    commandArray['Variable:humCounter'] = '0 CREATE'
+    commandArray['Variable:humCounter'] = '0 CREATE STATIC'
     return commandArray
 end
  

@@ -6166,7 +6166,8 @@ void CSQLHelper::AddTaskItem(const _tTaskItem &tItem)
 	boost::lock_guard<boost::mutex> l(m_background_task_mutex);
 
 	// Check if an event for the same device is already in queue, and if so, replace it
-	// _log.Log(LOG_NORM, "Request to add task: idx=%llu, DelayTime=%d, Command='%s', Level=%d, Hue=%d, RelatedEvent='%s'", tItem._idx, tItem._DelayTime, tItem._command.c_str(), tItem._level, tItem._Hue, tItem._relatedEvent.c_str());
+	if (_log.isTraceEnable())
+	   _log.Log(LOG_TRACE, "TASK: Request to add task: idx=%llu, DelayTime=%d, Command='%s', Level=%d, Hue=%d, RelatedEvent='%s'", tItem._idx, tItem._DelayTime, tItem._command.c_str(), tItem._level, tItem._Hue, tItem._relatedEvent.c_str());
 	// Remove any previous task linked to the same device
 
 	if (
@@ -6177,13 +6178,15 @@ void CSQLHelper::AddTaskItem(const _tTaskItem &tItem)
 		std::vector<_tTaskItem>::iterator itt = m_background_task_queue.begin();
 		while (itt != m_background_task_queue.end())
 		{
-			// _log.Log(LOG_NORM, "Comparing with item in queue: idx=%llu, DelayTime=%d, Command='%s', Level=%d, Hue=%d, RelatedEvent='%s'", itt->_idx, itt->_DelayTime, itt->_command.c_str(), itt->_level, itt->_Hue, itt->_relatedEvent.c_str());
+			if (_log.isTraceEnable())
+				 _log.Log(LOG_TRACE, "TASK: Comparing with item in queue: idx=%llu, DelayTime=%d, Command='%s', Level=%d, Hue=%d, RelatedEvent='%s'", itt->_idx, itt->_DelayTime, itt->_command.c_str(), itt->_level, itt->_Hue, itt->_relatedEvent.c_str());
 			if (itt->_idx == tItem._idx && itt->_ItemType == tItem._ItemType)
 			{
 				int iDelayDiff = tItem._DelayTime - itt->_DelayTime;
 				if (iDelayDiff < 3)
 				{
-					// _log.Log(LOG_NORM, "=> Already present. Cancelling previous task item");
+					if (_log.isTraceEnable())
+						 _log.Log(LOG_TRACE, "TASK: => Already present. Cancelling previous task item");
 					itt = m_background_task_queue.erase(itt);
 				}
 				else

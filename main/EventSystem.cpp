@@ -2985,15 +2985,39 @@ bool CEventSystem::processLuaCommand(lua_State *lua_state, const std::string &fi
 
 		aFind = variableValue.find(" CREATE");
 		if ((aFind > 0) && (aFind != std::string::npos)) {
+
+			// syntax VALUE CREATE INTEGER/FLOAT/STRING
+			std::vector<std::string> cmd;
+			StringSplit(variableValue, " ", cmd);
+			variableValue = cmd[0];
+
 			//create user loca string variable
 			_tUserVariable uvitem;
+			bool staticVariable = false;
+			std::string variabletype = "2";
+
+			for (int i = 1; i < cmd.size();i++){
+				if (cmd[i] == "STATIC")	staticVariable = true;
+				else if (cmd[i] == "INTEGER")	variabletype = "0";
+				else if (cmd[i] == "FLOAT")	    variabletype = "1";
+				else if (cmd[i] == "STRING")	variabletype = "2";
+				else if (cmd[i] == "DATE")	    variabletype = "3";
+				else if (cmd[i] == "TIME")   	variabletype = "4";
+			}
+
 			uvitem.ID = 0;
 			uvitem.variableName = variableName;
-			variableValue=variableValue.substr(0, aFind);
 			uvitem.variableValue = variableValue;
-			uvitem.variableType = 2 ; 
+			uvitem.variableType = std::stoi(variabletype) ;
 			uvitem.lastUpdate = "";
-			m_uservariables[variableName] = uvitem;
+			//if static Variable create only in RAM
+			if (staticVariable)
+				m_uservariables[variableName] = uvitem;
+			else {
+				//create only in Database UserVariable 
+				m_sql.SaveUserVariable(variableName, variabletype, variableValue);
+			}
+
 		}
 
 

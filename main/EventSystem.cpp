@@ -1930,17 +1930,17 @@ bool CEventSystem::parseBlocklyActions(const std::string &Actions, const std::st
 			}
 			else if (isVariable)
 			{
-				int afterTimerSeconds = 0;
+				float afterTimerSeconds = 0;
 				size_t aFind = doWhat.find(" AFTER ");
 				if ((aFind > 0) && (aFind != std::string::npos)) {
 					std::string delayString = doWhat.substr(aFind + 7);
 					std::string newAction = doWhat.substr(0, aFind);
-					afterTimerSeconds = atoi(delayString.c_str());
+					afterTimerSeconds = static_cast<float>(atof(delayString.c_str()));
 					doWhat = newAction;
 					StripQuotes(doWhat);
 				}
 				doWhat = ProcessVariableArgument(doWhat);
-				if (afterTimerSeconds == 0)
+				if (afterTimerSeconds < (1./timer_resolution_hz/2))
 				{
 					std::vector<std::vector<std::string> > result;
 					result = m_sql.safe_query("SELECT Name, ValueType FROM UserVariables WHERE (ID == '%q')", variableNo.c_str());
@@ -1955,7 +1955,7 @@ bool CEventSystem::parseBlocklyActions(const std::string &Actions, const std::st
 				}
 				else
 				{
-					int DelayTime = 1 + afterTimerSeconds;
+					float DelayTime = afterTimerSeconds;
 					_tTaskItem tItem;
 					tItem = _tTaskItem::SetVariable(DelayTime, (const unsigned long long)atol(variableNo.c_str()), doWhat, false);
 					m_sql.AddTaskItem(tItem);
@@ -2729,7 +2729,7 @@ void CEventSystem::EvaluateLua(const std::string &reason, const std::string &fil
 		lua_rawset(lua_state, -3);
 	}
 	lua_setglobal(lua_state, "otherdevices_scenesgroups_idx");
-	
+
 	lua_createtable(lua_state, (int)m_uservariables.size(), 0);
 
 	typedef std::map<unsigned long long, _tUserVariable>::iterator it_var;
@@ -2984,18 +2984,17 @@ bool CEventSystem::processLuaCommand(lua_State *lua_state, const std::string &fi
 
 		std::vector<std::vector<std::string> > result;
 
-		int afterTimerSeconds = 0;
+		float afterTimerSeconds = 0;
 		size_t aFind = variableValue.find(" AFTER ");
 		if ((aFind > 0) && (aFind != std::string::npos)) {
 			std::string delayString = variableValue.substr(aFind + 7);
 			std::string newAction = variableValue.substr(0, aFind);
-			afterTimerSeconds = atoi(delayString.c_str());
+			afterTimerSeconds = static_cast<float>(atof(delayString.c_str()));
 			variableValue = newAction;
 		}
 
 		aFind = variableValue.find(" CREATE");
 		if ((aFind > 0) && (aFind != std::string::npos)) {
-
 			// syntax VALUE CREATE INTEGER/FLOAT/STRING
 			std::vector<std::string> cmd;
 			StringSplit(variableValue, " ", cmd);
@@ -3005,7 +3004,6 @@ bool CEventSystem::processLuaCommand(lua_State *lua_state, const std::string &fi
 			_tUserVariable uvitem;
 			bool staticVariable = false;
 			std::string variabletype = "2";
-
 			for (int i = 1; i < cmd.size();i++){
 				if (cmd[i] == "STATIC")	staticVariable = true;
 				else if (cmd[i] == "INTEGER")	variabletype = "0";
@@ -3014,7 +3012,6 @@ bool CEventSystem::processLuaCommand(lua_State *lua_state, const std::string &fi
 				else if (cmd[i] == "DATE")	    variabletype = "3";
 				else if (cmd[i] == "TIME")   	variabletype = "4";
 			}
-
 			uvitem.ID = 0;
 			uvitem.variableName = variableName;
 			uvitem.variableValue = variableValue;
@@ -3027,46 +3024,41 @@ bool CEventSystem::processLuaCommand(lua_State *lua_state, const std::string &fi
 				//create only in Database UserVariable 
 				m_sql.SaveUserVariable(variableName, variabletype, variableValue);
 			}
-
 		}
-
-
 		TUserStaticVariableMap::iterator iterator = m_userStaticvariables.find(variableName);
 		//if found , it is user static variable loacal
 		if (iterator != m_userStaticvariables.end())
 		{
 			m_userStaticvariables[variableName].variableValue = variableValue;
+			return true;
 		}
-		else {
-			result = m_sql.safe_query("SELECT ID, ValueType FROM UserVariables WHERE (Name == '%q')", variableName.c_str());
-			if (result.size() > 0)
+		result = m_sql.safe_query("SELECT ID, ValueType FROM UserVariables WHERE (Name == '%q')", variableName.c_str());
+		if (result.size() > 0)
+		{
+			std::vector<std::string> sd = result[0];
+
+			variableValue = ProcessVariableArgument(variableValue);
+
+			if (afterTimerSeconds < (1./timer_resolution_hz/2))
 			{
-				std::vector<std::string> sd = result[0];
-
-				variableValue = ProcessVariableArgument(variableValue);
-
-				if (afterTimerSeconds == 0)
-				{
-					std::string updateResult = m_sql.UpdateUserVariable(sd[0], variableName, sd[1], variableValue, false);
-					if (updateResult != "OK") {
-						_log.Log(LOG_ERROR, "EventSystem: Error updating variable %s: %s", variableName.c_str(), updateResult.c_str());
-					}
+				std::string updateResult = m_sql.UpdateUserVariable(sd[0], variableName, sd[1], variableValue, false);
+				if (updateResult != "OK") {
+					_log.Log(LOG_ERROR, "EventSystem: Error updating variable %s: %s", variableName.c_str(), updateResult.c_str());
 				}
-				else
-				{
-					int DelayTime = 1 + afterTimerSeconds;
-					unsigned long long idx;
-					std::stringstream sstr;
-					sstr << sd[0];
-					sstr >> idx;
-					_tTaskItem tItem;
-					tItem = _tTaskItem::SetVariable(DelayTime, idx, variableValue, false);
-					m_sql.AddTaskItem(tItem);
-				}
-				scriptTrue = true;
 			}
+			else
+			{
+				float DelayTime = afterTimerSeconds;
+				unsigned long long idx;
+				std::stringstream sstr;
+				sstr << sd[0];
+				sstr >> idx;
+				_tTaskItem tItem;
+				tItem = _tTaskItem::SetVariable(DelayTime, idx, variableValue, false);
+				m_sql.AddTaskItem(tItem);
+			}
+			scriptTrue = true;
 		}
-
 	}
 	else
 	{
@@ -3257,19 +3249,19 @@ bool CEventSystem::ScheduleEvent(std::string deviceName, const std::string &Acti
 			return false;
 
 		std::string cAction = Action;
-		int delay = 0;
+		float delay = 0;
 		size_t aFind = Action.find(" AFTER ");
 		if ((aFind > 0) && (aFind != std::string::npos)) {
 			std::string delayString = Action.substr(aFind + 7);
 			std::string newAction = Action.substr(0, aFind);
-			delay = atoi(delayString.c_str());
+			delay = static_cast<float>(atof(delayString.c_str()));
 			cAction = newAction;
 		}
 		StripQuotes(cAction);
 
 
 		std::string subject = cAction;
-		if (delay == 0)
+		if (delay < (1./timer_resolution_hz/2))
 		{
 			m_mainworker.m_cameras.EmailCameraSnapshot(deviceName, subject);
 		}
@@ -3304,36 +3296,30 @@ bool CEventSystem::ScheduleEvent(int deviceID, std::string Action, bool isScene,
 	unsigned char previousLevel = calculateDimLevel(deviceID, m_devicestates[deviceID].lastLevel);
 	devicestatesMutexLock.unlock();
 
-	int suspendTimer = 0;
-	int randomTimer = 0;
-	int afterTimerSeconds = 0;
+	float suspendTimer = 0;
+	float randomTimer = 0;
+	float afterTimerSeconds = 0;
 
 	size_t aFind = Action.find(" FOR ");
 	if ((aFind > 0) && (aFind != std::string::npos)) {
 		std::string delayString = Action.substr(aFind + 5);
 		std::string newAction = Action.substr(0, aFind);
-		suspendTimer = atoi(delayString.c_str());
-		if (suspendTimer > 0)
-		{
-			Action = newAction;
-		}
+		suspendTimer = static_cast<float>(atof(delayString.c_str()));
+		Action = newAction;
 	}
 	size_t rFind = Action.find(" RANDOM ");
 	if ((rFind > 0) && (rFind != std::string::npos))
 	{
 		std::string delayString = Action.substr(rFind + 8);
 		std::string newAction = Action.substr(0, rFind);
-		randomTimer = atoi(delayString.c_str());
-		if (randomTimer > 0)
-		{
-			Action = newAction;
-		}
+		randomTimer = static_cast<float>(atof(delayString.c_str()));
+		Action = newAction;
 	}
 	aFind = Action.find(" AFTER ");
 	if ((aFind > 0) && (aFind != std::string::npos)) {
 		std::string delayString = Action.substr(aFind + 7);
 		std::string newAction = Action.substr(0, aFind);
-		afterTimerSeconds = atoi(delayString.c_str());
+		afterTimerSeconds = static_cast<float>(atof(delayString.c_str()));
 		Action = newAction;
 	}
 
@@ -3412,13 +3398,13 @@ bool CEventSystem::ScheduleEvent(int deviceID, std::string Action, bool isScene,
 
 		Action = Action.substr(0, 7);
 	}
-	int DelayTime = 1;
+	float DelayTime = 0;
 
-	if (randomTimer > 0) {
-		int rTime;
+	if (randomTimer > (1./timer_resolution_hz/2)) {
+		float rTime;
 		srand((unsigned int)mytime(NULL));
-		rTime = rand() % randomTimer + 1;
-		DelayTime = (rTime * 60) + 5; //prevent it from running again immediately the next minute if blockly script doesn't handle that
+		rTime = (float)rand()/(float)(RAND_MAX/randomTimer);
+		DelayTime = static_cast<float>(rTime + (1. / timer_resolution_hz)); //prevent it from running again immediately the next minute if blockly script doesn't handle that
 		//alreadyScheduled = isEventscheduled(deviceID, randomTimer, isScene);
 	}
 	if (afterTimerSeconds > 0)
@@ -3467,9 +3453,9 @@ bool CEventSystem::ScheduleEvent(int deviceID, std::string Action, bool isScene,
 	}
 	m_sql.AddTaskItem(tItem);
 
-	if (suspendTimer > 0)
+	if (suspendTimer > (1./timer_resolution_hz/2))
 	{
-		DelayTime = (suspendTimer * 60) + 5; //prevent it from running again immediately the next minute if blockly script doesn't handle that
+		DelayTime = static_cast<float>(suspendTimer + (1. / timer_resolution_hz)); //prevent it from running again immediately the next minute if blockly script doesn't handle that
 		_tTaskItem delayedtItem;
 		if (isScene) {
 			if (Action == "On") {

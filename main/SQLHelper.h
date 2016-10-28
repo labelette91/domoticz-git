@@ -7,6 +7,8 @@
 #include <map>
 #include "Helper.h"
 
+#define timer_resolution_hz 25
+
 struct sqlite3;
 
 enum _eWindUnit
@@ -41,7 +43,7 @@ enum _eTaskItemType
 struct _tTaskItem
 {
 	_eTaskItemType _ItemType;
-	int _DelayTime;
+	float _DelayTime;
 	int _HardwareID;
 	unsigned long long _idx;
 	std::string _ID;
@@ -57,13 +59,13 @@ struct _tTaskItem
     unsigned char _level;
 	int _Hue;
     std::string _relatedEvent;
-    
+
 	_tTaskItem()
 	{
 
 	}
 
-	static _tTaskItem SwitchLight(const int DelayTime, const unsigned long long idx, const int HardwareID, const char* ID, const unsigned char unit, const unsigned char devType, const unsigned char subType, const int switchtype, const unsigned char signallevel, const unsigned char batterylevel, const int nValue, const char* sValue)
+	static _tTaskItem SwitchLight(const float DelayTime, const unsigned long long idx, const int HardwareID, const char* ID, const unsigned char unit, const unsigned char devType, const unsigned char subType, const int switchtype, const unsigned char signallevel, const unsigned char batterylevel, const int nValue, const char* sValue)
 	{
 		_tTaskItem tItem;
 		tItem._ItemType=TITEM_SWITCHCMD;
@@ -81,7 +83,7 @@ struct _tTaskItem
 		tItem._sValue=sValue;
 		return tItem;
 	}
-	static _tTaskItem ExecuteScript(const int DelayTime, const std::string &ScriptPath, const std::string &ScriptParams)
+	static _tTaskItem ExecuteScript(const float DelayTime, const std::string &ScriptPath, const std::string &ScriptParams)
 	{
 		_tTaskItem tItem;
 		tItem._ItemType=TITEM_EXECUTE_SCRIPT;
@@ -90,7 +92,7 @@ struct _tTaskItem
 		tItem._sValue=ScriptParams;
 		return tItem;
 	}
-	static _tTaskItem EmailCameraSnapshot(const int DelayTime, const std::string &CamIdx, const std::string &Subject)
+	static _tTaskItem EmailCameraSnapshot(const float DelayTime, const std::string &CamIdx, const std::string &Subject)
 	{
 		_tTaskItem tItem;
 		tItem._ItemType=TITEM_EMAIL_CAMERA_SNAPSHOT;
@@ -99,7 +101,7 @@ struct _tTaskItem
 		tItem._sValue=Subject;
 		return tItem;
 	}
-	static _tTaskItem SendEmail(const int DelayTime, const std::string &Subject, const std::string &Body)
+	static _tTaskItem SendEmail(const float DelayTime, const std::string &Subject, const std::string &Body)
 	{
 		_tTaskItem tItem;
 		tItem._ItemType=TITEM_SEND_EMAIL;
@@ -108,7 +110,7 @@ struct _tTaskItem
 		tItem._sValue=Body;
 		return tItem;
 	}
-	static _tTaskItem SendEmailTo(const int DelayTime, const std::string &Subject, const std::string &Body, const std::string &To)
+	static _tTaskItem SendEmailTo(const float DelayTime, const std::string &Subject, const std::string &Body, const std::string &To)
 	{
 		_tTaskItem tItem;
 		tItem._ItemType=TITEM_SEND_EMAIL_TO;
@@ -118,7 +120,7 @@ struct _tTaskItem
 		tItem._command=To;
 		return tItem;
 	}
-	static _tTaskItem SendSMS(const int DelayTime, const std::string &Subject)
+	static _tTaskItem SendSMS(const float DelayTime, const std::string &Subject)
 	{
 		_tTaskItem tItem;
 		tItem._ItemType = TITEM_SEND_SMS;
@@ -126,7 +128,7 @@ struct _tTaskItem
 		tItem._ID = Subject;
 		return tItem;
 	}
-	static _tTaskItem SwitchLightEvent(const int DelayTime, const unsigned long long idx, const std::string &Command, const unsigned char Level, const int Hue, const std::string &eventName)
+	static _tTaskItem SwitchLightEvent(const float DelayTime, const unsigned long long idx, const std::string &Command, const unsigned char Level, const int Hue, const std::string &eventName)
 	{
 		_tTaskItem tItem;
 		tItem._ItemType=TITEM_SWITCHCMD_EVENT;
@@ -139,7 +141,7 @@ struct _tTaskItem
 
 		return tItem;
 	}
-    static _tTaskItem SwitchSceneEvent(const int DelayTime, const unsigned long long idx, const std::string &Command, const std::string &eventName)
+    static _tTaskItem SwitchSceneEvent(const float DelayTime, const unsigned long long idx, const std::string &Command, const std::string &eventName)
 	{
 		_tTaskItem tItem;
 		tItem._ItemType=TITEM_SWITCHCMD_SCENE;
@@ -147,10 +149,10 @@ struct _tTaskItem
 		tItem._idx=idx;
         tItem._command= Command;
         tItem._relatedEvent = eventName;
-        
+
 		return tItem;
 	}
-	static _tTaskItem GetHTTPPage(const int DelayTime, const std::string &URL, const std::string &eventName)
+	static _tTaskItem GetHTTPPage(const float DelayTime, const std::string &URL, const std::string &eventName)
 	{
 		_tTaskItem tItem;
 		tItem._ItemType=TITEM_GETURL;
@@ -160,7 +162,7 @@ struct _tTaskItem
 
 		return tItem;
 	}
-	static _tTaskItem SetVariable(const int DelayTime, const unsigned long long idx, const std::string &varvalue, const bool eventtrigger)
+	static _tTaskItem SetVariable(const float DelayTime, const unsigned long long idx, const std::string &varvalue, const bool eventtrigger)
 	{
 		_tTaskItem tItem;
 		tItem._ItemType = TITEM_SET_VARIABLE;
@@ -170,7 +172,7 @@ struct _tTaskItem
 		tItem._nValue = (eventtrigger==true)?1:0;
 		return tItem;
 	}
-	
+
 };
 
 class CSQLHelper
@@ -194,7 +196,7 @@ public:
 	unsigned long long UpdateValueHomeConfortGroupCmd(const int HardwareID, const char* ID, const unsigned char unit, const unsigned char devType, const unsigned char subType, const unsigned char signallevel, const unsigned char batterylevel, const int nValue, const char* sValue, std::string &devname, const bool bUseOnOffAction = true);
 
 	bool GetLastValue(const int HardwareID, const char* DeviceID, const unsigned char unit, const unsigned char devType, const unsigned char subType, int &nvalue, std::string &sValue, struct tm &LastUpdateTime);
-	
+
 	void Lighting2GroupCmd(const std::string &ID, const unsigned char subType, const unsigned char GroupCmd);
 	void HomeConfortGroupCmd(const std::string &ID, const unsigned char subType, const unsigned char GroupCmd);
 	void GeneralSwitchGroupCmd(const std::string &ID, const unsigned char subType, const unsigned char GroupCmd);
@@ -235,13 +237,13 @@ public:
 	void VacuumDatabase();
 
 	void DeleteHardware(const std::string &idx);
-    
+
     void DeleteCamera(const std::string &idx);
 
     void DeletePlan(const std::string &idx);
 
     void DeleteEvent(const std::string &idx);
-    
+
 	void DeleteDevices(const std::string &idx);
 
 	void TransferDevice(const std::string &oldidx, const std::string &newidx);
@@ -249,9 +251,9 @@ public:
 	bool DoesSceneByNameExits(const std::string &SceneName);
 
 	void AddTaskItem(const _tTaskItem &tItem);
-    
+
     void EventsGetTaskItems(std::vector<_tTaskItem> &currentTasks);
-   
+
 	void SetUnitsAndScale();
 
 	void CheckDeviceTimeout();
@@ -314,7 +316,7 @@ private:
 	std::map<unsigned long long, int> m_timeoutlastsend;
 	std::map<unsigned long long, int> m_batterylowlastsend;
 	bool			m_bAcceptHardwareTimerActive;
-	int				m_iAcceptHardwareTimerCounter;
+	float			m_iAcceptHardwareTimerCounter;
 	bool			m_bPreviousAcceptNewHardware;
 
 	std::vector<_tTaskItem> m_background_task_queue;

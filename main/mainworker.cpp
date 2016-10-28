@@ -11330,7 +11330,7 @@ bool MainWorker::SwitchLight(const unsigned long long idx, const std::string &sw
 		{
 			_log.Log(LOG_NORM, "Delaying switch [%s] action (%s) for %d seconds", devName.c_str(), switchcmd.c_str(), ExtraDelay);
 		}
-		m_sql.AddTaskItem(_tTaskItem::SwitchLightEvent(iOnDelay + ExtraDelay, idx, switchcmd, level, hue, "Switch with Delay"));
+		m_sql.AddTaskItem(_tTaskItem::SwitchLightEvent(static_cast<float>(iOnDelay + ExtraDelay), idx, switchcmd, level, hue, "Switch with Delay"));
 		return true;
 	}
 	else
@@ -11899,7 +11899,7 @@ bool MainWorker::SwitchScene(const unsigned long long idx, const std::string &sw
 						subject=Name + " Activated";
 					else
 						subject=Name + " Status: " + switchcmd;
-					m_sql.AddTaskItem(_tTaskItem::EmailCameraSnapshot(delay+1,camidx,subject));
+					m_sql.AddTaskItem(_tTaskItem::EmailCameraSnapshot(static_cast<float>(delay + 1), camidx, subject));
 				}
 			}
 		}

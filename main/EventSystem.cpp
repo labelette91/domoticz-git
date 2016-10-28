@@ -281,10 +281,11 @@ void CEventSystem::GetCurrentStates()
 
 void CEventSystem::GetCurrentUserVariables()
 {
+	int maxId = 0;
 	boost::unique_lock<boost::shared_mutex> uservariablesMutexLock(m_uservariablesMutex);
 
 	//_log.Log(LOG_STATUS, "EventSystem: reset all user variables...");
-//	m_uservariables.clear();
+	m_uservariables.clear();
 
 	std::vector<std::vector<std::string> > result;
 	result = m_sql.safe_query("SELECT ID,Name,Value, ValueType, LastUpdate FROM UserVariables");
@@ -301,9 +302,18 @@ void CEventSystem::GetCurrentUserVariables()
 			uvitem.variableValue = sd[2];
 			uvitem.variableType = atoi(sd[3].c_str());
 			uvitem.lastUpdate = sd[4];
-			m_uservariables[std::to_string(uvitem.ID)] = uvitem;
+			m_uservariables[uvitem.ID] = uvitem;
+			if (uvitem.ID > maxId) maxId = uvitem.ID ;
 		}
 	}
+
+	TUserStaticVariableMap::iterator itt ;
+	for (itt = m_userStaticvariables.begin(); itt != m_userStaticvariables.end(); ++itt)
+	{
+		m_uservariables[++maxId] = itt->second ;
+	}
+
+
 }
 
 void CEventSystem::GetCurrentScenesGroups()
@@ -1271,7 +1281,7 @@ lua_State *CEventSystem::CreateBlocklyLuaState()
 
 	lua_createtable(lua_state, (int)m_uservariables.size(), 0);
 
-	typedef TUserVariableMap::iterator it_var;
+	typedef std::map<unsigned long long, _tUserVariable>::iterator it_var;
 	for (it_var iterator = m_uservariables.begin(); iterator != m_uservariables.end(); ++iterator) {
 		_tUserVariable uvitem = iterator->second;
 		if (uvitem.variableType == 0) {
@@ -1813,7 +1823,7 @@ std::string CEventSystem::ProcessVariableArgument(const std::string &Argument)
 	}
 	else if (Argument.find("variable") == 0)
 	{
-		TUserVariableMap::const_iterator itt = m_uservariables.find(std::to_string(dindex));
+		std::map<unsigned long long, _tUserVariable>::const_iterator itt = m_uservariables.find(dindex);
 		if (itt != m_uservariables.end())
 		{
 			return itt->second.variableValue;
@@ -2208,7 +2218,7 @@ void CEventSystem::EvaluatePython(const std::string &reason, const std::string &
 		// put variables in user_variables dict, but also in the namespace
 		object user_variables = dict();
 		{
-			typedef TUserVariableMap::iterator it_var;
+			typedef std::map<unsigned long long, _tUserVariable>::iterator it_var;
 			for (it_var iterator = m_uservariables.begin(); iterator != m_uservariables.end(); ++iterator) {
 				_tUserVariable uvitem = iterator->second;
 				//user_variables[uvitem.variableName] = uvitem;
@@ -2675,7 +2685,7 @@ void CEventSystem::EvaluateLua(const std::string &reason, const std::string &fil
 	devicestatesMutexLock2.unlock();
 	lua_createtable(lua_state, (int)m_uservariables.size(), 0);
 
-	typedef TUserVariableMap::iterator it_var;
+	typedef std::map<unsigned long long, _tUserVariable>::iterator it_var;
 	for (it_var iterator = m_uservariables.begin(); iterator != m_uservariables.end(); ++iterator) {
 		_tUserVariable uvitem = iterator->second;
 		if (uvitem.variableType == 0)  {
@@ -2722,7 +2732,7 @@ void CEventSystem::EvaluateLua(const std::string &reason, const std::string &fil
 	
 	lua_createtable(lua_state, (int)m_uservariables.size(), 0);
 
-	typedef TUserVariableMap::iterator it_var;
+	typedef std::map<unsigned long long, _tUserVariable>::iterator it_var;
 	for (it_var iterator = m_uservariables.begin(); iterator != m_uservariables.end(); ++iterator) {
 		_tUserVariable uvitem = iterator->second;
 		lua_pushstring(lua_state, uvitem.variableName.c_str());
@@ -2733,7 +2743,7 @@ void CEventSystem::EvaluateLua(const std::string &reason, const std::string &fil
 
 	if (reason == "uservariable") {
 		if (varId > 0) {
-			typedef TUserVariableMap::iterator it_cvar;
+			typedef std::map<unsigned long long, _tUserVariable>::iterator it_cvar;
 			for (it_cvar iterator = m_uservariables.begin(); iterator != m_uservariables.end(); ++iterator) {
 				_tUserVariable uvitem = iterator->second;
 				if (uvitem.ID == varId) {
@@ -3012,7 +3022,7 @@ bool CEventSystem::processLuaCommand(lua_State *lua_state, const std::string &fi
 			uvitem.lastUpdate = "";
 			//if static Variable create only in RAM
 			if (staticVariable)
-				m_uservariables[variableName] = uvitem;
+				m_userStaticvariables[variableName] = uvitem;
 			else {
 				//create only in Database UserVariable 
 				m_sql.SaveUserVariable(variableName, variabletype, variableValue);
@@ -3021,11 +3031,11 @@ bool CEventSystem::processLuaCommand(lua_State *lua_state, const std::string &fi
 		}
 
 
-		TUserVariableMap::iterator iterator = m_uservariables.find(variableName);
-		//if found , it is user variable loacal
-		if (iterator != m_uservariables.end())
+		TUserStaticVariableMap::iterator iterator = m_userStaticvariables.find(variableName);
+		//if found , it is user static variable loacal
+		if (iterator != m_userStaticvariables.end())
 		{
-			m_uservariables[variableName].variableValue = variableValue;
+			m_userStaticvariables[variableName].variableValue = variableValue;
 		}
 		else {
 			result = m_sql.safe_query("SELECT ID, ValueType FROM UserVariables WHERE (Name == '%q')", variableName.c_str());
@@ -3210,7 +3220,7 @@ void CEventSystem::WriteToLog(const std::string &devNameNoQuotes, const std::str
 	}
 	else if (devNameNoQuotes == "WriteToLogUserVariable")
 	{
-		_log.Log(LOG_STATUS, "%s", m_uservariables[(doWhat.c_str())].variableValue.c_str());
+		_log.Log(LOG_STATUS, "%s", m_uservariables[atoi(doWhat.c_str())].variableValue.c_str());
 	}
 	else if (devNameNoQuotes == "WriteToLogDeviceVariable")
 	{

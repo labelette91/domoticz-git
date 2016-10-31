@@ -1487,7 +1487,7 @@ bool  ImperiHome::Request( std::string &request_path , std::string &rep_content)
 	else  if (request_path.find("/devices")==0)
 	{
 		std::vector<std::string> results;
-		StringSplit(request_path,"/",results);
+		StringSplit(request_path.substr(1),"/",results);
 		if (results.size()==1)
 		{
 			if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"IMPE: Devices request"  );

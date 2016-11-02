@@ -17,7 +17,8 @@ TEST_MODE = false                   -- when true TEST_MODE_HUMVAR is used instea
 TEST_MODE_HUMVAR = 'testHumidity'   -- fake humidity value, give it a test value in domoticz/uservars
 PRINT_MODE = true					        -- when true wil print output to log and send notifications
 SAMPLE_INTERVAL = 10                -- 10 min
-INTERVAL = 60                       --temps maximim fan on off
+TIME_ON = 60                       --temps maximim fan   on 
+TIME_OFF = 60                       --temps maximim fan  off
 
 setConstants()
 
@@ -65,7 +66,7 @@ extHum = otherdevices_humidity[EXTERIOR_NAME]
 lastState = otherdevices[FAN_NAME]
  
 if (current >= humThresHold) and (current > extHum ) then
-	  if (FanTimeOn >= INTERVAL ) then
+	  if (FanTimeOn >= TIME_OFF ) then
     	newCmd  = 'On'
     else
       newCmd = lastState
@@ -73,7 +74,9 @@ if (current >= humThresHold) and (current > extHum ) then
 else
     newCmd  = 'Off'
 end
-if ( lastState == 'On' ) and (FanTimeOn >= INTERVAL ) then
+if ( (current - extHum) > 10 ) then TIME_ON = TIME_ON * 2 end
+
+if ( lastState == 'On' ) and (FanTimeOn >= TIME_ON ) then
     newCmd  = 'Off'
 end
 

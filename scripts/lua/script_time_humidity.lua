@@ -81,8 +81,8 @@ if ( lastState == 'On' ) and (FanTimeOn >= TIME_ON ) then
     newCmd  = 'Off'
 end
 
+commandArray[FAN_NAME] = newCmd 
 if (newCmd ~= lastState) then 	
-	commandArray[FAN_NAME] = newCmd 
 	FanTimeOn = 0
 end
 

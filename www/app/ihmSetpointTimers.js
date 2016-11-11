@@ -172,8 +172,7 @@ function SetHoursTemp( dayN,hour,confortTemp,ecoTemp)
 	else{
 	//selection using row and day	checkbox
      for (var day=0;day<7;day++) {
-        var entry = $.WeekDays[day];
-        if ( getDayCheckBox(entry).is(":checked")) 
+         if (DayCheck[day])
         {
             SetDayHourTemp( day,hour,confortTemp,ecoTemp);
 		}
@@ -196,6 +195,15 @@ function SetDays (TypeStr, bDisabled)
 		getDayCheckBox("Fri").attr('disabled', bDisabled);
 		getDayCheckBox("Sat").attr('disabled', bDisabled);
 		getDayCheckBox("Sun").attr('disabled', bDisabled);
+
+		DayCheck[0] = getDayCheckBox("Mon").is(":checked");
+		DayCheck[1] = getDayCheckBox("Tue").is(":checked");
+		DayCheck[2] = getDayCheckBox("Wed").is(":checked");
+		DayCheck[3] = getDayCheckBox("Thu").is(":checked");
+		DayCheck[4] = getDayCheckBox("Fri").is(":checked");
+		DayCheck[5] = getDayCheckBox("Sat").is(":checked");
+		DayCheck[6] = getDayCheckBox("Sun").is(":checked");
+
 }
 function SetVal(id,temp)
 { 
@@ -258,11 +266,10 @@ function getDayCheckBox(entry)
 {
   return $("#utilitycontent #"+entry+" #Chk");
 }
-//day: 0..6
+//day: 0..6 : return button ihm object
 function getItem(day,hour)
 {
-  var entry = $.WeekDays[day];
-  var obj = $("#utilitycontent #"+entry+" #"+hour);
+  var obj = DayHoursObj[day][hour]
   return obj;
 }
 function getConforVal()
@@ -328,14 +335,19 @@ function ShowIhmSetpointTimersInt(devIdx,name, isdimmer, stype,devsubtype)
   $.WeekDays = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]; 
   DayTimer  = new Array(7); 
   clearDayTimer() ;
-  getTimerSetPoints(devIdx) ;
+  getTimerSetPoints(devIdx);
+  setObjItemRef();
   DisplayTimerValues(20);
+
+  DayCheck = new Array(7);
+  SetDays("Everyday", false);
+
   
-  $("button.btn-timer").mouseover(function () {
-     if ($.MouseDown){
-        SetHoursTemp( $(this).prop("name"),$(this).prop("id"), getConforVal() , getEcoVal() );  
-     }
-  });
+//  $("button.btn-timer").mouseover(function () {
+//     if ($.MouseDown){
+//        SetHoursTemp( $(this).prop("name"),$(this).prop("id"), getConforVal() , getEcoVal() );  
+//     }
+//  });
   
   $("button.btn-timer").mousedown(function () {
     $.MouseDown = true ;
@@ -471,4 +483,18 @@ function ProgCopy(idx)
 			RefreshDeviceCombo("#dialog-copy #sensor" ,"utility",true) ;
 			$( "#dialog-copy" ).i18n();
 			$( "#dialog-copy" ).dialog( "open" );
+}
+
+//update the button object ref
+function setObjItemRef() {
+    DayHoursObj = new Array(7)
+    for (var i = 0; i < 7; i++) DayHoursObj[i] = [];
+
+    for (day = 0; day < 7; day++) {
+        for (var hour = 0; hour < 24; hour++) {
+            var entry = $.WeekDays[day];
+            var obj = $("#utilitycontent #" + entry + " #" + hour);
+            DayHoursObj[day][hour] = obj;
+        }
+    };
 }

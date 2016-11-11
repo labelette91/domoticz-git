@@ -66,7 +66,7 @@ extHum = otherdevices_humidity[EXTERIOR_NAME]
 lastState = otherdevices[FAN_NAME]
 delta = (current - extHum)
  
-if (current >= humThresHold) and (delta > 3 ) then
+if (current >= humThresHold) and (delta > 1 ) then
 	  if (FanTimeOn >= TIME_OFF ) then
     	newCmd  = 'On'
     else

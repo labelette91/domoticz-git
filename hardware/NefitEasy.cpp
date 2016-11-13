@@ -25,7 +25,11 @@ easy-server --host=0.0.0.0 --serial=XXXX --access-key=XXXX --password=XXXX
 After this you should be able to connect to port 3000
 */
 
-//#define DEBUG_NefitEasyW
+#ifdef _DEBUG
+	//#define DEBUG_NefitEasyW
+	//#define DEBUG_NefitEasyR
+#endif
+
 #ifdef DEBUG_NefitEasyW
 void SaveString2Disk(std::string str, std::string filename)
 {
@@ -303,7 +307,15 @@ void CNefitEasy::SetHotWaterMode(bool bTurnOn)
 
 	try
 	{
-		szURL << "http://" << m_szIPAddress << ":" << m_usIPPort << NEFITEASY_HTTP_BRIDGE << (m_bClockMode == true) ? NEFITEASY_SET_HOT_WATER_CLOCK_MODE : NEFITEASY_SET_HOT_WATER_MANUAL_MODE;
+		//szURL << "http://" << m_szIPAddress << ":" << m_usIPPort << NEFITEASY_HTTP_BRIDGE << (m_bClockMode == true) ? NEFITEASY_SET_HOT_WATER_CLOCK_MODE : NEFITEASY_SET_HOT_WATER_MANUAL_MODE;
+		//Set Both modes
+		szURL << "http://" << m_szIPAddress << ":" << m_usIPPort << NEFITEASY_HTTP_BRIDGE << NEFITEASY_SET_HOT_WATER_CLOCK_MODE;
+		if (!HTTPClient::POST(szURL.str(), root.toStyledString(), ExtraHeaders, sResult))
+		{
+			_log.Log(LOG_ERROR, "NefitEasy: Error setting User Mode!");
+			return;
+		}
+		szURL << "http://" << m_szIPAddress << ":" << m_usIPPort << NEFITEASY_HTTP_BRIDGE << NEFITEASY_SET_HOT_WATER_MANUAL_MODE;
 		if (!HTTPClient::POST(szURL.str(), root.toStyledString(), ExtraHeaders, sResult))
 		{
 			_log.Log(LOG_ERROR, "NefitEasy: Error setting User Mode!");
@@ -384,7 +396,7 @@ bool CNefitEasy::GetStatusDetails()
 	CTD -> 'current time/date' string
 	CTR -> 'control' string (room)
 	DAS -> '?' on/off
-	DHW -> '?Domestic Hot Water' on/off
+	DHW -> 'Domestic Hot Water' on/off
 	ESI -> 'powersave active' on/off
 	FPA -> 'fireplace mode active, continue heating even when maximum setpoint temperature reached' string
 	HED_DB -> '?'
@@ -453,7 +465,7 @@ bool CNefitEasy::GetStatusDetails()
 	if (!root2["DHW"].empty())
 	{
 		tmpstr = root2["DHW"].asString();
-		bool bIsOn = (tmpstr != "no");
+		bool bIsOn = (tmpstr != "off");
 		SendSwitch(2, 1, -1, bIsOn, 0, "Hot Water");
 	}
 

@@ -7,7 +7,7 @@ define(['app'], function (app) {
 				if (result==true) {
 					$.ajax({
 						 url: "json.htm?type=command&param=deletetimer&idx=" + idx,
-						 async: false, 
+						 async: false,
 						 dataType: 'json',
 						 success: function(data) {
 							RefreshTimerTable($.devIdx);
@@ -15,7 +15,7 @@ define(['app'], function (app) {
 						 error: function(){
 								HideNotify();
 								ShowNotify($.t('Problem deleting timer!'), 2500, true);
-						 }     
+						 }
 					});
 				}
 			});
@@ -27,7 +27,7 @@ define(['app'], function (app) {
 				if (result==true) {
 					$.ajax({
 						 url: "json.htm?type=command&param=cleartimers&idx=" + $.devIdx,
-						 async: false, 
+						 async: false,
 						 dataType: 'json',
 						 success: function(data) {
 							RefreshTimerTable($.devIdx);
@@ -35,7 +35,7 @@ define(['app'], function (app) {
 						 error: function(){
 								HideNotify();
 								ShowNotify($.t('Problem clearing timers!'), 2500, true);
-						 }     
+						 }
 					});
 				}
 			});
@@ -150,8 +150,8 @@ define(['app'], function (app) {
 				return;
 			}
 			$.ajax({
-				 url: "json.htm?type=command&param=updatetimer&idx=" + idx + 
-							"&active=" + tsettings.Active + 
+				 url: "json.htm?type=command&param=updatetimer&idx=" + idx +
+							"&active=" + tsettings.Active +
 							"&timertype=" + tsettings.timertype +
 							"&date=" + tsettings.date +
 							"&hour=" + tsettings.hour +
@@ -164,7 +164,7 @@ define(['app'], function (app) {
 							"&mday=" + tsettings.mday +
 							"&month=" + tsettings.month +
 							"&occurence=" + tsettings.occurence,
-				 async: false, 
+				 async: false,
 				 dataType: 'json',
 				 success: function(data) {
 					RefreshTimerTable($.devIdx);
@@ -172,7 +172,7 @@ define(['app'], function (app) {
 				 error: function(){
 						HideNotify();
 						ShowNotify($.t('Problem updating timer!'), 2500, true);
-				 }     
+				 }
 			});
 		}
 
@@ -227,8 +227,8 @@ define(['app'], function (app) {
 				return;
 			}
 			$.ajax({
-				 url: "json.htm?type=command&param=addtimer&idx=" + $.devIdx + 
-							"&active=" + tsettings.Active + 
+				 url: "json.htm?type=command&param=addtimer&idx=" + $.devIdx +
+							"&active=" + tsettings.Active +
 							"&timertype=" + tsettings.timertype +
 							"&date=" + tsettings.date +
 							"&hour=" + tsettings.hour +
@@ -241,7 +241,7 @@ define(['app'], function (app) {
 							"&mday=" + tsettings.mday +
 							"&month=" + tsettings.month +
 							"&occurence=" + tsettings.occurence,
-				 async: false, 
+				 async: false,
 				 dataType: 'json',
 				 success: function(data) {
 					RefreshTimerTable($.devIdx);
@@ -249,7 +249,7 @@ define(['app'], function (app) {
 				 error: function(){
 						HideNotify();
 						ShowNotify($.t('Problem adding timer!'), 2500, true);
-				 }     
+				 }
 			});
 		}
 
@@ -281,13 +281,13 @@ define(['app'], function (app) {
 
 		  var oTable = $('#timertable').dataTable();
 		  oTable.fnClearTable();
-		  
+
 		  $.ajax({
-			 url: "json.htm?type=timers&idx=" + idx, 
-			 async: false, 
+			 url: "json.htm?type=timers&idx=" + idx,
+			 async: false,
 			 dataType: 'json',
 			 success: function(data) {
-				
+
 			  if (typeof data.result != 'undefined') {
 				$.each(data.result, function(i,item){
 					var active="No";
@@ -319,7 +319,7 @@ define(['app'], function (app) {
 							}
 						}
 					}
-					
+
 					var DayStr = "";
 					var DayStrOrig = "";
 					if ((item.Type<=4) || (item.Type==8) || (item.Type==9)) {
@@ -375,7 +375,7 @@ define(['app'], function (app) {
 						var Weekday = Math.log(parseInt(item.Days)) / Math.log(2);
 						DayStrOrig="Yearly on " + $.myglobals.OccurenceStr[item.Occurence-1] + " " + $.myglobals.WeekdayStr[Weekday] + " in " + $.myglobals.MonthStr[item.Month-1];
 					}
-					
+
 					//translate daystring
 					var splitstr = ", ";
 					if (item.Type > 5) {
@@ -388,12 +388,12 @@ define(['app'], function (app) {
 							DayStr+=splitstr;
 						}
 					});
-					
+
 					var rEnabled="No";
 					if (item.Randomness=="true") {
 						rEnabled="Yes";
 					}
-								
+
 					var addId = oTable.fnAddData( {
 						"DT_RowId": item.idx,
 						"Active": active,
@@ -464,7 +464,7 @@ define(['app'], function (app) {
 							cHSB.h=hue;
 							cHSB.s=sat;
 							cHSB.b=level;
-							
+
 							$("#lightcontent #optionRGB").prop('checked',(sat==100));
 							$("#lightcontent #optionWhite").prop('checked',!(sat==100));
 
@@ -477,7 +477,7 @@ define(['app'], function (app) {
 								$("#lightcontent #LevelDiv").show();
 							}
 						}
-						
+
 						var timerType=data["TType"];
 						if (timerType==5) {
 							$("#lightcontent #timerparamstable #sdate").val(data["2"]);
@@ -537,7 +537,7 @@ define(['app'], function (app) {
 							$("#lightcontent #timerparamstable #roccurence").hide();
 							$("#lightcontent #timerparamstable #rmonths").hide();
 						}
-						
+
 						var disableDays=false;
 						if (data["Days"]=="Everyday") {
 							$("#lightcontent #timerparamstable #when_1").prop('checked', 'checked');
@@ -553,14 +553,14 @@ define(['app'], function (app) {
 						}
 						else
 							$("#lightcontent #timerparamstable #when_4").prop('checked', 'checked');
-							
+
 						EnableDisableDays(data["Days"],disableDays);
 					}
 				}
-			}); 
-		  
+			});
+
 			$rootScope.RefreshTimeAndSun();
-		  
+
 			$('#modal').hide();
 		}
 
@@ -573,10 +573,10 @@ define(['app'], function (app) {
 			$.devIdx=id;
 			$.isDimmer=isdimmer;
 			$.isSelector = (devsubtype === "Selector Switch");
-			
+
 			$.bIsRGBW=(devsubtype.indexOf("RGBW") >= 0);
 			$.bIsLED=(devsubtype.indexOf("RGB") >= 0);
-		  
+
 			if ($.isSelector) {
 				// backup selector switch level names before displaying edit edit form
 				var selectorSwitch$ = $("#selector" + $.devIdx);
@@ -584,7 +584,7 @@ define(['app'], function (app) {
 				$.selectorSwitchLevelOffHidden = selectorSwitch$.data("leveloffhidden");
 			}
 			var oTable;
-			
+
 			$('#modal').show();
 			var htmlcontent = '';
 			htmlcontent='<p><h2><span data-i18n="Name"></span>: ' + unescape(name) + '</h2></p><br>\n';
@@ -593,7 +593,7 @@ define(['app'], function (app) {
 			var sunSet="";
 			$.ajax({
 				 url: "json.htm?type=command&param=getSunRiseSet",
-				 async: false, 
+				 async: false,
 				 dataType: 'json',
 				 success: function(data) {
 					if (typeof data.Sunrise != 'undefined') {
@@ -602,10 +602,10 @@ define(['app'], function (app) {
 					}
 				 }
 			});
-		  
+
 			var suntext='<div id="timesun" /><br>\n';
 			htmlcontent+=suntext;
-		  
+
 			htmlcontent+=$('#edittimers').html();
 			$('#lightcontent').html(GetBackbuttonHTMLTable('ShowLights')+htmlcontent);
 			$('#lightcontent').i18n();
@@ -619,7 +619,7 @@ define(['app'], function (app) {
 
 			var nowTemp = new Date();
 			var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
-			
+
 			$( "#lightcontent #sdate" ).datepicker({
 				minDate: now,
 				defaultDate: now,
@@ -627,7 +627,7 @@ define(['app'], function (app) {
 				showWeek: true,
 				firstDay: 1
 			});
-			$("#lightcontent #combotype").change(function() { 
+			$("#lightcontent #combotype").change(function() {
 				var timerType=$("#lightcontent #combotype").val();
 				if (timerType==5) {
 					$("#lightcontent #timerparamstable #rdate").show();
@@ -687,7 +687,7 @@ define(['app'], function (app) {
 			cHSB.b=100;
 			$('#lightcontent #Brightness').val(100);
 			$('#lightcontent #Hue').val(128);
-			
+
 			if ($.bIsLED==true) {
 				$("#lightcontent #LedColor").show();
 			}
@@ -740,21 +740,21 @@ define(['app'], function (app) {
 			$('#timerparamstable #combotimehour >option').remove();
 			$('#timerparamstable #combotimemin >option').remove();
 			$('#timerparamstable #days >option').remove();
-						
+
 			//fill hour/minute/days comboboxes
 			for (ii=0; ii<24; ii++)
 			{
-				$('#timerparamstable #combotimehour').append($('<option></option>').val(ii).html($.strPad(ii,2)));  
+				$('#timerparamstable #combotimehour').append($('<option></option>').val(ii).html($.strPad(ii,2)));
 			}
 			for (ii=0; ii<60; ii++)
 			{
-				$('#timerparamstable #combotimemin').append($('<option></option>').val(ii).html($.strPad(ii,2)));  
+				$('#timerparamstable #combotimemin').append($('<option></option>').val(ii).html($.strPad(ii,2)));
 			}
 			for (ii=1; ii<=31; ii++)
 			{
-				$('#timerparamstable #days').append($('<option></option>').val(ii).html(ii));  
+				$('#timerparamstable #days').append($('<option></option>').val(ii).html(ii));
 			}
-		  
+
 			$("#lightcontent #timerparamstable #when_1").click(function() {
 				EnableDisableDays("Everyday",true);
 			});
@@ -901,8 +901,8 @@ define(['app'], function (app) {
 				$scope.mytimer = undefined;
 			}
 			$.ajax({
-				url: "json.htm?type=command&param=makefavorite&idx=" + id + "&isfavorite=" + isfavorite, 
-				async: false, 
+				url: "json.htm?type=command&param=makefavorite&idx=" + id + "&isfavorite=" + isfavorite,
+				async: false,
 				dataType: 'json',
 				success: function(data) {
 					ShowLights();
@@ -913,11 +913,11 @@ define(['app'], function (app) {
 		DeleteLightSwitchIntern = function (bRemoveSubDevices)
 		{
 			$.ajax({
-				 url: "json.htm?type=setused&idx=" + $.devIdx + 
-					'&name=' + encodeURIComponent($("#lightcontent #devicename").val()) + 
-					'&description=' + encodeURIComponent($("#lightcontent #devicedescription").val()) + 
+				 url: "json.htm?type=setused&idx=" + $.devIdx +
+					'&name=' + encodeURIComponent($("#lightcontent #devicename").val()) +
+					'&description=' + encodeURIComponent($("#lightcontent #devicedescription").val()) +
 					'&used=false&RemoveSubDevices=' + bRemoveSubDevices,
-				 async: false, 
+				 async: false,
 				 dataType: 'json',
 				 success: function(data) {
 						ShowLights();
@@ -963,7 +963,7 @@ define(['app'], function (app) {
 
 			var strParam1=$("#lightcontent #onaction").val();
 			var strParam2=$("#lightcontent #offaction").val();
-			
+
 			var bIsProtected=$('#lightcontent #protected').is(":checked");
 
 			if (strParam1!="") {
@@ -1010,20 +1010,20 @@ define(['app'], function (app) {
 				devOptions.push(";");
 				devOptionsParam.push(devOptions.join(''));
 			}
-			
+
 			if ( bValid ) {
 				if ($.stype=="Security") {
 					$.ajax({
 						 url: "json.htm?type=setused&idx=" + $.devIdx +
 						  '&name=' + encodeURIComponent($("#lightcontent #devicename").val()) +
-						  '&description=' + encodeURIComponent($("#lightcontent #devicedescription").val()) + 
+						  '&description=' + encodeURIComponent($("#lightcontent #devicedescription").val()) +
 						  '&strparam1=' + btoa(strParam1) +
 						  '&strparam2=' + btoa(strParam2) +
 						  '&protected=' + bIsProtected +
 						  '&log='       + $('#lightcontent #log').is(":checked") +
 						  '&used=true' +
 						  '&options=' + btoa(encodeURIComponent(devOptionsParam.join(''))), // encode before b64 to prevent from character encoding issue
-						 async: false, 
+						 async: false,
 						 dataType: 'json',
 						 success: function(data) {
 								ShowLights();
@@ -1041,24 +1041,24 @@ define(['app'], function (app) {
 						addjvalstr+="&addjvalue2=" + $("#lightcontent #ondelay").val();
 					}
 					var CustomImage=0;
-					
+
 					if ((switchtype == 0) || (switchtype == 7) || (switchtype == 17) || (switchtype == 18)) {
 						var cval=$('#lightcontent #comboswitchicon').data('ddslick').selectedIndex;
 						CustomImage=$.ddData[cval].value;
 					}
 					$.ajax({
-						 url: "json.htm?type=setused&idx=" + $.devIdx + 
-							'&name=' + encodeURIComponent($("#lightcontent #devicename").val()) + 
-							'&description=' + encodeURIComponent($("#lightcontent #devicedescription").val()) + 
+						 url: "json.htm?type=setused&idx=" + $.devIdx +
+							'&name=' + encodeURIComponent($("#lightcontent #devicename").val()) +
+							'&description=' + encodeURIComponent($("#lightcontent #devicedescription").val()) +
 							'&strparam1=' + btoa(strParam1) +
 							'&strparam2=' + btoa(strParam2) +
 							'&protected=' + bIsProtected +
-						    '&log=' + $('#lightcontent #log').is(":checked") +
+						  '&log=' + $('#lightcontent #log').is(":checked") +
 							'&switchtype=' + $("#lightcontent #comboswitchtype").val() +
-							'&customimage=' + CustomImage + 
+							'&customimage=' + CustomImage +
 							'&used=true' + addjvalstr +
 							'&options=' + btoa(encodeURIComponent(devOptionsParam.join(''))), // encode before b64 to prevent from character encoding issue
-						 async: false, 
+						 async: false,
 						 dataType: 'json',
 						 success: function(data) {
 								ShowLights();
@@ -1074,7 +1074,7 @@ define(['app'], function (app) {
 				if (result==true) {
 					$.ajax({
 							url: "json.htm?type=command&param=deleteallsubdevices&idx=" + $.devIdx,
-							async: false, 
+							async: false,
 							dataType: 'json',
 							success: function(data) {
 							RefreshSubDeviceTable($.devIdx);
@@ -1090,7 +1090,7 @@ define(['app'], function (app) {
 				if (result==true) {
 					$.ajax({
 						 url: "json.htm?type=command&param=deletesubdevice&idx=" + idx,
-						 async: false, 
+						 async: false,
 						 dataType: 'json',
 						 success: function(data) {
 							RefreshSubDeviceTable($.devIdx);
@@ -1108,10 +1108,10 @@ define(['app'], function (app) {
 
 			var oTable = $('#lightcontent #subdevicestable').dataTable();
 			oTable.fnClearTable();
-		  
+
 			$.ajax({
-				url: "json.htm?type=command&param=getsubdevices&idx=" + idx, 
-				async: false, 
+				url: "json.htm?type=command&param=getsubdevices&idx=" + idx,
+				async: false,
 				dataType: 'json',
 				success: function(data) {
 					if (typeof data.result != 'undefined') {
@@ -1137,7 +1137,7 @@ define(['app'], function (app) {
 					oTable.$('tr.row_selected').removeClass('row_selected');
 					$(this).addClass('row_selected');
 					$('#lightcontent #delclr #subdevicedelete').attr("class", "btnstyle3");
-					
+
 					var anSelected = fnGetSelected( oTable );
 					if ( anSelected.length !== 0 ) {
 						var data = oTable.fnGetData( anSelected[0] );
@@ -1145,7 +1145,7 @@ define(['app'], function (app) {
 						$("#lightcontent #delclr #subdevicedelete").attr("href", "javascript:DeleteSubDevice(" + idx + ")");
 					}
 				}
-			}); 
+			});
 
 		  $('#modal').hide();
 		}
@@ -1159,7 +1159,7 @@ define(['app'], function (app) {
 			}
 			$.ajax({
 				url: "json.htm?type=command&param=addsubdevice&idx=" + $.devIdx + "&subidx=" + SubDeviceIdx,
-				async: false, 
+				async: false,
 				dataType: 'json',
 				success: function(data) {
 					if (data.status == 'OK') {
@@ -1172,7 +1172,7 @@ define(['app'], function (app) {
 				error: function(){
 					HideNotify();
 					ShowNotify($.t('Problem adding Sub/Slave Device!'), 2500, true);
-				}     
+				}
 			});
 		}
 
@@ -1186,7 +1186,7 @@ define(['app'], function (app) {
 			}
 			$.ajax({
 				 url: "json.htm?type=command&param=setcolbrightnessvalue&idx=" + idx + "&hue=" + hue + "&brightness=" + brightness + "&iswhite=" + isWhite,
-				 async: false, 
+				 async: false,
 				 dataType: 'json'
 			});
 		}
@@ -1195,7 +1195,7 @@ define(['app'], function (app) {
 		{
 			$.ajax({
 				 url: "json.htm?type=command&param=brightnessup&idx=" + $.devIdx,
-				 async: false, 
+				 async: false,
 				 dataType: 'json'
 			});
 		}
@@ -1204,7 +1204,7 @@ define(['app'], function (app) {
 		{
 			$.ajax({
 				 url: "json.htm?type=command&param=brightnessdown&idx=" + $.devIdx,
-				 async: false, 
+				 async: false,
 				 dataType: 'json'
 			});
 		}
@@ -1212,7 +1212,7 @@ define(['app'], function (app) {
 		{
 			$.ajax({
 				 url: "json.htm?type=command&param=discoup&idx=" + $.devIdx,
-				 async: false, 
+				 async: false,
 				 dataType: 'json'
 			});
 		}
@@ -1221,25 +1221,25 @@ define(['app'], function (app) {
 		{
 			$.ajax({
 				 url: "json.htm?type=command&param=discodown&idx=" + $.devIdx,
-				 async: false, 
+				 async: false,
 				 dataType: 'json'
 			});
 		}
-		
+
 		appLampDiscoMode = function()
 		{
 			$.ajax({
 				 url: "json.htm?type=command&param=discomode&idx=" + $.devIdx,
-				 async: false, 
+				 async: false,
 				 dataType: 'json'
 			});
 		}
-		
+
 		appLampSpeedUp = function()
 		{
 			$.ajax({
 				 url: "json.htm?type=command&param=speedup&idx=" + $.devIdx,
-				 async: false, 
+				 async: false,
 				 dataType: 'json'
 			});
 		}
@@ -1247,7 +1247,7 @@ define(['app'], function (app) {
 		{
 			$.ajax({
 				 url: "json.htm?type=command&param=speeduplong&idx=" + $.devIdx,
-				 async: false, 
+				 async: false,
 				 dataType: 'json'
 			});
 		}
@@ -1256,7 +1256,7 @@ define(['app'], function (app) {
 		{
 			$.ajax({
 				 url: "json.htm?type=command&param=speeddown&idx=" + $.devIdx,
-				 async: false, 
+				 async: false,
 				 dataType: 'json'
 			});
 		}
@@ -1265,7 +1265,7 @@ define(['app'], function (app) {
 		{
 			$.ajax({
 				 url: "json.htm?type=command&param=warmer&idx=" + $.devIdx,
-				 async: false, 
+				 async: false,
 				 dataType: 'json'
 			});
 		}
@@ -1274,7 +1274,7 @@ define(['app'], function (app) {
 		{
 			$.ajax({
 				 url: "json.htm?type=command&param=fulllight&idx=" + $.devIdx,
-				 async: false, 
+				 async: false,
 				 dataType: 'json'
 			});
 		}
@@ -1283,7 +1283,7 @@ define(['app'], function (app) {
 		{
 			$.ajax({
 				 url: "json.htm?type=command&param=nightlight&idx=" + $.devIdx,
-				 async: false, 
+				 async: false,
 				 dataType: 'json'
 			});
 		}
@@ -1509,7 +1509,7 @@ define(['app'], function (app) {
 		{
 			$.ajax({
 				 url: "json.htm?type=command&param=cooler&idx=" + $.devIdx,
-				 async: false, 
+				 async: false,
 				 dataType: 'json'
 			});
 		}
@@ -1840,8 +1840,8 @@ define(['app'], function (app) {
 				var Name = "";
 
 				$.ajax({
-				   url: "json.htm?type=command&param=learnsw", 
-				   async: false, 
+				   url: "json.htm?type=command&param=learnsw",
+				   async: false,
 				   dataType: 'json',
 				   success: function(data) {
 					if (typeof data.status != 'undefined') {
@@ -1879,8 +1879,8 @@ define(['app'], function (app) {
 		{
 			$.ComboHardware = [];
 			$.ajax({
-				url: "json.htm?type=command&param=getmanualhardware", 
-				async: false, 
+				url: "json.htm?type=command&param=getmanualhardware",
+				async: false,
 				dataType: 'json',
 				success: function(data) {
 					if (typeof data.result != 'undefined') {
@@ -1899,8 +1899,8 @@ define(['app'], function (app) {
 		{
 			$.ComboGpio = [];
 			$.ajax({
-				url: "json.htm?type=command&param=getgpio", 
-				async: false, 
+				url: "json.htm?type=command&param=getgpio",
+				async: false,
 				dataType: 'json',
 				success: function(data) {
 					if (typeof data.result != 'undefined') {
@@ -1919,8 +1919,8 @@ define(['app'], function (app) {
 		{
 			$.LightsAndSwitches = [];
 			$.ajax({
-				url: "json.htm?type=command&param=getlightswitches", 
-				async: false, 
+				url: "json.htm?type=command&param=getlightswitches",
+				async: false,
 				dataType: 'json',
 				success: function(data) {
 					if (typeof data.result != 'undefined') {
@@ -1936,21 +1936,21 @@ define(['app'], function (app) {
 		}
 
 		//Evohome...
-		
+
 		SwitchModal= function(idx, name, status, refreshfunction)
 		{
 			clearInterval($.myglobals.refreshTimer);
-			
+
 			ShowNotify($.t('Setting Evohome ') + ' ' + $.t(name));
-			
+
 			//FIXME avoid conflicts when setting a new status while reading the status from the web gateway at the same time
 			//(the status can flick back to the previous status after an update)...now implemented with script side lockout
 			$.ajax({
-			url: "json.htm?type=command&param=switchmodal" + 
-						"&idx=" + idx + 
+			url: "json.htm?type=command&param=switchmodal" +
+						"&idx=" + idx +
 						"&status=" + status +
 						"&action=1",
-			async: false, 
+			async: false,
 			dataType: 'json',
 			success: function(data) {
 					if (data.status=="ERROR") {
@@ -1966,10 +1966,10 @@ define(['app'], function (app) {
 			error: function(){
 				HideNotify();
 				alert($.t('Problem sending switch command'));
-			}     
+			}
 			});
 		}
-		
+
 		//FIXME move this to a shared js ...see temperaturecontroller.js
 		EvoDisplayTextMode = function(strstatus){
 			if(strstatus=="Auto")//FIXME better way to convert?
@@ -1982,7 +1982,7 @@ define(['app'], function (app) {
 				strstatus="Heating Off";
 			return strstatus;
 		}
-		
+
 		GetLightStatusText = function(item){
 			if(item.SubType=="Evohome")
 				return EvoDisplayTextMode(item.Status);
@@ -1991,12 +1991,12 @@ define(['app'], function (app) {
 			else
 				return item.Status;
 		}
-		
+
 		EvohomeAddJS = function()
 		{
-			  return "<script type='text/javascript'> function deselect(e,id) { $(id).slideFadeToggle('swing', function() { e.removeClass('selected'); });} $.fn.slideFadeToggle = function(easing, callback) {  return this.animate({ opacity: 'toggle',height: 'toggle' }, 'fast', easing, callback);};</script>";	  
+			  return "<script type='text/javascript'> function deselect(e,id) { $(id).slideFadeToggle('swing', function() { e.removeClass('selected'); });} $.fn.slideFadeToggle = function(easing, callback) {  return this.animate({ opacity: 'toggle',height: 'toggle' }, 'fast', easing, callback);};</script>";
 		}
-		
+
 		EvohomeImg = function(item)
 		{
 			return '<div title="Quick Actions" class="'+((item.Status=="Auto") ? "evoimgnorm" : "evoimg")+'"><img src="images/evohome/'+item.Status+'.png" class="lcursor" onclick="if($(this).hasClass(\'selected\')){deselect($(this),\'#evopop_'+ item.idx +'\');}else{$(this).addClass(\'selected\');$(\'#evopop_'+ item.idx +'\').slideFadeToggle();}return false;"></div>';
@@ -2009,7 +2009,7 @@ define(['app'], function (app) {
 			htm+='</ul></div>';
 			return htm;
 		}
-		
+
 		RefreshLights = function()
 		{
 			if (typeof $scope.mytimer != 'undefined') {
@@ -2017,10 +2017,10 @@ define(['app'], function (app) {
 				$scope.mytimer = undefined;
 			}
 		  var id="";
-		  
+
 		  $.ajax({
 			 url: "json.htm?type=devices&filter=light&used=true&order=Name&lastupdate="+$.LastUpdateTime+"&plan="+window.myglobals.LastPlanSelected,
-			 async: false, 
+			 async: false,
 			 dataType: 'json',
 			 success: function(data) {
 				if (typeof data.ServerTime != 'undefined') {
@@ -2044,14 +2044,14 @@ define(['app'], function (app) {
 						var img2="";
 						var img3="";
 						var status="";
-						
+
 						var bigtext=TranslateStatusShort(item.Status);
 						if (item.UsedByCamera==true) {
 							var streamimg='<img src="images/webcam.png" title="' + $.t('Stream Video') +'" height="16" width="16">';
 							var streamurl="<a href=\"javascript:ShowCameraLiveStream('" + escape(item.Name) + "','" + item.CameraIdx + "')\">" + streamimg + "</a>";
 							bigtext+="&nbsp;"+streamurl;
 						}
-						
+
 						if (item.SubType=="Security Panel") {
 							img='<a href="secpanel/"><img src="images/security48.png" class="lcursor" height="48" width="48"></a>';
 						}
@@ -2352,7 +2352,7 @@ define(['app'], function (app) {
 								}
 						}
 					}
-								
+
 						var nbackcolor="#D4E1EE";
 						if (item.HaveTimeout==true) {
 							nbackcolor="#DF2D3A";
@@ -2365,7 +2365,7 @@ define(['app'], function (app) {
 						if (obackcolor!=nbackcolor) {
 							$(id + " #name").css( "background-color", nbackcolor );
 						}
-						
+
 						if ($(id + " #img").html()!=img) {
 							$(id + " #img").html(img);
 						}
@@ -2440,15 +2440,15 @@ define(['app'], function (app) {
 				$scope.mytimer = undefined;
 			}
 		  $('#modal').show();
-		  
+
 		  RefreshLightSwitchesComboArray();
-		  
+
 		  var htmlcontent = '';
 			var bShowRoomplan=false;
 			$.RoomPlans = [];
 		  $.ajax({
 			 url: "json.htm?type=plans",
-			 async: false, 
+			 async: false,
 			 dataType: 'json',
 			 success: function(data) {
 				if (typeof data.result != 'undefined') {
@@ -2470,7 +2470,7 @@ define(['app'], function (app) {
 				}
 			 }
 		  });
-		  
+
 		  var bHaveAddedDevider = false;
 
 		  var tophtm="";
@@ -2509,12 +2509,12 @@ define(['app'], function (app) {
 		  var j=0;
 
 		  $.ajax({
-			 url: "json.htm?type=devices&filter=light&used=true&order=Name&plan="+window.myglobals.LastPlanSelected, 
-			 async: false, 
+			 url: "json.htm?type=devices&filter=light&used=true&order=Name&plan="+window.myglobals.LastPlanSelected,
+			 async: false,
 			 dataType: 'json',
 			 success: function(data) {
-				 
-				 
+
+
 			  htmlcontent+=EvohomeAddJS();
 
 			  if (typeof data.result != 'undefined') {
@@ -2550,7 +2550,7 @@ define(['app'], function (app) {
 					else {
 						xhtm+='\t    <table id="itemtablenostatus" border="0" cellpadding="0" cellspacing="0">\n';
 					}
-					
+
 					var nbackcolor="#D4E1EE";
 					if (item.HaveTimeout==true) {
 						nbackcolor="#DF2D3A";
@@ -2558,7 +2558,7 @@ define(['app'], function (app) {
 					else if (item.Protected==true) {
 						nbackcolor="#A4B1EE";
 					}
-					
+
 					xhtm+=
 						'\t    <tr>\n' +
 						'\t      <td id="name" style="background-color: ' + nbackcolor + ';">' + item.Name + '</td>\n' +
@@ -2828,7 +2828,7 @@ define(['app'], function (app) {
 									else {
 										xhtm+='\t      <td id="img"><img src="images/uvsunny.png" title="' + $.t("Daytime") + '" height="48" width="48"></td>\n';
 									}
-							}					
+							}
 							else if (item.SwitchType == "Motion Sensor") {
 								if (
 									(item.Status == 'On')||
@@ -2855,7 +2855,7 @@ define(['app'], function (app) {
 							else if (item.SubType.indexOf("Itho")==0) {
 								bAddTimer=false;
 								xhtm+='\t      <td id="img"><img src="images/Fan48_On.png" height="48" width="48" class="lcursor" onclick="ShowIthoPopup(event, ' + item.idx + ', ShowLights, ' + item.Protected +');"></td>\n';
-							}					
+							}
 						  else {
 							if (
 								(item.Status == 'On')||
@@ -2929,11 +2929,11 @@ define(['app'], function (app) {
 					xhtm+='</td>\n' +
 							'\t      <td>';
 					  if (item.Favorite == 0) {
-						xhtm+=      
+						xhtm+=
 							  '<img src="images/nofavorite.png" title="' + $.t('Add to Dashboard') + '" onclick="MakeFavorite(' + item.idx + ',1);" class="lcursor">&nbsp;&nbsp;&nbsp;&nbsp;';
 					  }
 					  else {
-						xhtm+=      
+						xhtm+=
 							  '<img src="images/favorite.png" title="' + $.t('Remove from Dashboard') +'" onclick="MakeFavorite(' + item.idx + ',0);" class="lcursor">&nbsp;&nbsp;&nbsp;&nbsp;';
 					  }
 				  xhtm+=
@@ -2965,7 +2965,7 @@ define(['app'], function (app) {
 									else {
 										xhtm+='<a id="resetbtn" class="btnsmall-dis" onclick="ResetSecurityStatus(' + item.idx + ',\'Normal\',ShowLights);" data-i18n="Reset">Reset</a> ';
 									}
-					  }					
+					  }
 					  if (item.Notifications == "true")
 						xhtm+='<a class="btnsmall-sel" onclick="ShowNotifications(' + item.idx + ',\'' + escape(item.Name) + '\', \'#lightcontent\', \'ShowLights\',' + bIsDimmer + ',\'' + item.Type + '\'' + ', \'' + item.SubType + '\');" data-i18n="Notifications">Notifications</a>';
 					  else
@@ -3003,7 +3003,7 @@ define(['app'], function (app) {
 				if (typeof window.myglobals.LastPlanSelected!= 'undefined') {
 					$("#lightcontent #comboroom").val(window.myglobals.LastPlanSelected);
 				}
-				$("#lightcontent #comboroom").change(function() { 
+				$("#lightcontent #comboroom").change(function() {
 					var idx = $("#lightcontent #comboroom option:selected").val();
 					window.myglobals.LastPlanSelected=idx;
 					ShowLights();
@@ -3034,7 +3034,7 @@ define(['app'], function (app) {
 									}
 									$.ajax({
 										 url: "json.htm?type=command&param=switchdeviceorder&idx1=" + myid + "&idx2=" + $.devIdx + "&roomid=" + roomid,
-										 async: false, 
+										 async: false,
 										 dataType: 'json',
 										 success: function(data) {
 												ShowLights();
@@ -3181,7 +3181,7 @@ define(['app'], function (app) {
 			}, 10000);
 		  return false;
 		}
-		
+
 		$scope.ResizeDimSliders = function()
 		{
 			var nobj = $("#lightcontent #name");
@@ -3207,7 +3207,7 @@ define(['app'], function (app) {
 			var lighttype=$("#dialog-addmanuallightdevice #lighttable #combolighttype option:selected").val();
 			var bIsARCType=((lighttype<20)||(lighttype==101));
 			var bIsType5=0;
-			
+
 			var tothousecodes=1;
 			var totunits=1;
 			if ((lighttype==0)||(lighttype==1)||(lighttype==3)||(lighttype==101)) {
@@ -3306,8 +3306,13 @@ define(['app'], function (app) {
 				totrooms=10;
 				totpointofloads=10;
 			}
+			else if (lighttype==306) {
+				//Openwebnet light
+				totrooms=10;
+				totpointofloads=10;
+			}
 
-			
+
 			$("#dialog-addmanuallightdevice #he105params").hide();
 			$("#dialog-addmanuallightdevice #blindsparams").hide();
 			$("#dialog-addmanuallightdevice #lightingparams_enocean").hide();
@@ -3402,8 +3407,8 @@ define(['app'], function (app) {
 				$("#dialog-addmanuallightdevice #lighting3params").hide();
 				$("#dialog-addmanuallightdevice #fanparams").show();
 			}
-			else if (lighttype==305) {
-				//Openwebnet Blinds
+			else if((lighttype==305) || (lighttype==306)){
+				//Openwebnet Blinds/light
 				$("#dialog-addmanuallightdevice #openwebnetparams #combocmd1  >option").remove();
 				for (ii=1; ii<totrooms; ii++)
 				{
@@ -3414,7 +3419,7 @@ define(['app'], function (app) {
 				{
 					$('#dialog-addmanuallightdevice #openwebnetparams #combocmd2').append($('<option></option>').val(ii).html(ii));
 				}
-				
+
 				$("#dialog-addmanuallightdevice #lighting1params").hide();
 				$("#dialog-addmanuallightdevice #lighting2params").hide();
 				$("#dialog-addmanuallightdevice #lighting3params").hide();
@@ -3470,7 +3475,7 @@ define(['app'], function (app) {
 					return "";
 			}
 			mParams+="&hwdid="+hwdID;
-			
+
 			var name=$("#dialog-addmanuallightdevice #devicename");
 			if ((name.val()=="")||(!checkLength(name,2,100))) {
 				if (!isTest) {
@@ -3479,10 +3484,10 @@ define(['app'], function (app) {
 				}
 			}
 			mParams+="&name="+encodeURIComponent(name.val());
-			
+
 			var description=$("#dialog-addmanuallightdevice #devicedescription");
 			mParams+="&description="+encodeURIComponent(description.val());
-			
+
 			mParams+="&switchtype="+$("#dialog-addmanuallightdevice #lighttable #comboswitchtype option:selected").val();
 			var lighttype=$("#dialog-addmanuallightdevice #lighttable #combolighttype option:selected").val();
 			mParams+="&lighttype="+lighttype;
@@ -3500,7 +3505,7 @@ define(['app'], function (app) {
 				//mParams+="&groupcode="+$("#dialog-addmanuallightdevice #lightingparams_enocean #comboid option:selected").val();
 				//mParams+="&unitcode="+$("#dialog-addmanuallightdevice #lightingparams_enocean #combounitcode option:selected").val();
 				mParams+="&groupcode="+$("#dialog-addmanuallightdevice #lightingparams_enocean #combounitcode option:selected").val();
-				mParams+="&unitcode="+$("#dialog-addmanuallightdevice #lightingparams_enocean #comboid option:selected").val();				
+				mParams+="&unitcode="+$("#dialog-addmanuallightdevice #lightingparams_enocean #comboid option:selected").val();
 				ID="EnOcean";
 				mParams+="&id="+ID;
 			}
@@ -3543,8 +3548,8 @@ define(['app'], function (app) {
 					$("#dialog-addmanuallightdevice #fanparams #combocmd3 option:selected").text();
 				mParams+="&id="+ID;
 			}
-			else if (lighttype==305) {
-				//OpenWebNet Blinds
+			else if ((lighttype==305) || (lighttype==306)) {
+				//OpenWebNet Blinds/light
 				var ID="OpenWebNet";
 				var unitcode=
 					$("#dialog-addmanuallightdevice #openwebnetparams #combocmd1 option:selected").val()+
@@ -3609,7 +3614,7 @@ define(['app'], function (app) {
 			{
 				mParams+="&maindeviceidx=" + MainDeviceIdx;
 			}
-			
+
 			return mParams;
 		}
 
@@ -3620,8 +3625,8 @@ define(['app'], function (app) {
 				return;
 			}
 			$.ajax({
-				 url: "json.htm?type=command&param=testswitch"+mParams, 
-				 async: false, 
+				 url: "json.htm?type=command&param=testswitch"+mParams,
+				 async: false,
 				 dataType: 'json',
 				 success: function(data) {
 					if (typeof data.status != 'undefined') {
@@ -3657,7 +3662,7 @@ define(['app'], function (app) {
 			//global var
 			$.devIdx=0;
 			$.LastUpdateTime=parseInt(0);
-			
+
 			$.myglobals = {
 				TimerTypesStr : [],
 				CommandStr : [],
@@ -3708,18 +3713,18 @@ define(['app'], function (app) {
 													return;
 												}
 											}
-						  
+
 						  if ( bValid ) {
 							  $( this ).dialog( "close" );
 							  $.ajax({
 								 url: "json.htm?type=setused&idx=" + $.devIdx + '&name=' + encodeURIComponent($("#dialog-addlightdevice #devicename").val()) + '&switchtype=' + $("#dialog-addlightdevice #comboswitchtype").val() + '&used=true&maindeviceidx=' + MainDeviceIdx,
-								 async: false, 
+								 async: false,
 								 dataType: 'json',
 								 success: function(data) {
 									ShowLights();
 								 }
 							  });
-							  
+
 						  }
 					  },
 					  Cancel: function() {
@@ -3745,8 +3750,8 @@ define(['app'], function (app) {
 				}
 				$.pDialog=$( this );
 				$.ajax({
-					 url: "json.htm?type=command&param=addswitch"+mParams, 
-					 async: false, 
+					 url: "json.htm?type=command&param=addswitch"+mParams,
+					 async: false,
 					 dataType: 'json',
 					 success: function(data) {
 						if (typeof data.status != 'undefined') {
@@ -3776,7 +3781,7 @@ define(['app'], function (app) {
 				  buttons: dialog_addmanuallightdevice_buttons,
 				  open: function() {
 						RefreshHardwareComboArray();
-						
+
 						$("#dialog-addmanuallightdevice #lighttable #combohardware").html("");
 						$.each($.ComboHardware, function(i,item){
 							var option = $('<option />');
@@ -3792,7 +3797,7 @@ define(['app'], function (app) {
 							$("#combogpio").append(option);
 						});
 
-						$("#dialog-addmanuallightdevice #lighttable #comboswitchtype").change(function() { 
+						$("#dialog-addmanuallightdevice #lighttable #comboswitchtype").change(function() {
 							var switchtype=$("#dialog-addmanuallightdevice #lighttable #comboswitchtype option:selected").val(),
 								subtype = -1;
 							if (switchtype == 1) {
@@ -3805,7 +3810,7 @@ define(['app'], function (app) {
 							}
 							UpdateAddManualDialog();
 						});
-						$("#dialog-addmanuallightdevice #lighttable #combolighttype").change(function() { 
+						$("#dialog-addmanuallightdevice #lighttable #combolighttype").change(function() {
 							var subtype=$("#dialog-addmanuallightdevice #lighttable #combolighttype option:selected").val(),
 								switchtype = -1;
 							if (subtype == 303) {
@@ -3879,8 +3884,8 @@ define(['app'], function (app) {
 			$scope.CustomImages=[];
 			//Get Custom icons
 			$.ajax({
-			 url: "json.htm?type=custom_light_icons", 
-			 async: false, 
+			 url: "json.htm?type=custom_light_icons",
+			 async: false,
 			 dataType: 'json',
 			 success: function(data) {
 				if (typeof data.result != 'undefined') {
@@ -3916,6 +3921,6 @@ define(['app'], function (app) {
 			if (typeof popup != 'undefined') {
 				popup.hide();
 			}
-		}); 
+		});
 	} ]);
 });

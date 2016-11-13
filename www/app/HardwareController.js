@@ -89,13 +89,13 @@ define(['app'], function (app) {
 				(text.indexOf("Motherboard") >= 0) ||
 				(text.indexOf("Kodi") >= 0) ||
 				(text.indexOf("Evohome") >= 0 && text.indexOf("script") >= 0) ||
-                (text.indexOf("Yeelight") >= 0)
+                (text.indexOf("YeeLight") >= 0)
 				)
             {
-		// if hardwaretype == 1000 => I2C sensors grouping
-		if (hardwaretype == 1000) {
-                    hardwaretype = $("#hardwareparamsi2clocal #comboi2clocal").find('option:selected').val();
-		}
+				// if hardwaretype == 1000 => I2C sensors grouping
+				if (hardwaretype == 1000) {
+							hardwaretype = $("#hardwareparamsi2clocal #comboi2clocal").find('option:selected').val();
+				}
 
                 $.ajax({
                      url: "json.htm?type=command&param=updatehardware&htype=" + hardwaretype +
@@ -917,7 +917,7 @@ define(['app'], function (app) {
 				(text.indexOf("Evohome") >= 0 && text.indexOf("script") >= 0) ||
 				(text.indexOf("Tellstick") >= 0) ||
 				(text.indexOf("Motherboard") >= 0) ||
-                (text.indexOf("Yeelight") >= 0)
+                (text.indexOf("YeeLight") >= 0)
 				)
             {
                 $.ajax({
@@ -4303,6 +4303,71 @@ define(['app'], function (app) {
             OnDummySensorTypeChange();
         }
 
+        AddYeeLight = function(idx,name)
+        {
+			$.devIdx=idx;
+
+            $( "#dialog-addyeelight" ).dialog({
+                  autoOpen: false,
+                  width: 420,
+                  height: 250,
+                  modal: true,
+                  resizable: false,
+                  buttons: {
+                      "OK": function() {
+                          var bValid = true;
+                            var SensorName=$("#dialog-addyeelight #name").val();
+							if (SensorName=="")
+							{
+								ShowNotify($.t('Please enter a Name!'), 2500, true);
+								return;
+							}
+                            var IPAddress=$("#dialog-addyeelight #ipaddress").val();
+							if (IPAddress=="")
+							{
+								ShowNotify($.t('Please enter a IP Address!'), 2500, true);
+								return;
+							}
+                            var SensorType=$("#dialog-addyeelight #lighttype option:selected").val();
+                            if (typeof SensorType == 'undefined') {
+                                bootbox.alert($.t('No Light Type Selected!'));
+                                return ;
+                            }
+							$( this ).dialog( "close" );
+                            $.ajax({
+                                 url: "json.htm?type=command&param=addyeelight&idx=" + $.devIdx +
+									"&name=" + encodeURIComponent(SensorName) +
+									"&ipaddress=" + encodeURIComponent(IPAddress) +
+									"&stype=" + SensorType,
+                                 async: false,
+                                 dataType: 'json',
+                                 success: function(data) {
+                                    if (data.status == 'OK') {
+                                        ShowNotify($.t('Light created, and can be found in the devices tab!'), 2500);
+                                    }
+                                    else {
+                                        ShowNotify($.t('Problem adding Light!'), 2500, true);
+                                    }
+                                 },
+                                 error: function(){
+                                        HideNotify();
+                                        ShowNotify($.t('Problem adding Light!'), 2500, true);
+                                 }
+                            });
+                      },
+                      Cancel: function() {
+                          $( this ).dialog( "close" );
+                      }
+                  },
+                  close: function() {
+                    $( this ).dialog( "close" );
+                  }
+            });
+
+            $( "#dialog-addyeelight" ).i18n();
+            $( "#dialog-addyeelight" ).dialog( "open" );
+        }
+
 		ReloadPiFace = function(idx,name)
         {
           $.post("reloadpiface.webem", { 'idx':idx }, function(data) {
@@ -4483,6 +4548,9 @@ define(['app'], function (app) {
                     }
                     else if (HwTypeStr.indexOf("Dummy") >= 0) {
                         HwTypeStr+=' <span class="label label-info lcursor" onclick="CreateDummySensors(' + item.idx + ',\'' + item.Name + '\');">' + $.t("Create Virtual Sensors") + '</span>';
+                    }
+                    else if (HwTypeStr.indexOf("YeeLight") >= 0) {
+                        HwTypeStr+=' <span class="label label-info lcursor" onclick="AddYeeLight(' + item.idx + ',\'' + item.Name + '\');">' + $.t("Add Light") + '</span>';
                     }
                     else if (HwTypeStr.indexOf("PiFace") >= 0) {
                         HwTypeStr+=' <span class="label label-info lcursor" onclick="ReloadPiFace(' + item.idx + ',\'' + item.Name + '\');">' + $.t("Reload") + '</span>';

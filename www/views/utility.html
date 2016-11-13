@@ -414,12 +414,18 @@
     <a class="btnstyle3" onclick="AddSetpointTimer();" data-i18n="Add">Add</a>
 </div>
 <div id="ihmSetpointTimers" style="display:none;">
+  <p style="height:50px;" align="center">
+      <input type="radio" name="when" id="when1" style="height:40px;width:40px;" value="Everyday" checked>&nbsp;<span data-i18n="Everyday" style="margin-right: 20px;">Everyday</span>
+      <input type="radio" name="when" id="when2" style="height:40px;width:40px;" value="Weekdays">&nbsp;<span data-i18n="Weekdays" style="margin-right: 20px;">Weekdays</span>
+      <input type="radio" name="when" id="when3" style="height:40px;width:40px;" value="Weekends">&nbsp;<span data-i18n="Weekends" style="margin-right: 20px;">Weekends</span>
+      <input type="radio" name="when" id="when4" style="height:40px;width:40px;" value="SelectedDays">&nbsp;<span data-i18n="Selected Days" style="margin-right: 20px;">SelectedDays</span>
+  </p>
   <table BORDER="0">       
-    
 	<tr>
 		<td align="right" ><label for="tvalue"><span data-i18n="Confor" onclick="selectConfButton();" >Confor</span>:</label></td>
 		<td><input type="text" id="tConf" style="width: 60px; padding: .2em;" class="text ui-widget-content ui-corner-all">
 		&nbsp;  
+<!--		
     <label> <button id="cT1"  class="btn btn-th btn-conf" type="button"  onclick="SetConf(this);">15</button></label>
     <label> <button id="cT2"  class="btn btn-th btn-conf" type="button"  onclick="SetConf(this);">16</button></label>
     <label> <button id="cT3"  class="btn btn-th btn-conf" type="button"  onclick="SetConf(this);">17</button></label>
@@ -431,13 +437,14 @@
     <label> <button id="cT9"  class="btn btn-th btn-conf" type="button"  onclick="SetConf(this);">23</button></label>
     <label> <button id="cT10" class="btn btn-th btn-conf" type="button"  onclick="SetConf(this);">24</button></label>
     <label> <button id="cT11" class="btn btn-th btn-conf" type="button"  onclick="SetConf(this);">25</button></label>
-
+-->    
   </td>
 	</tr>
 	<tr>
 		<td align="right" ><label for="tvalue"><span data-i18n="Eco" onclick="selectEcoButton();">Eco</span>:</label></td>
 		<td><input type="text" id="tEco" style="width: 60px; padding: .2em;" class="text ui-widget-content ui-corner-all">
 		&nbsp;  
+<!--		
     <label> <button id="eT1"  class="btn btn-th btn-eco" type="button"  onclick="SetEco(this);">15</button></label>
     <label> <button id="eT2"  class="btn btn-th btn-eco" type="button"  onclick="SetEco(this);">16</button></label>
     <label> <button id="eT3"  class="btn btn-th btn-eco" type="button"  onclick="SetEco(this);">17</button></label>
@@ -449,17 +456,9 @@
     <label> <button id="eT9"  class="btn btn-th btn-eco" type="button"  onclick="SetEco(this);">23</button></label>
     <label> <button id="eT10" class="btn btn-th btn-eco" type="button"  onclick="SetEco(this);">24</button></label>
     <label> <button id="eT11" class="btn btn-th btn-eco" type="button"  onclick="SetEco(this);">25</button></label>
+-->    
   </td>
 	</tr>
-  <tr style="height:50px;" >                                           
-		<td></td>
-		<td>
-			<input type="radio" name="when" id="when1" value="Everyday" checked>&nbsp;<span data-i18n="Everyday" style="margin-right: 20px;">Everyday</span>
-			<input type="radio" name="when" id="when2" value="Weekdays">&nbsp;<span data-i18n="Weekdays" style="margin-right: 20px;">Weekdays</span>
-			<input type="radio" name="when" id="when3" value="Weekends">&nbsp;<span data-i18n="Weekends" style="margin-right: 20px;">Weekends</span>
-			<input type="radio" name="when" id="when4" value="SelectedDays">&nbsp;<span data-i18n="Selected Days" style="margin-right: 20px;">SelectedDays</span><br>
-		</td>
-  <tr> 
   </table>
 
   </div>

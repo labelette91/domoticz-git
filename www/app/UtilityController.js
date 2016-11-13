@@ -507,12 +507,13 @@ define(['app'], function (app) {
 			'\t<table class="bannav" id="bannav" border="0" cellpadding="0" cellspacing="0" width="100%">\n' +
 			'\t<tr>\n' +
 			'\t  <td align="left"><a class="btnstylerev" onclick="ShowUtilities();" data-i18n="Back">Back</a></td>\n' +
+            '\t  <td><h2><span data-i18n="Name"></span>: ' + name + '</h2></td>\n' +
 			'\t  <td align="right"><a class="btnstyle" onclick="ProgCopy('+id+');" data-i18n="Copy">Copy</a>\n' +
 			'\t                    <a class="btnstyle" onclick="ProgAdd('+id+');" data-i18n="Add">Add</a></td>\n' +
 			'\t</tr>\n' +
 			'\t</table>\n';
 
-			htmlcontent+='<p><h2><span data-i18n="Name"></span>: ' + name + '</h2></p><br>\n';
+//			htmlcontent+='<p><h2><span data-i18n="Name"></span>: ' + name + '</h2></p><br>\n';
 
 			htmlcontent+=$('#ihmSetpointTimers').html();
 			htmlcontent+=createDayHourTable();

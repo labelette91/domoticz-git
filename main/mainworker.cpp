@@ -1243,7 +1243,7 @@ void MainWorker::HandleAutomaticBackups()
 		if ((lDir = opendir(sbackup_DirH.c_str())) != NULL)
 		{
 			std::stringstream sTmp;
-			sTmp << "backup-hour-" << hour << ".db";
+			sTmp << "backup-hour-" << std::setw(2) << std::setfill('0') << hour << ".db";
 
 			std::string OutputFileName=sbackup_DirH + sTmp.str();
 			if (m_sql.BackupDatabase(OutputFileName)) {
@@ -1263,7 +1263,7 @@ void MainWorker::HandleAutomaticBackups()
 		if ((lDir = opendir(sbackup_DirD.c_str())) != NULL)
 		{
 			std::stringstream sTmp;
-			sTmp << "backup-day-" << day << ".db";
+			sTmp << "backup-day-" << std::setw(2) << std::setfill('0') << day << ".db";
 
 			std::string OutputFileName=sbackup_DirD + sTmp.str();
 			if (m_sql.BackupDatabase(OutputFileName)) {
@@ -1282,7 +1282,7 @@ void MainWorker::HandleAutomaticBackups()
 		if ((lDir = opendir(sbackup_DirM.c_str())) != NULL)
 		{
 			std::stringstream sTmp;
-			sTmp << "backup-month-" << month+1 << ".db";
+			sTmp << "backup-month-" << std::setw(2) << std::setfill('0') << month+1 << ".db";
 
 			std::string OutputFileName=sbackup_DirM + sTmp.str();
 			if (m_sql.BackupDatabase(OutputFileName)) {

@@ -2293,7 +2293,27 @@ void CEventSystem::EvaluatePython(const std::string &reason, const std::string &
 		time_t now = time(0);
 		struct tm ltime;
 		localtime_r(&now, &ltime);
-		int minutesSinceMidnight = (ltime.tm_hour * 60) + ltime.tm_min;
+//GB3:	number of hours since midnight may be different from ltime.tm_hour
+//	determine the correct time_t value for midnight and use difftime()
+//	to find the correct number of minutes since midnight.
+		struct tm mtime;
+		time_t tmidnight;
+		int isdst = ltime.tm_isdst;
+		bool goodtime = false;
+		while (!goodtime) {
+			mtime.tm_isdst = isdst;
+			mtime.tm_year = ltime.tm_year;
+			mtime.tm_mon = ltime.tm_mon;
+			mtime.tm_mday = ltime.tm_mday;
+			mtime.tm_hour = 0;
+			mtime.tm_min = 0;
+			mtime.tm_sec = 0;
+			tmidnight = mktime(&mtime);
+			goodtime = (mtime.tm_isdst == isdst);
+			isdst = mtime.tm_isdst;
+		}
+		int minutesSinceMidnight = (int)(difftime(now,tmidnight) / 60);
+	
 		bool dayTimeBool = false;
 		bool nightTimeBool = false;
 		if ((minutesSinceMidnight > intRise) && (minutesSinceMidnight < intSet)) {
@@ -2451,7 +2471,23 @@ void CEventSystem::EvaluateLua(const std::string &reason, const std::string &fil
 	time_t now = time(0);
 	struct tm ltime;
 	localtime_r(&now, &ltime);
-	int minutesSinceMidnight = (ltime.tm_hour * 60) + ltime.tm_min;
+	struct tm mtime;
+	time_t tmidnight;
+	int isdst = ltime.tm_isdst;
+	bool goodtime = false;
+	while (!goodtime) {
+		mtime.tm_isdst = isdst;
+		mtime.tm_year = ltime.tm_year;
+		mtime.tm_mon = ltime.tm_mon;
+		mtime.tm_mday = ltime.tm_mday;
+		mtime.tm_hour = 0;
+		mtime.tm_min = 0;
+		mtime.tm_sec = 0;
+		tmidnight = mktime(&mtime);
+		goodtime = (mtime.tm_isdst == isdst);
+		isdst = mtime.tm_isdst;
+	}
+	int minutesSinceMidnight = (int)(difftime(now,tmidnight) / 60);
 	bool dayTimeBool = false;
 	bool nightTimeBool = false;
 	if ((minutesSinceMidnight > intRise) && (minutesSinceMidnight < intSet)) {
@@ -2754,7 +2790,7 @@ void CEventSystem::EvaluateLua(const std::string &reason, const std::string &fil
 			// BEGIN OTO: populate changed info
 			lua_createtable(lua_state, 3, 0);
 			lua_pushstring(lua_state, "idx");
-			lua_pushnumber(lua_state, DeviceID);
+			lua_pushnumber(lua_state, (lua_Number)DeviceID);
 			lua_rawset(lua_state, -3);
 
 			lua_pushstring(lua_state, "svalue");
@@ -3050,7 +3086,8 @@ bool CEventSystem::iterateLuaTable(lua_State *lua_state, const int tIndex, const
 bool CEventSystem::processLuaCommand(lua_State *lua_state, const std::string &filename)
 {
 	bool scriptTrue = false;
-	if (std::string(lua_tostring(lua_state, -2)) == "SendNotification") {
+	std::string lCommand = std::string(lua_tostring(lua_state, -2));
+	if (lCommand == "SendNotification") {
 		std::string luaString = lua_tostring(lua_state, -1);
 		std::string subject(" "), body(" "), priority("0"), sound;
 		std::string extraData;
@@ -3072,7 +3109,7 @@ bool CEventSystem::processLuaCommand(lua_State *lua_state, const std::string &fi
 		m_sql.AddTaskItem(_tTaskItem::SendNotification(1, subject, body, std::string(""), atoi(priority.c_str()), sound));
 		scriptTrue = true;
 	}
-	else if (std::string(lua_tostring(lua_state, -2)) == "SendEmail") {
+	else if (lCommand == "SendEmail") {
 		std::string luaString = lua_tostring(lua_state, -1);
 		std::string subject, body, to;
 		std::vector<std::string> aParam;
@@ -3090,7 +3127,7 @@ bool CEventSystem::processLuaCommand(lua_State *lua_state, const std::string &fi
 		m_sql.AddTaskItem(_tTaskItem::SendEmailTo(1, subject, body, to));
 		scriptTrue = true;
 	}
-	else if (std::string(lua_tostring(lua_state, -2)) == "SendSMS") {
+	else if (lCommand == "SendSMS") {
 		std::string luaString = lua_tostring(lua_state, -1);
 		if (luaString.empty())
 		{
@@ -3101,21 +3138,21 @@ bool CEventSystem::processLuaCommand(lua_State *lua_state, const std::string &fi
 		m_sql.AddTaskItem(_tTaskItem::SendSMS(1, luaString));
 		scriptTrue = true;
 	}
-	else if (std::string(lua_tostring(lua_state, -2)) == "OpenURL")
+	else if (lCommand == "OpenURL")
 	{
 		std::string luaString = lua_tostring(lua_state, -1);
 		OpenURL(luaString);
 		scriptTrue = true;
 	}
-	else if (std::string(lua_tostring(lua_state, -2)) == "UpdateDevice")
+	else if (lCommand == "UpdateDevice")
 	{
 		std::string luaString = lua_tostring(lua_state, -1);
 		UpdateDevice(luaString);
 		scriptTrue = true;
 	}
-	else if (std::string(lua_tostring(lua_state, -2)).find("Variable:") == 0)
+	else if (lCommand.find("Variable:") == 0)
 	{
-		std::string variableName = std::string(lua_tostring(lua_state, -2)).substr(9);
+		std::string variableName = lCommand.substr(9);
 		std::string variableValue = lua_tostring(lua_state, -1);
 
 		std::vector<std::vector<std::string> > result;
@@ -3195,6 +3232,14 @@ bool CEventSystem::processLuaCommand(lua_State *lua_state, const std::string &fi
 			}
 			scriptTrue = true;
 		}
+	}
+	else if (lCommand.find("SetSetPoint:") == 0)
+	{
+		std::string SetPointIdx = lCommand.substr(12);
+		std::string SetPointValue = lua_tostring(lua_state, -1);
+
+		int idx = atoi(SetPointIdx.c_str());
+		m_sql.AddTaskItem(_tTaskItem::SetSetPoint(0.5f, idx, SetPointValue));
 	}
 	else
 	{

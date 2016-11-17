@@ -63,6 +63,7 @@
 #include "../hardware/evohome.h"
 #include "../hardware/MySensorsSerial.h"
 #include "../hardware/MySensorsTCP.h"
+#include "../hardware/MySensorsMQTT.h"
 #include "../hardware/MQTT.h"
 #include "../hardware/FritzboxTCP.h"
 #include "../hardware/ETH8020.h"
@@ -720,6 +721,10 @@ bool MainWorker::AddHardwareFromParams(
 	case HTYPE_MySensorsTCP:
 		//LAN
 		pHardware = new MySensorsTCP(ID, Address, Port);
+		break;
+	case HTYPE_MySensorsMQTT:
+		//LAN
+		pHardware = new MySensorsMQTT(ID, Address, Port, Username, Password, Filename);
 		break;
 	case HTYPE_RFLINKTCP:
 		//LAN
@@ -1484,7 +1489,7 @@ void MainWorker::Do_Work()
 
 		if (ltime.tm_min!=m_ScheduleLastMinute)
 		{
-			if (atime - m_ScheduleLastMinuteTime > 30) //avoid RTC/NTP clock drifts
+			if (difftime(atime,m_ScheduleLastMinuteTime) > 30) //avoid RTC/NTP clock drifts
 			{
 				m_VirtualThermostat.ScheduleThermostat(ltime.tm_min);
 				m_ScheduleLastMinuteTime = atime;
@@ -1517,7 +1522,7 @@ void MainWorker::Do_Work()
 		}
 		if (ltime.tm_hour!=m_ScheduleLastHour)
 		{
-			if (atime - m_ScheduleLastHourTime > 30 * 60) //avoid RTC/NTP clock drifts
+			if (difftime(atime,m_ScheduleLastHourTime) > 30 * 60) //avoid RTC/NTP clock drifts
 			{
 				m_ScheduleLastHourTime = atime;
 				m_ScheduleLastHour = ltime.tm_hour;

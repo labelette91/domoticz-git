@@ -167,7 +167,7 @@ static int __init rfrpi_init(void)
 	}
 	rx_irqs[0] = ret;
 	printk(KERN_INFO "RFRPI - Successfully requested RX IRQ # %d\n", rx_irqs[0]);
-	ret = request_irq(rx_irqs[0], rx_isr, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_DISABLED, "rfrpi#rx", NULL);
+	ret = request_irq(rx_irqs[0], rx_isr, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING , "rfrpi#rx", NULL);
 	if(ret) {
 		printk(KERN_ERR "RFRPI - Unable to request IRQ: %d\n", ret);
 		goto fail3;

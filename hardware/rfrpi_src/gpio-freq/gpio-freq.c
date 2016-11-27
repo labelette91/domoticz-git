@@ -56,6 +56,8 @@ static int gpio_freq_open (struct inode * ind, struct file * filp)
 	int err;
 	int gpio;
 	struct gpio_freq_data * data;
+
+  printk(KERN_INFO "open inode %d:%d\n", imajor(ind) , iminor(ind) );
 	
 	data = kzalloc(sizeof(struct gpio_freq_data), GFP_KERNEL);
 	if (data == NULL)
@@ -210,6 +212,7 @@ static int __init gpio_freq_init (void)
 	err = alloc_chrdev_region(& gpio_freq_dev, 0, gpio_freq_nb_gpios, THIS_MODULE->name);
 	if (err != 0)
 		return err;
+  printk(KERN_INFO "create region %d %d\n", MAJOR(gpio_freq_dev) , MINOR(gpio_freq_dev) );
 
 	gpio_freq_class = class_create(THIS_MODULE, GPIO_FREQ_CLASS_NAME);
  	if (IS_ERR(gpio_freq_class)) {
@@ -217,8 +220,10 @@ static int __init gpio_freq_init (void)
  		return -EINVAL;
  	}
 
-	for (i = 0; i < gpio_freq_nb_gpios; i ++) 
-		device_create(gpio_freq_class, NULL, MKDEV(MAJOR(gpio_freq_dev), i), NULL, GPIO_FREQ_ENTRIES_NAME, i);
+	for (i = 0; i < gpio_freq_nb_gpios; i ++) {
+		device_create(gpio_freq_class, NULL, MKDEV(MAJOR(gpio_freq_dev), i), NULL, GPIO_FREQ_ENTRIES_NAME, gpio_freq_table[i]);
+		printk(KERN_INFO "create device %s%d GPIO:%d\n",GPIO_FREQ_CLASS_NAME,i,gpio_freq_table[i] );
+	}
 
 	cdev_init(& gpio_freq_cdev, & gpio_freq_fops);
 
@@ -244,7 +249,7 @@ void __exit gpio_freq_exit (void)
 	cdev_del (& gpio_freq_cdev);
 
 	for (i = 0; i < gpio_freq_nb_gpios; i ++) 
-		device_destroy(gpio_freq_class, MKDEV(MAJOR(gpio_freq_dev), i));
+		device_destroy(gpio_freq_class, MKDEV(MAJOR(gpio_freq_dev),  i));
 
 	class_destroy(gpio_freq_class);
 	gpio_freq_class = NULL;

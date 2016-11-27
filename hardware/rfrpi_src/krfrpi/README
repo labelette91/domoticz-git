@@ -1,0 +1,17 @@
+This is a Kernel Driver for receiving data based on kernel interuption instead of
+Software interruption this helps to correctly handle timing with RPI B+ and RPI2
+where kernel respond to software interrupt with an incertain delay.
+
+To compile this kernel driver you need to have your RPI environment ready for it. 
+Please take a look to this post for being ready.
+
+http://www.disk91.com/2015/technology/systems/rf433-raspberry-pi-gpio-kernel-driver-for-interrupt-management/
+
+Then to compile, execute
+make
+
+After you can load the kernel by insmod krfrpi.ko
+You should after that have a /dev/rfrpi device
+
+(c) Disk19.com / 2015
+License : GPL

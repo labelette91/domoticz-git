@@ -21,7 +21,7 @@
 #include <linux/spinlock.h>
 #include <linux/version.h>
 
-#include <asm/uaccess.h>
+//#include <asm/uaccess.h>
 
 
 // ------------------ Default values ----------------------------------------
@@ -38,11 +38,18 @@
 
 
 // ------------------ Driver private data type ------------------------------
+#define BUFFER_SZ			512 
 
 struct gpio_freq_data {
-	struct timeval last_timestamp;
-	int        frequency;
+    struct timespec lastIrq_time;
+    unsigned long lastDelta[BUFFER_SZ];
+    int  pRead;
+    int  pWrite;
+    int  wasOverflow;
+
 	spinlock_t spinlock;
+    int frequency;
+    struct timeval last_timestamp;
 };
 
 
@@ -116,30 +123,37 @@ static int gpio_freq_release (struct inode * ind,  struct file * filp)
 
 static int gpio_freq_read(struct file * filp, char * buffer, size_t length, loff_t * offset)
 {
-	int lg;
-	int err;
-	char * kbuffer;
-	unsigned long irqmsk;
+
 	struct gpio_freq_data * data = filp->private_data;
-	
-	kbuffer = kmalloc(128, GFP_KERNEL);
-	if (kbuffer == NULL)
-		return -ENOMEM;
+	unsigned long irqmsk;
 
+	// returns one of the line with the time between two IRQs
+	// return 0 : end of reading
+	// return >0 : size
+	// return -EFAULT : error
+	char tmp[256];
+	int _count;
+	int _error_count;
+
+	_count = 0;
 	spin_lock_irqsave(& (data->spinlock), irqmsk);
-	snprintf(kbuffer, 128, "%d\n", data->frequency);
+	if ( data->pRead != data->pWrite ) {
+		_count=sprintf(tmp,"%ld\n",data->lastDelta[data->pRead]);
+        if(length<_count)
+            _count=length;
+        _error_count = copy_to_user(buffer,tmp,_count+1);
+		data->pRead = (data->pRead + 1) & (BUFFER_SZ-1);
+	}
 	spin_unlock_irqrestore(& (data->spinlock), irqmsk);
-	lg = strlen(kbuffer);
-	if (lg > length)
-		lg = length;
-		
-	err = copy_to_user(buffer, kbuffer, lg);
+    printk(KERN_INFO "read %s", tmp );
 
-	kfree(kbuffer);
+    if ( _error_count != 0 ) {
+    	printk(KERN_ERR "RFRPI - Error writing to char device");
+        return -EFAULT;
+    }
 
-	if (err != 0)
-		return -EFAULT;
-	return lg;
+	return _count;
+
 }
 
 
@@ -148,11 +162,10 @@ static int gpio_freq_read(struct file * filp, char * buffer, size_t length, loff
 static irqreturn_t gpio_freq_handler(int irq, void * arg)
 {
 	struct gpio_freq_data * data;
-	struct timeval timestamp;
 	struct file * filp = (struct file *) arg;
-	long int period;
-
-	do_gettimeofday(& timestamp);
+   	struct timespec current_time;
+    struct timespec delta;
+   	unsigned long ns;
 	
 	if (filp == NULL)
 		return -IRQ_NONE;
@@ -160,23 +173,32 @@ static irqreturn_t gpio_freq_handler(int irq, void * arg)
 	data = filp->private_data;
 	if (data == NULL)
 		return IRQ_NONE;
-	
-	if ((data->last_timestamp.tv_sec  != 0)
-	 || (data->last_timestamp.tv_usec != 0)) {
-		period  = timestamp.tv_sec - data->last_timestamp.tv_sec;
-		period *= 1000000;  // In microsec.
-		period += timestamp.tv_usec - data->last_timestamp.tv_usec;
-		spin_lock(&(data->spinlock));
-		if (period > 0)
-			data->frequency = 1000000 / period;
-		else
-			data->frequency = 0;
-		spin_unlock(&(data->spinlock));
-	}
 
-	data->last_timestamp = timestamp;
+   	getnstimeofday(&current_time);
+	delta = timespec_sub(current_time, data->lastIrq_time);
+	ns = ((long long)delta.tv_sec * 1000000)+(delta.tv_nsec/1000); 
+
+    printk(KERN_INFO "pulse %d\n", ns );
+
+    spin_lock(&(data->spinlock));
+    data->lastDelta[data->pWrite] = ns;
+   	getnstimeofday(&data->lastIrq_time);
+	data->pWrite = ( data->pWrite + 1 )  & (BUFFER_SZ-1);
+	if (data->pWrite == data->pRead) {
+		// overflow
+		data->pRead = ( data->pRead + 1 ) & (BUFFER_SZ-1);
+		if ( data->wasOverflow == 0 ) {
+	       printk(KERN_ERR "RFRPI - Buffer Overflow - IRQ will be missed");
+	       data->wasOverflow = 1;
+	    }
+	} else {
+		data->wasOverflow = 0;
+	}
+    spin_unlock(&(data->spinlock));
 
 	return IRQ_HANDLED;
+
+
 }
 
 

@@ -21,7 +21,7 @@
 #include <linux/spinlock.h>
 #include <linux/version.h>
 
-//#include <asm/uaccess.h>
+#include <asm/uaccess.h>
 
 
 // ------------------ Default values ----------------------------------------
@@ -64,7 +64,8 @@ static int gpio_freq_open (struct inode * ind, struct file * filp)
 	int gpio;
 	struct gpio_freq_data * data;
 
-  printk(KERN_INFO "open inode %d:%d\n", imajor(ind) , iminor(ind) );
+	gpio = iminor(ind);
+  printk(KERN_INFO "open inode %d:%d GPIO:%d\n", imajor(ind) , iminor(ind),gpio_freq_table[gpio] );
 	
 	data = kzalloc(sizeof(struct gpio_freq_data), GFP_KERNEL);
 	if (data == NULL)
@@ -72,7 +73,6 @@ static int gpio_freq_open (struct inode * ind, struct file * filp)
 	
 	spin_lock_init(& (data->spinlock));
 		
-	gpio = iminor(ind);
 	err = gpio_request(gpio_freq_table[gpio], THIS_MODULE->name);
 	if (err != 0) {
 		printk(KERN_ERR "%s: unable to reserve GPIO %d\n", THIS_MODULE->name, gpio_freq_table[gpio]);
@@ -132,23 +132,27 @@ static int gpio_freq_read(struct file * filp, char * buffer, size_t length, loff
 	// return >0 : size
 	// return -EFAULT : error
 	char tmp[256];
-	int _count;
-	int _error_count;
-
+	int _count=0;
+	int _error_count=0;
+  long pulse = 0 ;
+  
 	_count = 0;
+	tmp[0] = 0 ;
 	spin_lock_irqsave(& (data->spinlock), irqmsk);
 	if ( data->pRead != data->pWrite ) {
-		_count=sprintf(tmp,"%ld\n",data->lastDelta[data->pRead]);
-        if(length<_count)
-            _count=length;
-        _error_count = copy_to_user(buffer,tmp,_count+1);
+		pulse = data->lastDelta[data->pRead];
 		data->pRead = (data->pRead + 1) & (BUFFER_SZ-1);
 	}
+	_count=sprintf(tmp,"%ld\n",data->lastDelta[data->pRead]);
+  if(length<_count)
+    _count=length;
+  _error_count = copy_to_user(buffer,tmp,_count+1);
+	
 	spin_unlock_irqrestore(& (data->spinlock), irqmsk);
-    printk(KERN_INFO "read %s", tmp );
+  printk(KERN_INFO "read %s", tmp );
 
     if ( _error_count != 0 ) {
-    	printk(KERN_ERR "RFRPI - Error writing to char device");
+    	printk(KERN_ERR "RFRPI - copy_to_user");
         return -EFAULT;
     }
 
@@ -178,7 +182,7 @@ static irqreturn_t gpio_freq_handler(int irq, void * arg)
 	delta = timespec_sub(current_time, data->lastIrq_time);
 	ns = ((long long)delta.tv_sec * 1000000)+(delta.tv_nsec/1000); 
 
-    printk(KERN_INFO "pulse %d\n", ns );
+  printk(KERN_INFO "pulse %ld\n", ns );
 
     spin_lock(&(data->spinlock));
     data->lastDelta[data->pWrite] = ns;
@@ -244,7 +248,7 @@ static int __init gpio_freq_init (void)
 
 	for (i = 0; i < gpio_freq_nb_gpios; i ++) {
 		device_create(gpio_freq_class, NULL, MKDEV(MAJOR(gpio_freq_dev), i), NULL, GPIO_FREQ_ENTRIES_NAME, gpio_freq_table[i]);
-		printk(KERN_INFO "create device %s%d GPIO:%d\n",GPIO_FREQ_CLASS_NAME,i,gpio_freq_table[i] );
+		printk(KERN_INFO "create device %s%d \n",GPIO_FREQ_ENTRIES_NAME,gpio_freq_table[i] );
 	}
 
 	cdev_init(& gpio_freq_cdev, & gpio_freq_fops);
@@ -270,9 +274,10 @@ void __exit gpio_freq_exit (void)
 
 	cdev_del (& gpio_freq_cdev);
 
-	for (i = 0; i < gpio_freq_nb_gpios; i ++) 
+	for (i = 0; i < gpio_freq_nb_gpios; i ++) {
 		device_destroy(gpio_freq_class, MKDEV(MAJOR(gpio_freq_dev),  i));
-
+		printk(KERN_INFO "delete device %s%d \n",GPIO_FREQ_ENTRIES_NAME,gpio_freq_table[i] );
+	}
 	class_destroy(gpio_freq_class);
 	gpio_freq_class = NULL;
 

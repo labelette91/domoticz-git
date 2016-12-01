@@ -39,10 +39,11 @@
 
 // ------------------ Driver private data type ------------------------------
 #define BUFFER_SZ			512 
+#define U32B unsigned long
 
 struct gpio_freq_data {
     struct timespec lastIrq_time;
-    unsigned long lastDelta[BUFFER_SZ];
+    U32B lastDelta[BUFFER_SZ];
     int  pRead;
     int  pWrite;
     int  wasOverflow;
@@ -53,6 +54,16 @@ struct gpio_freq_data {
 };
 
 
+//test
+void testData(struct gpio_freq_data * data)
+{
+    int i;
+    for (i=0;i<10;i++)
+        data->lastDelta[i] = i+1;
+	data->pWrite =   10;
+    data->pRead  = 0 ;
+
+}
 
 // ------------------ Driver private methods -------------------------------
 
@@ -89,7 +100,7 @@ static int gpio_freq_open (struct inode * ind, struct file * filp)
 	}
 	
 	err = request_irq(gpio_to_irq(gpio_freq_table[gpio]), gpio_freq_handler,
-	                  IRQF_SHARED | IRQF_TRIGGER_RISING,
+	                  IRQF_SHARED | IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING ,
 	                  THIS_MODULE->name, filp);
 	if (err != 0) {
 		printk(KERN_ERR "%s: unable to handle GPIO %d IRQ\n", THIS_MODULE->name, gpio_freq_table[gpio]);
@@ -99,6 +110,7 @@ static int gpio_freq_open (struct inode * ind, struct file * filp)
 	}
 
 	filp->private_data = data;
+    testData(data);
 	return 0;
 }
 
@@ -119,7 +131,28 @@ static int gpio_freq_release (struct inode * ind,  struct file * filp)
 }
 
 
+int copy_data(struct gpio_freq_data * data , char * buffer, size_t length )
+{
+    int nb  ;
+    int _error_count=0;
+    if ( data->pRead != data->pWrite ) {
 
+        /* copy data between read and write */
+        if ( data->pRead < data->pWrite ) 
+            nb = (data->pWrite-data->pRead)    ; 
+        else
+        /* copy data between read and end buffer */
+            nb = (BUFFER_SZ-data->pRead)    ; 
+        
+        //compute size of long word
+        length /=  sizeof(U32B);
+        if (nb>= length )
+            nb = length ;
+        _error_count = copy_to_user(buffer,&data->lastDelta[data->pRead],nb * sizeof(U32B));
+        data->pRead = (data->pWrite + nb) & (BUFFER_SZ-1);
+	}
+    return _error_count;
+}
 
 static int gpio_freq_read(struct file * filp, char * buffer, size_t length, loff_t * offset)
 {
@@ -141,15 +174,13 @@ static int gpio_freq_read(struct file * filp, char * buffer, size_t length, loff
 	spin_lock_irqsave(& (data->spinlock), irqmsk);
 	if ( data->pRead != data->pWrite ) {
 		pulse = data->lastDelta[data->pRead];
+		_count = sprintf(tmp, "%ld", data->lastDelta[data->pRead]);
 		data->pRead = (data->pRead + 1) & (BUFFER_SZ-1);
+        _error_count = copy_to_user(buffer,tmp,_count+1);
 	}
-	_count=sprintf(tmp,"%ld\n",data->lastDelta[data->pRead]);
-  if(length<_count)
-    _count=length;
-  _error_count = copy_to_user(buffer,tmp,_count+1);
 	
 	spin_unlock_irqrestore(& (data->spinlock), irqmsk);
-  printk(KERN_INFO "read %s", tmp );
+    printk(KERN_INFO "read %s %d %d", tmp , _count , length );
 
     if ( _error_count != 0 ) {
     	printk(KERN_ERR "RFRPI - copy_to_user");

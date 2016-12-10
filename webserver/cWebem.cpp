@@ -1591,6 +1591,7 @@ void cWebemRequestHandler::handle_request(const request& req, reply& rep)
 	// Initialize session
 	WebEmSession session;
 	session.remote_host = req.host_address;
+	session.reply_status = reply::ok;
 	session.isnew = false;
 	session.forcelogin = false;
 	session.rememberme = false;
@@ -1634,6 +1635,11 @@ void cWebemRequestHandler::handle_request(const request& req, reply& rep)
 	modify_info mInfo;
 	if (!myWebem->CheckForPageOverride(session, requestCopy, rep))
 	{
+		if (session.reply_status != reply::ok)
+		{
+			rep = reply::stock_reply(static_cast<reply::status_type>(session.reply_status));
+			return;
+		}
 		// do normal handling
 		try
 		{
@@ -1713,6 +1719,12 @@ void cWebemRequestHandler::handle_request(const request& req, reply& rep)
 	}
 	else
 	{
+		if (session.reply_status != reply::ok)
+		{
+			rep = reply::stock_reply(static_cast<reply::status_type>(session.reply_status));
+			return;
+		}
+
 		if (!rep.bIsGZIP) {
 			CompressWebOutput(req, rep);
 		}

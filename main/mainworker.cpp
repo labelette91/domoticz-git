@@ -109,6 +109,7 @@
 #include "../hardware/ZiBlueSerial.h"
 #include "../hardware/ZiBlueTCP.h"
 #include "../hardware/Yeelight.h"
+#include "../hardware/XiaomiGateway.h"
 
 // load notifications configuration
 #include "../notifications/NotificationHelper.h"
@@ -828,27 +829,27 @@ bool MainWorker::AddHardwareFromParams(
 #endif
 		break;
 	case HTYPE_VOLCRAFTCO20:
-		//Voltcrafr CO-20 Air Quality
+		//Voltcraft CO-20 Air Quality
 #ifdef WITH_LIBUSB
 		pHardware = new CVolcraftCO20(ID);
 #endif
 		break;
 #endif
 	case HTYPE_RaspberryBMP085:
-		pHardware = new I2C(ID,1,0);
+		pHardware = new I2C(ID, I2C::I2CTYPE_BMP085, 0);
 		break;
 	case HTYPE_HomeEasy:
 		pHardware = new HomeEasy(ID);
 		break;
 	case HTYPE_RaspberryHTU21D:
-		pHardware = new I2C(ID,2,0);
+		pHardware = new I2C(ID, I2C::I2CTYPE_HTU21D, 0);
 		break;
 	case HTYPE_RaspberryTSL2561:
-		pHardware = new I2C(ID,3,0);
+		pHardware = new I2C(ID, I2C::I2CTYPE_TSL2561, 0);
 		break;
 	case HTYPE_RaspberryPCF8574:
-		pHardware = new I2C(ID,4,Port);
-		break;
+		pHardware = new I2C(ID, I2C::I2CTYPE_PCF8574, Port);
+		break; 
 	case HTYPE_Wunderground:
 		pHardware = new CWunderground(ID,Username,Password);
 		break;
@@ -956,6 +957,9 @@ bool MainWorker::AddHardwareFromParams(
 		break;
 	case HTYPE_Yeelight:
 		pHardware = new Yeelight(ID);
+		break;
+	case HTYPE_XiaomiGateway:
+		pHardware = new XiaomiGateway(ID);
 		break;
 	}
 
@@ -6294,6 +6298,13 @@ void MainWorker::decode_evohome3(const int HwdID, const _eHardwareTypes HwdType,
 			return;
 		unsigned char cur_cmnd=atoi(result[0][5].c_str());
 		BatteryLevel = atoi(result[0][7].c_str());
+		
+		if (pEvo->EVOHOME3.updatetype == CEvohome::updBattery)
+		{
+			BatteryLevel = pEvo->EVOHOME3.battery_level;
+			szDemand = result[0][6];
+			cmnd=(atoi(szDemand.c_str())>0)?light1_sOn:light1_sOff;
+		}
 		if(Unit==0xFF)
 		{
 			Unit=atoi(result[0][2].c_str());
@@ -6313,10 +6324,9 @@ void MainWorker::decode_evohome3(const int HwdID, const _eHardwareTypes HwdType,
 		bNewDev=true;
 		if(pEvo->EVOHOME3.demand==0xFF)//0418 allows us to associate unit and deviceid but no state information other messages only contain one or the other
 			szDemand="0";
+		if (pEvo->EVOHOME3.updatetype == CEvohome::updBattery)
+			BatteryLevel = pEvo->EVOHOME3.battery_level;
 	}
-
-	if (pEvo->EVOHOME3.updatetype == CEvohome::updBattery)
-		BatteryLevel = pEvo->EVOHOME3.battery_level;
 
 	uint64_t DevRowIdx=m_sql.UpdateValue(HwdID, ID.c_str(),Unit,devType,subType,SignalLevel,BatteryLevel,cmnd,szDemand.c_str(), procResult.DeviceName);
 	if (DevRowIdx == -1)

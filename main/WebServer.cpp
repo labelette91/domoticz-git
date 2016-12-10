@@ -926,7 +926,8 @@ namespace http {
 				if (
 					(ii == HTYPE_RaspberryBMP085) ||
 					(ii == HTYPE_RaspberryHTU21D) ||
-					(ii == HTYPE_RaspberryTSL2561)
+					(ii == HTYPE_RaspberryTSL2561) ||
+					(ii == HTYPE_RaspberryPCF8574)
 					)
 				{
 					bDoAdd = false;
@@ -1202,6 +1203,9 @@ namespace http {
 			else if (htype == HTYPE_GoodweAPI) {
 				if (username == "")
 					return;
+			}
+			else if (htype == HTYPE_RaspberryPCF8574) {
+				//All fine here
 			}
 			else
 				return;
@@ -1479,6 +1483,9 @@ namespace http {
 					if (username == "") {
 						return;
 					}
+			}
+			else if (htype == HTYPE_RaspberryPCF8574) {
+				//All fine here
 			}
 			else
 				return;
@@ -3751,7 +3758,7 @@ namespace http {
 						return;
 					devid = id;
 				}
-				else if (lighttype < 60)
+				else if (lighttype < 70)
 				{
 					dtype = pTypeLighting5;
 					subtype = lighttype - 50;
@@ -3768,22 +3775,6 @@ namespace http {
 						devid = "00" + id;
 					else
 						devid = id;
-				}
-				else if (lighttype < 70)
-				{
-					//Blyss
-					dtype = pTypeLighting6;
-					subtype = lighttype - 60;
-					std::string sgroupcode = request::findValue(&req, "groupcode");
-					sunitcode = request::findValue(&req, "unitcode");
-					std::string id = request::findValue(&req, "id");
-					if (
-						(sgroupcode == "") ||
-						(sunitcode == "") ||
-						(id == "")
-						)
-						return;
-					devid = id + sgroupcode;
 				}
 				else
 				{
@@ -3902,6 +3893,22 @@ namespace http {
 							)
 							return;
 						devid = id;
+					}
+					else if (lighttype == 106)
+					{
+						//Blyss
+						dtype = pTypeLighting6;
+						subtype = lighttype - 60;
+						std::string sgroupcode = request::findValue(&req, "groupcode");
+						sunitcode = request::findValue(&req, "unitcode");
+						std::string id = request::findValue(&req, "id");
+						if (
+							(sgroupcode == "") ||
+							(sunitcode == "") ||
+							(id == "")
+							)
+							return;
+						devid = id + sgroupcode;
 					}
 					else if ((lighttype >= 200) && (lighttype < 300))
 					{
@@ -4173,7 +4180,7 @@ namespace http {
 						return;
 					devid = id;
 				}
-				else if (lighttype < 60)
+				else if (lighttype < 70)
 				{
 					dtype = pTypeLighting5;
 					subtype = lighttype - 50;
@@ -4190,22 +4197,6 @@ namespace http {
 						devid = "00" + id;
 					else
 						devid = id;
-				}
-				else if (lighttype < 70)
-				{
-					//Blyss
-					dtype = pTypeLighting6;
-					subtype = lighttype - 60;
-					std::string sgroupcode = request::findValue(&req, "groupcode");
-					sunitcode = request::findValue(&req, "unitcode");
-					std::string id = request::findValue(&req, "id");
-					if (
-						(sgroupcode == "") ||
-						(sunitcode == "") ||
-						(id == "")
-						)
-						return;
-					devid = id + sgroupcode;
 				}
 				else if (lighttype == 101)
 				{
@@ -4278,6 +4269,22 @@ namespace http {
 						)
 						return;
 					devid = id;
+				}
+				else if (lighttype == 106)
+				{
+					//Blyss
+					dtype = pTypeLighting6;
+					subtype = lighttype - 60;
+					std::string sgroupcode = request::findValue(&req, "groupcode");
+					sunitcode = request::findValue(&req, "unitcode");
+					std::string id = request::findValue(&req, "id");
+					if (
+						(sgroupcode == "") ||
+						(sunitcode == "") ||
+						(id == "")
+						)
+						return;
+					devid = id + sgroupcode;
 				}
 				else
 				{
@@ -6951,6 +6958,7 @@ namespace http {
 			const std::string &planID,
 			const std::string &floorID,
 			const bool bDisplayHidden,
+			const bool bDisplayDisabled,
 			const bool bFetchFavorites,
 			const time_t LastUpdate, 
 			const std::string &username,
@@ -6968,8 +6976,6 @@ namespace http {
 
 			int SensorTimeOut = 60;
 			m_sql.GetPreferencesVar("SensorTimeout", SensorTimeOut);
-			int HideDisabledHardwareSensors = 1;
-			m_sql.GetPreferencesVar("HideDisabledHardwareSensors", HideDisabledHardwareSensors);
 
 			//Get All Hardware ID's/Names, need them later
 			std::map<int, _tHardwareListInt> _hardwareNames;
@@ -7432,11 +7438,8 @@ namespace http {
 					if (hItt != _hardwareNames.end())
 					{
 						//ignore sensors where the hardware is disabled
-						if (HideDisabledHardwareSensors)
-						{
-							if (!(*hItt).second.Enabled)
-								continue;
-						}
+						if ((!bDisplayDisabled)&& (!(*hItt).second.Enabled))
+							continue;
 					}
 
 					unsigned int dType = atoi(sd[5].c_str());
@@ -10056,8 +10059,16 @@ namespace http {
 			std::string floorid = request::findValue(&req, "floor");
 			std::string sDisplayHidden = request::findValue(&req, "displayhidden");
 			std::string sFetchFavorites = request::findValue(&req, "favorite");
+			std::string sDisplayDisabled = request::findValue(&req, "displaydisabled");
 			bool bDisplayHidden = (sDisplayHidden == "1");
 			bool bFetchFavorites = (sFetchFavorites == "1");
+
+			int HideDisabledHardwareSensors = 0;
+			m_sql.GetPreferencesVar("HideDisabledHardwareSensors", HideDisabledHardwareSensors);
+			bool bDisabledDisabled = (HideDisabledHardwareSensors == 0);
+			if (sDisplayDisabled == "1")
+				bDisabledDisabled = true;
+
 			std::string sLastUpdate = request::findValue(&req, "lastupdate");
 			std::string hwidx = request::findValue(&req, "hwidx"); // OTO
 
@@ -10072,7 +10083,7 @@ namespace http {
 			root["status"] = "OK";
 			root["title"] = "Devices";
 
-			GetJSonDevices(root, rused, rfilter, order, rid, planid, floorid, bDisplayHidden, bFetchFavorites, LastUpdate, session.username, hwidx);
+			GetJSonDevices(root, rused, rfilter, order, rid, planid, floorid, bDisplayHidden, bDisabledDisabled, bFetchFavorites, LastUpdate, session.username, hwidx);
 		}
 
 		void CWebServer::RType_Users(WebEmSession & session, const request& req, Json::Value &root)

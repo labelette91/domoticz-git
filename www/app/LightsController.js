@@ -3264,7 +3264,7 @@ define(['app'], function (app) {
 				bIsType5=1;
 				totunits=16;
 			}
-			else if (lighttype==59) {
+			else if (lighttype==65) {
 				//IT (Intertek,FA500,PROmax...)
 				bIsType5=1;
 				totunits=4;
@@ -3453,9 +3453,9 @@ define(['app'], function (app) {
 				}
 				else {
 					$("#dialog-addmanuallightdevice #lighting2params #combocmd1").hide();
-					if ((lighttype==55)||(lighttype==57)||(lighttype==59)||(lighttype==100)) {
+					if ((lighttype==55)||(lighttype==57)||(lighttype==65)||(lighttype==100)) {
 						$("#dialog-addmanuallightdevice #lighting2params #combocmd2").hide();
-						if ((lighttype!=59)&&(lighttype!=100)) {
+						if ((lighttype!=65)&&(lighttype!=100)) {
 							$("#dialog-addmanuallightdevice #lighting2paramsUnitCode").hide();
 						}
 					}
@@ -3548,13 +3548,21 @@ define(['app'], function (app) {
 					$("#dialog-addmanuallightdevice #fanparams #combocmd3 option:selected").text();
 				mParams+="&id="+ID;
 			}
-			else if ((lighttype==305) || (lighttype==306)) {
-				//OpenWebNet Blinds/light
-				var ID="OpenWebNet";
-				var unitcode=
-					$("#dialog-addmanuallightdevice #openwebnetparams #combocmd1 option:selected").val()+
-					$("#dialog-addmanuallightdevice #openwebnetparams #combocmd2 option:selected").val();
-				mParams+="&id="+ID+"&unitcode="+unitcode;
+			else if (lighttype==305) {
+				//OpenWebNet Blinds
+				var appID= parseInt($("#dialog-addmanuallightdevice #openwebnetparams #combocmd1 option:selected").val()+
+					$("#dialog-addmanuallightdevice #openwebnetparams #combocmd2 option:selected").val());
+                var ID = ("0002" + ("0000" + appID.toString(16)).slice(-4)); // WHO_AUTOMATION
+				var unitcode= "0";
+				mParams+="&id="+ID.toUpperCase()+"&unitcode="+unitcode;
+			}
+			else if (lighttype==306) {
+				//OpenWebNet light
+				var appID= parseInt($("#dialog-addmanuallightdevice #openwebnetparams #combocmd1 option:selected").val()+
+					$("#dialog-addmanuallightdevice #openwebnetparams #combocmd2 option:selected").val());
+                var ID = ("0001" + ("0000" + appID.toString(16)).slice(-4)); // WHO_LIGHTING
+                var unitcode= "0";
+				mParams+="&id="+ID.toUpperCase()+"&unitcode="+unitcode;
 			}
 			else {
 				//AC
@@ -3564,7 +3572,7 @@ define(['app'], function (app) {
 					(lighttype==50)||
 					(lighttype==55)||
 					(lighttype==57)||
-					(lighttype==59)||
+					(lighttype==65)||
 					(lighttype==100)||
 					(lighttype==102)||
 					(lighttype==105)||

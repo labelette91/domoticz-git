@@ -243,6 +243,7 @@ const char *Hardware_Type_Desc(int hType)
 		{ HTYPE_ZIBLUETCP, "ZiBlue RFPlayer with LAN interface" },
 		{ HTYPE_Yeelight, "YeeLight LED" },
 		{ HTYPE_RaspberryPCF8574, "I2C PIO 8bit expander PCF8574 or PCF8574A" },
+		{ HTYPE_XiaomiGateway, "Xiaomi Gateway" },
 		{ 0, NULL, NULL }
 	};
 	return findTableIDSingle1 (Table, hType);
@@ -830,6 +831,9 @@ const char *RFX_Type_SubType_Desc(const unsigned char dType, const unsigned char
 		{ pTypeGeneralSwitch, sSwitchTypeSteffen, "Steffen" },
 		{ pTypeGeneralSwitch, sSwitchTypeAlectoSA, "AlectoSA" },
 		{ pTypeGeneralSwitch, sSwitchTypeGPIOset, "GPIOset" },
+		{ pTypeGeneralSwitch, sSwitchTypeKonigSec, "KonigSec" },
+		{ pTypeGeneralSwitch, sSwitchTypeRM174RF, "RM174RF" },
+		{ pTypeGeneralSwitch, sSwitchTypeLiwin, "Liwin" },
 		{  0,0,NULL }
 	};
 	return findTableID1ID2(Table, dType, sType);

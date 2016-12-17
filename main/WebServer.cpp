@@ -3491,6 +3491,7 @@ namespace http {
 						case pTypeChime:
 						case pTypeThermostat2:
 						case pTypeThermostat3:
+						case pTypeThermostat4:
 						case pTypeRemote:
 						case pTypeRadiator1:
 						case pTypeGeneralSwitch:
@@ -3589,6 +3590,7 @@ namespace http {
 							case pTypeChime:
 							case pTypeThermostat2:
 							case pTypeThermostat3:
+							case pTypeThermostat4:
 							case pTypeRemote:
 							case pTypeGeneralSwitch:
 							case pTypeHomeConfort:
@@ -4512,16 +4514,6 @@ namespace http {
 							)
 							return;
 						int iUnitCode = atoi(sunitcode.c_str());
-						if (
-							(lighttype == 205) ||
-							(lighttype == 210) ||
-							(lighttype == 211)||
-							(lighttype == 212)
-							)
-						{
-							id = id.substr(0, 6);
-							sunitcode = "0";
-						}
 						sprintf(szTmp, "%d", iUnitCode);
 						sunitcode = szTmp;
 						devid = id;
@@ -4770,6 +4762,7 @@ namespace http {
 					(dType == pTypeChime) ||
 					(dType == pTypeThermostat2) ||
 					(dType == pTypeThermostat3) ||
+					(dType == pTypeThermostat4) ||
 					(dType == pTypeRemote) ||
 					(dType == pTypeGeneralSwitch) ||
 					(dType == pTypeHomeConfort) ||
@@ -5720,6 +5713,7 @@ namespace http {
 					(dType != pTypeChime) &&
 					(dType != pTypeThermostat2) &&
 					(dType != pTypeThermostat3) &&
+					(dType != pTypeThermostat4) &&
 					(dType != pTypeRemote) &&
 					(dType != pTypeGeneralSwitch) &&
 					(dType != pTypeHomeConfort) &&
@@ -7766,6 +7760,7 @@ namespace http {
 								(dType != pTypeChime) &&
 								(dType != pTypeThermostat2) &&
 								(dType != pTypeThermostat3) &&
+								(dType != pTypeThermostat4) &&
 								(dType != pTypeRemote) &&
 								(dType != pTypeGeneralSwitch) &&
 								(dType != pTypeHomeConfort) &&
@@ -8033,6 +8028,7 @@ namespace http {
 						(dType == pTypeChime) ||
 						(dType == pTypeThermostat2) ||
 						(dType == pTypeThermostat3) ||
+						(dType == pTypeThermostat4) ||
 						(dType == pTypeRemote)||
 						(dType == pTypeGeneralSwitch) ||
 						(dType == pTypeHomeConfort) ||
@@ -11918,6 +11914,7 @@ szQuery << "UPDATE DeviceStatus SET "
 				(dType != pTypeChime) &&
 				(dType != pTypeThermostat2) &&
 				(dType != pTypeThermostat3) &&
+				(dType != pTypeThermostat4) &&
 				(dType != pTypeRemote)&&
 				(dType != pTypeGeneralSwitch) &&
 				(dType != pTypeHomeConfort) &&

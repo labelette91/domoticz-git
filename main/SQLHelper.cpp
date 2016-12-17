@@ -3091,6 +3091,9 @@ uint64_t CSQLHelper::UpdateValue(const int HardwareID, const char* ID, const uns
 					case pTypeThermostat3:
 						newnValue=thermostat3_sOff;
 						break;
+					case pTypeThermostat4:
+						newnValue = thermostat4_sOff;
+						break;
 					case pTypeRadiator1:
 						newnValue = Radiator1_sNight;
 						break;
@@ -3172,6 +3175,9 @@ uint64_t CSQLHelper::UpdateValue(const int HardwareID, const char* ID, const uns
 				break;
 			case pTypeThermostat3:
 				newnValue=thermostat3_sOff;
+				break;
+			case pTypeThermostat4:
+				newnValue = thermostat4_sOff;
 				break;
 			case pTypeRadiator1:
 				newnValue = Radiator1_sNight;
@@ -3346,6 +3352,7 @@ uint64_t CSQLHelper::UpdateValueInt(const int HardwareID, const char* ID, const 
 	case pTypeChime:
 	case pTypeThermostat2:
 	case pTypeThermostat3:
+	case pTypeThermostat4:
 	case pTypeRemote:
 	case pTypeGeneralSwitch:
 	case pTypeHomeConfort:
@@ -6500,7 +6507,7 @@ void CSQLHelper::CheckDeviceTimeout()
 
 	std::vector<std::vector<std::string> > result;
 	result = safe_query(
-		"SELECT ID,Name,LastUpdate FROM DeviceStatus WHERE (Used!=0 AND LastUpdate<='%04d-%02d-%02d %02d:%02d:%02d' AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d) ORDER BY Name",
+		"SELECT ID,Name,LastUpdate FROM DeviceStatus WHERE (Used!=0 AND LastUpdate<='%04d-%02d-%02d %02d:%02d:%02d' AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d) ORDER BY Name",
 		ltime.tm_year+1900,ltime.tm_mon+1, ltime.tm_mday, ltime.tm_hour, ltime.tm_min, ltime.tm_sec,
 		pTypeLighting1,
 		pTypeLighting2,
@@ -6518,6 +6525,7 @@ void CSQLHelper::CheckDeviceTimeout()
 		pTypeChime,
 		pTypeThermostat2,
 		pTypeThermostat3,
+		pTypeThermostat4,
 		pTypeRemote,
 		pTypeGeneralSwitch,
 		pTypeHomeConfort

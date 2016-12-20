@@ -331,6 +331,7 @@ public:
 	bool		m_bDisableEventSystem;
 	LastValue TempLog;
 	int			m_ShortLogInterval;
+	bool		m_bLogEventScriptTrigger;
 private:
 	boost::mutex	m_sqlQueryMutex;
 	sqlite3			*m_dbase;

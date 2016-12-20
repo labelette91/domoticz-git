@@ -930,7 +930,8 @@ namespace http {
 					(ii == HTYPE_RaspberryBMP085) ||
 					(ii == HTYPE_RaspberryHTU21D) ||
 					(ii == HTYPE_RaspberryTSL2561) ||
-					(ii == HTYPE_RaspberryPCF8574)
+					(ii == HTYPE_RaspberryPCF8574) ||
+					(ii == HTYPE_RaspberryBME280)
 					)
 				{
 					bDoAdd = false;
@@ -1113,6 +1114,9 @@ namespace http {
 				//all fine here!
 			}
 			else if (htype == HTYPE_RaspberryTSL2561) {
+				//all fine here!
+			}
+			else if (htype == HTYPE_RaspberryBME280) {
 				//all fine here!
 			}
 			else if (htype == HTYPE_Dummy) {
@@ -1436,6 +1440,9 @@ namespace http {
 				//All fine here
 			}
 			else if (htype == HTYPE_RaspberryTSL2561) {
+				//All fine here
+			}
+			else if (htype == HTYPE_RaspberryBME280) {
 				//All fine here
 			}
 			else if (htype == HTYPE_Dummy) {
@@ -7069,6 +7076,10 @@ namespace http {
 				m_mainworker.m_eventsystem.StartEventSystem();
 			}
 
+			std::string LogEventScriptTrigger = request::findValue(&req, "LogEventScriptTrigger");
+			m_sql.m_bLogEventScriptTrigger = (LogEventScriptTrigger == "on" ? 1 : 0);
+			m_sql.UpdatePreferencesVar("LogEventScriptTrigger", m_sql.m_bLogEventScriptTrigger);
+
 			std::string EnableWidgetOrdering = request::findValue(&req, "AllowWidgetOrdering");
 			int iEnableAllowWidgetOrdering = (EnableWidgetOrdering == "on" ? 1 : 0);
 			m_sql.UpdatePreferencesVar("AllowWidgetOrdering", iEnableAllowWidgetOrdering);
@@ -11784,6 +11795,10 @@ szQuery << "UPDATE DeviceStatus SET "
 				else if (Key == "DisableEventScriptSystem")
 				{
 					root["DisableEventScriptSystem"] = nValue;
+				}
+				else if (Key == "LogEventScriptTrigger")
+				{
+					root["LogEventScriptTrigger"] = nValue;
 				}
 				else if (Key == "(1WireSensorPollPeriod")
 				{

@@ -32,3 +32,4 @@ domoticz.exe
 /hardware/ipch
 /Config/zwcfg_*.xml
 /makebetarob
+/plugins/manifest.xml

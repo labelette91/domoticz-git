@@ -4186,6 +4186,18 @@ namespace http {
 							)
 							return;
 					}
+					else if (lighttype == 307)
+					{
+					    dtype = pTypeGeneralSwitch;
+						subtype = sSwitchAuxiliaryT1;
+						devid = request::findValue(&req, "id");
+						sunitcode = request::findValue(&req, "unitcode");
+						if (
+							(devid == "") ||
+							(sunitcode == "")
+							)
+							return;
+					}
 				}
        // ----------- If needed convert to GeneralSwitch type (for o.a. RFlink) -----------
 				CDomoticzHardwareBase *pBaseHardware = reinterpret_cast<CDomoticzHardwareBase*>(m_mainworker.GetHardware(atoi(hwdid.c_str())));
@@ -4647,6 +4659,19 @@ namespace http {
 						//Light Openwebnet
 						dtype = pTypeGeneralSwitch;
 						subtype = sSwitchLightT1;
+						devid = request::findValue(&req, "id");
+						sunitcode = request::findValue(&req, "unitcode");
+						if (
+							(devid == "") ||
+							(sunitcode == "")
+							)
+							return;
+					}
+					else if (lighttype == 307)
+					{
+					    //Auxiliary Openwebnet
+					    dtype = pTypeGeneralSwitch;
+						subtype = sSwitchAuxiliaryT1;
 						devid = request::findValue(&req, "id");
 						sunitcode = request::findValue(&req, "unitcode");
 						if (

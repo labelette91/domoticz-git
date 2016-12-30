@@ -2071,6 +2071,18 @@ void MainWorker::ProcessRXMessage(const CDomoticzHardwareBase *pHardware, const 
 	std::string DeviceName = "";
 	tcp::server::CTCPClient *pClient2Ignore = NULL;
 
+	if (_log.isTraceEnable()) {
+		char  mes[sizeof(tRBUF)*2+2];
+		char * ptmes = mes;
+		for (int i = 0; i < Len; i++) {
+			sprintf(ptmes,"%02X", pRXCommand[i]);
+			ptmes += 2;
+		}
+		*ptmes = 0 ;
+
+		_log.Log(LOG_TRACE, "RXMSG:process RX Msg %s", mes);
+	}
+
 	if (pHardware->HwdType == HTYPE_Domoticz)
 	{
 		if (pHardware->m_HwdID == 8765) //did we receive it from our master?

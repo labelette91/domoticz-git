@@ -373,6 +373,7 @@ hardware/ZiBlueTCP.cpp
 hardware/ZWaveBase.cpp
 hardware/Yeelight.cpp
 hardware/XiaomiGateway.cpp
+hardware/Arilux.cpp
 hardware/plugins/PluginManager.cpp
 notifications/NotificationBase.cpp
 notifications/NotificationEmail.cpp

@@ -111,6 +111,7 @@
 #include "../hardware/Yeelight.h"
 #include "../hardware/XiaomiGateway.h"
 #include "../hardware/plugins/Plugins.h"
+#include "../hardware/Arilux.h"
 
 // load notifications configuration
 #include "../notifications/NotificationHelper.h"
@@ -973,6 +974,9 @@ bool MainWorker::AddHardwareFromParams(
 	case HTYPE_XiaomiGateway:
 		pHardware = new XiaomiGateway(ID);
 		break;
+	case HTYPE_Arilux:	
+		pHardware = new Arilux(ID);
+		break;	
 	}
 
 	if (pHardware)

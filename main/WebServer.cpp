@@ -1218,7 +1218,7 @@ namespace http {
 			else if (htype == HTYPE_RaspberryGPIO) {
 				//all fine here!
 			}
-			else if (htype == HTYPE_OpenWebNet) {
+			else if (htype == HTYPE_OpenWebNetTCP) {
 				//All fine here
 			}
 			else if (htype == HTYPE_Daikin) {
@@ -1232,6 +1232,9 @@ namespace http {
 				//All fine here
 			}
 			else if (htype == HTYPE_RaspberryPCF8574) {
+				//All fine here
+			}
+			else if (htype == HTYPE_OpenWebNetUSB) {
 				//All fine here
 			}
 			else
@@ -1534,7 +1537,7 @@ namespace http {
 				)
 					return;
 			}
-			else if (htype == HTYPE_OpenWebNet) {
+			else if (htype == HTYPE_OpenWebNetTCP) {
 				//All fine here
 			}
 			else if (htype == HTYPE_PythonPlugin) {
@@ -1546,6 +1549,9 @@ namespace http {
 					}
 			}
 			else if (htype == HTYPE_RaspberryPCF8574) {
+				//All fine here
+			}
+			else if (htype == HTYPE_OpenWebNetUSB) {
 				//All fine here
 			}
 			else
@@ -1704,7 +1710,11 @@ namespace http {
 			std::string variablename = request::findValue(&req, "vname");
 			std::string variablevalue = request::findValue(&req, "vvalue");
 			std::string variabletype = request::findValue(&req, "vtype");
-			if ((variablename == "") || (variablevalue == "") || (variabletype == ""))
+			if (
+				(variablename == "") || 
+				(variabletype == "") || 
+				((variablevalue == "") && (variabletype != "2"))
+				)
 				return;
 
 			root["status"] = m_sql.SaveUserVariable(variablename, variabletype, variablevalue);
@@ -1734,7 +1744,12 @@ namespace http {
 				idx = result[0][0];
 			}
 
-			if (idx.empty() || variablename.empty() || variablevalue.empty() || variabletype.empty())
+			if (
+				(idx.empty()) ||
+				(variablename.empty()) ||
+				(variabletype.empty()) ||
+				((variablevalue.empty()) && (variabletype != "2"))
+				) 
 				return;
 
 			root["status"] = m_sql.UpdateUserVariable(idx, variablename, variabletype, variablevalue, true);
@@ -2831,7 +2846,7 @@ namespace http {
 			else
 			{
 				//add script to background worker
-				m_sql.AddTaskItem(_tTaskItem::ExecuteScript(1, scriptname, strparm));
+				m_sql.AddTaskItem(_tTaskItem::ExecuteScript(0.2f, scriptname, strparm));
 			}
 			root["title"] = "ExecuteScript";
 			root["status"] = "OK";
@@ -3429,7 +3444,8 @@ namespace http {
 						case HTYPE_RFLINKTCP:
 						case HTYPE_ZIBLUEUSB:
 						case HTYPE_ZIBLUETCP:
-						case HTYPE_OpenWebNet:
+						case HTYPE_OpenWebNetTCP:
+						case HTYPE_OpenWebNetUSB:
 							root["result"][ii]["idx"] = ID;
 							root["result"][ii]["Name"] = Name;
 							ii++;
@@ -4093,6 +4109,20 @@ namespace http {
 							return;
 						devid = id + sgroupcode;
 					}
+					else if (lighttype == 107)
+					{
+						//RFY2
+						dtype = pTypeRFY;
+						subtype = sTypeRFY2;
+						std::string id = request::findValue(&req, "id");
+						sunitcode = request::findValue(&req, "unitcode");
+						if (
+							(id == "") ||
+							(sunitcode == "")
+							)
+							return;
+						devid = id;
+					}
 					else if ((lighttype >= 200) && (lighttype < 300))
 					{
 						dtype = pTypeBlinds;
@@ -4172,7 +4202,7 @@ namespace http {
 						sunitcode = "0";
 					}
 					else if (lighttype == 305) {
-						//Blinds Openwebnet
+						//Blinds Openwebnet Bus
 						dtype = pTypeGeneralSwitch;
 						subtype = sSwitchBlindsT1;
 						devid = request::findValue(&req, "id");
@@ -4184,7 +4214,7 @@ namespace http {
 							return;
 					}
 					else if (lighttype == 306) {
-						//Light Openwebnet
+						//Light Openwebnet Bus
 						dtype = pTypeGeneralSwitch;
 						subtype = sSwitchLightT1;
 						devid = request::findValue(&req, "id");
@@ -4197,8 +4227,33 @@ namespace http {
 					}
 					else if (lighttype == 307)
 					{
-					    dtype = pTypeGeneralSwitch;
+						//Auxiliary Openwebnet Bus
+						dtype = pTypeGeneralSwitch;
 						subtype = sSwitchAuxiliaryT1;
+						devid = request::findValue(&req, "id");
+						sunitcode = request::findValue(&req, "unitcode");
+						if (
+							(devid == "") ||
+							(sunitcode == "")
+							)
+							return;
+					}
+					else if (lighttype == 307) {
+						//Blinds Openwebnet Zigbee
+						dtype = pTypeGeneralSwitch;
+						subtype = sSwitchBlindsT2;
+						devid = request::findValue(&req, "id");
+						sunitcode = request::findValue(&req, "unitcode");
+						if (
+							(devid == "") ||
+							(sunitcode == "")
+							)
+							return;
+					}
+					else if (lighttype == 308) {
+						//Light Openwebnet Zigbee
+						dtype = pTypeGeneralSwitch;
+						subtype = sSwitchLightT2;
 						devid = request::findValue(&req, "id");
 						sunitcode = request::findValue(&req, "unitcode");
 						if (
@@ -4484,6 +4539,20 @@ namespace http {
 						return;
 					devid = id + sgroupcode;
 				}
+				else if (lighttype == 107)
+				{
+					//RFY2
+					dtype = pTypeRFY;
+					subtype = sTypeRFY2;
+					std::string id = request::findValue(&req, "id");
+					sunitcode = request::findValue(&req, "unitcode");
+					if (
+						(id == "") ||
+						(sunitcode == "")
+						)
+						return;
+					devid = id;
+				}
 				else
 				{
 					if (lighttype == 100)
@@ -4652,7 +4721,7 @@ namespace http {
 					}
 					else if (lighttype == 305)
 					{
-						//Blinds Openwebnet
+						//Blinds Openwebnet Bus
 						dtype = pTypeGeneralSwitch;
 						subtype = sSwitchBlindsT1;
 						devid = request::findValue(&req, "id");
@@ -4665,7 +4734,7 @@ namespace http {
 					}
 					else if (lighttype == 306)
 					{
-						//Light Openwebnet
+						//Light Openwebnet Bus
 						dtype = pTypeGeneralSwitch;
 						subtype = sSwitchLightT1;
 						devid = request::findValue(&req, "id");
@@ -4678,9 +4747,35 @@ namespace http {
 					}
 					else if (lighttype == 307)
 					{
-					    //Auxiliary Openwebnet
+					    //Auxiliary Openwebnet Bus
 					    dtype = pTypeGeneralSwitch;
 						subtype = sSwitchAuxiliaryT1;
+						devid = request::findValue(&req, "id");
+						sunitcode = request::findValue(&req, "unitcode");
+						if (
+							(devid == "") ||
+							(sunitcode == "")
+							)
+							return;
+					}
+					else if (lighttype == 308)
+					{
+						//Blinds Openwebnet Zigbee
+						dtype = pTypeGeneralSwitch;
+						subtype = sSwitchBlindsT2;
+						devid = request::findValue(&req, "id");
+						sunitcode = request::findValue(&req, "unitcode");
+						if (
+							(devid == "") ||
+							(sunitcode == "")
+							)
+							return;
+					}
+					else if (lighttype == 309)
+					{
+						//Light Openwebnet Zigbee
+						dtype = pTypeGeneralSwitch;
+						subtype = sSwitchLightT2;
 						devid = request::findValue(&req, "id");
 						sunitcode = request::findValue(&req, "unitcode");
 						if (

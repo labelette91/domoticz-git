@@ -151,7 +151,7 @@ enum _eHardwareTypes {
 	HTYPE_NefitEastLAN,			//68
 	HTYPE_HomeEasy, 			//70
 	HTYPE_PanasonicTV,			//69
-	HTYPE_OpenWebNet,			//70
+	HTYPE_OpenWebNetTCP,		//70
 	HTYPE_RaspberryHTU21D,		//71
 	HTYPE_AtagOne,				//72
 	HTYPE_Sterbox,				//73
@@ -178,7 +178,8 @@ enum _eHardwareTypes {
 	HTYPE_PythonPlugin,			//94
 	HTYPE_XiaomiGateway,		//95
 	HTYPE_RaspberryBME280,		//96
-	HTYPE_Arilux,		//97
+	HTYPE_Arilux,				//97
+	HTYPE_OpenWebNetUSB,		//98
 	HTYPE_END
 };
 

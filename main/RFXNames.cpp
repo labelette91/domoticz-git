@@ -1515,6 +1515,7 @@ void GetLightStatus(
 			break;
 		case sTypeBBSB:
 		case sTypeRSL:
+		case sTypeKangtai:
 			bHaveGroupCmd=true;
 			switch (nValue)
 			{

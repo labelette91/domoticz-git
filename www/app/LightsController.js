@@ -1630,7 +1630,7 @@ define(['app'], function (app) {
 
 			$.bIsLED=(devsubtype.indexOf("RGB") >= 0);
 			$.bIsRGB=(devsubtype=="RGB");
-			$.bIsRGBW=(devsubtype=="RGBW");
+			$.bIsRGBW=(devsubtype.indexOf("RGBW") >= 0);
 			$.bIsWhite=(devsubtype=="White");
 
 			if ($.bIsLED==true) {
@@ -2387,7 +2387,7 @@ define(['app'], function (app) {
 							if (item.SubType=="RGB") {
 								img='<img src="images/RGB48_On.png" onclick="ShowRGBWPopup(event, ' + item.idx + ', \'RefreshLights\',' + item.Protected + ',' + item.MaxDimLevel + ',' + item.LevelInt + ',' + item.Hue + ');" class="lcursor" height="48" width="48">';
 							}
-							else if (item.SubType=="RGBW") {
+							else if (item.SubType.indexOf("RGBW") >= 0) {
 								img='<img src="images/RGB48_On.png" onclick="ShowRGBWPopup(event, ' + item.idx + ', \'RefreshLights\',' + item.Protected + ',' + item.MaxDimLevel + ',' + item.LevelInt + ',' + item.Hue + ');" class="lcursor" height="48" width="48">';
 							}
 							else {
@@ -2398,7 +2398,7 @@ define(['app'], function (app) {
 							if (item.SubType=="RGB") {
 								img='<img src="images/RGB48_Off.png" onclick="ShowRGBWPopup(event, ' + item.idx + ',\'RefreshLights\',' + item.Protected + ',' + item.MaxDimLevel + ',' + item.LevelInt + ',' + item.Hue + ');" class="lcursor" height="48" width="48">';
 							}
-							else if (item.SubType=="RGBW") {
+							else if (item.SubType.indexOf("RGBW") >= 0) {
 								img='<img src="images/RGB48_Off.png" onclick="ShowRGBWPopup(event, ' + item.idx + ',\'RefreshLights\',' + item.Protected + ',' + item.MaxDimLevel + ',' + item.LevelInt + ',' + item.Hue + ');" class="lcursor" height="48" width="48">';
 							}
 							else {
@@ -2978,7 +2978,7 @@ define(['app'], function (app) {
 										if (item.SubType=="RGB") {
 											xhtm+='\t      <td id="img"><img src="images/RGB48_On.png" onclick="ShowRGBWPopup(event, ' + item.idx + ', \'RefreshLights\',' + item.Protected + ',' + item.MaxDimLevel + ',' + item.LevelInt + ',' + item.Hue + ');" class="lcursor" height="48" width="48"></td>\n';
 										}
-										else if (item.SubType=="RGBW") {
+										else if (item.SubType.indexOf("RGBW") >= 0) {
 											xhtm+='\t      <td id="img"><img src="images/RGB48_On.png" onclick="ShowRGBWPopup(event, ' + item.idx + ', \'RefreshLights\',' + item.Protected + ',' + item.MaxDimLevel + ',' + item.LevelInt + ',' + item.Hue + ');" class="lcursor" height="48" width="48"></td>\n';
 										}
 										else {
@@ -2989,7 +2989,7 @@ define(['app'], function (app) {
 										if (item.SubType=="RGB") {
 											xhtm+='\t      <td id="img"><img src="images/RGB48_Off.png" onclick="ShowRGBWPopup(event, ' + item.idx + ',\'RefreshLights\',' + item.Protected + ',' + item.MaxDimLevel + ',' + item.LevelInt + ',' + item.Hue + ');" class="lcursor" height="48" width="48"></td>\n';
 										}
-										else if (item.SubType=="RGBW") {
+										else if (item.SubType.indexOf("RGBW") >= 0) {
 											xhtm+='\t      <td id="img"><img src="images/RGB48_Off.png" onclick="ShowRGBWPopup(event, ' + item.idx + ',\'RefreshLights\',' + item.Protected + ',' + item.MaxDimLevel + ',' + item.LevelInt + ',' + item.Hue + ');" class="lcursor" height="48" width="48"></td>\n';
 										}
 										else {
@@ -3079,7 +3079,7 @@ define(['app'], function (app) {
 						'\t      <td id="lastupdate">' + item.LastUpdate + '</td>\n' +
 						'\t      <td id="type">' + item.Type + ', ' + item.SubType + ', ' + item.SwitchType;
 					if (item.SwitchType == "Dimmer") {
-						if ((item.SubType=="RGBW")||(item.SubType=="RGB")) {
+						if ((item.SubType.indexOf("RGBW") >= 0)||(item.SubType=="RGB")) {
 						}
 						else {
 							xhtm+='<br><br><div style="margin-left:60px;" class="dimslider" id="slider" data-idx="' + item.idx + '" data-type="norm" data-maxlevel="' + item.MaxDimLevel + '" data-isprotected="' + item.Protected + '" data-svalue="' + item.LevelInt + '"></div>';
@@ -3432,7 +3432,7 @@ define(['app'], function (app) {
 			}
 			else if (lighttype==9) {
 				tothousecodes=16;
-				totunits=4;
+				totunits=10;
 			}
 			else if (lighttype==10) {
 				tothousecodes=4;

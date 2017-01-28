@@ -968,7 +968,7 @@ namespace http {
 					bDoAdd = false;
 				if (ii == HTYPE_HomeEasy) bDoAdd = false;
 #endif
-				if (ii == HTYPE_PythonPlugin)
+				if (((ii == HTYPE_1WIRE) && (!C1Wire::Have1WireSystem())) || (ii == HTYPE_PythonPlugin))
 					bDoAdd = false;
 				if (bDoAdd)
 					_htypes[Hardware_Type_Desc(ii)] = ii;

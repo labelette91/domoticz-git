@@ -1447,8 +1447,8 @@ define(['app'], function (app) {
                      "&port=" + encodeURIComponent(nrofwinddelen) +
                      "&Mode1=" + encodeURIComponent(mill_id) +
                      "&enabled=" + bEnabled +
+                     "&restarttype=" + restarttype +
                      "&datatimeout=" + datatimeout,
-                     "&restarttype=" + restarttype  +
                      async: false,
                      dataType: 'json',
                      success: function(data) {

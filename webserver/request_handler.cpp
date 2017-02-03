@@ -328,7 +328,9 @@ void request_handler::handle_request(const request &req, reply &rep, modify_info
 					  if (full_path.find('.') != std::string::npos)
 					  {
 						  rep = reply::stock_reply(reply::not_found);
+#ifdef _DEBUG
 						  _log.Log(LOG_ERROR, "Webserver: File '%s': %s (%d)", request_path.c_str(), strerror(errno), errno);
+#endif
 						  return;
 					  }
 					  request_path += "/index.html";
@@ -337,7 +339,9 @@ void request_handler::handle_request(const request &req, reply &rep, modify_info
 					  if (!is.is_open())
 					  {
 						  rep = reply::stock_reply(reply::not_found);
+#ifdef _DEBUG
 						  _log.Log(LOG_ERROR, "Webserver: File '%s': %s (%d)", request_path.c_str(), strerror(errno), errno);
+#endif
 						  return;
 					  }
 					  extension = "html";
@@ -365,7 +369,9 @@ void request_handler::handle_request(const request &req, reply &rep, modify_info
 	  if (m_uf==NULL)
 	  {
 		  rep = reply::stock_reply(reply::not_found);
+#ifdef _DEBUG
 		  _log.Log(LOG_ERROR, "Webserver: File '%s': %s (%d)", request_path.c_str(), strerror(errno), errno);
+#endif
 		  return;
 	  }
 
@@ -379,7 +385,9 @@ void request_handler::handle_request(const request &req, reply &rep, modify_info
 			  if (myWebem && do_extract_currentfile(m_uf,myWebem->m_zippassword.c_str(),rep.content)!=UNZ_OK)
 			  {
 				  rep = reply::stock_reply(reply::not_found);
+#ifdef _DEBUG
 				  _log.Log(LOG_ERROR, "Webserver: File '%s': %s (%d)", request_path.c_str(), strerror(errno), errno);
+#endif
 				  return;
 			  }
 			  bHaveLoadedgzip=true;
@@ -390,13 +398,17 @@ void request_handler::handle_request(const request &req, reply &rep, modify_info
 		  if (unzLocateFile(m_uf,request_path.c_str(),0)!=UNZ_OK)
 		  {
 			  rep = reply::stock_reply(reply::not_found);
+#ifdef _DEBUG
 			  _log.Log(LOG_ERROR, "Webserver: File '%s': %s (%d)", request_path.c_str(), strerror(errno), errno);
+#endif
 			  return;
 		  }
 		  if (myWebem && do_extract_currentfile(m_uf,myWebem->m_zippassword.c_str(),rep.content)!=UNZ_OK)
 		  {
 			  rep = reply::stock_reply(reply::not_found);
+#ifdef _DEBUG
 			  _log.Log(LOG_ERROR, "Webserver: File '%s': %s (%d)", request_path.c_str(), strerror(errno), errno);
+#endif
 			  return;
 		  }
 	  }

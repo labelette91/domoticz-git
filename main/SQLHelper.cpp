@@ -18,7 +18,6 @@
 #include "WebServerHelper.h"
 #include "../webserver/Base64.h"
 #include "unzip.h"
-#include "mainstructs.h"
 #include <boost/lexical_cast.hpp>
 #include "../notifications/NotificationHelper.h"
 
@@ -2392,7 +2391,7 @@ bool CSQLHelper::OpenDatabase()
 
 	if (!GetPreferencesVar("SecStatus", nValue))
 	{
-		UpdatePreferencesVar("SecStatus", (int)SECSTATUS_DISARMED);
+		UpdatePreferencesVar("SecStatus", 0);
 	}
 	if (!GetPreferencesVar("SecOnDelay", nValue))
 	{

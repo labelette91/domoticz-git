@@ -951,16 +951,20 @@ namespace Plugins {
 		return Py_None;
 	}
 
-	static PyObject* CDevice_update(CDevice* self, PyObject *args)
+	static PyObject* CDevice_update(CDevice *self, PyObject *args, PyObject *kwds)
 	{
 		if (self->pPlugin)
 		{
-			int			nValue;
-			char*		sValue;
+			int			nValue = 0;
+			char*		sValue = NULL;
+			int			iSignalLevel = 0;
+			int			iBatteryLevel = 0;
 			PyObject*	pNameBytes = PyUnicode_AsASCIIString(self->Name);
-			if (!PyArg_ParseTuple(args, "is", &nValue, &sValue))
+			static char *kwlist[] = { "nValue", "sValue", "SignalLevel", "BatteryLevel", NULL };
+
+			if (!PyArg_ParseTupleAndKeywords(args, kwds, "is|ii", kwlist, &nValue, &sValue, &iSignalLevel, &iBatteryLevel))
 			{
-				_log.Log(LOG_ERROR, "(%s) %s: failed to parse parameters: integer, string expected.", __func__, PyBytes_AsString(pNameBytes));
+				_log.Log(LOG_ERROR, "(%s) %s: Failed to parse parameters: 'nValue', 'sValue', 'SignalLevel' or 'BatteryLevel' expected.", __func__, PyBytes_AsString(pNameBytes));
 				Py_DECREF(pNameBytes);
 				return NULL;
 			}
@@ -974,7 +978,7 @@ namespace Plugins {
 			}
 			PyObject*	pDeviceBytes = PyUnicode_AsASCIIString(self->DeviceID);
 			std::string	sName = PyBytes_AsString(pNameBytes);
-			m_sql.UpdateValue(self->HwdID, std::string(PyBytes_AsString(pDeviceBytes)).c_str(), (const unsigned char)self->Unit, (const unsigned char)self->Type, (const unsigned char)self->SubType, 100, 255, nValue, std::string(sValue).c_str(), sName, true);
+			m_sql.UpdateValue(self->HwdID, std::string(PyBytes_AsString(pDeviceBytes)).c_str(), (const unsigned char)self->Unit, (const unsigned char)self->Type, (const unsigned char)self->SubType, iSignalLevel, iBatteryLevel, nValue, std::string(sValue).c_str(), sName, true);
 			Py_DECREF(pNameBytes);
 			Py_DECREF(pDeviceBytes);
 
@@ -1079,7 +1083,7 @@ namespace Plugins {
 	static PyMethodDef CDevice_methods[] = {
 		{ "Refresh", (PyCFunction)CDevice_refresh, METH_NOARGS, "Refresh device details"},
 		{ "Create", (PyCFunction)CDevice_insert, METH_NOARGS, "Create the device in Domoticz." },
-		{ "Update", (PyCFunction)CDevice_update, METH_VARARGS, "Update the device values in Domoticz." },
+		{ "Update", (PyCFunction)CDevice_update, METH_VARARGS | METH_KEYWORDS, "Update the device values in Domoticz." },
 		{ "Delete", (PyCFunction)CDevice_delete, METH_NOARGS, "Delete the device in Domoticz." },
 		{ "Image", (PyCFunction)CDevice_seticon, METH_VARARGS, "Set the device image in Domoticz." },
 		{ NULL }  /* Sentinel */
@@ -2307,10 +2311,21 @@ namespace Plugins {
 
 		if (Message.m_Type == PMT_Stop)
 		{
-			// Stop Python
-			if (m_DeviceDict) Py_XDECREF(m_DeviceDict);
-			if (m_PyInterpreter) Py_EndInterpreter((PyThreadState*)m_PyInterpreter);
-			Py_XDECREF(m_PyModule);
+			try
+			{
+				// Stop Python
+				if (m_DeviceDict) Py_XDECREF(m_DeviceDict);
+				if (m_PyInterpreter) Py_EndInterpreter((PyThreadState*)m_PyInterpreter);
+				Py_XDECREF(m_PyModule);
+			}
+			catch (std::exception e)
+			{
+				_log.Log(LOG_ERROR, "%s: Execption thrown releasing Interpreter: %s", __func__, e.what());
+			}
+			catch (...)
+			{
+				_log.Log(LOG_ERROR, "%s: Unknown execption thrown releasing Interpreter", __func__);
+			}
 			m_PyModule = NULL;
 			m_DeviceDict = NULL;
 			m_PyInterpreter = NULL;
@@ -2345,7 +2360,8 @@ namespace Plugins {
 		{
 			if (it_type->second.find(sFind) != std::string::npos)
 			{
-				ssPath << it_type->first.c_str();
+				m_HomeFolder = it_type->first;
+				ssPath << m_HomeFolder.c_str();
 				sPluginXML = it_type->second;
 				break;
 			}
@@ -2407,12 +2423,14 @@ namespace Plugins {
 					const char*	pAttributeValue = pXmlEle->Attribute("version");
 					if (pAttributeValue)
 					{
+						m_Version = pAttributeValue;
 						sExtraDetail += "version ";
 						sExtraDetail += pAttributeValue;
 					}
 					pAttributeValue = pXmlEle->Attribute("author");
 					if (pAttributeValue)
 					{
+						m_Author = pAttributeValue;
 						if (sExtraDetail.length()) sExtraDetail += ", ";
 						sExtraDetail += "author '";
 						sExtraDetail += pAttributeValue;
@@ -2454,6 +2472,9 @@ namespace Plugins {
 			{
 				std::vector<std::string> sd = *itt;
 				const char*	pChar = sd[0].c_str();
+				ADD_STRING_TO_DICT(pParamsDict, "HomeFolder", m_HomeFolder);
+				ADD_STRING_TO_DICT(pParamsDict, "Version", m_Version);
+				ADD_STRING_TO_DICT(pParamsDict, "Author", m_Author);
 				ADD_STRING_TO_DICT(pParamsDict, "Name", sd[0]);
 				ADD_STRING_TO_DICT(pParamsDict, "Address", sd[1]);
 				ADD_STRING_TO_DICT(pParamsDict, "Port", sd[2]);
@@ -2790,7 +2811,15 @@ namespace Plugins {
 					else
 					{
 						CPlugin*	pPlugin = (CPlugin*)m_pPlugins[Message.m_HwdID];
-						pPlugin->HandleMessage(Message);
+						if (pPlugin)
+						{
+							pPlugin->HandleMessage(Message);
+						}
+						else
+						{
+							_log.Log(LOG_ERROR, "PluginSystem: Plugin for Hardware %d not found in Plugins map.", Message.m_HwdID);
+						}
+
 					}
 				}
 			}

@@ -11455,8 +11455,8 @@ namespace http {
 			std::vector<std::string> sd = result[0];
 
 			result = m_sql.safe_query(
-				"UPDATE DeviceStatus SET  DeviceID='%s' , nValue=%s , sValue='%s' WHERE (ID == %q) ",
-				sd[1].c_str(), sd[8].c_str(), sd[9].c_str(), sidx.c_str());
+				"UPDATE DeviceStatus SET  DeviceID='%s' , Unit=%s , nValue=%s , sValue='%s' WHERE (ID == %q) ",
+				sd[1].c_str(), sd[2].c_str(), sd[8].c_str(), sd[9].c_str(), sidx.c_str());
 
 
 /* old

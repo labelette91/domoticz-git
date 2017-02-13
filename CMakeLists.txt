@@ -274,10 +274,11 @@ main/WebServerHelper.cpp
 main/WindCalculation.cpp
 main/VirtualThermostat.cpp
 main/Imperihome.cpp
-push/Push.cpp
-push/DataPush.cpp
-push/HttpPush.cpp
+push/BasePush.cpp
+push/FibaroPush.cpp
 push/GooglePubSubPush.cpp
+push/HttpPush.cpp
+push/InfluxPush.cpp
 httpclient/HTTPClient.cpp
 httpclient/UrlEncode.cpp
 hardware/1Wire.cpp

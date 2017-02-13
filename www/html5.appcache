@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# ref 1352
+# ref 1354
 
 CACHE:
 # CSS
@@ -457,6 +457,7 @@ app/CustomIconsController.js
 app/DevicesController.js
 app/DPFibaroController.js
 app/DPHttpController.js
+app/DPInfluxController.js
 app/DPGooglePubSubController.js
 app/DummyController.js
 app/EventsController.js
@@ -567,6 +568,7 @@ views/customicons.html
 views/devices.html
 views/dpfibaro.html
 views/dphttp.html
+views/dpinflux.html
 views/dpgooglepubsub.html
 views/events.html
 views/frontpage_example.html

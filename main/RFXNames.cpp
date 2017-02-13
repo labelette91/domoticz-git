@@ -327,6 +327,7 @@ const char *Notification_Type_Desc(const int nType, const unsigned char snum)
 		{ NTYPE_PAUSED, "Pause Stream", "Y" },
 		{ NTYPE_STOPPED, "Stop Stream", "Q" },
 		{ NTYPE_PLAYING, "Play Stream", "a" },
+		{ NTYPE_VALUE, "Value", "F" },
 		{  0,NULL,NULL }
 	};
 	if (snum==0)
@@ -365,6 +366,7 @@ const char *Notification_Type_Label(const int nType)
 		{ NTYPE_PAUSED, "" },
 		{ NTYPE_STOPPED, "" },
 		{ NTYPE_PLAYING, "" },
+		{ NTYPE_VALUE, "" },
 		{  0,NULL,NULL }
 	};
 	return findTableIDSingle1 (Table, nType);
@@ -717,6 +719,7 @@ const char *RFX_Type_SubType_Desc(const unsigned char dType, const unsigned char
 		{ pTypeGeneral, sTypeKwh, "kWh" },
 		{ pTypeGeneral, sTypeWaterflow, "Waterflow" },
 		{ pTypeGeneral, sTypeCustom, "Custom Sensor" },
+		{ pTypeGeneral, sTypeZWaveAlarm, "Alarm" },
 
 		{ pTypeThermostat, sTypeThermSetpoint, "SetPoint" },
 		{ pTypeThermostat, sTypeThermTemperature, "Temperature" },

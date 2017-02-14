@@ -17,8 +17,8 @@ TEST_MODE = false                   -- when true TEST_MODE_HUMVAR is used instea
 TEST_MODE_HUMVAR = 'testHumidity'   -- fake humidity value, give it a test value in domoticz/uservars
 PRINT_MODE = true					        -- when true wil print output to log and send notifications
 SAMPLE_INTERVAL = 10                -- 10 min
-TIME_ON = 60                       --temps maximim fan   on 
-TIME_OFF = 60                       --temps maximim fan  off
+TIME_ON = 120                       --temps maximim fan   on 
+TIME_OFF = 30                       --temps maximim fan  off
 
 setConstants()
 

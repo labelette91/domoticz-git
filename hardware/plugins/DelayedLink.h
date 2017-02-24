@@ -14,7 +14,7 @@
 #include <frameobject.h>
 
 #ifdef WIN32
-#	include "../../../domoticz/main/dirent_windows.h"
+#	include "../../main/dirent_windows.h"
 #else
 #	include <dirent.h>
 #endif

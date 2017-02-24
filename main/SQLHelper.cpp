@@ -6138,7 +6138,7 @@ void CSQLHelper::AddTaskItem(const _tTaskItem &tItem)
 
 	// Check if an event for the same device is already in queue, and if so, replace it
 	if (_log.isTraceEnable())
-	   _log.Log(LOG_TRACE, "TASK: Request to add task: idx=%" PRIu64 ", DelayTime=%d, Command='%s', Level=%d, Hue=%d, RelatedEvent='%s'", tItem._idx, tItem._DelayTime, tItem._command.c_str(), tItem._level, tItem._Hue, tItem._relatedEvent.c_str());
+	   _log.Log(LOG_TRACE, "TASK: Request to add task: idx=%" PRIu64 ", DelayTime=%f, Command='%s', Level=%d, Hue=%d, RelatedEvent='%s'", tItem._idx, tItem._DelayTime, tItem._command.c_str(), tItem._level, tItem._Hue, tItem._relatedEvent.c_str());
 	// Remove any previous task linked to the same device
 
 	if (

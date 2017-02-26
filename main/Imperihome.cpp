@@ -84,7 +84,6 @@ private:
 	void getDeviceCamera(int &iroot);
 public:
 	bool Request( std::string &request_path , std::string &rep_content);
-  void getGraphTemperature(std::string &idx ,  time_t  tmDateStart , time_t  tmDateEnd ,std::string &rep_content);
 	void getScenes(int &iroot);
   void setGenericSensor(TSqlRowQuery * row) ;
   void setKeyGenericSensor() ;
@@ -122,6 +121,20 @@ std::string DeviceTypeString[]={
 "DevTempHygro"
 
 };	
+
+
+//graphic table / field 
+typedef struct  {
+	int			pType;			//type
+	std::string Table;			//table name
+	std::string Field;			//field name
+	std::string KeyNAme;		//key value name
+}T_GRAPHIC;
+
+T_GRAPHIC GraphicTable[] = {
+	{  },
+};
+
 void ImperiHome::setKeyGenericSensor() {
    
   if (nValueGlb!="0")
@@ -189,8 +202,8 @@ void ImperiHome::ManageHisto (std::string &device , std::string &value	 , std::s
 	if (value=="Watts")
 		getGraphic(ID , "Meter"       , "Usage"       , "Watts" , DateStartSec ,  DateEndSec, rep_content );
 	else
-	  getGraphTemperature(ID ,  DateStartSec , DateEndSec , rep_content );
-	
+		getGraphic(ID , "TEMPERATURE", "Temperature"  , "value" , DateStartSec  , DateEndSec, rep_content);
+
 }
 void ImperiHome::ManageAction (std::string &device , std::string &action	 , std::string &actionType	 , std::string actionValue	 )
 {
@@ -1587,10 +1600,6 @@ _log.Log(LOG_STATUS,"IMPE: Graphic Id:%s from:%lu=%s to:%lu=%s Points:%d", idx.c
 
 }
 
-void ImperiHome::getGraphTemperature(std::string &idx ,  time_t  DateStart , time_t  DateEnd ,std::string &rep_content)
-{
-  getGraphic(idx , "TEMPERATURE" , "Temperature" , "value" , DateStart ,  DateEnd, rep_content );
-}
 
 
   

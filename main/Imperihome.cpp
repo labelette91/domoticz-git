@@ -82,6 +82,7 @@ private:
 	void Histo(std::string &rep_content, std::string &from );
 	void ManageHisto (std::string &device , std::string &value	 , std::string &histo	 , std::string &from	 , std::string &to , std::string &rep_content);
 	void getDeviceCamera(int &iroot);
+  void getGraphic(std::string &idx , std::string TableName , std::string FieldName , std::string KeyName , time_t DateStart , time_t  DateEnd, std::string &rep_content );
 public:
 	bool Request( std::string &request_path , std::string &rep_content);
 	void getScenes(int &iroot);
@@ -90,7 +91,6 @@ public:
 
 };
 
-void getGraphic(std::string &idx , std::string TableName , std::string FieldName , std::string KeyName , time_t DateStart , time_t  DateEnd, std::string &rep_content );
 	
 std::string DeviceTypeString[]={
 "DevDimmer",
@@ -122,17 +122,57 @@ std::string DeviceTypeString[]={
 
 };	
 
+#define TTEMP  "temp"
+#define THUM   "hum"
+#define TBARO  "baro"
+#define TI1    "i1"
+#define TI2    "i2"
+#define TI3    "i3"
+#define TVALUE "value"
+#define TUV    "uv"
 
 //graphic table / field 
 typedef struct  {
-	int			pType;			//type
+	int			IssType;			  //ISS device type DeviceTypeEnum
+                          //if = 0 : all type
+	std::string KeyName;		//key value name
 	std::string Table;			//table name
 	std::string Field;			//field name
-	std::string KeyNAme;		//key value name
 }T_GRAPHIC;
 
+//this table give the Table Name / field Name for the short log in order to get the graphic values
+// from the ptype and ISS request key Name value
+
 T_GRAPHIC GraphicTable[] = {
-	{  },
+    { DevDimmer             ,""         ,""                  ,""                  },
+    { DevSwitch             ,""         ,""                  ,""                  },
+    { DevTemperature        ,"value"    ,"TEMPERATURE"       ,"Temperature"       },
+    { DevCamera             ,""         ,""                  ,""                  },
+    { DevCO2                ,""         ,""                  ,""                  },
+    { DevShutter            ,""         ,""                  ,""                  },
+    { DevDoor               ,""         ,""                  ,""                  },
+    { DevFlood              ,""         ,""                  ,""                  },
+    { DevMotion             ,""         ,""                  ,""                  },
+    { DevSmoke              ,""         ,""                  ,""                  },
+    { DevElectricity        ,"Watts"    ,"Meter"             ,"Usage"             },
+    { DevGenericSensor      ,""         ,""                  ,""                  },
+    { DevHygrometry         ,"value"    ,"TEMPERATURE"       ,"Humidity"                        },
+    { DevLuminosity         ,""         ,""                  ,""                  },
+    { DevLock               ,""         ,""                  ,""                  },
+    { DevMultiSwitch        ,""         ,""                  ,""                  },
+    { DevNoise              ,""         ,""                  ,""                  },
+    { DevPressure           ,"value"    ,"TEMPERATURE"       ,"Barometer"         },
+    { DevRain               ,""         ,""                  ,""                  },
+    { DevScene              ,""         ,""                  ,""                  },
+    { DevUV                 ,""         ,""                  ,""                  },
+    { DevWind               ,""         ,""                  ,""                  },
+    { DevCO2Alert           ,""         ,""                  ,""                  },
+    { DevThermostat         ,""         ,""                  ,""                  },
+    { DevRGBLight			,""         ,""                  ,""                  },
+    { DevTempHygro		    ,"temp"     ,"TEMPERATURE"       ,"Temperature"       },
+    { DevTempHygro		    ,"hygro"    ,"TEMPERATURE"       ,"Humidity"          },
+
+    { -1                    ,    ""     ,""                  ,"" },
 };
 
 void ImperiHome::setKeyGenericSensor() {
@@ -172,11 +212,42 @@ AddjValue,
 AddjValue2
 };
 
+//device name is devXXX_type
 
 std::string getDeviceId(std::string &device )
 {
     //the dev Id is DEVnnn_zzz : nnn is the ID 
  return  device.substr(3,device.find("_")-3);
+}
+std::string buildDeviceId(std::string &pidx , std::string &DevTypeName , DeviceTypeEnum ApType  )
+{
+	//the dev Id is DEVnnn_zzz : nnn is the ID  zzz: the DeviceTypeEnum ApType 
+//	return  "dev" + pidx + "_" + DevTypeName;
+  return  "dev" + pidx + "_" + To_string(ApType);
+}
+std::string getDeviceTypeName(std::string &device)
+{
+	//the dev Id is DEVnnn_zzz : nnn is the ID 
+	//return zzz
+	int posUnder = device.find("_");
+	if (posUnder == std::string::npos)
+		return "";
+	else
+		return  device.substr(posUnder+1, 100 );
+}
+
+void SqlGetTypeSubType( std::string &idx , int &dType , int &dSubType )
+{
+	TSqlQueryResult result;
+	dType = 0;
+	dSubType = 0;
+    result = m_sql.Query("SELECT Type,SubType  FROM DeviceStatus where (ID==%s)", idx.c_str());
+    if (result.size()>0)
+    {
+	    TSqlRowQuery * row = &result[0];
+	    dType = atoi((*row)[0].c_str());
+	    dSubType = atoi((*row)[1].c_str());
+    }
 }
 
 //from to ms since 1/1/1970
@@ -187,22 +258,44 @@ void ImperiHome::ManageHisto (std::string &device , std::string &value	 , std::s
 
 	_log.Log(LOG_STATUS,"IMPE: Graphic Device:%s Value:%s Histo:%s From:%s To:%s",device.c_str () , value.c_str () , histo.c_str () , from.c_str () , to.c_str ()  );
 
-    //the dev Id is DEVnnn_zzz : nnn is the ID 
-    std::string ID = getDeviceId(device);
-		//divide by 1000 = sec
-		from = from.substr(0,from.length()-3) ;
-		to   = to.substr(0,to.length()-3) ;
+  //the dev Id is DEVnnn_zzz : nnn is the ID zzz : Iss Device type
+  std::string ID = getDeviceId(device);
 
-		DateStartSec= atol(from.c_str());
-		DateEndSec	= atol(to.c_str());
+  std::string TypeName = getDeviceTypeName(device);
+  int IssType = atoi(TypeName.c_str());   
+
+
+    //divide by 1000 = sec
+	from = from.substr(0,from.length()-3) ;
+	to   = to.substr(0,to.length()-3) ;
+
+	DateStartSec= atol(from.c_str());
+	DateEndSec	= atol(to.c_str());
 
 //	Histo(rep_content, to )	;
-//	getGraphic(ID , "TEMPERATURE" , "Temperature" , "value" , DateStartSec ,  DateEndSec, rep_content );
 	//if power graphics 
-	if (value=="Watts")
+/*
+if (value=="Watts")
 		getGraphic(ID , "Meter"       , "Usage"       , "Watts" , DateStartSec ,  DateEndSec, rep_content );
 	else
 		getGraphic(ID , "TEMPERATURE", "Temperature"  , "value" , DateStartSec  , DateEndSec, rep_content);
+*/
+
+	int i = 0;
+/*	int dType = 0;
+	int dSubType = 0;
+  SqlGetTypeSubType(ID,dType,dSubType);
+*/
+
+  while (GraphicTable[i].IssType != -1 ) {
+	if   ( (GraphicTable[i].IssType == IssType ) && (GraphicTable[i].KeyName == value) )
+    {
+		getGraphic(ID, GraphicTable[i].Table, GraphicTable[i].Field, value , DateStartSec, DateEndSec, rep_content);
+		return;
+	}
+	i++;
+
+  }
 
 }
 void ImperiHome::ManageAction (std::string &device , std::string &action	 , std::string &actionType	 , std::string actionValue	 )
@@ -513,7 +606,7 @@ DeviceTypeEnum ImperiHome::LightType( TSqlRowQuery * row  , Json::Value &params 
 
 void ImperiHome::updateRoot(int ii , std::string pidx , std::string pname, std::string proom , DeviceTypeEnum ApType , std::string DevTypeName)
 {
-	  root["devices"][ii]["id"]     = "dev"+pidx+"_" + DevTypeName ;  //devIdx
+	  root["devices"][ii]["id"]       = buildDeviceId ( pidx ,  DevTypeName ,  ApType ); 
 		root["devices"][ii]["name"]   = pname ;		//Name
 		root["devices"][ii]["room"]   = proom ;
 		root["devices"][ii]["type"]   = GetTypeDevice(ApType);		//type
@@ -582,12 +675,6 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
           updateRoot( iroot++ , row , DevHygrometry );
           break;
         case pTypeTEMP_HUM :
-          //temperature
-          //SetKey(0,"value" ,sValueGlb[0] , "°C",true );
-          //updateRoot( iroot++ , row , DevTemperature );
-          ////humidity
-          //SetKey(0,"value" ,sValueGlb[1] ,"%" , false);
-          //updateRoot( iroot++ , row , DevHygrometry );
           //DevTempHygro
           SetKey(0,"temp" ,sValueGlb[0] , "°C",true );
           SetKey(1,"hygro",sValueGlb[1] , "%" , false);
@@ -595,31 +682,30 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
           
           break;
         case pTypeTEMP_HUM_BARO :
-          //temperature
-          SetKey(0,"value" ,sValueGlb[0] , "°C",true );
-          updateRoot( iroot++ , row , DevTemperature ,"temp");
-          //humidity
-          SetKey(0,"value" ,sValueGlb[1] ,"%" , false);
-          updateRoot( iroot++ , row , DevHygrometry ,"hum");
+          //DevTempHygro
+          SetKey(0,"temp" ,sValueGlb[0] , "°C",true );
+          SetKey(1,"hygro",sValueGlb[1] , "%" , false);
+          updateRoot( iroot++ , row , DevTempHygro );
+
           //baro
           SetKey(0,"value" ,sValueGlb[3] ,"mbar" , false);
-          updateRoot( iroot++ , row , DevPressure ,"baro");
+          updateRoot( iroot++ , row , DevPressure ,TBARO);
           break;
         case pTypeTEMP_BARO :
           //temperature
           SetKey(0,"value" ,sValueGlb[0] , "°C",true );
-          updateRoot( iroot++ , row , DevTemperature ,"temp");
+          updateRoot( iroot++ , row , DevTemperature ,TTEMP);
           //baro
           SetKey(0,"value" ,sValueGlb[1] ,"mbar" , false);
-          updateRoot( iroot++ , row , DevPressure ,"baro" );
+          updateRoot( iroot++ , row , DevPressure ,TBARO );
           break;
         case pTypeUV :
           //UVI
           SetKey(0,"value" ,sValueGlb[0] ,"" , false);
-          updateRoot( iroot++ , row , DevUV ,"uv");
+          updateRoot( iroot++ , row , DevUV ,TUV);
           //temperature
           SetKey(0,"value" ,sValueGlb[1] , "°C",false );
-          updateRoot( iroot++ , row , DevTemperature ,"temp");
+          updateRoot( iroot++ , row , DevTemperature ,TTEMP);
           break;
         case pTypeWIND :
           //wind direction /speed
@@ -653,7 +739,7 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
               //data= I1;I2;I3
 	          SetKey(0,"Watts"     ,sValueGlb[0] ,"W" ,false );
             updateRoot( iroot++ , row , DevElectricity ,"i1");
-            if (sValueGlb.size()>=2){
+/*            if (sValueGlb.size()>=2){
 	          SetKey(0,"Watts"     ,sValueGlb[1] ,"W" ,false );
             updateRoot( iroot++ , row , DevElectricity ,"i2");
             }
@@ -661,6 +747,7 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
 	          SetKey(0,"Watts"     ,sValueGlb[2] ,"W" ,false );
             updateRoot( iroot++ , row , DevElectricity ,"i3");
             }
+*/
               
           break;
         case pTypeENERGY ://   //CM119/160  //CM180
@@ -1543,7 +1630,7 @@ bool  ImperiHomeRequest( std::string &request_path , std::string &rep_content)
   return ret;
 }
 
-void getGraphic(std::string &idx , std::string TableName , std::string FieldName , std::string KeyName , time_t DateStart , time_t  DateEnd, std::string &rep_content )
+void ImperiHome::getGraphic(std::string &idx , std::string TableName , std::string FieldName , std::string KeyName , time_t DateStart , time_t  DateEnd, std::string &rep_content )
 {
 	TSqlQueryResult result;
 	char DateStartStr[40];
@@ -1559,16 +1646,7 @@ rep_content = "";
 rep_content += "{";
 rep_content += "  \"values\": [";
 
-
-result = m_sql.Query("SELECT Type,SubType  FROM DeviceStatus where (ID==%s)", idx.c_str());
-if (result.size()>0)
-{
-	TSqlRowQuery * row = &result[0];
-	dType = atoi((*row)[0].c_str());
-	dSubType = atoi((*row)[1].c_str());
-}
-
-
+SqlGetTypeSubType(idx,dType,dSubType);
 
 result=m_sql.Query ( "SELECT %s , Date FROM %s WHERE (DeviceRowID==%s AND Date>='%s' AND Date<='%s' ) ORDER BY Date ASC" ,FieldName.c_str(), TableName.c_str(),idx.c_str(),DateStartStr,DateEndStr);
 for (unsigned int i=0;i<result.size();i++)

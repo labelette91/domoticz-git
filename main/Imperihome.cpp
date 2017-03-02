@@ -55,6 +55,10 @@ enum DeviceTypeEnum
     
 	};
 
+//map beetween DeviceId and RoomId
+  typedef std::map<std::string  ,  std::string  > T_Map_Room_DeviceId ;
+  T_Map_Room_DeviceId Map_Room_DeviceId;
+
 class  ImperiHome {
 private:
 	Json::Value root;
@@ -62,7 +66,6 @@ private:
 	std::vector<std::string> sValueGlb;
   std::string nValueGlb ;
   int iroot;
-
 
 	const char * GetTypeDevice(DeviceTypeEnum dev);
 	void ManageAction (std::string &device , std::string &action	 , std::string &actionType	 , std::string actionValue	 );
@@ -73,7 +76,7 @@ private:
 	void DeviceContent3(std::string &rep_content);
 	void DeviceContent2(std::string &rep_content);
 	void DeviceContent1(std::string &rep_content);
-  void RoomContent1(std::string &rep_content);
+  void getRoomContent(std::string &rep_content);
   void SetParams( int KeyNum , const char * KeyName , std::string KeyValue);
   void SetParams( int KeyNum , const char * KeyName , bool KeyValue);
   void SetKey( int KeyNum , const char * KeyName , std::string KeyValue);
@@ -83,6 +86,13 @@ private:
 	void ManageHisto (std::string &device , std::string &value	 , std::string &histo	 , std::string &from	 , std::string &to , std::string &rep_content);
 	void getDeviceCamera(int &iroot);
   void getGraphic(std::string &idx , std::string TableName , std::string FieldName , std::string KeyName , time_t DateStart , time_t  DateEnd, std::string &rep_content );
+  void         setRoomId ( std::string  &DeviceRowID , std::string RoomId ) ;
+  std::string  getRoomId ( std::string  &DeviceRowID ) ;
+  void clearRoomIds();
+  void build_Map_Room_DeviceId();
+  bool is_Map_Room_DeviceId_built();
+
+
 public:
 	bool Request( std::string &request_path , std::string &rep_content);
 	void getScenes(int &iroot);
@@ -145,35 +155,37 @@ typedef struct  {
 // from the ptype and ISS request key Name value
 
 T_GRAPHIC GraphicTable[] = {
-    { DevDimmer             ,""         ,""                  ,""                  },
-    { DevSwitch             ,""         ,""                  ,""                  },
-    { DevTemperature        ,PKEYVALUE  ,"TEMPERATURE"       ,"Temperature"       },
-    { DevCamera             ,""         ,""                  ,""                  },
-    { DevCO2                ,""         ,""                  ,""                  },
-    { DevShutter            ,""         ,""                  ,""                  },
-    { DevDoor               ,""         ,""                  ,""                  },
-    { DevFlood              ,""         ,""                  ,""                  },
-    { DevMotion             ,""         ,""                  ,""                  },
-    { DevSmoke              ,""         ,""                  ,""                  },
-    { DevElectricity        ,"Watts"    ,"Meter"             ,"Usage"             },
-    { DevGenericSensor      ,""         ,""                  ,""                  },
-    { DevHygrometry         ,PKEYVALUE  ,"TEMPERATURE"       ,"Humidity"                        },
-    { DevLuminosity         ,""         ,""                  ,""                  },
-    { DevLock               ,""         ,""                  ,""                  },
-    { DevMultiSwitch        ,""         ,""                  ,""                  },
-    { DevNoise              ,""         ,""                  ,""                  },
-    { DevPressure           ,PKEYVALUE  ,"TEMPERATURE"       ,"Barometer"         },
-    { DevRain               ,""         ,""                  ,""                  },
-    { DevScene              ,""         ,""                  ,""                  },
-    { DevUV                 ,""         ,""                  ,""                  },
-    { DevWind               ,""         ,""                  ,""                  },
-    { DevCO2Alert           ,""         ,""                  ,""                  },
-    { DevThermostat         ,""         ,""                  ,""                  },
-    { DevRGBLight			,""         ,""                  ,""                  },
-    { DevTempHygro		    ,"temp"     ,"TEMPERATURE"       ,"Temperature"       },
-    { DevTempHygro		    ,"hygro"    ,"TEMPERATURE"       ,"Humidity"          },
-
-    { -1                    ,    ""     ,""                  ,"" },
+    { DevDimmer             ,""              ,""                  ,""                  },
+    { DevSwitch             ,""              ,""                  ,""                  },
+    { DevTemperature        ,PKEYVALUE       ,"TEMPERATURE"       ,"Temperature"       },
+    { DevCamera             ,""              ,""                  ,""                  },
+    { DevCO2                ,""              ,""                  ,""                  },
+    { DevShutter            ,""              ,""                  ,""                  },
+    { DevDoor               ,""              ,""                  ,""                  },
+    { DevFlood              ,""              ,""                  ,""                  },
+    { DevMotion             ,""              ,""                  ,""                  },
+    { DevSmoke              ,""              ,""                  ,""                  },
+    { DevElectricity        ,"Watts"         ,"Meter"             ,"Usage"             },
+    { DevGenericSensor      ,""              ,""                  ,""                  },
+    { DevHygrometry         ,PKEYVALUE       ,"TEMPERATURE"       ,"Humidity"          },
+    { DevLuminosity         ,PKEYVALUE       ,"Meter"             ,"Value"             },
+    { DevLock               ,""              ,""                  ,""                  },
+    { DevMultiSwitch        ,""              ,""                  ,""                  },
+    { DevNoise              ,""              ,""                  ,""                  },
+    { DevPressure           ,PKEYVALUE       ,"TEMPERATURE"       ,"Barometer"         },
+    { DevRain               ,"Value"         ,"Rain"              ,"Rate"              },
+    { DevRain               ,"Accumulation"  ,"Rain"              ,"Rate"              },
+    { DevScene              ,""              ,""                  ,"Total"             },
+    { DevUV                 ,"Value"         ,"UV"                ,"Level"             },
+    { DevWind               ,"Speed"         ,"Wind"              ,"Speed"             },
+    { DevWind               ,"Direction"     ,"Wind"              ,"Direction"         },
+    { DevCO2Alert           ,""              ,""                  ,""                  },
+    { DevThermostat         ,""              ,""                  ,""                  },
+    { DevRGBLight			      ,""              ,""                  ,""                  },
+    { DevTempHygro		      ,"temp"          ,"TEMPERATURE"       ,"Temperature"       },
+    { DevTempHygro		      ,"hygro"         ,"TEMPERATURE"       ,"Humidity"          },
+                                             
+    { -1                    ,    ""          ,""                  ,"" },
 };
 
 void ImperiHome::setKeyGenericSensor() {
@@ -595,7 +607,8 @@ void ImperiHome::updateRoot(int ii , std::string pidx , std::string pname, std::
 {
 	  root["devices"][ii]["id"]       = buildDeviceId ( pidx ,  DevTypeName ,  ApType ); 
 		root["devices"][ii]["name"]   = pname ;		//Name
-		root["devices"][ii]["room"]   = proom ;
+		root["devices"][ii]["room"]   = getRoomId(pidx) ;
+//		root["devices"][ii]["room"]   = proom ;
 		root["devices"][ii]["type"]   = GetTypeDevice(ApType);		//type
 		root["devices"][ii]["params"] = params;
 }
@@ -615,7 +628,10 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
 {
   int dtype,dSubType=0;
   iroot=0;
-	root.clear();
+  root.clear();
+  //build Map_Room_DeviceId if not done
+  if (!is_Map_Room_DeviceId_built())
+	  build_Map_Room_DeviceId();
 
   TSqlQueryResult result=m_sql.Query("SELECT ID,Name,nValue,Type,SubType,sValue,SwitchType,LastLevel,RoomTemp,SwitchIdx,AddjValue,AddjValue2  FROM DeviceStatus where (used==1)"  ) ;
 	
@@ -896,29 +912,110 @@ void ImperiHome::getDeviceCamera(int &iroot)
 }
 
 
-
-
-
-void ImperiHome::RoomContent1(std::string &rep_content)
+void ImperiHome::setRoomId ( std::string  &DeviceRowID , std::string RoomId )
 {
+    Map_Room_DeviceId[DeviceRowID] = "roomID"+RoomId;
+}
+
+//get RoomId from DeviceRowID
+std::string  ImperiHome::getRoomId ( std::string  &DeviceRowID ) 
+{
+  std::string RoomId = Map_Room_DeviceId[DeviceRowID] ;
+  //if does not exist , take default RoomID1
+  if (RoomId=="") {
+    setRoomId (  DeviceRowID , "0" );
+    RoomId = Map_Room_DeviceId[DeviceRowID] ;
+  }
+  return RoomId ;
+}
+
+void ImperiHome::clearRoomIds()
+{
+  Map_Room_DeviceId.clear();
+}
+
+
+
+//build the Map_Room_DeviceId table in order to retrieve roomIDxx from DeviceRowId
+//without database access
+void ImperiHome::build_Map_Room_DeviceId()
+{
+	TSqlQueryResult result = m_sql.Query("SELECT ID, Name FROM Plans ");
+	clearRoomIds();
+	//get device ID  with RoomId
+	result = m_sql.Query("SELECT PlanID,DeviceRowID FROM DeviceToPlansMap WHERE (DevSceneType==0)");
+	for (unsigned int ii = 0; ii<result.size(); ii++)
+	{
+		TSqlRowQuery * row = &result[ii];
+		setRoomId((*row)[1], (*row)[0]);
+	}
+
+}
+
+bool ImperiHome::is_Map_Room_DeviceId_built()
+{
+	return Map_Room_DeviceId.size();
+}
+
+
+void ImperiHome::getRoomContent(std::string &rep_content)
+{
+  char line[1024];
+  TSqlQueryResult result=m_sql.Query( "SELECT ID, Name FROM Plans " ) ;
+	
+	rep_content = "";
+	rep_content += "{                                    ";
+	rep_content += "  \"rooms\": [                       ";
+
+  //default room if not defined
+  rep_content += "    {                                ";
+	rep_content += "      \"id\": \"roomID0\",           ";
+	rep_content += "      \"name\": \"room\"      ";
+	rep_content += "    }                                ";
+  
+  for (unsigned int ii=0;ii<result.size();ii++)
+	{
+		TSqlRowQuery * row = &result[ii] ;
+
+    rep_content += "," ;
+
+    rep_content += "    {                                ";
+		sprintf(line , "      \"id\": \"roomID%s\",",(*row)[0].c_str() );  rep_content += line ;
+		sprintf(line , "      \"name\": \"%s\"     ",(*row)[1].c_str() );  rep_content += line ;
+		rep_content += "    }                                ";
+
+  }
+  rep_content += "  ]                                  ";
+	rep_content += "}                                    ";
+
+
+  //build the Map_Room_DeviceId table in order to retrieve roomIDxx from DeviceRowId
+  //without database access
+	build_Map_Room_DeviceId();
+
+/*
 		rep_content = "";
 		rep_content += "{                                    ";
 		rep_content += "  \"rooms\": [                       ";
-		rep_content += "    {                                ";
+
+    rep_content += "    {                                ";
 		rep_content += "      \"id\": \"roomID1\",           ";
 		rep_content += "      \"name\": \"Living Room\"      ";
 		rep_content += "    },                               ";
-		rep_content += "    {                                ";
+
+    rep_content += "    {                                ";
 		rep_content += "      \"id\": \"roomID2\",           ";
 		rep_content += "      \"name\": \"Kitchen\"          ";
 		rep_content += "    },                               ";
-		rep_content += "    {                                ";
+
+    rep_content += "    {                                ";
 		rep_content += "      \"id\": \"roomID3\",           ";
 		rep_content += "      \"name\": \"room\"      ";
 		rep_content += "    }                                ";
-		rep_content += "  ]                                  ";
-		rep_content += "}                                    ";
 
+    rep_content += "  ]                                  ";
+		rep_content += "}                                    ";
+*/
 }
 
 void ImperiHome::DeviceContent1(std::string &rep_content)
@@ -1596,7 +1693,7 @@ bool  ImperiHome::Request( std::string &request_path , std::string &rep_content)
 	}
 	else  if (request_path=="/rooms"){
 		if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"IMPE: Rooms request"  );
-		RoomContent1( rep_content);
+		getRoomContent( rep_content);
 	}
 	else
 		return false;

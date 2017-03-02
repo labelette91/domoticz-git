@@ -128,8 +128,9 @@ std::string DeviceTypeString[]={
 #define TI1    "i1"
 #define TI2    "i2"
 #define TI3    "i3"
-#define TVALUE "value"
+#define PKEYVALUE "value"
 #define TUV    "uv"
+#define TLUX   "lux"
 
 //graphic table / field 
 typedef struct  {
@@ -146,7 +147,7 @@ typedef struct  {
 T_GRAPHIC GraphicTable[] = {
     { DevDimmer             ,""         ,""                  ,""                  },
     { DevSwitch             ,""         ,""                  ,""                  },
-    { DevTemperature        ,"value"    ,"TEMPERATURE"       ,"Temperature"       },
+    { DevTemperature        ,PKEYVALUE  ,"TEMPERATURE"       ,"Temperature"       },
     { DevCamera             ,""         ,""                  ,""                  },
     { DevCO2                ,""         ,""                  ,""                  },
     { DevShutter            ,""         ,""                  ,""                  },
@@ -156,12 +157,12 @@ T_GRAPHIC GraphicTable[] = {
     { DevSmoke              ,""         ,""                  ,""                  },
     { DevElectricity        ,"Watts"    ,"Meter"             ,"Usage"             },
     { DevGenericSensor      ,""         ,""                  ,""                  },
-    { DevHygrometry         ,"value"    ,"TEMPERATURE"       ,"Humidity"                        },
+    { DevHygrometry         ,PKEYVALUE  ,"TEMPERATURE"       ,"Humidity"                        },
     { DevLuminosity         ,""         ,""                  ,""                  },
     { DevLock               ,""         ,""                  ,""                  },
     { DevMultiSwitch        ,""         ,""                  ,""                  },
     { DevNoise              ,""         ,""                  ,""                  },
-    { DevPressure           ,"value"    ,"TEMPERATURE"       ,"Barometer"         },
+    { DevPressure           ,PKEYVALUE  ,"TEMPERATURE"       ,"Barometer"         },
     { DevRain               ,""         ,""                  ,""                  },
     { DevScene              ,""         ,""                  ,""                  },
     { DevUV                 ,""         ,""                  ,""                  },
@@ -178,11 +179,11 @@ T_GRAPHIC GraphicTable[] = {
 void ImperiHome::setKeyGenericSensor() {
    
   if (nValueGlb!="0")
-    SetKey(0,"value" ,nValueGlb    );
+    SetKey(0,PKEYVALUE ,nValueGlb    );
   else if (sValueGlb[0].length() !=0)
-    SetKey(0,"value" ,sValueGlb[0] );
+    SetKey(0,PKEYVALUE ,sValueGlb[0] );
   else
-    SetKey(0,"value" ,nValueGlb    );
+    SetKey(0,PKEYVALUE ,nValueGlb    );
 }
 
 void ImperiHome::setGenericSensor(TSqlRowQuery * row) {
@@ -272,30 +273,16 @@ void ImperiHome::ManageHisto (std::string &device , std::string &value	 , std::s
 	DateStartSec= atol(from.c_str());
 	DateEndSec	= atol(to.c_str());
 
-//	Histo(rep_content, to )	;
-	//if power graphics 
-/*
-if (value=="Watts")
-		getGraphic(ID , "Meter"       , "Usage"       , "Watts" , DateStartSec ,  DateEndSec, rep_content );
-	else
-		getGraphic(ID , "TEMPERATURE", "Temperature"  , "value" , DateStartSec  , DateEndSec, rep_content);
-*/
-
 	int i = 0;
-/*	int dType = 0;
-	int dSubType = 0;
-  SqlGetTypeSubType(ID,dType,dSubType);
-*/
 
-  while (GraphicTable[i].IssType != -1 ) {
-	if   ( (GraphicTable[i].IssType == IssType ) && (GraphicTable[i].KeyName == value) )
-    {
-		getGraphic(ID, GraphicTable[i].Table, GraphicTable[i].Field, value , DateStartSec, DateEndSec, rep_content);
-		return;
-	}
-	i++;
-
-  }
+    while (GraphicTable[i].IssType != -1 ) {
+		if   ( (GraphicTable[i].IssType == IssType ) && (GraphicTable[i].KeyName == value) )
+		{
+			getGraphic(ID, GraphicTable[i].Table, GraphicTable[i].Field, value , DateStartSec, DateEndSec, rep_content);
+			return;
+		}
+		i++;
+    }
 
 }
 void ImperiHome::ManageAction (std::string &device , std::string &action	 , std::string &actionType	 , std::string actionValue	 )
@@ -430,7 +417,7 @@ void ImperiHome::manageTypeGeneral( TSqlRowQuery * row  , Json::Value &params )
     //							root["result"][ii]["Voltage"] = atof(sValue.c_str());
     break;
   case  sTypePressure :
-    SetKey(0,"value" ,sValueGlb[0] ,"bar" , false);
+    SetKey(0,PKEYVALUE ,sValueGlb[0] ,"bar" , false);
     updateRoot( iroot++ , row , DevPressure );
 
     //							sprintf(szData, "%.1f Bar", atof(sValue.c_str()));
@@ -478,7 +465,7 @@ void ImperiHome::manageTypeGeneral( TSqlRowQuery * row  , Json::Value &params )
 
     break;
   case  sTypeBaro				 :
-    SetKey(0,"value" ,sValueGlb[0] ,"bar" , false);
+    SetKey(0,PKEYVALUE ,sValueGlb[0] ,"bar" , false);
     updateRoot( iroot++ , row , DevPressure );
 
     break;
@@ -667,11 +654,11 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
           updateRoot( iroot++ , row , LightType(  row  , params ) );
           break;
         case pTypeTEMP:	
-          SetKey(0,"value" ,sValueGlb[0] , "°C",true );
+          SetKey(0,PKEYVALUE ,sValueGlb[0] , "°C",true );
           updateRoot( iroot++ , row , DevTemperature );
           break;
         case pTypeHUM:	
-          SetKey(0,"value" ,nValueGlb ,"%" , false);
+          SetKey(0,PKEYVALUE ,nValueGlb ,"%" , false);
           updateRoot( iroot++ , row , DevHygrometry );
           break;
         case pTypeTEMP_HUM :
@@ -688,23 +675,23 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
           updateRoot( iroot++ , row , DevTempHygro );
 
           //baro
-          SetKey(0,"value" ,sValueGlb[3] ,"mbar" , false);
+          SetKey(0,PKEYVALUE ,sValueGlb[3] ,"mbar" , false);
           updateRoot( iroot++ , row , DevPressure ,TBARO);
           break;
         case pTypeTEMP_BARO :
           //temperature
-          SetKey(0,"value" ,sValueGlb[0] , "°C",true );
+          SetKey(0,PKEYVALUE ,sValueGlb[0] , "°C",true );
           updateRoot( iroot++ , row , DevTemperature ,TTEMP);
           //baro
-          SetKey(0,"value" ,sValueGlb[1] ,"mbar" , false);
+          SetKey(0,PKEYVALUE ,sValueGlb[1] ,"mbar" , false);
           updateRoot( iroot++ , row , DevPressure ,TBARO );
           break;
         case pTypeUV :
           //UVI
-          SetKey(0,"value" ,sValueGlb[0] ,"" , false);
+          SetKey(0,PKEYVALUE ,sValueGlb[0] ,"" , false);
           updateRoot( iroot++ , row , DevUV ,TUV);
           //temperature
-          SetKey(0,"value" ,sValueGlb[1] , "°C",false );
+          SetKey(0,PKEYVALUE ,sValueGlb[1] , "°C",false );
           updateRoot( iroot++ , row , DevTemperature ,TTEMP);
           break;
         case pTypeWIND :
@@ -788,7 +775,7 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
 		  updateRoot(iroot++, row, DevSwitch);
           break;
         case pTypeLux :
-          SetKey(0,"value" ,sValueGlb[0] , "lux",false );
+          SetKey(0,PKEYVALUE ,sValueGlb[0] , TLUX ,false );
           updateRoot( iroot++ , row , DevLuminosity );
 
           break;

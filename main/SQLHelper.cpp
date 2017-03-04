@@ -7499,34 +7499,6 @@ bool CSQLHelper::InsertCustomIconFromZip(const std::string &szZip, std::string &
 	return true;
 }
 
-//update the SerialPort Name field in database with port information 
-void updateHardwareSerialName()
-{
-  bool bUseDirectPath;
-  std::vector<std::string> SerialPorts =  GetSerialPorts(bUseDirectPath);
-  std::string idx;
-  std::string SerialPortName;
-  unsigned int port;
-
-  TSqlQueryResult result=m_sql.Query("SELECT ID,Port FROM Hardware "  ) ;
-
-	//for all the hardware device 
-	for (unsigned int i=0;i<result.size();i++)
-	{
-		TSqlRowQuery * row = &result[i] ;
-
-    idx=(*row)[0];
-    port = atoi((*row)[1].c_str());    
-    //get serial string name
-    if (port<SerialPorts.size())
-      SerialPortName = SerialPorts[port]; 
-    else
-      SerialPortName ="";
-    //update serial name
-		m_sql.Query("UPDATE Hardware SET SerialPort=%s WHERE (ID == %s)",	SerialPortName.c_str(),idx.c_str());
-
-  }
-}
 std::map<std::string, std::string> CSQLHelper::BuildDeviceOptions(const std::string & options, const bool decode) {
 	std::map<std::string, std::string> optionsMap;
 	if (!options.empty()) {

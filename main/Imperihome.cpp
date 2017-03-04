@@ -236,7 +236,7 @@ std::string buildDeviceId(std::string &pidx , std::string &DevTypeName , DeviceT
 {
 	//the dev Id is DEVnnn_zzz : nnn is the ID  zzz: the DeviceTypeEnum ApType 
 //	return  "dev" + pidx + "_" + DevTypeName;
-  return  "dev" + pidx + "_" + To_string(ApType);
+  return  "dev" + pidx + "_" + std::to_string(ApType);
 }
 std::string getDeviceTypeName(std::string &device)
 {
@@ -716,7 +716,7 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
           { 
             int intGust = atoi(sValueGlb[3].c_str());
             long double speed = (intGust) *m_sql.m_windscale ;
-            SetKey(1,"Speed" , To_string((double)speed) , "km/h",false );
+            SetKey(1,"Speed" , std::to_string((double)speed) , "km/h",false );
           }
           updateRoot( iroot++ , row , DevWind );
           break;
@@ -1603,39 +1603,39 @@ rep_content = "";
 rep_content += "{                              ";
 rep_content += "  \"values\": [                ";
 rep_content += "    {                          ";
-rep_content += "      \"date\" : " + To_string(fr) + "000,"; fr+=60*delta;
+rep_content += "      \"date\" : " + std::to_string(fr) + "000,"; fr+=60*delta;
 rep_content += "      \"value\" : 18.2         ";
 rep_content += "    },                         ";
 rep_content += "    {                          ";
-rep_content += "      \"date\" : " + To_string(fr) + "000,"; fr+=60*delta;
+rep_content += "      \"date\" : " + std::to_string(fr) + "000,"; fr+=60*delta;
 rep_content += "      \"value\" : 21.3         ";
 rep_content += "    },                         ";
 rep_content += "    {                          ";
-rep_content += "      \"date\" : " + To_string(fr) + "000,"; fr+=60*delta;
+rep_content += "      \"date\" : " + std::to_string(fr) + "000,"; fr+=60*delta;
 rep_content += "      \"value\" : 17.6         ";
 rep_content += "    },                         ";
 rep_content += "    {                          ";
-rep_content += "      \"date\" : " + To_string(fr) + "000,"; fr+=60*delta;
+rep_content += "      \"date\" : " + std::to_string(fr) + "000,"; fr+=60*delta;
 rep_content += "      \"value\" : 23.1         ";
 rep_content += "    },                         ";
 rep_content += "    {                          ";
-rep_content += "      \"date\" : " + To_string(fr) + "000,"; fr+=60*delta;
+rep_content += "      \"date\" : " + std::to_string(fr) + "000,"; fr+=60*delta;
 rep_content += "      \"value\" : 24.9         ";
 rep_content += "    },                         ";
 rep_content += "    {                          ";
-rep_content += "      \"date\" : " + To_string(fr) + "000,"; fr+=60*delta;
+rep_content += "      \"date\" : " + std::to_string(fr) + "000,"; fr+=60*delta;
 rep_content += "      \"value\" : 18.5         ";
 rep_content += "    },                         ";
 rep_content += "    {                          ";
-rep_content += "      \"date\" : " + To_string(fr) + "000,"; fr+=60*delta;
+rep_content += "      \"date\" : " + std::to_string(fr) + "000,"; fr+=60*delta;
 rep_content += "      \"value\" : 20.0         ";
 rep_content += "    },                         ";
 rep_content += "    {                          ";
-rep_content += "      \"date\" : " + To_string(fr) + "000,"; fr+=60*delta;
+rep_content += "      \"date\" : " + std::to_string(fr) + "000,"; fr+=60*delta;
 rep_content += "      \"value\" : 20.1         ";
 rep_content += "    },                         ";
 rep_content += "    {                          ";
-rep_content += "      \"date\" : " + To_string(fr) + ","; fr+=60*delta;
+rep_content += "      \"date\" : " + std::to_string(fr) + ","; fr+=60*delta;
 rep_content += "      \"value\" : 19.6         ";
 rep_content += "    }                          ";
 rep_content += "  ]                            ";   
@@ -1750,7 +1750,7 @@ for (unsigned int i=0;i<result.size();i++)
 	if (i>0)
 			rep_content += ",";
 	rep_content += "{";
-	rep_content += "\"date\" : " + To_string((int)timeSec) + "000,"; 
+	rep_content += "\"date\" : " + std::to_string((int)timeSec) + "000,"; 
 	rep_content += "\"value\": " + std::string(tv);
 	rep_content += "}";
 

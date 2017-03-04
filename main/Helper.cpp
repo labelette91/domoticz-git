@@ -492,31 +492,6 @@ std::vector<std::string> ExecuteCommandAndReturn(const std::string &szCommand)
 	return ret;
 }
 
-std::string To_string (double  val)
-{
-	char vs[128];
-	sprintf(vs, "%f", val);
-	return vs;
-}
-
-std::string To_string (int  val)
-{
-	char vs[128];
-	sprintf(vs, "%d", val);
-	return vs;
-}
-std::string To_string (long  val)
-{
-	char vs[128];
-	sprintf(vs, "%ld", val);
-	return vs;
-}
-std::string To_string (unsigned long  long val)
-{
-	char vs[128];
-	sprintf(vs, "%llu", val);
-	return vs;
-}
 //convert date string 10/12/2014 10:45:58 en  struct tm 
 void DateAsciiTotmTime (std::string &sTime , struct tm &tmTime  )
 {

@@ -46,7 +46,44 @@ BOOL console::IsConsoleVisible()
 		return false;
 	return IsWindowVisible(hWnd);
 }
+void consoleReDim( unsigned width, unsigned height )
+    {
+    SMALL_RECT r;
+    COORD      c;
+    HANDLE                     hConOut;
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
 
+    hConOut = GetStdHandle( STD_OUTPUT_HANDLE );
+    if (!GetConsoleScreenBufferInfo( hConOut, &csbi ))
+		return;
+    r.Left   =
+    r.Top    = 0;
+    r.Right  = width -1;
+    r.Bottom = height -1;
+    
+    c.X = width;
+    c.Y = height;
+    SetConsoleScreenBufferSize( hConOut, c );
+
+	SetConsoleWindowInfo( hConOut, TRUE, &r );
+
+/*	CONSOLE_HISTORY_INFO ConsoleHistoryInfo ;
+    ConsoleHistoryInfo.cbSize = sizeof(CONSOLE_HISTORY_INFO);
+
+
+	ConsoleHistoryInfo.HistoryBufferSize=1000;
+	ConsoleHistoryInfo.NumberOfHistoryBuffers=1;
+	ConsoleHistoryInfo.dwFlags=0;
+
+	SetConsoleHistoryInfo(  &ConsoleHistoryInfo	);
+*/
+
+
+	SetConsoleDisplayMode(hConOut,CONSOLE_WINDOWED_MODE, &c);
+
+    }
+
+  
 BOOL console::SetConsoleWindowSize(const SHORT x, const SHORT y)
 {
 	HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -138,6 +175,8 @@ void console::OpenHideConsole()
 	SetConsoleWindowSize(140, 30);
 
 	SetConsoleTitle("Domoticz Home Automation System");
+	consoleReDim(800,100);
+
 }
 
 console myconsole;
@@ -261,7 +300,7 @@ bool InitWindowsHelper(HINSTANCE hInstance, HINSTANCE hPrevInstance, int nShowCm
 
 	//Step 1: Registering the Window Class
 	wc.cbSize        = sizeof(WNDCLASSEX);
-	wc.style         = 0;
+	wc.style         = CS_HREDRAW | CS_VREDRAW;
 	wc.lpfnWndProc   = WndProc;
 	wc.cbClsExtra    = 0;
 	wc.cbWndExtra    = 0;
@@ -281,12 +320,12 @@ bool InitWindowsHelper(HINSTANCE hInstance, HINSTANCE hPrevInstance, int nShowCm
 	}
 
 	// Step 2: Creating the Window
-	g_hWnd = CreateWindowEx(
-		WS_EX_CLIENTEDGE,
+	g_hWnd = CreateWindow(
+//		WS_EX_CLIENTEDGE,
 		g_szClassName,
 		"Domoticz Home Automation",
 		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, CW_USEDEFAULT, 340, 20,
+		CW_USEDEFAULT, CW_USEDEFAULT, 800, 600,
 		NULL, NULL, hInstance, NULL);
 
 	if(g_hWnd == NULL)
@@ -306,6 +345,13 @@ bool InitWindowsHelper(HINSTANCE hInstance, HINSTANCE hPrevInstance, int nShowCm
 		ShellExecute(NULL, "open", szURL, NULL, NULL, SW_SHOWNORMAL);
 	}
 #endif
+//SetWindowLong(g_hWnd, GWL_STYLE, WS_SIZEBOX);
+// See remarks on http://msdn.microsoft.com/en-us/library/windows/desktop/ms633545.aspx
+/*
+SetWindowPos(g_hWnd, 0, 
+   0, 0, 0, 0, // Position + Size
+   SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+	 */
 	return true;
 }
 

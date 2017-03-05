@@ -1402,8 +1402,7 @@ define(['app'], function (app) {
 							(item.Type == "Weight") || 
 							(item.Type == "Usage")||
 							(item.SubType=="Percentage")||
-							((item.Type=="Fan")&&(typeof item.SubType != 'undefined')&&(item.SubType.indexOf('Itho')!=0))||
-							((item.Type=="Fan")&&(typeof item.SubType != 'undefined')&&(item.SubType.indexOf('Lucci')!=0))||
+							//((item.Type=="Fan")&&(typeof item.SubType != 'undefined')&&(item.SubType.indexOf('Lucci')!=0))||
 							((item.Type == "Thermostat")&&(item.SubType=="SetPoint"))||
 							(item.SubType=="kWh")||
 							(item.SubType=="Soil Moisture")||
@@ -3384,8 +3383,7 @@ define(['app'], function (app) {
 							(item.Type == "Weight") || 
 							(item.Type == "Usage")||
 							(item.SubType == "Percentage")||	
-							((item.Type=="Fan")&&(typeof item.SubType != 'undefined')&&(item.SubType.indexOf('Itho')!=0))||
-							((item.Type=="Fan")&&(typeof item.SubType != 'undefined')&&(item.SubType.indexOf('Lucci')!=0))||
+							//((item.Type=="Fan")&&(typeof item.SubType != 'undefined')&&(item.SubType.indexOf('Lucci')!=0))||
 							((item.Type == "Thermostat")&&(item.SubType=="SetPoint"))||
 							(item.SubType=="Soil Moisture")||
 							(item.SubType=="Leaf Wetness")||

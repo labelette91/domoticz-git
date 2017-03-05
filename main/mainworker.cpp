@@ -118,6 +118,7 @@
 #include "../hardware/Arilux.h"
 #include "../hardware/OpenWebNetUSB.h"
 #include "../hardware/InComfort.h"
+#include "../hardware/RelayNet.h"
 
 // load notifications configuration
 #include "../notifications/NotificationHelper.h"
@@ -302,29 +303,10 @@ void MainWorker::StopDomoticzHardware()
 
 void MainWorker::GetAvailableWebThemes()
 {
-	m_webthemes.clear();
-	DIR *d = NULL;
-
 	std::string ThemeFolder = szWWWFolder + "/styles/";
+	m_webthemes.clear();
+	DirectoryListing(m_webthemes, ThemeFolder, true, false);
 
-	d = opendir(ThemeFolder.c_str());
-	if (d != NULL)
-	{
-		struct dirent *de = NULL;
-		// Loop while not NULL
-		while ((de = readdir(d)))
-		{
-			std::string dirname = de->d_name;
-			if (dirent_is_directory(ThemeFolder, de))
-			{
-				if ((dirname != ".") && (dirname != "..") && (dirname != ".svn"))
-				{
-					m_webthemes.push_back(dirname);
-				}
-			}
-		}
-		closedir(d);
-	}
 	//check if current theme is found, if not, select default
 	bool bFound = false;
 	std::string sValue;
@@ -793,6 +775,10 @@ bool MainWorker::AddHardwareFromParams(
 	case HTYPE_ETH8020:
 		//LAN
 		pHardware = new CETH8020(ID, Address, Port, Username, Password);
+		break;
+	case HTYPE_RelayNet:
+		//LAN
+		pHardware = new RelayNet(ID, Address, Port, Username, Password, Mode1 != 0, Mode2 != 0, Mode3, Mode4, Mode5);
 		break;
 	case HTYPE_KMTronicTCP:
 		//LAN

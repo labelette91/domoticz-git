@@ -4117,12 +4117,13 @@ void CSQLHelper::UpdateTemperatureLog()
 				ToRecord = TempLog.AsChanged((int)ID,temp,DELTA_TEMP); //record if temperature change of 1 deg
 				break;
 			case pTypeThermostat:
-				temp = static_cast<float>(atof(splitresults[0].c_str()));
+				//set point temperature record as chill
+				chill = static_cast<float>(atof(splitresults[0].c_str()));
 				//record power % as humidity
 				humidity = atoi(sd[6].c_str()); 
-				//record room temp as chill
-				chill = (float)atof(sd[7].c_str()); 
-				ToRecord = TempLog.AsChanged((int)ID,chill,0.2); //record if room temperature change of 1 deg
+				//record room temp 
+				temp = (float)atof(sd[7].c_str());
+				ToRecord = TempLog.AsChanged((int)ID, temp,0.2); //record if room temperature change 
 				break;
 			case pTypeThermostat1:
 				temp = static_cast<float>(atof(splitresults[0].c_str()));

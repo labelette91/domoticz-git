@@ -1539,7 +1539,7 @@ void MainWorker::Do_Work()
 		{
 			if (difftime(atime,m_ScheduleLastMinuteTime) > 30) //avoid RTC/NTP clock drifts
 			{
-				m_VirtualThermostat.ScheduleThermostat(ltime.tm_min);
+//				m_VirtualThermostat.ScheduleThermostat(ltime.tm_min);
 				m_ScheduleLastMinuteTime = atime;
 				m_ScheduleLastMinute = ltime.tm_min;
 

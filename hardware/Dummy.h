@@ -13,5 +13,11 @@ private:
 	void Init();
 	bool StartHardware();
 	bool StopHardware();
+	void Do_Work();
+
+	boost::shared_ptr<boost::thread> m_thread;
+	volatile bool m_stoprequested;
+	int m_ScheduleLastMinute;
+
 };
 

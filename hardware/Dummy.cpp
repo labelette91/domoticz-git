@@ -11,6 +11,8 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 #include <sstream>
+#include "../main/localtime_r.h"
+#include "../main/VirtualThermostat.h"
 
 CDummy::CDummy(const int ID)
 {
@@ -30,15 +32,49 @@ void CDummy::Init()
 bool CDummy::StartHardware()
 {
 	Init();
-	m_bIsStarted=true;
+	m_stoprequested = false;
+
+
+	//Start worker thread
+	m_thread = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&CDummy::Do_Work, this)));
 	sOnConnected(this);
-	return true;
+	m_bIsStarted = true;
+	return (m_thread != NULL);
 }
 
 bool CDummy::StopHardware()
 {
-	m_bIsStarted=false;
-    return true;
+	m_stoprequested = true;
+	if (m_thread != NULL)
+		m_thread->join();
+	m_bIsStarted = false;
+	return true;
+}
+void CDummy::Do_Work()
+{
+	int sec_counter = 0;
+	_log.Log(LOG_STATUS, "CDummy: Worker started...");
+	while (!m_stoprequested)
+	{
+		sleep_milliseconds(1000);
+		if (m_stoprequested)
+			break;
+		sec_counter++;
+
+		if (sec_counter % 12 == 0) {
+			m_LastHeartbeat = mytime(NULL);
+		}
+		time_t atime = mytime(NULL);
+		struct tm ltime;
+		localtime_r(&atime, &ltime);
+		if (ltime.tm_min != m_ScheduleLastMinute)
+		{
+				m_VirtualThermostat.ScheduleThermostat(ltime.tm_min);
+				m_ScheduleLastMinute = ltime.tm_min;
+		}
+
+	}
+	_log.Log(LOG_STATUS, "CDummy: Worker stopped...");
 }
 
 bool CDummy::WriteToHardware(const char *pdata, const unsigned char length)

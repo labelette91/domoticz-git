@@ -329,7 +329,7 @@ void request_handler::handle_request(const request &req, reply &rep, modify_info
 					  {
 						  rep = reply::stock_reply(reply::not_found);
 #ifdef _DEBUG
-						  _log.Log(LOG_ERROR, "Webserver: File '%s': %s (%d)", request_path.c_str(), strerror(errno), errno);
+						  _log.Log(LOG_ERROR, "Webserver: File '%s': %s (%d) (remote address: %s)", request_path.c_str(), strerror(errno), errno, req.host_address.c_str());
 #endif
 						  return;
 					  }
@@ -340,7 +340,7 @@ void request_handler::handle_request(const request &req, reply &rep, modify_info
 					  {
 						  rep = reply::stock_reply(reply::not_found);
 #ifdef _DEBUG
-						  _log.Log(LOG_ERROR, "Webserver: File '%s': %s (%d)", request_path.c_str(), strerror(errno), errno);
+						  _log.Log(LOG_ERROR, "Webserver: File '%s': %s (%d)  (remote address: %s)", request_path.c_str(), strerror(errno), errno, req.host_address.c_str());
 #endif
 						  return;
 					  }
@@ -370,7 +370,8 @@ void request_handler::handle_request(const request &req, reply &rep, modify_info
 	  {
 		  rep = reply::stock_reply(reply::not_found);
 #ifdef _DEBUG
-		  _log.Log(LOG_ERROR, "Webserver: File '%s': %s (%d)", request_path.c_str(), strerror(errno), errno);
+		  _log.Log(LOG_ERROR, "Webserver: File '%s': %s (%d) (remote address: %s)", request_path.c_str(), strerror(errno), errno, req.host_address.c_str());
+
 #endif
 		  return;
 	  }
@@ -386,7 +387,7 @@ void request_handler::handle_request(const request &req, reply &rep, modify_info
 			  {
 				  rep = reply::stock_reply(reply::not_found);
 #ifdef _DEBUG
-				  _log.Log(LOG_ERROR, "Webserver: File '%s': %s (%d)", request_path.c_str(), strerror(errno), errno);
+				  _log.Log(LOG_ERROR, "Webserver: File '%s': %s (%d) (remote address: %s)", request_path.c_str(), strerror(errno), errno, req.host_address.c_str());
 #endif
 				  return;
 			  }
@@ -399,7 +400,7 @@ void request_handler::handle_request(const request &req, reply &rep, modify_info
 		  {
 			  rep = reply::stock_reply(reply::not_found);
 #ifdef _DEBUG
-			  _log.Log(LOG_ERROR, "Webserver: File '%s': %s (%d)", request_path.c_str(), strerror(errno), errno);
+			  _log.Log(LOG_ERROR, "Webserver: File '%s': %s (%d) (remote address: %s)", request_path.c_str(), strerror(errno), errno, req.host_address.c_str());
 #endif
 			  return;
 		  }
@@ -407,7 +408,7 @@ void request_handler::handle_request(const request &req, reply &rep, modify_info
 		  {
 			  rep = reply::stock_reply(reply::not_found);
 #ifdef _DEBUG
-			  _log.Log(LOG_ERROR, "Webserver: File '%s': %s (%d)", request_path.c_str(), strerror(errno), errno);
+			  _log.Log(LOG_ERROR, "Webserver: File '%s': %s (%d) (remote address: %s)", request_path.c_str(), strerror(errno), errno, req.host_address.c_str());
 #endif
 			  return;
 		  }

@@ -1587,7 +1587,7 @@ void cWebemRequestHandler::handle_request(const request& req, reply& rep)
 {
 	//_log.Log(LOG_NORM, "www-request: %s", req.uri.c_str());
 	if (_log.isTraceEnable())	  
-		_log.Log(LOG_TRACE, "WEB: www-request: %s", req.uri.c_str());
+		_log.Log(LOG_TRACE, "WEBH: www-request: %s", req.uri.c_str());
 
 	// Initialize session
 	WebEmSession session;

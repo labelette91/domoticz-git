@@ -151,7 +151,7 @@ try
 		{
 			if ((Minute % 10) == 0 )
 				if (_log.isTraceEnable())
-					_log.Log(LOG_TRACE, "THER: Mn:%02d  Therm:%-10s(%2s) SetPoint:%4.1f POWER OFF LightId(%2ld):%d ", Minute, ThermostatSwitchName, idxThermostat, ThermostatTemperatureSet, SwitchIdx, SwitchValue);
+					_log.Log(LOG_TRACE, "VTHER: Mn:%02d  Therm:%-10s(%2s) SetPoint:%4.1f POWER OFF LightId(%2ld):%d ", Minute, ThermostatSwitchName, idxThermostat, ThermostatTemperatureSet, SwitchIdx, SwitchValue);
 
 		}
 		//retrieve corresponding Temperature device name    
@@ -188,7 +188,7 @@ try
 							m_mainworker.SwitchLight( SwitchIdx, "Off", 0  , 0 ,  false,0, !SwitchStateAsChanged);
 						sleep_milliseconds(1000);
 						if (_log.isTraceEnable())	  
-							_log.Log(LOG_TRACE,"THER: Mn:%02d  Therm:%-10s(%2s) Room:%4.1f SetPoint:%4.1f Power:%3d LightId(%2ld):%d Kp:%3.f Ki:%3.f Integr:%3.1f",Minute,ThermostatSwitchName, idxThermostat , RoomTemperature,ThermostatTemperatureSet,PowerModulation,SwitchIdx,SwitchValue,CoefProportional,CoefIntegral, DeltaTemps[ThermostatId]->GetSum() /INTEGRAL_DURATION);
+							_log.Log(LOG_TRACE,"VTHER: Mn:%02d  Therm:%-10s(%2s) Room:%4.1f SetPoint:%4.1f Power:%3d LightId(%2ld):%d Kp:%3.f Ki:%3.f Integr:%3.1f",Minute,ThermostatSwitchName, idxThermostat , RoomTemperature,ThermostatTemperatureSet,PowerModulation,SwitchIdx,SwitchValue,CoefProportional,CoefIntegral, DeltaTemps[ThermostatId]->GetSum() /INTEGRAL_DURATION);
 
 					}
 					if (( lastPowerModulation != PowerModulation) || (lastTemp != RoomTemperature ) || (SwitchStateAsChanged) )
@@ -306,7 +306,7 @@ void VirtualThermostat::ThermostatToggleEcoConfort (const char * devID , char * 
 	//update the thermostat set point : Cmd Set temp
 	 std::string ID  =  devID ;
 	m_sql.UpdateDeviceValue("sValue", (int)targetTemp , (ID)) ;
-	if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"THER: Thermostat toggle Idx:%s Temp:%d Duration:%s",devID,targetTemp,Duration  );
+	if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"VTHER: Toggle Eco Confort Idx:%s Temp:%d Duration:%s",devID,targetTemp,Duration  );
 }
 
 //return true if in confor mode

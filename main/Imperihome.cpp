@@ -1709,7 +1709,7 @@ bool  ImperiHomeRequest( std::string &request_path , std::string &rep_content)
 	if (_log.isTraceEnable()) 
 		if (!_log.TestFilter("IMPA"))
 			if (rep_content.length())
-			_log.Log(LOG_TRACE, "IMPA: %s", rep_content.c_str());
+			_log.Log(LOG_TRACE, "IMPA: IIS Answer %s", rep_content.c_str());
 
   return ret;
 }

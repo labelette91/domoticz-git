@@ -2694,7 +2694,7 @@ void CSQLHelper::Do_Work()
 		while (itt!=_items2do.end())
 		{
 			if (_log.isTraceEnable())	  
-						_log.Log(LOG_TRACE,"SQL: Do Task ItemType:%d Cmd:%s Value:%s ",itt->_ItemType ,itt->_command.c_str() ,itt->_sValue.c_str() ); 
+						_log.Log(LOG_TRACE,"SQLH: Do Task ItemType:%d Cmd:%s Value:%s ",itt->_ItemType ,itt->_command.c_str() ,itt->_sValue.c_str() ); 
 
 			if (itt->_ItemType == TITEM_SWITCHCMD)
 			{
@@ -2952,7 +2952,7 @@ std::vector<std::vector<std::string> > CSQLHelper::query(const std::string &szQu
 	}
 	boost::lock_guard<boost::mutex> l(m_sqlQueryMutex);
 
-	if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"DBQY:%s",szQuery.c_str()) ;
+	if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"SQLH query: %s",szQuery.c_str()) ;
 
 	sqlite3_stmt *statement;
 	std::vector<std::vector<std::string> > results;
@@ -3693,7 +3693,7 @@ uint64_t CSQLHelper::UpdateValueInt(const int HardwareID, const char* ID, const 
 		break;
 	}
 
-	if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"SQL :UpdateValueInt %s HwID:%d  DevID:%s Type:%d  sType:%d nValue:%d sValue:%s ", devname.c_str(),HardwareID, ID, devType, subType, nValue, sValue );
+	if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"SQLH UpdateValueInt %s HwID:%d  DevID:%s Type:%d  sType:%d nValue:%d sValue:%s ", devname.c_str(),HardwareID, ID, devType, subType, nValue, sValue );
 
 	if (bDeviceUsed)
 		m_mainworker.m_eventsystem.ProcessDevice(HardwareID, ulID, unit, devType, subType, signallevel, batterylevel, nValue, sValue, devname, 0);
@@ -6162,7 +6162,7 @@ void CSQLHelper::AddTaskItem(const _tTaskItem &tItem)
 
 	// Check if an event for the same device is already in queue, and if so, replace it
 	if (_log.isTraceEnable())
-	   _log.Log(LOG_TRACE, "TASK: Request to add task: idx=%" PRIu64 ", DelayTime=%f, Command='%s', Level=%d, Hue=%d, RelatedEvent='%s'", tItem._idx, tItem._DelayTime, tItem._command.c_str(), tItem._level, tItem._Hue, tItem._relatedEvent.c_str());
+	   _log.Log(LOG_TRACE, "SQLH AddTask: Request to add task: idx=%" PRIu64 ", DelayTime=%f, Command='%s', Level=%d, Hue=%d, RelatedEvent='%s'", tItem._idx, tItem._DelayTime, tItem._command.c_str(), tItem._level, tItem._Hue, tItem._relatedEvent.c_str());
 	// Remove any previous task linked to the same device
 
 	if (
@@ -6174,14 +6174,14 @@ void CSQLHelper::AddTaskItem(const _tTaskItem &tItem)
 		while (itt != m_background_task_queue.end())
 		{
 			if (_log.isTraceEnable())
-				 _log.Log(LOG_TRACE, "TASK: Comparing with item in queue: idx=%llu, DelayTime=%d, Command='%s', Level=%d, Hue=%d, RelatedEvent='%s'", itt->_idx, itt->_DelayTime, itt->_command.c_str(), itt->_level, itt->_Hue, itt->_relatedEvent.c_str());
+				 _log.Log(LOG_TRACE, "SQLH AddTask: Comparing with item in queue: idx=%llu, DelayTime=%d, Command='%s', Level=%d, Hue=%d, RelatedEvent='%s'", itt->_idx, itt->_DelayTime, itt->_command.c_str(), itt->_level, itt->_Hue, itt->_relatedEvent.c_str());
 			if (itt->_idx == tItem._idx && itt->_ItemType == tItem._ItemType)
 			{
 				float iDelayDiff = tItem._DelayTime - itt->_DelayTime;
 				if (iDelayDiff < (1./timer_resolution_hz/2))
 				{
 					if (_log.isTraceEnable())
-						 _log.Log(LOG_TRACE, "TASK: => Already present. Cancelling previous task item");
+						 _log.Log(LOG_TRACE, "SQLH AddTask: => Already present. Cancelling previous task item");
 					itt = m_background_task_queue.erase(itt);
 				}
 				else
@@ -6475,7 +6475,7 @@ bool CSQLHelper::HandleOnOffAction(const bool bIsOn, const std::string &OnAction
 {
 	if (OnAction.size()<1)
 		return true;
-	if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"SQL: HandleOnOffAction:%d OnAction:%s OffAction:%s",bIsOn, OnAction.c_str(),OffAction.c_str());
+	if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"SQLH HandleOnOffAction: %d OnAction:%s OffAction:%s",bIsOn, OnAction.c_str(),OffAction.c_str());
 
 	if (bIsOn)
 	{
@@ -7269,7 +7269,7 @@ void LogRow (TSqlRowQuery * row)
 		std::string Row;
 		for (unsigned int j=0;j<(*row).size();j++)
 			Row = Row+(*row)[j]+";";
-		_log.Log(LOG_TRACE,"DBQY:ROW %s",Row.c_str());
+    _log.Log(LOG_TRACE,"SQLH LogRow : %s",Row.c_str());
 }
 void LogQueryResult (TSqlQueryResult &result)
 {

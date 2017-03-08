@@ -1627,7 +1627,7 @@ void MainWorker::SendCommand(const int HwdID, unsigned char Cmd, const char *szM
 		return;
 
 	if (szMessage!=NULL)
-		if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"CMD :%s", szMessage);
+		if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"MAIN SendCommand: %s", szMessage);
 
 
 	tRBUF cmd;
@@ -1656,7 +1656,7 @@ bool MainWorker::WriteToHardware(const int HwdID, const char *pdata, const unsig
 		return false;
 
 	return m_hardwaredevices[hindex]->WriteToHardware(pdata,length);
-	if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"HW  : send %s",m_hardwaredevices[hindex]->Name.c_str()  );
+	if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"MAIN WriteToHardware %s",m_hardwaredevices[hindex]->Name.c_str()  );
 
 }
 
@@ -2094,7 +2094,7 @@ void MainWorker::ProcessRXMessage(const CDomoticzHardwareBase *pHardware, const 
 		}
 		*ptmes = 0 ;
 
-		_log.Log(LOG_TRACE, "RXMSG:process RX Msg %s", mes);
+		_log.Log(LOG_TRACE, "MAIN ProcessRX Msg %s", mes);
 	}
 
 	if (pHardware->HwdType == HTYPE_Domoticz)
@@ -10750,7 +10750,7 @@ bool MainWorker::SwitchLightInt(const std::vector<std::string> &sd, std::string 
 
 	int HardwareID = atoi(sd[0].c_str());
 
-	if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"LIGH: SwitchLightI: switchcmd:%s level:%d HWid:%d  sd:%s %s %s %s %s %s", switchcmd.c_str(),level,HardwareID ,
+	if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"MAIN SwitchLightInt : switchcmd:%s level:%d HWid:%d  sd:%s %s %s %s %s %s", switchcmd.c_str(),level,HardwareID ,
 	 sd[0].c_str(), sd[1].c_str(), sd[2].c_str(), sd[3].c_str(), sd[4].c_str(), sd[5].c_str() );
 
 	int hindex=FindDomoticzHardware(HardwareID);
@@ -11734,7 +11734,7 @@ bool MainWorker::SwitchLight(const std::string &idx, const std::string &switchcm
 bool MainWorker::SwitchLight(const uint64_t idx, const std::string &switchcmd, const int level, const int hue, const bool ooc, const int ExtraDelay,bool IsTesting)
 {
 	//Get Device details
-    if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"LIGH: SwitchLight idx:%d cmd:%s lvl:%d " ,(long)idx,switchcmd.c_str(),level );
+    if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"MAIN SwitchLight idx:%d cmd:%s lvl:%d " ,(long)idx,switchcmd.c_str(),level );
 	std::vector<std::vector<std::string> > result;
 	result = m_sql.safe_query(
 		"SELECT HardwareID,DeviceID,Unit,Type,SubType,SwitchType,AddjValue2,nValue,sValue,Name,Options FROM DeviceStatus WHERE (ID == %" PRIu64 ")",
@@ -12006,7 +12006,7 @@ bool MainWorker::SetSetPointInt(const std::vector<std::string> &sd, const float 
 			{
 				//Also set it in the database, ad this devices does not send updates
 				//DecodeRXMessage(pHardware, (const unsigned char*)&tmeter);
-				_log.Log(LOG_TRACE, "SetPoint command Idx=%s : Temp=%f",sd[7].c_str(),TempValue);
+				_log.Log(LOG_TRACE, "MAIN SetPoint command Idx=%s : Temp=%f",sd[7].c_str(),TempValue);
 				PushAndWaitRxMessage(pHardware, (const unsigned char*)&tmeter, NULL, -1);
 			}
 		}

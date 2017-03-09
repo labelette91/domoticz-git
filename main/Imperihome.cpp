@@ -254,7 +254,7 @@ void SqlGetTypeSubType( std::string &idx , int &dType , int &dSubType )
 	TSqlQueryResult result;
 	dType = 0;
 	dSubType = 0;
-    result = m_sql.Query("SELECT Type,SubType  FROM DeviceStatus where (ID==%s)", idx.c_str());
+    result = m_sql.safe_query("SELECT Type,SubType  FROM DeviceStatus where (ID==%s)", idx.c_str());
     if (result.size()>0)
     {
 	    TSqlRowQuery * row = &result[0];
@@ -633,7 +633,7 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
   if (!is_Map_Room_DeviceId_built())
 	  build_Map_Room_DeviceId();
 
-  TSqlQueryResult result=m_sql.Query("SELECT ID,Name,nValue,Type,SubType,sValue,SwitchType,LastLevel,RoomTemp,SwitchIdx,AddjValue,AddjValue2  FROM DeviceStatus where (used==1)"  ) ;
+  TSqlQueryResult result=m_sql.safe_query("SELECT ID,Name,nValue,Type,SubType,sValue,SwitchType,LastLevel,RoomTemp,SwitchIdx,AddjValue,AddjValue2  FROM DeviceStatus where (used==1)"  ) ;
 	
 	for (unsigned int ii=0;ii<result.size();ii++)
 	{
@@ -881,8 +881,8 @@ void ImperiHome::getDeviceCamera(int &iroot)
 
 
 //  		szQuery << "SELECT ID, Name, Enabled, Address, Port, Username, Password, ImageURL FROM Cameras WHERE (Enabled=='1') ORDER BY ID ASC";
-//    TSqlQueryResult result=m_sql.Query("SELECT Name,nValue,ID,Type,SubType,sValue,SwitchType,LastLevel,RoomTemp,SwitchIdx,AddjValue,AddjValue2  FROM DeviceStatus where (used==1)"  ) ;
-      TSqlQueryResult result=m_sql.Query("SELECT ID, Name, Enabled, Address, Port, Username, Password, ImageURL FROM Cameras WHERE (Enabled=='1') ORDER BY ID ASC"   ) ;
+//    TSqlQueryResult result=m_sql.safe_query("SELECT Name,nValue,ID,Type,SubType,sValue,SwitchType,LastLevel,RoomTemp,SwitchIdx,AddjValue,AddjValue2  FROM DeviceStatus where (used==1)"  ) ;
+      TSqlQueryResult result=m_sql.safe_query("SELECT ID, Name, Enabled, Address, Port, Username, Password, ImageURL FROM Cameras WHERE (Enabled=='1') ORDER BY ID ASC"   ) ;
 	                                       
 	    for (unsigned int ii=0;ii<result.size();ii++)
 	    {
@@ -940,10 +940,10 @@ void ImperiHome::clearRoomIds()
 //without database access
 void ImperiHome::build_Map_Room_DeviceId()
 {
-	TSqlQueryResult result = m_sql.Query("SELECT ID, Name FROM Plans ");
+	TSqlQueryResult result = m_sql.safe_query("SELECT ID, Name FROM Plans ");
 	clearRoomIds();
 	//get device ID  with RoomId
-	result = m_sql.Query("SELECT PlanID,DeviceRowID FROM DeviceToPlansMap WHERE (DevSceneType==0)");
+	result = m_sql.safe_query("SELECT PlanID,DeviceRowID FROM DeviceToPlansMap WHERE (DevSceneType==0)");
 	for (unsigned int ii = 0; ii<result.size(); ii++)
 	{
 		TSqlRowQuery * row = &result[ii];
@@ -961,7 +961,7 @@ bool ImperiHome::is_Map_Room_DeviceId_built()
 void ImperiHome::getRoomContent(std::string &rep_content)
 {
   char line[1024];
-  TSqlQueryResult result=m_sql.Query( "SELECT ID, Name FROM Plans " ) ;
+  TSqlQueryResult result=m_sql.safe_query( "SELECT ID, Name FROM Plans " ) ;
 	
 	rep_content = "";
 	rep_content += "{                                    ";
@@ -1732,7 +1732,7 @@ rep_content += "  \"values\": [";
 
 SqlGetTypeSubType(idx,dType,dSubType);
 
-result=m_sql.Query ( "SELECT %s , Date FROM %s WHERE (DeviceRowID==%s AND Date>='%s' AND Date<='%s' ) ORDER BY Date ASC" ,FieldName.c_str(), TableName.c_str(),idx.c_str(),DateStartStr,DateEndStr);
+result=m_sql.safe_query ( "SELECT %s , Date FROM %s WHERE (DeviceRowID==%s AND Date>='%s' AND Date<='%s' ) ORDER BY Date ASC" ,FieldName.c_str(), TableName.c_str(),idx.c_str(),DateStartStr,DateEndStr);
 for (unsigned int i=0;i<result.size();i++)
 {
 	TSqlRowQuery * sd = &result[i] ;

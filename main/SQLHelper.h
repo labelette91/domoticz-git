@@ -302,7 +302,6 @@ public:
 	double ConvertTemperatureUnit(double tempcelcius);
 	std::string GetDeviceValue(const char * FieldName , const char *Idx );
 
-	std::vector<std::vector<std::string> > Query( const char fmt[] , ... );
 	float getTemperatureFromSValue(const char * sValue);
 
 	bool GetPreferencesVar(const std::string &Key, double &Value);

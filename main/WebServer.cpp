@@ -2910,7 +2910,7 @@ namespace http {
 			if ( (idx == "")&&(name != "")) 
 			{
 			  //use of name in place of ID : search idx from name 
-        TSqlQueryResult result=m_sql.Query("SELECT ID  FROM DeviceStatus where Name like '%s' " ,name.c_str() ) ;
+        TSqlQueryResult result=m_sql.safe_query("SELECT ID  FROM DeviceStatus where Name like '%s' " ,name.c_str() ) ;
         for (int i=0;i<result.size();i++)
 				{
           idx = result[i][0];
@@ -11787,7 +11787,7 @@ szQuery << "UPDATE DeviceStatus SET "
 			if ( (idx == "")&&(name != "")) 
 			{
 			  //use of name in place of ID : search idx from name : assume name is uniqu
-        TSqlQueryResult result=m_sql.Query("SELECT ID  FROM DeviceStatus where Name == '%s' " ,name.c_str() ) ;
+        TSqlQueryResult result=m_sql.safe_query("SELECT ID  FROM DeviceStatus where Name == '%s' " ,name.c_str() ) ;
         if (result.size()==1)
           idx = result[0][0];
 			}

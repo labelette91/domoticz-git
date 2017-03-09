@@ -87,7 +87,7 @@ HomeEasy::HomeEasy(const int ID)
 	//input pin in mode1
 	//output pin in mode2
 
-	TSqlQueryResult result = m_sql.Query("SELECT Mode1, Mode2, Mode3, Mode4, Mode5, Mode6 FROM Hardware WHERE (ID='%d')", ID );
+	TSqlQueryResult result = m_sql.safe_query("SELECT Mode1, Mode2, Mode3, Mode4, Mode5, Mode6 FROM Hardware WHERE (ID='%d')", ID );
 	if (result.size() > 0)
 	{
 		RXPIN = atoi(result[0][0].c_str());

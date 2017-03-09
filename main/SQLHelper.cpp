@@ -7137,7 +7137,7 @@ void CSQLHelper::AllowNewHardwareTimer(const int iTotMinutes)
 
 std::string CSQLHelper::GetDeviceValue(const char * FieldName , const char *Idx )
 {	
-	TSqlQueryResult result = Query("SELECT %s from DeviceStatus WHERE (ID == %s )",FieldName, Idx );
+	TSqlQueryResult result = safe_query("SELECT %s from DeviceStatus WHERE (ID == %s )",FieldName, Idx );
   if (result.size()>0)
 	  return  result[0][0];
   else
@@ -7146,28 +7146,15 @@ std::string CSQLHelper::GetDeviceValue(const char * FieldName , const char *Idx 
 
 void CSQLHelper::UpdateDeviceValue(const char * FieldName , std::string &Value , std::string &Idx )
 {	
-	Query("UPDATE DeviceStatus SET %s='%s' , LastUpdate='%s' WHERE (ID == %s )",FieldName, Value.c_str() ,GetCurrentAsciiTime ().c_str(),Idx.c_str());
+	safe_query("UPDATE DeviceStatus SET %s='%s' , LastUpdate='%s' WHERE (ID == %s )",FieldName, Value.c_str() ,GetCurrentAsciiTime ().c_str(),Idx.c_str());
 }
 void CSQLHelper::UpdateDeviceValue(const char * FieldName , int Value , std::string &Idx )
 {	
-	Query("UPDATE DeviceStatus SET %s=%d , LastUpdate='%s' WHERE (ID == %s )",FieldName, Value ,GetCurrentAsciiTime ().c_str(),Idx.c_str());
+	safe_query("UPDATE DeviceStatus SET %s=%d , LastUpdate='%s' WHERE (ID == %s )",FieldName, Value ,GetCurrentAsciiTime ().c_str(),Idx.c_str());
 }
 void CSQLHelper::UpdateDeviceValue(const char * FieldName , float Value , std::string &Idx )
 {	
-	Query("UPDATE DeviceStatus SET %s=%4.2f , LastUpdate='%s' WHERE (ID == %s )",FieldName, Value ,GetCurrentAsciiTime ().c_str(),Idx.c_str());
-}
-
-
-
-std::vector<std::vector<std::string> > CSQLHelper::Query( const char fmt[] , ... )
-{
-
-    va_list argptr;
-    va_start(argptr, fmt);  
-
-    char szTmp[1024];
-    vsnprintf(szTmp,sizeof(szTmp), fmt, argptr) ;
-	return query( std::string(szTmp)) ;
+	safe_query("UPDATE DeviceStatus SET %s=%4.2f , LastUpdate='%s' WHERE (ID == %s )",FieldName, Value ,GetCurrentAsciiTime ().c_str(),Idx.c_str());
 }
 
 std::string getSValuePart(std::string &sValue, unsigned int part )

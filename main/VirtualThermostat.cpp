@@ -120,7 +120,7 @@ try
 	//AddjMulti  : value of coef for proportinnal command (PID)
 	//AddjValue  ; eco temperature value
 	//AddjValue2 ; confor temperature value
-  TSqlQueryResult result=m_sql.Query("SELECT Name,nValue,ID,Power,RoomTemp,TempIdx,Type,SubType,sValue,SwitchIdx,AddjMulti,AddjMulti2  FROM DeviceStatus where TempIdx > 0 "  ) ;
+  TSqlQueryResult result=m_sql.safe_query("SELECT Name,nValue,ID,Power,RoomTemp,TempIdx,Type,SubType,sValue,SwitchIdx,AddjMulti,AddjMulti2  FROM DeviceStatus where TempIdx > 0 "  ) ;
 
 
 	//for all the thermostat switch
@@ -167,7 +167,7 @@ try
 				//force to update state in database else only send RF commande with out database update 
 //				bool SwitchStateAsChanged = (lastSwitchValue!=SwitchValue) ;
 				//if the switch is a HomeEasy protocol with no RF acknoledge , send the RF command each minute with out database DEVICESTATUS table update  
-			  TSqlQueryResult resSw = m_sql.Query("SELECT nValue,Type,SubType FROM DeviceStatus WHERE (ID == %s )", SwitchIdxStr.c_str()  ) ;
+			  TSqlQueryResult resSw = m_sql.safe_query("SELECT nValue,Type,SubType FROM DeviceStatus WHERE (ID == %s )", SwitchIdxStr.c_str()  ) ;
 
 //				std::string swSubt = m_sql.GetDeviceValue("SubType",SwitchIdxStr.c_str());
 //				SwitchSubType = atoi(swSubt.c_str());
@@ -192,15 +192,15 @@ try
 
 					}
 					if (( lastPowerModulation != PowerModulation) || (lastTemp != RoomTemperature ) || (SwitchStateAsChanged) )
-						m_sql.Query("UPDATE DeviceStatus SET RoomTemp='%4.1f',Power=%d,nValue=%d, LastUpdate='%s' WHERE (ID = %s )", RoomTemperature , PowerModulation ,SwitchValue,  GetCurrentAsciiTime ().c_str(), idxThermostat  	);
+						m_sql.safe_query("UPDATE DeviceStatus SET RoomTemp='%4.1f',Power=%d,nValue=%d, LastUpdate='%s' WHERE (ID = %s )", RoomTemperature , PowerModulation ,SwitchValue,  GetCurrentAsciiTime ().c_str(), idxThermostat  	);
 													if ((Minute % 10 )==0)
 				{
 					//compute delta room temperature
 					float DeltaTemp = RoomTemperature - Map_LastRoomTemp[ThermostatId] ;
 					Map_LastRoomTemp[ThermostatId] = RoomTemperature ;
 					if ( DeltaTemp == RoomTemperature ) DeltaTemp=0;  //first call
-//						TSqlQueryResult res=m_sql.Query("SELECT ID FROM DeviceStatus where Name=='his_%s'", ThermostatSwitchName ) ;
-//						if (res.size() )m_sql.Query( "INSERT INTO Temperature (DeviceRowID, Temperature, Humidity ) VALUES (%s , %4.1f, %d )",res[0][0].c_str(),ThermostatTemperatureSet,PowerModulation	);
+//						TSqlQueryResult res=m_sql.safe_query("SELECT ID FROM DeviceStatus where Name=='his_%s'", ThermostatSwitchName ) ;
+//						if (res.size() )m_sql.safe_query( "INSERT INTO Temperature (DeviceRowID, Temperature, Humidity ) VALUES (%s , %4.1f, %d )",res[0][0].c_str(),ThermostatTemperatureSet,PowerModulation	);
 				}
 				}
 				else
@@ -224,7 +224,7 @@ catch (...)
 int VirtualThermostat::getPrevThermostatProg ( const char * devID , char * CurrentTime , std::string &Time )
 {
   int TargetTemp=0;
-    TSqlQueryResult result = m_sql.Query("SELECT Time,Temperature FROM SetpointTimers where (DeviceRowID==%s) and ( Time < '%s' ) order by time desc limit 1" ,devID, CurrentTime  ) ;
+    TSqlQueryResult result = m_sql.safe_query("SELECT Time,Temperature FROM SetpointTimers where (DeviceRowID==%s) and ( Time < '%s' ) order by time desc limit 1" ,devID, CurrentTime  ) ;
     if (result.size() ){
       Time       = result[0][0];
       TargetTemp =atoi(result[0][1].c_str());
@@ -236,7 +236,7 @@ return TargetTemp;
 int VirtualThermostat::getNextThermostatProg ( const char * devID , char * CurrentTime , std::string &Time )
 {
   int TargetTemp=0;
-    TSqlQueryResult result = m_sql.Query("SELECT Time,Temperature FROM SetpointTimers where (DeviceRowID==%s) and ( Time > '%s' ) order by time asc limit 1" ,devID, CurrentTime  ) ;
+    TSqlQueryResult result = m_sql.safe_query("SELECT Time,Temperature FROM SetpointTimers where (DeviceRowID==%s) and ( Time > '%s' ) order by time asc limit 1" ,devID, CurrentTime  ) ;
     if (result.size() ){
       Time       = result[0][0];
       TargetTemp =atoi(result[0][1].c_str());
@@ -255,7 +255,7 @@ int VirtualThermostat::GetEcoTempFromTimers (const char * devID )
   int MinTemp;
   TSqlQueryResult result;
   //get min temperature  from SetpointTimers
-  result=m_sql.Query("SELECT MIN(Temperature) FROM SetpointTimers where DeviceRowID==%s" , devID) ;
+  result=m_sql.safe_query("SELECT MIN(Temperature) FROM SetpointTimers where DeviceRowID==%s" , devID) ;
   if (result.size()) MinTemp=atoi(result[0][0].c_str());else MinTemp=16;
   return MinTemp;
 }
@@ -271,7 +271,7 @@ int VirtualThermostat::GetConfortTempFromTimers (const char * devID )
   int MaxTemp;
   TSqlQueryResult result;
   //get  max temperature  from SetpointTimers
-  result=m_sql.Query("SELECT MAX(Temperature) FROM SetpointTimers where DeviceRowID==%s" , devID) ;
+  result=m_sql.safe_query("SELECT MAX(Temperature) FROM SetpointTimers where DeviceRowID==%s" , devID) ;
   if (result.size()) MaxTemp=atoi(result[0][0].c_str());else MaxTemp=20;
   return MaxTemp;
 }

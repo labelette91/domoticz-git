@@ -210,7 +210,6 @@ void request_handler::handle_request(const request &req, reply &rep, modify_info
 {
   mInfo.mtime_support = false;
   // Decode url to path.
-  if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"WEBH : Host:%s Uri;%s", req.host_address.c_str(),req.uri.c_str());
   std::string request_path;
   if (!url_decode(req.uri, request_path))
   {

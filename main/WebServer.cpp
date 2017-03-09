@@ -2879,7 +2879,7 @@ namespace http {
 			std::string sstate = request::findValue(&req, "state");
 			std::string idx = request::findValue(&req, "idx");
 			std::string name = request::findValue(&req,"name");
-  		_log.Log(LOG_TRACE, "WEBS SetThermostatState  State cmd Id:%s Name:%s State:%s",idx.c_str(), name.c_str(),sstate.c_str());
+			_log.Log(LOG_TRACE, "WEBS SetThermostatState  State cmd Id:%s Name:%s State:%s",idx.c_str(), name.c_str(),sstate.c_str());
 
 			if (
 				((idx == "")&&(name=="")) ||
@@ -2909,18 +2909,18 @@ namespace http {
 			//allow use of name instead of idx
 			if ( (idx == "")&&(name != "")) 
 			{
-			  //use of name in place of ID : search idx from name 
-        TSqlQueryResult result=m_sql.safe_query("SELECT ID  FROM DeviceStatus where Name like '%s' " ,name.c_str() ) ;
-        for (int i=0;i<result.size();i++)
+				//use of name in place of ID : search idx from name 
+				TSqlQueryResult result=m_sql.safe_query("SELECT ID  FROM DeviceStatus where Name like '%s' " ,name.c_str() ) ;
+				for (int i=0;i<result.size();i++)
 				{
-          idx = result[i][0];
+				idx = result[i][0];
 					_log.Log(LOG_NORM, "Setting Thermostat State....%s Idx:%s  State:%d ",name.c_str(),idx.c_str(),iState);
 					m_mainworker.SetThermostatState(idx, iState);
 				}
 				return;
-			}
-			_log.Log(LOG_NORM, "Setting Thermostat State....%s : %d ",name.c_str(),iState);
-			m_mainworker.SetThermostatState(idx, iState);
+				}
+				_log.Log(LOG_NORM, "Setting Thermostat State....%s : %d ",name.c_str(),iState);
+				m_mainworker.SetThermostatState(idx, iState);
 		}
 
 		void CWebServer::Cmd_SystemShutdown(WebEmSession & session, const request& req, Json::Value &root)

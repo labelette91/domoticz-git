@@ -1533,14 +1533,10 @@ void MainWorker::Do_Work()
 		struct tm ltime;
 		localtime_r(&atime,&ltime);
 
-		////test
-//		ScheduleThermostat(ltime.tm_sec);
-
 		if (ltime.tm_min!=m_ScheduleLastMinute)
 		{
 			if (difftime(atime,m_ScheduleLastMinuteTime) > 30) //avoid RTC/NTP clock drifts
 			{
-//				m_VirtualThermostat.ScheduleThermostat(ltime.tm_min);
 				m_ScheduleLastMinuteTime = atime;
 				m_ScheduleLastMinute = ltime.tm_min;
 
@@ -12006,7 +12002,6 @@ bool MainWorker::SetSetPointInt(const std::vector<std::string> &sd, const float 
 			if (pHardware->HwdType == HTYPE_Dummy)
 			{
 				//Also set it in the database, ad this devices does not send updates
-				//DecodeRXMessage(pHardware, (const unsigned char*)&tmeter);
 				_log.Log(LOG_TRACE, "MAIN SetPoint command Idx=%s : Temp=%f",sd[7].c_str(),TempValue);
 				PushAndWaitRxMessage(pHardware, (const unsigned char*)&tmeter, NULL, -1);
 			}

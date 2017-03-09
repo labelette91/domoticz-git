@@ -10,7 +10,7 @@ enum _eLogLevel
 	LOG_ERROR=0,
 	LOG_STATUS=1,
 	LOG_NORM=2,
-  LOG_TRACE=3
+	LOG_TRACE=3
 };
 
 enum _eLogFileVerboseLevel
@@ -51,10 +51,10 @@ public:
 
 	void SetFilterString(std::string  &Filter);
 	bool isTraceEnable();
-  bool TestFilter(char * cbuffer);
+	bool TestFilter(char * cbuffer);
 	void setLogVerboseLevel(int LogLevel);
-  void SetLogPreference (std::string  LogFilter, std::string  LogFileName , std::string  LogLevel );
-  void GetLogPreference ();
+	void SetLogPreference (std::string  LogFilter, std::string  LogFileName , std::string  LogLevel );
+	void GetLogPreference ();
 	void ForwardErrorsToNotificationSystem(const bool bDoForward);
 
 	std::list<_tLogLineStruct> GetLog(const _eLogLevel lType);

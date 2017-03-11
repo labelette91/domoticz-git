@@ -389,6 +389,9 @@ define(['app'], function (app) {
 			  if (typeof data.LmsDuration != 'undefined') {
 				$("#lmstable #LmsDuration").val(data.LmsDuration);
 			  }
+			  if (typeof data.DeltaTemperatureLog != 'undefined') {
+			      $("#shortlogtable #DeltaTemperatureLog").val(data.DeltaTemperatureLog);
+			  }
   			  if (typeof data.GCMEnabled != 'undefined') {
   				$("#gcmtable #GCMEnabled").prop('checked',data.GCMEnabled==1);
 			  }
@@ -606,6 +609,15 @@ define(['app'], function (app) {
 			  if (typeof data.SecOnDelay != 'undefined') {
 				$("#sectable #SecOnDelay").val(data.SecOnDelay);
 			  }
+              if (typeof data.LogFilter != 'undefined') {
+                $("#LogFilterTable #LogFilter").val(data.LogFilter);
+              }
+              if (typeof data.LogFileName != 'undefined') {
+                $("#LogFilterTable #LogFileName").val(data.LogFileName);
+              }
+              if (typeof data.LogLevel != 'undefined') {
+                $("#LogFilterTable #LogLevel").val(data.LogLevel);
+              }
 			  if (typeof data.cloudenabled != 'undefined') {
 				  if (!data.cloudenabled) {
 					  $("#MyDomoticzTab").css("display", "none");

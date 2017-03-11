@@ -5,7 +5,11 @@ define(['app'], function (app) {
 		$scope.logitems = [];
 		$scope.logitems_status = [];
 		$scope.logitems_error = [];
-		
+		var LOG_ERROR = 0;
+		var LOG_STATUS = 1;
+		var LOG_NORM = 2;
+		var LOG_TRACE = 3;
+
 		$scope.to_trusted = function(html_code) {
 			return $sce.trustAsHtml(html_code);
 		}
@@ -30,7 +34,7 @@ define(['app'], function (app) {
 			var lastscrolltop=$("#logcontent #logdata").scrollTop();
 			var llogtime = $scope.LastLogTime;
 			$http({
-				url: "json.htm?type=command&param=getlog&lastlogtime=" + $scope.LastLogTime + "&loglevel=2",
+			    url: "json.htm?type=command&param=getlog&lastlogtime=" + $scope.LastLogTime + "&loglevel=" + LOG_NORM,
 				async: false, 
 				dataType: 'json'
 			}).success(function(data) {
@@ -47,14 +51,14 @@ define(['app'], function (app) {
 							text: message
 						});
 						if (llogtime!=0) {
-							if (item.level==1) {
+						    if (item.level == LOG_ERROR) {
 								//Error
 								$scope.logitems_error = $scope.logitems_error.concat({
 									mclass: logclass, 
 									text: message
 								});
 							}
-							else if (item.level==2) {
+						    else if (item.level == LOG_STATUS) {
 								//Status
 								$scope.logitems_status = $scope.logitems_status.concat({
 									mclass: logclass, 
@@ -75,7 +79,7 @@ define(['app'], function (app) {
 			if (llogtime==0) {
 				//Error
 				$http({
-					url: "json.htm?type=command&param=getlog&lastlogtime=" + $scope.LastLogTime + "&loglevel=0",
+				    url: "json.htm?type=command&param=getlog&lastlogtime=" + $scope.LastLogTime + "&loglevel=" + LOG_ERROR,
 					async: false, 
 					dataType: 'json'
 				}).success(function(data) {
@@ -93,7 +97,7 @@ define(['app'], function (app) {
 				});
 				//Status
 				$http({
-					url: "json.htm?type=command&param=getlog&lastlogtime=" + $scope.LastLogTime + "&loglevel=1",
+				    url: "json.htm?type=command&param=getlog&lastlogtime=" + $scope.LastLogTime + "&loglevel=" + LOG_STATUS,
 					async: false, 
 					dataType: 'json'
 				}).success(function(data) {
@@ -157,14 +161,14 @@ define(['app'], function (app) {
 
 		function getLogClass(level) {
 		    var logclass;
-		    if (level == 2) {
-		        logclass = "lognorm";
+		    if (level == LOG_STATUS) {
+		        logclass = "logstatus";
 		    }
-		    else if (level == 1) {
+		    else if (level == LOG_ERROR) {
 		        logclass = "logerror";
 		    }
 		    else {
-		        logclass = "logstatus";
+		        logclass = "lognorm";
 		    }
 		    return (logclass);
 		}

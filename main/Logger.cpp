@@ -14,7 +14,6 @@
 #endif
 
 #include "SQLHelper.h"
-#include "mainworker.h"
 
 #define MAX_LOG_LINE_BUFFER 100
 #define MAX_LOG_LINE_LENGTH (2048*3)

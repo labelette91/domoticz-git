@@ -7341,9 +7341,9 @@ namespace http {
 
 			std::string Latitude = request::findValue(&req, "Latitude");
 			std::string Longitude = request::findValue(&req, "Longitude");
-	    _log.SetLogPreference ( CURLEncode::URLDecode( request::findValue(&req,"LogFilter")   ),
-								CURLEncode::URLDecode( request::findValue(&req,"LogFileName") ),
-								CURLEncode::URLDecode( request::findValue(&req,"LogLevel")    ) );
+			_log.SetLogPreference ( CURLEncode::URLDecode( request::findValue(&req,"LogFilter")   ),
+									CURLEncode::URLDecode( request::findValue(&req,"LogFileName") ),
+									CURLEncode::URLDecode( request::findValue(&req,"LogLevel")    ) );
 			if ((Latitude != "") && (Longitude != ""))
 			{
 				std::string LatLong = Latitude + ";" + Longitude;
@@ -12410,8 +12410,18 @@ szQuery << "UPDATE DeviceStatus SET "
 				else if (Key == "SendErrorsAsNotification") {
 					root["SendErrorsAsNotification"] = nValue;
 				}
-				else 
-					root[Key]=sValue;
+				else if (Key == "LogFilter") {
+					root[Key] = sValue;
+				}
+				else if (Key == "LogFileName") {
+					root[Key] = sValue;
+				}
+				else if (Key == "LogLevel") {
+					root[Key] = sValue;
+				}
+				else if (Key == "DeltaTemperatureLog") {
+					root[Key] = sValue;
+				}
 			}
 		}
 

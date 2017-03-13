@@ -2,11 +2,10 @@
 #include "RFXNames.h"
 #include "RFXtrx.h"
 #include "../hardware/hardwaretypes.h"
-#include "Logger.h"
 #include "../hardware/evohome.h"
 #include "Helper.h"
 #include <boost/algorithm/string.hpp>
-//#include "Logger.h"
+#include "Logger.h"
 
 typedef struct _STR_TABLE_SINGLE {
 	unsigned long    id;

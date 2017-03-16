@@ -199,6 +199,12 @@ struct _tTaskItem
 	}
 };
 
+//row result for an sql query : string Vector
+typedef   std::vector<std::string> TSqlRowQuery;
+
+// result for an sql query : Vector of TSqlRowQuery
+typedef   std::vector<TSqlRowQuery> TSqlQueryResult;
+
 class CSQLHelper
 {
 public:
@@ -389,13 +395,9 @@ private:
 
 	std::vector<std::vector<std::string> > query(const std::string &szQuery);
 	std::vector<std::vector<std::string> > queryBlob(const std::string &szQuery);
+	void LogQueryResult(TSqlQueryResult &result);
 };
 
-//row result for an sql query : string Vector
-typedef   std::vector<std::string> TSqlRowQuery ;
-
-// result for an sql query : Vector of TSqlRowQuery
-typedef   std::vector<TSqlRowQuery> TSqlQueryResult ;
 extern CSQLHelper m_sql;
 
 std::string getSValuePart(const char * sValue, unsigned int part );

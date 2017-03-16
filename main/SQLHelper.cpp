@@ -2952,8 +2952,6 @@ std::vector<std::vector<std::string> > CSQLHelper::query(const std::string &szQu
 	}
 	boost::lock_guard<boost::mutex> l(m_sqlQueryMutex);
 
-	if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"SQLH query: %s",szQuery.c_str()) ;
-
 	sqlite3_stmt *statement;
 	std::vector<std::vector<std::string> > results;
 
@@ -2985,6 +2983,11 @@ std::vector<std::vector<std::string> > CSQLHelper::query(const std::string &szQu
 			}
 		}
 		sqlite3_finalize(statement);
+	}
+
+	if (_log.isTraceEnable()) {
+		_log.Log(LOG_TRACE, "SQLH query : %s", szQuery.c_str());
+		if (!_log.TestFilter("result"))	LogQueryResult(results);
 	}
 
 	std::string error = sqlite3_errmsg(m_dbase);
@@ -7333,9 +7336,9 @@ void LogRow (TSqlRowQuery * row)
 		std::string Row;
 		for (unsigned int j=0;j<(*row).size();j++)
 			Row = Row+(*row)[j]+";";
-    _log.Log(LOG_TRACE,"SQLH LogRow : %s",Row.c_str());
+    _log.Log(LOG_TRACE,"SQLH result: %s",Row.c_str());
 }
-void LogQueryResult (TSqlQueryResult &result)
+void CSQLHelper::LogQueryResult (TSqlQueryResult &result)
 {
 	for (unsigned int i=0;i<result.size();i++)
 	{

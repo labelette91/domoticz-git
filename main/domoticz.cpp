@@ -105,6 +105,7 @@ const char *szHelp=
 	"\t-log file_path (for example /var/log/domoticz.log)\n"
 #endif
 	"\t-loglevel (0=All, 1=Status+Error, 2=Error)\n"
+	"\t-debug    allow log trace level 4         \n"
 	"\t-notimestamps (do not prepend timestamps to logs; useful with syslog, etc.)\n"
 	"\t-php_cgi_path (for example /usr/bin/php-cgi)\n"
 #ifndef WIN32
@@ -473,7 +474,12 @@ int main(int argc, char**argv)
 			return 1;
 		}
 	}
-	if (cmdLine.HasSwitch("-notimestamps"))
+  if (cmdLine.HasSwitch("-debug"))
+		_log.SetLogDebug(true);
+  else
+		_log.SetLogDebug(false);
+
+  if (cmdLine.HasSwitch("-notimestamps"))
 	{
 		_log.EnableLogTimestamps(false);
 	}

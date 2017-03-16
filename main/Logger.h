@@ -55,6 +55,8 @@ public:
 	void setLogVerboseLevel(int LogLevel);
 	void SetLogPreference (std::string  LogFilter, std::string  LogFileName , std::string  LogLevel );
 	void GetLogPreference ();
+	void SetLogDebug(bool debug);
+	bool GetLogDebug();
 	void ForwardErrorsToNotificationSystem(const bool bDoForward);
 
 	std::list<_tLogLineStruct> GetLog(const _eLogLevel lType);
@@ -78,5 +80,6 @@ private:
 	std::vector<std::string> FilterStringList;
 	std::vector<std::string> KeepStringList;
 	_eLogFileVerboseLevel m_verbose_level;
+  bool m_debug;
 };
 extern CLogger _log;

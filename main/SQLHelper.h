@@ -306,6 +306,7 @@ public:
 
 	bool GetPreferencesVar(const std::string &Key, double &Value);
 	void UpdatePreferencesVar(const std::string &Key, const double Value);
+  void DeletePreferencesVar(const std::string Key );
 
 	float getHumidityFromSValue(const char * sValue);
 	bool GetLastValue(  const char* DeviceID, int &nValue, std::string &sValue, struct tm &LastUpdateTime);

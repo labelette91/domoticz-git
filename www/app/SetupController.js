@@ -270,9 +270,11 @@ define(['app'], function (app) {
 			 async: false,
 			 dataType: 'json',
 			 success: function(data) {
-			  if (typeof data.Location != 'undefined') {
-				$("#locationtable #Latitude").val(data.Location.Latitude);
-				$("#locationtable #Longitude").val(data.Location.Longitude);
+		     if (typeof data.Latitude != 'undefined') {
+				$("#locationtable #Latitude").val(data.Latitude);
+			  }
+		     if (typeof data.Longitude != 'undefined') {
+			      $("#locationtable #Longitude").val(data.Longitude);
 			  }
 			  if (typeof data.ProwlEnabled != 'undefined') {
   				$("#prowltable #ProwlEnabled").prop('checked',data.ProwlEnabled==1);
@@ -609,15 +611,16 @@ define(['app'], function (app) {
 			  if (typeof data.SecOnDelay != 'undefined') {
 				$("#sectable #SecOnDelay").val(data.SecOnDelay);
 			  }
-              if (typeof data.LogFilter != 'undefined') {
-                $("#LogFilterTable #LogFilter").val(data.LogFilter);
-              }
-              if (typeof data.LogFileName != 'undefined') {
-                $("#LogFilterTable #LogFileName").val(data.LogFileName);
-              }
-              if (typeof data.LogLevel != 'undefined') {
-                $("#LogFilterTable #LogLevel").val(data.LogLevel);
-              }
+			  if (typeof data.LogLevel != 'undefined') {
+  				$("#LogDebug #LogFilterTable #LogLevel").val(data.LogLevel);
+  				$("#LogDebug").show();
+			  }
+			  if (typeof data.LogFilter != 'undefined') {
+					$("#LogDebug #LogFilterTable #LogFilter").val(data.LogFilter);
+			  }
+			  if (typeof data.LogFileName != 'undefined') {
+					$("#LogDebug #LogFilterTable #LogFileName").val(data.LogFileName);
+			  }
 			  if (typeof data.cloudenabled != 'undefined') {
 				  if (!data.cloudenabled) {
 					  $("#MyDomoticzTab").css("display", "none");

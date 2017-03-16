@@ -3856,6 +3856,21 @@ bool CSQLHelper::GetPreferencesVar(const std::string &Key, int &nValue)
 	std::string sValue;
 	return GetPreferencesVar(Key, nValue, sValue);
 }
+void CSQLHelper::DeletePreferencesVar(const std::string Key )
+{
+  std::string sValue ;
+	if (!m_dbase)
+		return ;
+
+  //if found, delete
+  if ( GetPreferencesVar(Key,sValue)== true)
+  {
+	  TSqlQueryResult result;
+	  result = safe_query("DELETE FROM Preferences WHERE (Key='%q')",Key.c_str());
+  }
+}
+
+
 
 int CSQLHelper::GetLastBackupNo(const char *Key, int &nValue)
 {

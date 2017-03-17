@@ -424,18 +424,22 @@ bool  CLogger::GetLogDebug()
 
 void CLogger::SetLogPreference (std::string  LogFilter, std::string  LogFileName , std::string  LogLevel )
 {
-	m_sql.UpdatePreferencesVar("LogFilter"  , 0, LogFilter.c_str() );
-	m_sql.UpdatePreferencesVar("LogFileName",0, LogFileName.c_str() );
-	m_sql.UpdatePreferencesVar("LogLevel"   ,0, LogLevel.c_str() );
-	SetFilterString (LogFilter);
-	SetOutputFile (LogFileName.c_str());
-	setLogVerboseLevel(atoi(LogLevel.c_str()));
+	//if trace level is allowed
+	if (GetLogDebug()) {
+		//set LogFilter/LogFileName/LogLevel from Preferences tables
+		m_sql.UpdatePreferencesVar("LogFilter", 0, LogFilter.c_str());
+		m_sql.UpdatePreferencesVar("LogFileName", 0, LogFileName.c_str());
+		m_sql.UpdatePreferencesVar("LogLevel", 0, LogLevel.c_str());
+		SetFilterString(LogFilter);
+		SetOutputFile(LogFileName.c_str());
+		setLogVerboseLevel(atoi(LogLevel.c_str()));
+	}
 }
 void CLogger::GetLogPreference()
 {
 	std::string LogFilter, LogFileName, LogLevel;
 
-  //if trace vel is allowed
+  //if trace level is allowed
   if (GetLogDebug()){
     //get LogFilter/LogFileName/LogLevel from Preferences tables
     m_sql.GetPreferencesVar("LogFilter", LogFilter);

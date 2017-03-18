@@ -12114,10 +12114,8 @@ szQuery << "UPDATE DeviceStatus SET "
 
 					if (strarray.size() == 2)
 					{
-//						root["Location"]["Latitude"] = strarray[0];
-//						root["Location"]["Longitude"] = strarray[1];
-						root["Latitude"] = strarray[0];
-						root["Longitude"] = strarray[1];
+						root["Location"]["Latitude"] = strarray[0];
+						root["Location"]["Longitude"] = strarray[1];
 					}
 				}
 				/* RK: notification settings */

@@ -474,12 +474,11 @@ int main(int argc, char**argv)
 			return 1;
 		}
 	}
-  if (cmdLine.HasSwitch("-debug"))
+	if (cmdLine.HasSwitch("-debug"))
 		_log.SetLogDebug(true);
-  else
+	else
 		_log.SetLogDebug(false);
-
-  if (cmdLine.HasSwitch("-notimestamps"))
+	if (cmdLine.HasSwitch("-notimestamps"))
 	{
 		_log.EnableLogTimestamps(false);
 	}
@@ -926,10 +925,10 @@ int main(int argc, char**argv)
 	if (cmdLine.HasSwitch("-loglevel"))
 	{
 		int Level = atoi(cmdLine.GetSafeArgument("-loglevel", 0, "").c_str());
-    if     (Level==0) _log.SetVerboseLevel(VBL_ALL);
-    else if(Level==1) _log.SetVerboseLevel(VBL_STATUS_ERROR);
-    else if(Level==2) _log.SetVerboseLevel(VBL_ERROR);
-	else if((Level==3)&&(_log.GetLogDebug())) _log.SetVerboseLevel(VBL_TRACE);
+		if     (Level==0) _log.SetVerboseLevel(VBL_ALL);
+		else if(Level==1) _log.SetVerboseLevel(VBL_STATUS_ERROR);
+		else if(Level==2) _log.SetVerboseLevel(VBL_ERROR);
+		else if ((Level == 3) && (_log.GetLogDebug())) _log.SetVerboseLevel(VBL_TRACE);
 	}
 	if (cmdLine.HasSwitch("-verbose"))
 	{

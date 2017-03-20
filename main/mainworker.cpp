@@ -2085,7 +2085,7 @@ void MainWorker::ProcessRXMessage(const CDomoticzHardwareBase *pHardware, const 
 	if (_log.isTraceEnable()) {
 		char  mes[sizeof(tRBUF)*2+2];
 		char * ptmes = mes;
-		for (int i = 0; i < Len; i++) {
+		for (size_t i = 0; i < Len; i++) {
 			sprintf(ptmes,"%02X", pRXCommand[i]);
 			ptmes += 2;
 		}

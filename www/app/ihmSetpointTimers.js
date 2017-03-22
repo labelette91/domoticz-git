@@ -212,7 +212,8 @@ function SetVal(id,temp)
 
 function SetConf(obj)
 { 
-  SetConfTemp($(obj).html())  ;
+//  SetConfTemp($(obj).html())  ;
+  selectConfButton();
 }
 
 function SetConfTemp(temp)
@@ -222,7 +223,8 @@ function SetConfTemp(temp)
 }
 function SetEco(obj)
 { 
-  SetEcoTemp($(obj).html())  ;    ;
+//  SetEcoTemp($(obj).html())  ;    ;
+  selectEcoButton();
 }
 function SetEcoTemp(temp)
 { 

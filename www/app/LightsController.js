@@ -865,9 +865,9 @@ define(['app'], function (app) {
             '	<tr>                                                                                                                                                         ' +
             '	<td align="right" style="width:80px"><label for="combocommand"><span data-i18n="Command"></span>:</label></td>                                             ' +
             '   <td>                                                                                                                                                       ' +
-            '    <label> <button id="BtnOn"      class="btn btn-th btn-conf" type="button"  onclick="SetBtn(this);">On</button></label>                                         ' +
-            '    <label> <button id="BtnOff"     class="btn btn-th btn-conf" type="button"  onclick="SetBtn(this);">Off</button></label>                                         ' +
-            '    <label> <button id="BtnToggle"  class="btn btn-th btn-conf" type="button"  onclick="SetBtn(this);">Toggle</button></label>                                         ' +
+            '    <label> <button id="BtnOn"      class="btn btn-th btn-conf" type="button"  onclick="IhmShowTimer.SetBtn(this);">On</button></label>                                         ' +
+            '    <label> <button id="BtnOff"     class="btn btn-th btn-conf" type="button"  onclick="IhmShowTimer.SetBtn(this);">Off</button></label>                                         ' +
+            '    <label> <button id="BtnToggle"  class="btn btn-th btn-conf" type="button"  onclick="IhmShowTimer.SetBtn(this);">Toggle</button></label>                                         ' +
             '  </td>                                                                                                                                                       ' +
             '	</tr>                                                                                                                                                        ' +
 
@@ -883,7 +883,7 @@ define(['app'], function (app) {
             '  </table>                                                                                                                                                    ';
 		    //            '</div>                                                                                                                                                        ';
 
-		    htmlcontent += createDayHourTable();
+		    htmlcontent += IhmShowTimer.createDayHourTable();
 		    $('#lightcontent').html(htmlcontent);
 		    $('#lightcontent').i18n();
 

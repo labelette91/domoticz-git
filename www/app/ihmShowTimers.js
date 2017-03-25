@@ -301,27 +301,30 @@ function clearDisplay()
 		};
      };
 }
-function SetBtn(obj)
+
+return {
+SetBtn:  function (obj)
 {
     SetNoneBkgd($('#lightcontent #BtnOn'))
     SetNoneBkgd($('#lightcontent #BtnOff'))
     SetNoneBkgd($('#lightcontent #BtnToggle'))
-//    SetOnBkgd(obj)
+    //    SetOnBkgd(obj)
     $(obj).addClass("btn-confor");
 
     value = -1;
     if ($(obj).html() == "On") value = 1;
     if ($(obj).html() == "Off") value = 0;
-//    $("#lightcontent #combocommand").val(value);
+    //    $("#lightcontent #combocommand").val(value);
     SetCmdValue(value);
-//    var cb = $("#lightcontent #combocommand");
-//    cb.options[cb.selectedIndex].text;    //text de l'option = affiche
-//    cb.options[cb.selectedIndex].value;   //valeur de l'option = pas affichée affiche
-//    cb.text() //the text content of the selected option
-//    cb.val() //the value of the selected option
+    //    var cb = $("#lightcontent #combocommand");
+    //    cb.options[cb.selectedIndex].text;    //text de l'option = affiche
+    //    cb.options[cb.selectedIndex].value;   //valeur de l'option = pas affichée affiche
+    //    cb.text() //the text content of the selected option
+    //    cb.val() //the value of the selected option
     
 }
-function createDayHourTable()
+,
+createDayHourTable:    function ()
 {
     var Days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]; 
     var WeekDays = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]; 
@@ -331,7 +334,7 @@ function createDayHourTable()
     '<tr id="time">    \n'+                                       
     '<td></td>         \n';
     for (var i=0;i<24;i++)
-      html+= '<td><button id="'+i+'"  class="btn  btn-timer" type="button"  >'+i+'</button> </td>\n';                                  
+        html+= '<td><button id="'+i+'"  class="btn  btn-timer" type="button"  >'+i+'</button> </td>\n';                                  
     html+="</tr>\n";
     
     for (var day= 0;day<7;day++) 
@@ -348,10 +351,8 @@ function createDayHourTable()
     html+='</table>\n';
     return html;
 }
-
-return {
-
-    ProgCopyTimersBtn: function(idx)
+,
+ProgCopyTimersBtn: function(idx)
 {
 			$.devIdx=idx;
 			$( "#dialog-copy" ).dialog({
@@ -391,8 +392,8 @@ return {
 			$( "#dialog-copy" ).i18n();
 			$( "#dialog-copy" ).dialog( "open" );
 }
-    , 
-    ShowIhmTimersInt :function(devIdx, name, isdimmer, stype, devsubtype) {
+, 
+ShowIhmTimersInt :function(devIdx, name, isdimmer, stype, devsubtype) {
     $.MouseDown = false;
     $.DayDeb = 0;
     $.DayEnd = 0;
@@ -400,7 +401,7 @@ return {
     $.HourEnd = 0;
     $.GlobalValue = 1;
     //init button On	
-    SetBtn($('#lightcontent #BtnOn'));
+    IhmShowTimer.SetBtn($('#lightcontent #BtnOn'));
 
     $.WeekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
     DayTimer = new Array(7);
@@ -471,8 +472,8 @@ return {
         });*/
 
 }
-    ,
-    ProgAddTimersBtn: function (devIdx) {
+,
+ProgAddTimersBtn: function (devIdx) {
     ClearTimersInt(devIdx);
     var lastValue = [];
     for (var hour = 0; hour < 24; hour++) {

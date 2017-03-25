@@ -1,3 +1,5 @@
+// define module
+var ShowIhmSetpointTimersFct  = (function () {
 function GetSetpointSettings (days , hour,min,val)
 {
     //days : bit 0: Monday 1:Tuesday ... 6:  sunday
@@ -11,7 +13,6 @@ function GetSetpointSettings (days , hour,min,val)
 	tsettings.days=days;
 	return tsettings;
 }  
-
 //read timer set point and store in DayTimer[day][hour]
 function getTimerSetPoints(idx)
 {
@@ -52,7 +53,6 @@ function getTimerSetPoints(idx)
 			 }
 		  });
 }
-
 function ClearSetpointTimersInt (devIdx)
 {
 	$.ajax({
@@ -92,33 +92,6 @@ function ProgAddSetpointTimer (devIdx,days,hour,min,val)
 		 }     
 	});
 }
-function ProgAdd(devIdx) {
-	ClearSetpointTimersInt(devIdx);
-	var lastTemp = [];
-	for (var hour = 0; hour < 24; hour++) {
-		var tdays = 0;
-		var lastHourTemp = DayTimer[0][hour];
-		var DayHourTemp = 0;
-		for (day = 0; day < 7; day++) {
-			var temp = DayTimer[day][hour];
-			if (temp != lastTemp[day]) {
-				if (lastHourTemp != temp) {
-					ProgAddSetpointTimer(devIdx, tdays, hour, 0, lastHourTemp);
-					tdays = 0;
-					lastHourTemp = temp;
-				}
-				tdays |= (1 << day);
-				lastTemp[day] = temp;
-				DayHourTemp = temp;
-			}
-		}
-		if (tdays != 0)
-			ProgAddSetpointTimer(devIdx, tdays, hour, 0, DayHourTemp);
-	}
-	//            $.each($("button.btn-timer."+entry), function(i,item) {CreateTimer(devIdx,day,i,item);	});        
-	ShowNotify($.t('Sensor Timer added!'), 2500, true);
-}
-
 function setDayTimer(day,hour,value)
 {
 var undef;
@@ -132,7 +105,6 @@ var undef;
 		DayTimer[day][hour]=value;
     
 }
-
 function SetConforBkgd(obj){
 //	obj.removeClass("btn-info");
 //	obj.addClass("btn-confor");
@@ -148,7 +120,6 @@ function SetNoneBkgd(obj){
 	obj.removeClass("btn-info");
 	obj.removeClass("btn-confor");
 }
-
 function SetDayHourTemp( day,hour,confortTemp,ecoTemp)
 {
 	var obj = getItem(day,hour);
@@ -163,7 +134,6 @@ function SetDayHourTemp( day,hour,confortTemp,ecoTemp)
 		setDayTimer(day,hour,ecoTemp)
 	}
 }
-
 function SetHoursTemp( dayN,hour,confortTemp,ecoTemp)
 { 
 	if (istSelectedDay()){
@@ -209,13 +179,11 @@ function SetVal(id,temp)
 { 
 	$(id).val(temp);
 }
-
 function SetConf(obj)
 { 
 //  SetConfTemp($(obj).html())  ;
   selectConfButton();
 }
-
 function SetConfTemp(temp)
 { 
   SetVal("#utilitycontent #tConf",temp)     ;
@@ -231,9 +199,6 @@ function SetEcoTemp(temp)
   SetVal("#utilitycontent #tEco" ,temp)     ;
   selectEcoButton();
 }
-
-
-
 function debug(log_txt) {
     if (typeof window.console != 'undefined') {
         console.log("DEBUG: " + log_txt);
@@ -291,12 +256,10 @@ function clearDayTimer()
 {
 	 for (var i=0;i<7;i++) DayTimer[i]=[];
 }
-
 function istSelectedDay()
 {
   return $("#utilitycontent #when4").prop('checked');
 }
-
 function fillDayTimer()
 {
 /*  for (day=0;day<7;day++) {
@@ -310,7 +273,6 @@ function fillDayTimer()
         }
   }*/
 }
-
 function clearDisplay()
 {
      for (day=0;day<7;day++) {
@@ -321,8 +283,68 @@ function clearDisplay()
 		};
      };
 }
+function selectConfButton()
+{
+   $.each($("button.btn-conf"), function(i,item) {   $(item).addClass("btn-info");   });        
+   $.each($("button.btn-eco") , function(i,item) {   $(item).removeClass("btn-info");   });       
+//   $('#utilitycontent #ConfCkb').prop('checked',true);
+//   $('#utilitycontent #EcoCkb').prop('checked',false);
+	$.IsConfor=true;    
+}
+function selectEcoButton()
+{
+   $.each($("button.btn-conf"), function(i,item) {   $(item).removeClass("btn-info");   });        
+   $.each($("button.btn-eco") , function(i,item) {   $(item).addClass("btn-info");   });        
+//	$('#utilitycontent #ConfCkb').prop('checked',false);
+//	$('#utilitycontent #EcoCkb').prop('checked',true);
+	$.IsConfor=false;    
 
-function ShowIhmSetpointTimersInt(devIdx,name, isdimmer, stype,devsubtype)
+}
+//update the button object ref
+function setObjItemRef() {
+    DayHoursObj = new Array(7)
+    for (var i = 0; i < 7; i++) DayHoursObj[i] = [];
+
+    for (day = 0; day < 7; day++) {
+        for (var hour = 0; hour < 24; hour++) {
+            var entry = $.WeekDays[day];
+            var obj = $("#utilitycontent #" + entry + " #" + hour);
+            DayHoursObj[day][hour] = obj;
+        }
+    };
+}
+
+return {
+
+createDayHourTable:   function ()
+{
+    var Days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]; 
+    var WeekDays = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]; 
+
+    var html=
+    '<table BORDER="0">\n'+
+    '<tr id="time">    \n'+                                       
+    '<td></td>         \n';
+    for (var i=0;i<24;i++)
+        html+= '<td><button id="'+i+'"  class="btn  btn-timer" type="button"  >'+i+'</button> </td>\n';                                  
+    html+="</tr>\n";
+    
+    for (var day= 0;day<7;day++) 
+    {
+        html+='<tr id="'+WeekDays[day]+'">\n';
+        html+='<td><input type="checkbox" id="Chk" checked/>&nbsp;<span data-i18n="'+Days[day]+'">'+Days[day]+'</span>&nbsp;</td>\n';
+
+        for (var hour=0;hour<24;hour++)
+        {
+            html+='<td><button id="'+hour+'" name="'+day+'" class="btn  btn-timer " type="button"  ></button></td>\n';
+        }
+        html+='</tr>\n';
+    }
+    html+='</table>\n';
+    return html;
+}
+,
+ShowIhmSetpointTimersInt : function (devIdx,name, isdimmer, stype,devsubtype)
 {
   $.MouseDown = false ;
   $.DayDeb = 0 ;
@@ -399,54 +421,8 @@ function ShowIhmSetpointTimersInt(devIdx,name, isdimmer, stype,devsubtype)
   }
 
 }
-
-
-function selectConfButton()
-{
-   $.each($("button.btn-conf"), function(i,item) {   $(item).addClass("btn-info");   });        
-   $.each($("button.btn-eco") , function(i,item) {   $(item).removeClass("btn-info");   });       
-//   $('#utilitycontent #ConfCkb').prop('checked',true);
-//   $('#utilitycontent #EcoCkb').prop('checked',false);
-	$.IsConfor=true;    
-}
-function selectEcoButton()
-{
-   $.each($("button.btn-conf"), function(i,item) {   $(item).removeClass("btn-info");   });        
-   $.each($("button.btn-eco") , function(i,item) {   $(item).addClass("btn-info");   });        
-//	$('#utilitycontent #ConfCkb').prop('checked',false);
-//	$('#utilitycontent #EcoCkb').prop('checked',true);
-	$.IsConfor=false;    
-
-}
-
-function createDayHourTable()
-{
-    var Days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]; 
-    var WeekDays = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]; 
-
-    var html=
-    '<table BORDER="0">\n'+
-    '<tr id="time">    \n'+                                       
-    '<td></td>         \n';
-    for (var i=0;i<24;i++)
-      html+= '<td><button id="'+i+'"  class="btn  btn-timer" type="button"  >'+i+'</button> </td>\n';                                  
-    html+="</tr>\n";
-    
-    for (var day= 0;day<7;day++) 
-    {
-        html+='<tr id="'+WeekDays[day]+'">\n';
-        html+='<td><input type="checkbox" id="Chk" checked/>&nbsp;<span data-i18n="'+Days[day]+'">'+Days[day]+'</span>&nbsp;</td>\n';
-
-        for (var hour=0;hour<24;hour++)
-        {
-            html+='<td><button id="'+hour+'" name="'+day+'" class="btn  btn-timer " type="button"  ></button></td>\n';
-        }
-        html+='</tr>\n';
-    }
-    html+='</table>\n';
-    return html;
-}
-function ProgCopy(idx)
+,
+ProgCopy : function (idx)
 {
 			$.devIdx=idx;
 			$( "#dialog-copy" ).dialog({
@@ -486,17 +462,34 @@ function ProgCopy(idx)
 			$( "#dialog-copy" ).i18n();
 			$( "#dialog-copy" ).dialog( "open" );
 }
-
-//update the button object ref
-function setObjItemRef() {
-    DayHoursObj = new Array(7)
-    for (var i = 0; i < 7; i++) DayHoursObj[i] = [];
-
-    for (day = 0; day < 7; day++) {
-        for (var hour = 0; hour < 24; hour++) {
-            var entry = $.WeekDays[day];
-            var obj = $("#utilitycontent #" + entry + " #" + hour);
-            DayHoursObj[day][hour] = obj;
-        }
-    };
+,
+ProgAdd : function (devIdx) {
+	ClearSetpointTimersInt(devIdx);
+	var lastTemp = [];
+	for (var hour = 0; hour < 24; hour++) {
+		var tdays = 0;
+		var lastHourTemp = DayTimer[0][hour];
+		var DayHourTemp = 0;
+		for (day = 0; day < 7; day++) {
+			var temp = DayTimer[day][hour];
+			if (temp != lastTemp[day]) {
+				if (lastHourTemp != temp) {
+					ProgAddSetpointTimer(devIdx, tdays, hour, 0, lastHourTemp);
+					tdays = 0;
+					lastHourTemp = temp;
+				}
+				tdays |= (1 << day);
+				lastTemp[day] = temp;
+				DayHourTemp = temp;
+			}
+		}
+		if (tdays != 0)
+			ProgAddSetpointTimer(devIdx, tdays, hour, 0, DayHourTemp);
+	}
+	//            $.each($("button.btn-timer."+entry), function(i,item) {CreateTimer(devIdx,day,i,item);	});        
+	ShowNotify($.t('Sensor Timer added!'), 2500, true);
 }
+
+};
+
+})();

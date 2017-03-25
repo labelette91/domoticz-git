@@ -148,6 +148,21 @@ define(['app'], function (app) {
                 	var i2caddress=$("#hardwareparami2caddress #i2caddress").val();
                 	var port="&port=" + encodeURIComponent(i2caddress);
                 }
+                if (text.indexOf("GPIO") >= 0)
+                {
+                    var gpiodebounce=$("#hardwareparamsgpio #gpiodebounce").val();
+                    var gpioperiod=$("#hardwareparamsgpio #gpioperiod").val();
+                    if (gpiodebounce=="")
+                    {
+                        gpiodebounce = "50";
+                    }
+                    if (gpioperiod=="")
+                    {
+                        gpioperiod = "50";
+                    }
+                    Mode1 = gpiodebounce;
+                    Mode2 = gpioperiod;
+                }
             	$.ajax({
                      url: "json.htm?type=command&param=updatehardware&htype=" + hardwaretype +
                         "&name=" + encodeURIComponent(name) +
@@ -1024,7 +1039,6 @@ define(['app'], function (app) {
 				(text.indexOf("System Alive") >= 0) ||
 				(text.indexOf("Kodi Media") >= 0) ||
 				(text.indexOf("PiFace") >= 0) ||
-				(text.indexOf("GPIO") >= 0) ||
 				(text.indexOf("Evohome") >= 0 && text.indexOf("script") >= 0) ||
 				(text.indexOf("Tellstick") >= 0) ||
 				(text.indexOf("Motherboard") >= 0) ||
@@ -1070,6 +1084,32 @@ define(['app'], function (app) {
                      }
                 });
             }
+            else if (text.indexOf("GPIO") >= 0)
+            {
+                var gpiodebounce=$("#hardwarecontent #hardwareparamsgpio #gpiodebounce").val();
+                var gpioperiod=$("#hardwarecontent #hardwareparamsgpio #gpioperiod").val();
+                if (gpiodebounce=="")
+                {
+                    gpiodebounce = "50";
+                }
+                if (gpioperiod=="")
+                {
+                    gpioperiod = "50";
+                }
+                Mode1 = gpiodebounce;
+                Mode2 = gpioperiod;
+                $.ajax({
+                     url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout + "&Mode1=" + Mode1 + "&Mode2=" + Mode2,
+                     async: false,
+                     dataType: 'json',
+                     success: function(data) {
+                        RefreshHardwareTable();
+                     },
+                     error: function(){
+                            ShowNotify($.t('Problem adding hardware!'), 2500, true);
+                     }
+                });
+        }
 	    else if (text.indexOf("I2C ") >= 0 && text.indexOf("I2C sensor PIO 8bit expander PCF8574") < 0)
 	    {
                 hardwaretype = $("#hardwareparamsi2clocal #comboi2clocal").find('option:selected').val();
@@ -4982,6 +5022,10 @@ define(['app'], function (app) {
             					$("#hardwareparami2caddress #i2caddress").val(data["Port"].substring(4));
             				}
                         }
+                        else if (data["Type"].indexOf("GPIO") >= 0) {
+                            $("#hardwareparamsgpio #gpiodebounce").val(data["Mode1"]);
+                            $("#hardwareparamsgpio #gpioperiod").val(data["Mode2"]);
+                        }
                         else if (data["Type"].indexOf("USB") >= 0) {
                             $("#hardwarecontent #hardwareparamsserial #comboserialport").val(data["IntPort"]);
                             if (data["Type"].indexOf("MySensors") >= 0)
@@ -5020,12 +5064,12 @@ define(['app'], function (app) {
                             $("#hardwarecontent #hardwareparamsremote #tcpaddress").val(data["Address"]);
                             $("#hardwarecontent #hardwareparamsremote #tcpport").val(data["Port"]);
                             $("#hardwarecontent #hardwareparamslogin #password").val(data["Password"]);
-                            
+
                             if (data["Type"].indexOf("Satel Integra") >= 0)
                             {
                                 $("#hardwarecontent #hardwareparamspollinterval #pollinterval").val(data["Mode1"]);
                             }
-                            
+
                             if (data["Type"].indexOf("Relay-Net") >= 0)
                             {
                                 $("#hardwarecontent #hardwareparamsrelaynet #relaynetpollinputs").prop("checked",data["Mode1"]==1);
@@ -5221,6 +5265,7 @@ define(['app'], function (app) {
             $("#hardwarecontent #divpollinterval").hide();
             $("#hardwarecontent #divpythonplugin").hide();
 			$("#hardwarecontent #divrelaynet").hide();
+            $("#hardwarecontent #divgpio").hide();
 
             if (
 				(text.indexOf("TE923") >= 0)||
@@ -5245,8 +5290,8 @@ define(['app'], function (app) {
                 $("#hardwarecontent #divunderground").hide();
                 $("#hardwarecontent #divrftransmitter").show();
             }
-	    else if (text.indexOf("I2C ") >= 0)
-	    {
+    	    else if (text.indexOf("I2C ") >= 0)
+    	    {
                 $("#hardwarecontent #divi2clocal").show();
                 $("#hardwarecontent #divserial").hide();
                 $("#hardwarecontent #divremote").hide();
@@ -5257,9 +5302,18 @@ define(['app'], function (app) {
                 var text1 = $("#hardwarecontent #divi2clocal #hardwareparamsi2clocal #comboi2clocal option:selected").text();
                 if (text1.indexOf("I2C sensor PIO 8bit expander PCF8574") >= 0)
                 {
-                	$("#hardwarecontent #divi2caddress").show();
+                    $("#hardwarecontent #divi2caddress").show();
                 }
-	    }
+            }
+            else if (text.indexOf("GPIO") >= 0)
+            {
+                $("#hardwarecontent #divgpio").show();
+                $("#hardwarecontent #divserial").hide();
+                $("#hardwarecontent #divremote").hide();
+                $("#hardwarecontent #divlogin").hide();
+                $("#hardwarecontent #divunderground").hide();
+                $("#hardwarecontent #divhttppoller").hide();
+            }
             else if (text.indexOf("USB") >= 0)
             {
                 if (text.indexOf("MySensors") >= 0)
@@ -5311,13 +5365,13 @@ define(['app'], function (app) {
                   $("#hardwarecontent #divlogin").hide();
                   $("#hardwarecontent #divrelaynet").show();
                 }
-                
+
 				if (text.indexOf("Satel Integra") >= 0)
                 {
                     $("#hardwarecontent #divpollinterval").show();
                     $("#hardwarecontent #hardwareparamspollinterval #pollinterval").val(1000);
 				}
-				
+
 				if (text.indexOf("MyHome OpenWebNet with LAN interface") >= 0)
 				{
 				    $("#hardwarecontent #hardwareparamsremote #tcpport").val(20000);

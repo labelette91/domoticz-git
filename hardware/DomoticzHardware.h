@@ -5,7 +5,7 @@
 #include "../main/RFXtrx.h"
 
 //Base class with functions all notification systems should have
-#define RX_BUFFER_SIZE 40
+#define RX_BUFFER_SIZE 100
 
 //in casee of device Timeout , type restart
 // 0 first restart device 

@@ -5279,6 +5279,10 @@ void CSQLHelper::AddCalendarUpdateMeter()
 					if (musage!=0)
 						m_notifications.CheckAndHandleNotification(ID, devname, devType, subType, NTYPE_TODAYCOUNTER, musage);
 					break;
+				default:
+					//Unhandled
+					musage = 0;
+					break;
 				}
 			}
 			else

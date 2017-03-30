@@ -689,7 +689,7 @@ bool MainWorker::AddHardwareFromParams(
 		pHardware = new Meteostick(ID, SerialPort, 115200);
 		break;
 	case HTYPE_EVOHOME_SERIAL:
-		pHardware = new CEvohome(ID,SerialPort);
+		pHardware = new CEvohome(ID,SerialPort,Mode1);
 		break;
 	case HTYPE_RFLINKUSB:
 		pHardware = new CRFLinkSerial(ID, SerialPort);
@@ -937,7 +937,7 @@ bool MainWorker::AddHardwareFromParams(
 		break;
 #endif //WITH_TELLDUSCORE
 	case HTYPE_EVOHOME_SCRIPT:
-		pHardware = new CEvohome(ID,"");
+		pHardware = new CEvohome(ID,"",0);
 		break;
 	case HTYPE_PiFace:
 		pHardware = new CPiFace(ID);
@@ -12981,6 +12981,22 @@ bool MainWorker::UpdateDevice(const int HardwareID, const std::string &DeviceID,
 				gDevice.intval2 = nValue;
 				DecodeRXMessage(pHardware, (const unsigned char *)&gDevice, NULL, batterylevel);
 				return true;
+			}
+			else if (subType == sTypeKwh)
+			{
+				std::vector<std::string> strarray;
+				StringSplit(sValue, ";", strarray);
+				if (strarray.size() == 2)
+				{
+					_tGeneralDevice gDevice;
+					gDevice.subtype = subType;
+					gDevice.id = unit;
+					gDevice.intval1 = static_cast<int>(ID);
+					gDevice.floatval1 = static_cast<float>(atof(strarray[0].c_str()));
+					gDevice.floatval2 = static_cast<float>(atof(strarray[1].c_str()));
+					DecodeRXMessage(pHardware, (const unsigned char *)&gDevice, NULL, batterylevel);
+					return true;
+				}
 			}
 			else if (subType == sTypeAlert)
 			{

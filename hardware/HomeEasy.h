@@ -1,7 +1,7 @@
 #pragma once
 
 #include "DomoticzHardware.h"
-#include "HomeEasyTransmitter.h"
+class HomeEasyTransmitter;
 #ifdef WITH_GPIO
 
 #define SS 0

@@ -1392,53 +1392,8 @@
     <ClInclude Include="..\webserver\utf.hpp">
       <Filter>Webserver</Filter>
     </ClInclude>
-    <ClInclude Include="..\main\appversion.h">
-      <Filter>HTTPClient\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\CmdLine.h">
-      <Filter>HTTPClient\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\Helper.h">
-      <Filter>HTTPClient\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\localtime_r.h">
-      <Filter>HTTPClient\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\mainworker.h">
-      <Filter>HTTPClient\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>HTTPClient\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\RFXNames.h">
-      <Filter>HTTPClient\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\RFXtrx.h">
-      <Filter>HTTPClient\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\Scheduler.h">
-      <Filter>HTTPClient\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\SQLHelper.h">
-      <Filter>HTTPClient\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\stdafx.h">
-      <Filter>HTTPClient\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\SunRiseSet.h">
-      <Filter>HTTPClient\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\targetver.h">
-      <Filter>HTTPClient\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\WebServer.h">
-      <Filter>HTTPClient\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="WindowsHelper.h">
       <Filter>Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\Logger.h">
-      <Filter>HTTPClient\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\main\Camera.h">
       <Filter>Camera</Filter>
@@ -1451,9 +1406,6 @@
     </ClInclude>
     <ClInclude Include="..\hardware\TE923.h">
       <Filter>Devices\TE923</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\WindCalculation.h">
-      <Filter>HTTPClient\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\hardware\Rego6XXSerial.h">
       <Filter>Devices\Rego6XX</Filter>
@@ -1481,9 +1433,6 @@
     </ClInclude>
     <ClInclude Include="..\hardware\Wunderground.h">
       <Filter>Devices\wunderground.com</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\mainstructs.h">
-      <Filter>HTTPClient\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\hardware\Dummy.h">
       <Filter>Devices\Dummy</Filter>
@@ -1529,9 +1478,6 @@
     </ClInclude>
     <ClInclude Include="..\hardware\1Wire\1WireByOWFS.h">
       <Filter>Devices\1-Wire</Filter>
-    </ClInclude>
-    <ClInclude Include="Version.h">
-      <Filter>HTTPClient\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\main\GZipHelper.h">
       <Filter>zlib</Filter>
@@ -1836,9 +1782,6 @@
     <ClInclude Include="..\hardware\Nest.h">
       <Filter>Devices\Nest</Filter>
     </ClInclude>
-    <ClInclude Include="..\main\concurrent_queue.h">
-      <Filter>HTTPClient\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\hardware\Netatmo.h">
       <Filter>Devices\Netatmo</Filter>
     </ClInclude>
@@ -1872,9 +1815,6 @@
     <ClInclude Include="..\hardware\HomeEasy.h">
       <Filter>Devices\HomeEasy</Filter>
     </ClInclude>
-    <ClInclude Include="..\hardware\HomeEasyTransmitter.h">
-      <Filter>Devices\HomeEasy</Filter>
-    </ClInclude>
     <ClInclude Include="..\hardware\openwebnet\bt_openwebnet.h">
       <Filter>Devices\OpenWebNet</Filter>
     </ClInclude>
@@ -1892,9 +1832,6 @@
     </ClInclude>
     <ClInclude Include="..\hardware\Comm5Serial.h">
       <Filter>Devices\Comm5 MA-5XXX</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\LuaHandler.h">
-      <Filter>HTTPClient\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\hardware\HttpPoller.h">
       <Filter>Devices\HttpPoller</Filter>
@@ -2013,9 +1950,27 @@
     <ClInclude Include="..\hardware\plugins\PythonObjects.h">
       <Filter>Devices\Python Plugins</Filter>
     </ClInclude>
-    <ClInclude Include="..\main\LuaCommon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <ClInclude Include="..\main\appversion.h" />
+    <ClInclude Include="..\main\CmdLine.h" />
+    <ClInclude Include="..\main\concurrent_queue.h" />
+    <ClInclude Include="..\main\localtime_r.h" />
+    <ClInclude Include="..\main\Logger.h" />
+    <ClInclude Include="..\main\LuaCommon.h" />
+    <ClInclude Include="..\main\LuaHandler.h" />
+    <ClInclude Include="..\main\mainstructs.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="..\main\Scheduler.h" />
+    <ClInclude Include="..\main\SQLHelper.h" />
+    <ClInclude Include="..\main\Helper.h" />
+    <ClInclude Include="..\main\mainworker.h" />
+    <ClInclude Include="..\main\RFXNames.h" />
+    <ClInclude Include="..\main\RFXtrx.h" />
+    <ClInclude Include="Version.h" />
+    <ClInclude Include="..\main\WindCalculation.h" />
+    <ClInclude Include="..\main\stdafx.h" />
+    <ClInclude Include="..\main\SunRiseSet.h" />
+    <ClInclude Include="..\main\targetver.h" />
+    <ClInclude Include="..\main\WebServer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\webserver\Base64.cpp">
@@ -2561,9 +2516,6 @@
     <ClCompile Include="..\hardware\AtagOne.cpp">
       <Filter>Devices\AtagOne</Filter>
     </ClCompile>
-    <ClCompile Include="..\hardware\Sensor.cpp">
-      <Filter>Devices\HomeEasy</Filter>
-    </ClCompile>
     <ClCompile Include="..\webserver\fastcgi.cpp">
       <Filter>Webserver</Filter>
     </ClCompile>
@@ -2582,9 +2534,6 @@
     <ClCompile Include="..\hardware\RFXBase.cpp">
       <Filter>Devices\RFXCom</Filter>
     </ClCompile>
-    <ClCompile Include="..\hardware\dummywiringPi.cpp">
-      <Filter>Devices\HomeEasy</Filter>
-    </ClCompile>
     <ClCompile Include="..\hardware\Fitbit.cpp">
       <Filter>Devices\Fitbit</Filter>
     </ClCompile>
@@ -2593,12 +2542,6 @@
     </ClCompile>
     <ClCompile Include="..\hardware\S0MeterTCP.cpp">
       <Filter>Devices\S0 Meter</Filter>
-    </ClCompile>
-    <ClCompile Include="..\hardware\Record.cpp">
-      <Filter>Devices\HomeEasy</Filter>
-    </ClCompile>
-    <ClCompile Include="..\hardware\RcOok.cpp">
-      <Filter>Devices\HomeEasy</Filter>
     </ClCompile>
     <ClCompile Include="..\hardware\DenkoviSmartdenLan.cpp">
       <Filter>Devices\Denkovi</Filter>
@@ -2698,6 +2641,18 @@
     </ClCompile>
     <ClCompile Include="..\main\LuaCommon.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\RfTxRx\dummywiringPi.cpp">
+      <Filter>Devices\HomeEasy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\RfTxRx\RcOok.cpp">
+      <Filter>Devices\HomeEasy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\RfTxRx\Record.cpp">
+      <Filter>Devices\HomeEasy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\RfTxRx\Sensor.cpp">
+      <Filter>Devices\HomeEasy</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

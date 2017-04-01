@@ -8,7 +8,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 
-#include "Print.h"
+#include "RfTxRx/Print.h"
 
 #ifdef WITH_GPIO
 
@@ -26,19 +26,19 @@
 #include "HagerDecoder.h"
 
 #endif
-#include "SPI.h"
+#include "RfTxRx/SPI.h"
 #include "../main/Logger.h"
 #include "../main/localtime_r.h"
 #include "../main/RFXtrx.h"
 
-#include "HomeEasyTransmitter.h"
+#include "RfTxRx/HomeEasyTransmitter.h"
 #include "../main/SQLHelper.h"
-#include "hager.h"
+#include "RfTxRx/hager.h"
 
-#include "RcOok.h"
-#include "DecodeHomeEasy.h"
+#include "RfTxRx/RcOok.h"
+#include "RfTxRx/DecodeHomeEasy.h"
 
-#include "Record.h"
+#include "RfTxRx/Record.h"
 
 
 SPIClass SPI;
@@ -64,7 +64,7 @@ HagerDecoder   hager;
 
 #endif
 
-#include "fifo.cpp"
+#include "RfTxRx/fifo.cpp"
 
 //TFifo Fifo;
 TRecord Record;

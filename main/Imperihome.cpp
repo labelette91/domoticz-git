@@ -301,7 +301,7 @@ void ImperiHome::ManageAction (std::string &device , std::string &action	 , std:
 {
       //the dev Id is DEVnnn_zzz : nnn is the ID 
 			std::string ID = getDeviceId(device);
-			if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"IMPE: Devices:%s Action:%s request:%s Value:%s",device.c_str(), action.c_str(), actionType.c_str() , actionValue.c_str());
+			if (_log.isTraceEnabled()) _log.Log(LOG_TRACE,"IMPE: Devices:%s Action:%s request:%s Value:%s",device.c_str(), action.c_str(), actionType.c_str() , actionValue.c_str());
 			if (actionType=="setStatus")
 			{
 				if (actionValue=="1" )
@@ -1665,7 +1665,7 @@ bool  ImperiHome::Request( std::string &request_path , std::string &rep_content)
 
 	if (request_path=="/system")
 	{
-		if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"IMPE: System request"  );
+		if (_log.isTraceEnabled()) _log.Log(LOG_TRACE,"IMPE: System request"  );
 		rep_content = " { \"id\": \"Domoticz"+getIpAdress()+"\",  \"apiversion\": 1 }";
 	}
 	else  if (request_path.find("/devices")==0)
@@ -1674,7 +1674,7 @@ bool  ImperiHome::Request( std::string &request_path , std::string &rep_content)
 		StringSplit(request_path.substr(1),"/",results);
 		if (results.size()==1)
 		{
-			if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"IMPE: Devices request"  );
+			if (_log.isTraceEnabled()) _log.Log(LOG_TRACE,"IMPE: Devices request"  );
 			DeviceContent3(rep_content);
 		}
 		else 	if (results.size()==5)
@@ -1692,7 +1692,7 @@ bool  ImperiHome::Request( std::string &request_path , std::string &rep_content)
 
 	}
 	else  if (request_path=="/rooms"){
-		if (_log.isTraceEnable()) _log.Log(LOG_TRACE,"IMPE: Rooms request"  );
+		if (_log.isTraceEnabled()) _log.Log(LOG_TRACE,"IMPE: Rooms request"  );
 		getRoomContent( rep_content);
 	}
 	else
@@ -1706,7 +1706,7 @@ bool  ImperiHomeRequest( std::string &request_path , std::string &rep_content)
   ImperiHome m_ImperiHome ;
   bool ret = m_ImperiHome.Request( request_path , rep_content);
   if (ret)
-	if (_log.isTraceEnable()) 
+	if (_log.isTraceEnabled()) 
 		if (!_log.TestFilter("IMPA"))
 			if (rep_content.length())
 			_log.Log(LOG_TRACE, "IMPA: IIS Answer %s", rep_content.c_str());

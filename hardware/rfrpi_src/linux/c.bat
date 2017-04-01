@@ -1,0 +1,11 @@
+copy vide cdev.h
+copy vide device.h
+copy vide fs.h
+copy vide gpio.h
+copy vide interrupt.h
+copy vide module.h
+copy vide sched.h
+copy vide slab.h
+copy vide spinlock.h
+copy vide version.h
+copy vide uaccess.h

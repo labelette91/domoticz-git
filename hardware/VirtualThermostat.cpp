@@ -1,12 +1,12 @@
 #include "stdafx.h"
-#include "Helper.h"
-#include "Logger.h"
-#include "SQLHelper.h"
-#include "RFXtrx.h"
+#include "../main/Helper.h"
+#include "../main/Logger.h"
+#include "../main/SQLHelper.h"
+#include "../main/RFXtrx.h"
 
 #include "VirtualThermostat.h"
 
-#include "mainworker.h"
+#include "../main/mainworker.h"
 
 VirtualThermostat m_VirtualThermostat;
 

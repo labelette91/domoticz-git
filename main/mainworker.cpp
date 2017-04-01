@@ -155,7 +155,7 @@
 	#include <fstream>
 #endif
 
-#include "VirtualThermostat.h"
+#include "../hardware/VirtualThermostat.h"
 
 #define round(a) ( int ) ( a + .5 )
 

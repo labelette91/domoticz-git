@@ -464,6 +464,9 @@
     <Filter Include="Devices\RelayNet">
       <UniqueIdentifier>{9882d591-40c3-4d12-8c0a-af2d53d939ff}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Devices\VirtualThermostat">
+      <UniqueIdentifier>{e5f665da-9750-4a71-bc13-7f468cd0ff0a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\CMakeLists.txt">
@@ -2501,9 +2504,6 @@
     <ClCompile Include="..\main\Imperihome.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\main\VirtualThermostat.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\hardware\HomeEasy.cpp">
       <Filter>Devices\HomeEasy</Filter>
     </ClCompile>
@@ -2653,6 +2653,9 @@
     </ClCompile>
     <ClCompile Include="..\hardware\RfTxRx\Sensor.cpp">
       <Filter>Devices\HomeEasy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\VirtualThermostat.cpp">
+      <Filter>Devices\VirtualThermostat</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

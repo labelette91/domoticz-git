@@ -274,7 +274,6 @@ main/SunRiseSet.cpp
 main/WebServer.cpp
 main/WebServerHelper.cpp
 main/WindCalculation.cpp
-main/VirtualThermostat.cpp
 main/Imperihome.cpp
 push/BasePush.cpp
 push/FibaroPush.cpp
@@ -302,6 +301,7 @@ hardware/RfTxRx/RcOok.cpp
 hardware/RfTxRx/RFM69.cpp
 hardware/RfTxRx/HomeEasyTransmitter.cpp
 hardware/RfTxRx/hager.cpp
+hardware/VirtualThermostat.cpp
 hardware/AtagOne.cpp
 hardware/BleBox.cpp
 hardware/Comm5TCP.cpp

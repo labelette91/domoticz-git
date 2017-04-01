@@ -12,7 +12,7 @@
 #include <inttypes.h>
 #include <sstream>
 #include "../main/localtime_r.h"
-#include "../main/VirtualThermostat.h"
+#include "VirtualThermostat.h"
 
 CDummy::CDummy(const int ID)
 {

@@ -56,7 +56,7 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
-#include "VirtualThermostat.h"
+#include "../hardware/VirtualThermostat.h"
 
 #define round(a) ( int ) ( a + .5 )
 

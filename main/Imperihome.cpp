@@ -8,7 +8,7 @@
 #include "../main/RFXtrx.h"
 #include "../main/mainworker.h"
 #include "../hardware/hardwaretypes.h"
-#include "../main/VirtualThermostat.h"
+#include "../hardware/VirtualThermostat.h"
 #include "../webserver/Base64.h"
 
 //#define __PI__

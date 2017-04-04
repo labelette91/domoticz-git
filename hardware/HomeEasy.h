@@ -2,15 +2,8 @@
 
 #include "DomoticzHardware.h"
 class HomeEasyTransmitter;
-#ifdef WITH_GPIO
+class RFM69;
 
-#define SS 0
-#define RF69_IRQ_PIN 0 
-#define RF69_IRQ_NUM 0 
-#include "RFM69.h"
-#include "RFM69registers.h"
-
-#endif
 class HomeEasy : public CDomoticzHardwareBase
 {
 public:

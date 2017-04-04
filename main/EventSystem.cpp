@@ -3204,26 +3204,26 @@ bool CEventSystem::processLuaCommand(lua_State *lua_state, const std::string &fi
 			//create user loca string variable
 			_tUserVariable uvitem;
 			bool staticVariable = false;
-			std::string variabletype = "2";
+			int variabletype = 2;
 			for (int i = 1; i < cmd.size();i++){
 				if (cmd[i] == "STATIC")	staticVariable = true;
-				else if (cmd[i] == "INTEGER")	variabletype = "0";
-				else if (cmd[i] == "FLOAT")	    variabletype = "1";
-				else if (cmd[i] == "STRING")	variabletype = "2";
-				else if (cmd[i] == "DATE")	    variabletype = "3";
-				else if (cmd[i] == "TIME")   	variabletype = "4";
+				else if (cmd[i] == "INTEGER")	variabletype = 0;
+				else if (cmd[i] == "FLOAT")	    variabletype = 1;
+				else if (cmd[i] == "STRING")	variabletype = 2;
+				else if (cmd[i] == "DATE")	    variabletype = 3;
+				else if (cmd[i] == "TIME")   	variabletype = 4;
 			}
 			uvitem.ID = 0;
 			uvitem.variableName = variableName;
 			uvitem.variableValue = variableValue;
-			uvitem.variableType = std::stoi(variabletype) ;
+			uvitem.variableType = variabletype ;
 			uvitem.lastUpdate = "";
 			//if static Variable create only in RAM
 			if (staticVariable)
 				m_userStaticvariables[variableName] = uvitem;
 			else {
 				//create only in Database UserVariable 
-				m_sql.SaveUserVariable(variableName, variabletype, variableValue);
+				m_sql.SaveUserVariable(variableName, boost::to_string(variabletype), variableValue);
 			}
 		}
 		TUserStaticVariableMap::iterator iterator = m_userStaticvariables.find(variableName);

@@ -19,11 +19,18 @@
 #include <wiringPi.h>
 
 //#include "RCSwitch.h"
-#include "RcOok.h"
-#include "Sensor.h"
+#include "RfTxRx/RcOok.h"
+#include "RfTxRx/Sensor.h"
 
-#include "DecodeOTIO.h"
-#include "HagerDecoder.h"
+#include "RfTxRx/DecodeOTIO.h"
+#include "RfTxRx/HagerDecoder.h"
+
+//rfm69 
+#define SS 0
+#define RF69_IRQ_PIN 0 
+#define RF69_IRQ_NUM 0 
+#include "RfTxRx/RFM69.h"
+#include "RfTxRx/RFM69registers.h"
 
 #endif
 #include "RfTxRx/SPI.h"
@@ -296,7 +303,7 @@ void HomeEasy::Do_Work()
 
 #ifdef WITH_GPIO
 		//if tace is enable and dump pulse data is enable
-		if ( (!Record.empty()) && (_log.isTraceEnable()) &&(!_log.TestFilter("RCDATA")) )
+		if ( (!Record.empty()) && (_log.isTraceEnabled()) &&(!_log.TestFilter("RCDATA")) )
 					_log.Log(LOG_TRACE, "RCDATA %s", Record.ToString(1).c_str());
 
 		//while a pulse has been recorded

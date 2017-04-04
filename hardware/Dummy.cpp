@@ -363,7 +363,7 @@ namespace http {
 				sprintf(ID, "%07ld", nid);
 				DeviceRowIdx = m_sql.UpdateValue(HwdID, ID, 1, pTypeThermostat, sTypeThermSetpoint, 10, 255, 0, "0", devname);
 				//set coefficient for PID
-				std::string uidstr = std::to_string(DeviceRowIdx);
+				std::string uidstr = boost::to_string(DeviceRowIdx);
 				m_sql.UpdateDeviceValue("AddjMulti",(float)100.0,uidstr);  //coef Kp proportionnal
 				m_sql.UpdateDeviceValue("AddjMulti2",(float)0.0,uidstr);    //coef Ki integral
 				m_sql.UpdateDeviceValue("TempIdx",(int)-1,uidstr);

@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include "RFXNames.h"
+#include "Helper.h"
 #include "../httpclient/UrlEncode.h"
 #include <map>
 #include "Helper.h"
@@ -32,7 +33,7 @@ enum _eTaskItemType
 	TITEM_EXECUTE_SCRIPT,
 	TITEM_EMAIL_CAMERA_SNAPSHOT,
 	TITEM_SEND_EMAIL,
-    TITEM_SWITCHCMD_EVENT,
+	TITEM_SWITCHCMD_EVENT,
 	TITEM_SWITCHCMD_SCENE,
 	TITEM_GETURL,
 	TITEM_SEND_EMAIL_TO,
@@ -57,10 +58,11 @@ struct _tTaskItem
 	int _switchtype;
 	int _nValue;
 	std::string _sValue;
-    std::string _command;
-    unsigned char _level;
+	std::string _command;
+	unsigned char _level;
 	int _Hue;
-    std::string _relatedEvent;
+	std::string _relatedEvent;
+	timeval _DelayTimeBegin;
 
 	_tTaskItem()
 	{
@@ -83,6 +85,8 @@ struct _tTaskItem
 		tItem._switchtype=switchtype;
 		tItem._nValue=nValue;
 		tItem._sValue=sValue;
+		if (DelayTime)
+			getclock(&tItem._DelayTimeBegin);
 		return tItem;
 	}
 	static _tTaskItem ExecuteScript(const float DelayTime, const std::string &ScriptPath, const std::string &ScriptParams)
@@ -92,6 +96,8 @@ struct _tTaskItem
 		tItem._DelayTime=DelayTime;
 		tItem._ID=ScriptPath;
 		tItem._sValue=ScriptParams;
+		if (DelayTime)
+			getclock(&tItem._DelayTimeBegin);
 		return tItem;
 	}
 	static _tTaskItem EmailCameraSnapshot(const float DelayTime, const std::string &CamIdx, const std::string &Subject)
@@ -101,6 +107,8 @@ struct _tTaskItem
 		tItem._DelayTime=DelayTime;
 		tItem._ID=CamIdx;
 		tItem._sValue=Subject;
+		if (DelayTime)
+			getclock(&tItem._DelayTimeBegin);
 		return tItem;
 	}
 	static _tTaskItem SendEmail(const float DelayTime, const std::string &Subject, const std::string &Body)
@@ -110,6 +118,8 @@ struct _tTaskItem
 		tItem._DelayTime=DelayTime;
 		tItem._ID=Subject;
 		tItem._sValue=Body;
+		if (DelayTime)
+			getclock(&tItem._DelayTimeBegin);
 		return tItem;
 	}
 	static _tTaskItem SendEmailTo(const float DelayTime, const std::string &Subject, const std::string &Body, const std::string &To)
@@ -120,6 +130,8 @@ struct _tTaskItem
 		tItem._ID=Subject;
 		tItem._sValue=Body;
 		tItem._command=To;
+		if (DelayTime)
+			getclock(&tItem._DelayTimeBegin);
 		return tItem;
 	}
 	static _tTaskItem SendSMS(const float DelayTime, const std::string &Subject)
@@ -128,6 +140,8 @@ struct _tTaskItem
 		tItem._ItemType = TITEM_SEND_SMS;
 		tItem._DelayTime = DelayTime;
 		tItem._ID = Subject;
+		if (DelayTime)
+			getclock(&tItem._DelayTimeBegin);
 		return tItem;
 	}
 	static _tTaskItem SwitchLightEvent(const float DelayTime, const uint64_t idx, const std::string &Command, const unsigned char Level, const int Hue, const std::string &eventName)
@@ -136,22 +150,24 @@ struct _tTaskItem
 		tItem._ItemType=TITEM_SWITCHCMD_EVENT;
 		tItem._DelayTime=DelayTime;
 		tItem._idx=idx;
-        tItem._command= Command;
-        tItem._level= Level;
+		tItem._command= Command;
+		tItem._level= Level;
 		tItem._Hue=Hue;
-        tItem._relatedEvent = eventName;
-
+		tItem._relatedEvent = eventName;
+		if (DelayTime)
+			getclock(&tItem._DelayTimeBegin);
 		return tItem;
 	}
-    static _tTaskItem SwitchSceneEvent(const float DelayTime, const uint64_t idx, const std::string &Command, const std::string &eventName)
+	static _tTaskItem SwitchSceneEvent(const float DelayTime, const uint64_t idx, const std::string &Command, const std::string &eventName)
 	{
 		_tTaskItem tItem;
 		tItem._ItemType=TITEM_SWITCHCMD_SCENE;
 		tItem._DelayTime=DelayTime;
 		tItem._idx=idx;
-        tItem._command= Command;
-        tItem._relatedEvent = eventName;
-
+		tItem._command= Command;
+		tItem._relatedEvent = eventName;
+		if (DelayTime)
+			getclock(&tItem._DelayTimeBegin);
 		return tItem;
 	}
 	static _tTaskItem GetHTTPPage(const float DelayTime, const std::string &URL, const std::string &eventName)
@@ -161,7 +177,8 @@ struct _tTaskItem
 		tItem._DelayTime=DelayTime;
 		tItem._sValue= URL;
 		tItem._relatedEvent = eventName;
-
+		if (DelayTime)
+			getclock(&tItem._DelayTimeBegin);
 		return tItem;
 	}
 	static _tTaskItem SetVariable(const float DelayTime, const uint64_t idx, const std::string &varvalue, const bool eventtrigger)
@@ -172,6 +189,8 @@ struct _tTaskItem
 		tItem._idx = idx;
 		tItem._sValue = varvalue;
 		tItem._nValue = (eventtrigger==true)?1:0;
+		if (DelayTime)
+			getclock(&tItem._DelayTimeBegin);
 		return tItem;
 	}
 	static _tTaskItem SendNotification(const float DelayTime, const std::string &Subject, const std::string &Body, const std::string &ExtraData, const int Priority, const std::string &Sound, const std::string &SubSystem)
@@ -186,6 +205,8 @@ struct _tTaskItem
 		std::string tSound((!Sound.empty()) ? Sound : " ");
 		std::string tSubSystem((!SubSystem.empty()) ? SubSystem : " ");
 		tItem._command = tSubject + "!#" + tBody + "!#" + tExtraData + "!#" + tSound + "!#" + tSubSystem ;
+		if (DelayTime)
+			getclock(&tItem._DelayTimeBegin);
 		return tItem;
 	}
 	static _tTaskItem SetSetPoint(const float DelayTime, const uint64_t idx, const std::string &varvalue)
@@ -195,6 +216,8 @@ struct _tTaskItem
 		tItem._DelayTime = DelayTime;
 		tItem._idx = idx;
 		tItem._sValue = varvalue;
+		if (DelayTime)
+			getclock(&tItem._DelayTimeBegin);
 		return tItem;
 	}
 };
@@ -268,11 +291,11 @@ public:
 
 	void DeleteHardware(const std::string &idx);
 
-    void DeleteCamera(const std::string &idx);
+	void DeleteCamera(const std::string &idx);
 
-    void DeletePlan(const std::string &idx);
+	void DeletePlan(const std::string &idx);
 
-    void DeleteEvent(const std::string &idx);
+	void DeleteEvent(const std::string &idx);
 
 	void DeleteDevices(const std::string &idx);
 
@@ -282,7 +305,7 @@ public:
 
 	void AddTaskItem(const _tTaskItem &tItem);
 
-    void EventsGetTaskItems(std::vector<_tTaskItem> &currentTasks);
+	void EventsGetTaskItems(std::vector<_tTaskItem> &currentTasks);
 
 	void SetUnitsAndScale();
 

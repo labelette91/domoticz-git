@@ -190,7 +190,19 @@ function GetThermostatImg(item, RefreshLights, height) {
     }
     return img;
 }
-function RefreshTargetTemp ( id , val)
+function GetThermostatImage(item, RefreshLights, height) {
+    var img;
+    if (item.nValue == 1) {
+        img = 'smoke48on.png" title="' + $.t("Eco/Confort") + '" onmousedown="mouseDown(' + item.idx + ',' + item.SetPoint + ',' + RefreshLights + ')"  onmouseup="mouseUp(' + item.idx + ',' + item.SetPoint + ',' + RefreshLights + ');" onmouseover="cursorhand()" onmouseout="cursordefault()" height="' + height + '" width="' + height + '" style="vertical-align: middle;">';
+    }
+    else {
+        img = 'smoke48off.png" title="' + $.t("Eco/Confort") + '" onmousedown="mouseDown(' + item.idx + ',' + item.SetPoint + ',' + RefreshLights + ')" onmouseup="mouseUp(' + item.idx + ',' + item.SetPoint + ',' + RefreshLights + ');" onmouseover="cursorhand()" onmouseout="cursordefault()" height="' + height + '" width="' + height + '" style="vertical-align: middle;">';
+    }
+    return img;
+}
+
+
+function RefreshTargetTemp(id, val)
 {
    		$(id + " #bigtext #targettemp").html(val);
 }

@@ -3758,7 +3758,7 @@ define(['app'], function (app) {
 						bigtexthtml+=item.Data;
 						}
 						else if (isVirtualThermostat(item))	{
-							xhtm += ShowTargetRoomTemp(item.SetPoint, item.RoomTemp);
+						    bigtexthtml += ShowTargetRoomTemp(item.SetPoint, item.RoomTemp);
 						}
 						else if ((item.Type == "Thermostat")&&(item.SubType=="SetPoint")) {
 						  bigtexthtml+=item.Data + '\u00B0 ' + $scope.config.TempSign;
@@ -3778,11 +3778,6 @@ define(['app'], function (app) {
            /*  generate image and status html  */             
 						var statushtml="";
                         var imagehtml='<img src="images/';
-
-						if (isVirtualThermostat(item))	{
-							imagehtml += GetThermostatImage(item, "RefreshFavorites", 40) + '</td>\n';
-							statushtml = getTextStatus(item) ;
-						}
 
 						if (typeof item.Counter != 'undefined') {
 							if ((item.Type == "RFXMeter")||(item.Type == "YouLess Meter")) {
@@ -3900,7 +3895,11 @@ define(['app'], function (app) {
 					imagehtml+='gauge48.png" class="lcursor" onclick="ShowGeneralGraph(\'#dashcontent\',\'ShowFavorites\',' + item.idx + ',\'' + escape(item.Name) + '\',' + item.SwitchTypeVal +', \'' + item.SubType + '\');" height="40" width="40"></td>\n';
 					statushtml=item.Data;
 						}
-						else if ((item.Type == "Thermostat")&&(item.SubType=="SetPoint")) {
+						else if (isVirtualThermostat(item)) {
+						    imagehtml += GetThermostatImage(item, "RefreshFavorites", 40) + '</td>\n';
+						    statushtml = getTextStatus(item);
+						}
+						else if ((item.Type == "Thermostat") && (item.SubType == "SetPoint")) {
 					imagehtml+='override.png" class="lcursor" onclick="ShowSetpointPopup(event, ' + item.idx + ', ShowFavorites, ' + item.Protected + ', ' + item.Data + ');" height="40" width="40"></td>\n';
 					statushtml=item.Data + '\u00B0 ' + $scope.config.TempSign;
 						}

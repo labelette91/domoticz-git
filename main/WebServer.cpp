@@ -10094,10 +10094,10 @@ namespace http {
 							root["result"][ii]["nValue"]	  = nValue;
 							root["result"][ii]["SwitchIdx"]	=sd[INDEX_POWER+3];
 							
-							root["result"][ii]["AddjValue"] = AddjValue;
-							root["result"][ii]["AddjMulti"] = AddjMulti;
-							root["result"][ii]["AddjValue2"] = AddjValue2;
-							root["result"][ii]["AddjMulti2"] = AddjMulti2; 
+							root["result"][ii]["EcoTemp"]	= AddjValue;	//EcoTemp
+							root["result"][ii]["CoefProp"]	= AddjMulti;	//CoefProp
+							root["result"][ii]["ConforTemp"]= AddjValue2;	//ConforTemp
+							root["result"][ii]["CoefInteg"]	= AddjMulti2;	//CoefInteg
 
 
 						}

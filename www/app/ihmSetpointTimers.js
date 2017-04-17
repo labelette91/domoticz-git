@@ -106,14 +106,14 @@ var undef;
     
 }
 function SetConforBkgd(obj){
-//	obj.removeClass("btn-info");
-//	obj.addClass("btn-confor");
-	obj.addClass("btn-info");
+	obj.removeClass("btn-info");
+	obj.addClass("btn-confor");
+//	obj.addClass("btn-info");
 }
 function SetEcoBkgd(obj){
-//	obj.addClass("btn-info");
-//	obj.removeClass("btn-confor");
-	obj.removeClass("btn-info");
+	obj.addClass("btn-info");
+	obj.removeClass("btn-confor");
+//	obj.removeClass("btn-info");
 
 }
 function SetNoneBkgd(obj){
@@ -182,22 +182,22 @@ function SetVal(id,temp)
 function SetConf(obj)
 { 
 //  SetConfTemp($(obj).html())  ;
-  selectConfButton();
+    ShowIhmSetpointTimersFct.selectConfButton();
 }
 function SetConfTemp(temp)
 { 
   SetVal("#utilitycontent #tConf",temp)     ;
-  selectConfButton();
+  ShowIhmSetpointTimersFct.selectConfButton();
 }
 function SetEco(obj)
 { 
 //  SetEcoTemp($(obj).html())  ;    ;
-  selectEcoButton();
+    ShowIhmSetpointTimersFct.selectEcoButton();
 }
 function SetEcoTemp(temp)
 { 
   SetVal("#utilitycontent #tEco" ,temp)     ;
-  selectEcoButton();
+  ShowIhmSetpointTimersFct.selectEcoButton();
 }
 function debug(log_txt) {
     if (typeof window.console != 'undefined') {
@@ -282,23 +282,6 @@ function clearDisplay()
             SetNoneBkgd(obj);
 		};
      };
-}
-function selectConfButton()
-{
-   $.each($("button.btn-conf"), function(i,item) {   $(item).addClass("btn-info");   });        
-   $.each($("button.btn-eco") , function(i,item) {   $(item).removeClass("btn-info");   });       
-//   $('#utilitycontent #ConfCkb').prop('checked',true);
-//   $('#utilitycontent #EcoCkb').prop('checked',false);
-	$.IsConfor=true;    
-}
-function selectEcoButton()
-{
-   $.each($("button.btn-conf"), function(i,item) {   $(item).removeClass("btn-info");   });        
-   $.each($("button.btn-eco") , function(i,item) {   $(item).addClass("btn-info");   });        
-//	$('#utilitycontent #ConfCkb').prop('checked',false);
-//	$('#utilitycontent #EcoCkb').prop('checked',true);
-	$.IsConfor=false;    
-
 }
 //update the button object ref
 function setObjItemRef() {
@@ -408,10 +391,10 @@ ShowIhmSetpointTimersInt : function (devIdx,name, isdimmer, stype,devsubtype)
   });         
 
    $("#utilitycontent #tConf").click(function() {
-    selectConfButton();
+       ShowIhmSetpointTimersFct.selectConfButton();
   });                                                              
    $("#utilitycontent #tEco").click(function() {
-   selectEcoButton();
+       ShowIhmSetpointTimersFct.selectEcoButton();
   });                                                              
   if ( $.myglobals.tempsign !='C' ){
     //conversion farenheit
@@ -489,6 +472,26 @@ ProgAdd : function (devIdx) {
 	//            $.each($("button.btn-timer."+entry), function(i,item) {CreateTimer(devIdx,day,i,item);	});        
 	ShowNotify($.t('Sensor Timer added!'), 2500, true);
 }
+,
+selectConfButton : function ()
+{
+   $.each($("button.btn-conf"), function(i,item) {   $(item).addClass("btn-info");   });        
+    $.each($("button.btn-eco") , function(i,item) {   $(item).removeClass("btn-info");   });       
+    //   $('#utilitycontent #ConfCkb').prop('checked',true);
+    //   $('#utilitycontent #EcoCkb').prop('checked',false);
+    $.IsConfor=true;    
+}
+,
+selectEcoButton: function ()
+{
+    $.each($("button.btn-conf"), function(i,item) {   $(item).removeClass("btn-info");   });        
+    $.each($("button.btn-eco") , function(i,item) {   $(item).addClass("btn-info");   });        
+    //	$('#utilitycontent #ConfCkb').prop('checked',false);
+    //	$('#utilitycontent #EcoCkb').prop('checked',true);
+    $.IsConfor=false;    
+
+}
+
 
 };
 

@@ -1618,7 +1618,7 @@ define(['app'], function (app) {
 				  else if ((item.Type == "Thermostat")&&(item.SubType=="SetPoint")) {
 						if (permissions.hasPermission("Admin")) {
 							xhtm+='<a class="btnsmall" onclick="ShowTempLog(\'#utilitycontent\',\'ShowUtilities\',' + item.idx + ',\'' + escape(item.Name) + '\');" data-i18n="Log">Log</a> ';
-							xhtm+='<a class="btnsmall" onclick="EditSetPoint(' + item.idx + ',\'' + escape(item.Name) + '\',\'' + escape(item.Description) + '\', ' + item.SetPoint + ',' + item.Protected + ',' + item.TempIdx + ',' + item.SwitchIdx + ',' + isVirtualThermostat(item) + ',' + item.AddjMulti + ',' + item.AddjValue + ',' + item.AddjValue2 + ',' + item.AddjMulti2 +');" data-i18n="Edit">Edit</a> ';
+							xhtm += '<a class="btnsmall" onclick="EditSetPoint(' + item.idx + ',\'' + escape(item.Name) + '\',\'' + escape(item.Description) + '\', ' + item.SetPoint + ',' + item.Protected + ',' + item.TempIdx + ',' + item.SwitchIdx + ',' + isVirtualThermostat(item) + ',' + item.CoefProp + ',' + item.EcoTemp + ',' + item.ConforTemp + ',' + item.CoefInteg + ');" data-i18n="Edit">Edit</a> ';
 							if (item.Timers == "true") {
 								xhtm+='<a class="btnsmall-sel" onclick="ShowSetpointTimers(' + item.idx + ',\'' + escape(item.Name) + '\');" data-i18n="Timers">Timers</a> ';
 								xhtm+='<a class="btnsmall-sel" onclick="ShowIhmSetpointTimers(' + item.idx + ',\'' + escape(item.Name) + '\');" data-i18n="Prog">Prog</a> ';

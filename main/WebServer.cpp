@@ -26,6 +26,7 @@
 #include "../hardware/MySensorsBase.h"
 #include "../hardware/RFXBase.h"
 #include "../hardware/RFLinkBase.h"
+#include "../hardware/SysfsGPIO.h"
 #include "../hardware/HEOS.h"
 #ifdef WITH_GPIO
 #include "../hardware/Gpio.h"
@@ -989,7 +990,15 @@ namespace http {
 #endif
 #ifndef WITH_GPIO
 				if (ii == HTYPE_RaspberryGPIO)
+				{
 					bDoAdd = false;
+				}
+#endif
+#ifndef WITH_SYSFS_GPIO
+				if (ii == HTYPE_SysfsGPIO)
+				{
+					bDoAdd = false;
+				}
 				if (ii == HTYPE_HomeEasy) bDoAdd = false;
 #endif
 				if (((ii == HTYPE_1WIRE) && (!C1Wire::Have1WireSystem())) || (ii == HTYPE_PythonPlugin))
@@ -1247,6 +1256,9 @@ namespace http {
 					mode1 = atoi(mill_id.c_str());
 			}
 			else if (htype == HTYPE_RaspberryGPIO) {
+				//all fine here!
+			}
+			else if (htype == HTYPE_SysfsGPIO) {
 				//all fine here!
 			}
 			else if (htype == HTYPE_OpenWebNetTCP) {
@@ -1583,6 +1595,9 @@ namespace http {
 					port = 80;
 			}
 			else if (htype == HTYPE_RaspberryGPIO) {
+				//all fine here!
+			}
+			else if (htype == HTYPE_SysfsGPIO) {
 				//all fine here!
 			}
 			else if (htype == HTYPE_Daikin) {

@@ -288,6 +288,7 @@ public:
 
 	void ClearShortLog();
 	void VacuumDatabase();
+	void OptimizeDatabase(sqlite3 *dbase);
 
 	void DeleteHardware(const std::string &idx);
 

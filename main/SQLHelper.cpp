@@ -671,6 +671,7 @@ CSQLHelper::~CSQLHelper(void)
 	}
 	if (m_dbase!=NULL)
 	{
+		OptimizeDatabase(m_dbase);
 		sqlite3_close(m_dbase);
 		m_dbase=NULL;
 	}
@@ -5834,6 +5835,13 @@ void CSQLHelper::VacuumDatabase()
 	query("VACUUM");
 }
 
+void CSQLHelper::OptimizeDatabase(sqlite3 *dbase)
+{
+	if (dbase == NULL)
+		return;
+	sqlite3_exec(dbase, "PRAGMA optimize;", NULL, NULL, NULL);
+}
+
 void CSQLHelper::DeleteHardware(const std::string &idx)
 {
 	safe_query("DELETE FROM Hardware WHERE (ID == '%q')",idx.c_str());
@@ -6357,6 +6365,7 @@ bool CSQLHelper::RestoreDatabase(const std::string &dbase)
 		sqlite3_close(dbase_restore);
 		return false;
 	}
+	OptimizeDatabase(dbase_restore);
 	sqlite3_close(dbase_restore);
 	//we have a valid database!
 	std::remove(outputfile.c_str());
@@ -6403,6 +6412,7 @@ bool CSQLHelper::BackupDatabase(const std::string &OutputFile)
 		return false; //database not open!
 
 	//First cleanup the database
+	OptimizeDatabase(m_dbase);
 	VacuumDatabase();
 
 	boost::lock_guard<boost::mutex> l(m_sqlQueryMutex);

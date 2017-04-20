@@ -493,40 +493,20 @@ define(['app'], function (app) {
 			}
 			return o;
 		};
-		ShowIhmSetpointTimers = function (id,name, isdimmer, stype,devsubtype)
-		{
-			if (typeof $scope.mytimer != 'undefined') {
-				$interval.cancel($scope.mytimer);
-				$scope.mytimer = undefined;
-			}
-			$.devIdx=id;
-			$.isDimmer=isdimmer;
-			
-			$('#modal').show();
-			var htmlcontent = '';
-		  
-		    htmlcontent+=
-			'\t<table class="bannav" id="bannav" border="0" cellpadding="0" cellspacing="0" width="100%">\n' +
-			'\t<tr>\n' +
-			'\t  <td align="left"><a class="btnstylerev" onclick="ShowUtilities();" data-i18n="Back">Back</a></td>\n' +
-            '\t  <td><h2><span data-i18n="Name"></span>: ' + name + '</h2></td>\n' +
-			'\t  <td align="right"><a class="btnstyle" onclick="ShowIhmSetpointTimersFct.ProgCopy(' + id + ');" data-i18n="Copy">Copy</a>\n' +
-			'\t                    <a class="btnstyle" onclick="ShowIhmSetpointTimersFct.ProgAdd(' + id + ');" data-i18n="Add">Add</a></td>\n' +
-			'\t</tr>\n' +
-			'\t</table>\n';
+		ShowSetpointWeeklyTimers = function (id, name) {
+		    if (typeof $scope.mytimer != 'undefined') {
+		        $interval.cancel($scope.mytimer);
+		        $scope.mytimer = undefined;
+		    }
+		    $.devIdx = id;
 
-//			htmlcontent+='<p><h2><span data-i18n="Name"></span>: ' + name + '</h2></p><br>\n';
+		    $('#modal').show();
 
-			htmlcontent+=$('#ihmSetpointTimers').html();
-			htmlcontent += ShowIhmSetpointTimersFct.createDayHourTable();
-			$('#utilitycontent').html(/*GetBackbuttonHTMLTable('ShowUtilities')+*/htmlcontent);
-			$('#utilitycontent').i18n();
+		    ShowSetpointWeeklyTimersFct.Show(id, name);
 
-			ShowIhmSetpointTimersFct.ShowIhmSetpointTimersInt(id, name, isdimmer, stype, devsubtype);
-
-			$('#modal').hide();
+		    $('#modal').hide();
 		}
-		ShowSetpointTimers = function (id,name, isdimmer, stype,devsubtype)
+		ShowSetpointTimers = function (id, name, isdimmer, stype, devsubtype)
 		{
 			if (typeof $scope.mytimer != 'undefined') {
 				$interval.cancel($scope.mytimer);
@@ -1621,11 +1601,11 @@ define(['app'], function (app) {
 							xhtm += '<a class="btnsmall" onclick="EditSetPoint(' + item.idx + ',\'' + escape(item.Name) + '\',\'' + escape(item.Description) + '\', ' + item.SetPoint + ',' + item.Protected + ',' + item.TempIdx + ',' + item.SwitchIdx + ',' + isVirtualThermostat(item) + ',' + item.CoefProp + ',' + item.EcoTemp + ',' + item.ConforTemp + ',' + item.CoefInteg + ');" data-i18n="Edit">Edit</a> ';
 							if (item.Timers == "true") {
 								xhtm+='<a class="btnsmall-sel" onclick="ShowSetpointTimers(' + item.idx + ',\'' + escape(item.Name) + '\');" data-i18n="Timers">Timers</a> ';
-								xhtm+='<a class="btnsmall-sel" onclick="ShowIhmSetpointTimers(' + item.idx + ',\'' + escape(item.Name) + '\');" data-i18n="Prog">Prog</a> ';
+								xhtm+='<a class="btnsmall-sel" onclick="ShowSetpointWeeklyTimers(' + item.idx + ',\'' + escape(item.Name) + '\');" data-i18n="Prog">Prog</a> ';
                             }
 							else {
 								xhtm+='<a class="btnsmall" onclick="ShowSetpointTimers(' + item.idx + ',\'' + escape(item.Name) + '\');" data-i18n="Timers">Timers</a> ';
-								xhtm+='<a class="btnsmall" onclick="ShowIhmSetpointTimers(' + item.idx + ',\'' + escape(item.Name) + '\');" data-i18n="Prog">Prog</a> ';
+								xhtm+='<a class="btnsmall" onclick="ShowSetpointWeeklyTimers(' + item.idx + ',\'' + escape(item.Name) + '\');" data-i18n="Prog">Prog</a> ';
                             }
                         }
 				  }

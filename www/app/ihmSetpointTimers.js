@@ -1,5 +1,5 @@
 // define module
-var ShowIhmSetpointTimersFct  = (function () {
+var ShowSetpointWeeklyTimersFct  = (function () {
 function GetSetpointSettings (days , hour,min,val)
 {
     //days : bit 0: Monday 1:Tuesday ... 6:  sunday
@@ -182,22 +182,22 @@ function SetVal(id,temp)
 function SetConf(obj)
 { 
 //  SetConfTemp($(obj).html())  ;
-    ShowIhmSetpointTimersFct.selectConfButton();
+    ShowSetpointWeeklyTimersFct.selectConfButton();
 }
 function SetConfTemp(temp)
 { 
   SetVal("#utilitycontent #tConf",temp)     ;
-  ShowIhmSetpointTimersFct.selectConfButton();
+  ShowSetpointWeeklyTimersFct.selectConfButton();
 }
 function SetEco(obj)
 { 
 //  SetEcoTemp($(obj).html())  ;    ;
-    ShowIhmSetpointTimersFct.selectEcoButton();
+    ShowSetpointWeeklyTimersFct.selectEcoButton();
 }
 function SetEcoTemp(temp)
 { 
   SetVal("#utilitycontent #tEco" ,temp)     ;
-  ShowIhmSetpointTimersFct.selectEcoButton();
+  ShowSetpointWeeklyTimersFct.selectEcoButton();
 }
 function debug(log_txt) {
     if (typeof window.console != 'undefined') {
@@ -327,7 +327,7 @@ createDayHourTable:   function ()
     return html;
 }
 ,
-ShowIhmSetpointTimersInt : function (devIdx,name, isdimmer, stype,devsubtype)
+Show : function (devIdx,name)
 {
   $.MouseDown = false ;
   $.DayDeb = 0 ;
@@ -336,6 +336,24 @@ ShowIhmSetpointTimersInt : function (devIdx,name, isdimmer, stype,devsubtype)
   $.HourEnd = 0 ;
   $.IsConfor = true ;
 	
+  var htmlcontent = '';
+
+  htmlcontent +=
+      '\t<table class="bannav" id="bannav" border="0" cellpadding="0" cellspacing="0" width="100%">\n' +
+      '\t<tr>\n' +
+      '\t  <td align="left"><a class="btnstylerev" onclick="ShowUtilities();" data-i18n="Back">Back</a></td>\n' +
+      '\t  <td><h2><span data-i18n="Name"></span>: ' + name + '</h2></td>\n' +
+      '\t  <td align="right"><a class="btnstyle" onclick="ShowSetpointWeeklyTimersFct.ProgCopy(' + devIdx + ');" data-i18n="Copy">Copy</a>\n' +
+      '\t                    <a class="btnstyle" onclick="ShowSetpointWeeklyTimersFct.ProgAdd(' + devIdx + ');" data-i18n="Add">Add</a></td>\n' +
+      '\t</tr>\n' +
+      '\t</table>\n';
+
+    //			htmlcontent+='<p><h2><span data-i18n="Name"></span>: ' + name + '</h2></p><br>\n';
+
+  htmlcontent += $('#editSetpointWeeklyTimers').html();
+  htmlcontent += ShowSetpointWeeklyTimersFct.createDayHourTable();
+  $('#utilitycontent').html(/*GetBackbuttonHTMLTable('ShowUtilities')+*/htmlcontent);
+  $('#utilitycontent').i18n();
 
   SetEcoTemp(16)     ;
   SetConfTemp(20)     ;
@@ -391,10 +409,10 @@ ShowIhmSetpointTimersInt : function (devIdx,name, isdimmer, stype,devsubtype)
   });         
 
    $("#utilitycontent #tConf").click(function() {
-       ShowIhmSetpointTimersFct.selectConfButton();
+       ShowSetpointWeeklyTimersFct.selectConfButton();
   });                                                              
    $("#utilitycontent #tEco").click(function() {
-       ShowIhmSetpointTimersFct.selectEcoButton();
+       ShowSetpointWeeklyTimersFct.selectEcoButton();
   });                                                              
   if ( $.myglobals.tempsign !='C' ){
     //conversion farenheit
@@ -496,3 +514,5 @@ selectEcoButton: function ()
 };
 
 })();
+
+

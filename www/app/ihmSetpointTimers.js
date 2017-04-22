@@ -327,7 +327,7 @@ createDayHourTable:   function ()
     return html;
 }
 ,
-Show : function (devIdx,name)
+Show: function (devIdx, name, pEcoTemp, pConforTemp)
 {
   $.MouseDown = false ;
   $.DayDeb = 0 ;
@@ -335,7 +335,9 @@ Show : function (devIdx,name)
   $.HourDeb = 0 ;
   $.HourEnd = 0 ;
   $.IsConfor = true ;
-	
+  $.EcoTemp = pEcoTemp;
+  $.ConforTemp = pConforTemp;
+
   var htmlcontent = '';
 
   htmlcontent +=
@@ -355,14 +357,14 @@ Show : function (devIdx,name)
   $('#utilitycontent').html(/*GetBackbuttonHTMLTable('ShowUtilities')+*/htmlcontent);
   $('#utilitycontent').i18n();
 
-  SetEcoTemp(16)     ;
-  SetConfTemp(20)     ;
+  SetEcoTemp($.EcoTemp);
+  SetConfTemp($.ConforTemp);
   $.WeekDays = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]; 
   DayTimer  = new Array(7); 
   clearDayTimer() ;
   getTimerSetPoints(devIdx);
   setObjItemRef();
-  DisplayTimerValues(20);
+  DisplayTimerValues($.ConforTemp);
 
   DayCheck = new Array(7);
   SetDays("Everyday", false);
@@ -446,7 +448,7 @@ ProgCopy : function (idx)
 							clearDayTimer() ;
 							clearDisplay();
 							getTimerSetPoints(SensorIdx) ;
-							DisplayTimerValues(20);
+							DisplayTimerValues($.ConforTemp);
 
 							bootbox.alert($.t('Sensor Timer '+ SensorName +' copied!'));
 

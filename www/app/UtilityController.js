@@ -493,7 +493,7 @@ define(['app'], function (app) {
 			}
 			return o;
 		};
-		ShowSetpointWeeklyTimers = function (id, name) {
+		ShowSetpointWeeklyTimers = function (id, name,EcoTemp,ConforTemp) {
 		    if (typeof $scope.mytimer != 'undefined') {
 		        $interval.cancel($scope.mytimer);
 		        $scope.mytimer = undefined;
@@ -502,7 +502,7 @@ define(['app'], function (app) {
 
 		    $('#modal').show();
 
-		    ShowSetpointWeeklyTimersFct.Show(id, name);
+		    ShowSetpointWeeklyTimersFct.Show(id, name, EcoTemp, ConforTemp);
 
 		    $('#modal').hide();
 		}
@@ -1601,11 +1601,11 @@ define(['app'], function (app) {
 							xhtm += '<a class="btnsmall" onclick="EditSetPoint(' + item.idx + ',\'' + escape(item.Name) + '\',\'' + escape(item.Description) + '\', ' + item.SetPoint + ',' + item.Protected + ',' + item.TempIdx + ',' + item.SwitchIdx + ',' + isVirtualThermostat(item) + ',' + item.CoefProp + ',' + item.EcoTemp + ',' + item.ConforTemp + ',' + item.CoefInteg + ');" data-i18n="Edit">Edit</a> ';
 							if (item.Timers == "true") {
 								xhtm+='<a class="btnsmall-sel" onclick="ShowSetpointTimers(' + item.idx + ',\'' + escape(item.Name) + '\');" data-i18n="Timers">Timers</a> ';
-								xhtm+='<a class="btnsmall-sel" onclick="ShowSetpointWeeklyTimers(' + item.idx + ',\'' + escape(item.Name) + '\');" data-i18n="Prog">Prog</a> ';
+								xhtm+='<a class="btnsmall-sel" onclick="ShowSetpointWeeklyTimers(' + item.idx + ',\'' + escape(item.Name) + '\'' + ',' + item.EcoTemp + ',' + item.ConforTemp +');" data-i18n="Prog">Prog</a> ';
                             }
 							else {
-								xhtm+='<a class="btnsmall" onclick="ShowSetpointTimers(' + item.idx + ',\'' + escape(item.Name) + '\');" data-i18n="Timers">Timers</a> ';
-								xhtm+='<a class="btnsmall" onclick="ShowSetpointWeeklyTimers(' + item.idx + ',\'' + escape(item.Name) + '\');" data-i18n="Prog">Prog</a> ';
+								xhtm+='<a class="btnsmall"     onclick="ShowSetpointTimers(' + item.idx + ',\'' + escape(item.Name) + '\');" data-i18n="Timers">Timers</a> ';
+								xhtm += '<a class="btnsmall"   onclick="ShowSetpointWeeklyTimers(' + item.idx + ',\'' + escape(item.Name) + '\'' + ',' + item.EcoTemp + ',' + item.ConforTemp + ');" data-i18n="Prog">Prog</a> ';
                             }
                         }
 				  }

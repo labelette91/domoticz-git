@@ -1489,7 +1489,7 @@ define(['app'], function (app) {
 								}
 								else if (isVirtualThermostat(item))	{
 									RefreshTargetTemp(id, item.SetPoint);
-									RefreshRoomTemp(id, item.RoomTemp);
+									RefreshRoomTemp(id, item.Temp);
 									status = ShowThermostatMobile(item);
 								}
 								else if (item.SubType=="Alert") {
@@ -1597,7 +1597,7 @@ define(['app'], function (app) {
                                         img = GetThermostatImg(item, "RefreshFavorites", 40);
 										setHtmlValue(id + " #img", img );
                                         RefreshTargetTemp(id, item.SetPoint);
-                                        RefreshRoomTemp(id, item.RoomTemp);
+                                        RefreshRoomTemp(id, item.Temp);
 			                            status = getTextStatus(item) ;
 
 								}
@@ -3758,7 +3758,7 @@ define(['app'], function (app) {
 						bigtexthtml+=item.Data;
 						}
 						else if (isVirtualThermostat(item))	{
-						    bigtexthtml += ShowTargetRoomTemp(item.SetPoint, item.RoomTemp);
+						    bigtexthtml += ShowTargetRoomTemp(item.SetPoint, item.Temp);
 						}
 						else if ((item.Type == "Thermostat")&&(item.SubType=="SetPoint")) {
 						  bigtexthtml+=item.Data + '\u00B0 ' + $scope.config.TempSign;

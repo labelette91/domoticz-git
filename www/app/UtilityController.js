@@ -1089,7 +1089,7 @@ define(['app'], function (app) {
 								img = GetThermostatImg(item,"RefreshUtilities",48);
 								setHtmlValue(id + " #img", img );
 								RefreshTargetTemp ( id , item.SetPoint);
-								RefreshRoomTemp   ( id , item.RoomTemp);
+								RefreshRoomTemp   ( id , item.Temp);
 								RefreshThSlider(item.idx, "#utilitycontent #", item.SetPoint);
 								status = getTextStatus(item);
 								bigtext= $(id + " #bigtext").html();
@@ -1337,7 +1337,7 @@ define(['app'], function (app) {
 						  xhtm+=item.Data;
 						}
 						else if (isVirtualThermostat(item)){
-								xhtm+= ShowTargetRoomTemp(item.SetPoint, item.RoomTemp) ; 
+								xhtm+= ShowTargetRoomTemp(item.SetPoint, item.Temp) ; 
 						}
 						else if (item.Type == "Thermostat") {
 						  xhtm+=item.Data + '\u00B0 ' + $scope.config.TempSign;

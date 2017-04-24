@@ -6,7 +6,7 @@ const HTYPE_Dummy = 15 ;
 function ShowTempMobile(item) {
     var status="";
 
-        status += '<label id="bigtext" class="temp" '+ getEcoConforClick(item, 'RefreshFavorites')  +'>' + ShowTargetRoomTemp(item.SetPoint, item.RoomTemp) + '</label>\n' ;
+        status += '<label id="bigtext" class="temp" '+ getEcoConforClick(item, 'RefreshFavorites')  +'>' + ShowTargetRoomTemp(item.SetPoint, item.Temp) + '</label>\n' ;
         return status;
 }
 function ShowTempDownMobile(item) 
@@ -506,7 +506,7 @@ function AddLastSeen(item)
 }
 function isVirtualThermostat(item)
 {
-    return ( (item.Type == "Thermostat")&&(item.SubType=="SetPoint") && (item.HwType == HTYPE_Dummy )) ;
+    return (item.isVirtualThermostat == 'yes' ) ;
 }
 
 

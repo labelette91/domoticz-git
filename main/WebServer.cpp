@@ -10102,17 +10102,21 @@ namespace http {
 							root["result"][ii]["SetPoint"] = szTmp;
 							root["result"][ii]["HaveTimeout"] = bHaveTimeout;
 							root["result"][ii]["TypeImg"] = "override_mini";
-							root["result"][ii]["HwType"] = _hardwareNames[hardwareID].HardwareTypeVal;
-							root["result"][ii]["Power"]		=sd[INDEX_POWER];
-							root["result"][ii]["RoomTemp"]	=sd[INDEX_POWER+1];
-							root["result"][ii]["TempIdx"]	  =sd[INDEX_POWER+2];
-							root["result"][ii]["nValue"]	  = nValue;
-							root["result"][ii]["SwitchIdx"]	=sd[INDEX_POWER+3];
-							
-							root["result"][ii]["EcoTemp"]	= AddjValue;	//EcoTemp
-							root["result"][ii]["CoefProp"]	= AddjMulti;	//CoefProp
-							root["result"][ii]["ConforTemp"]= AddjValue2;	//ConforTemp
-							root["result"][ii]["CoefInteg"]	= AddjMulti2;	//CoefInteg
+							//if virtual Thermostat
+							if (_hardwareNames[hardwareID].HardwareTypeVal == HTYPE_Dummy)
+							{
+								root["result"][ii]["isVirtualThermostat"] = "yes";
+								root["result"][ii]["Power"]		  = sd[INDEX_POWER];
+								root["result"][ii]["Temp"]	    = sd[INDEX_POWER+1];
+								root["result"][ii]["TempIdx"]	  = sd[INDEX_POWER+2];
+								root["result"][ii]["nValue"]	  = nValue;
+								root["result"][ii]["SwitchIdx"]	= sd[INDEX_POWER+3];
+  							
+								root["result"][ii]["EcoTemp"]	  = AddjValue;	//EcoTemp
+								root["result"][ii]["CoefProp"]	= AddjMulti;	//CoefProp
+								root["result"][ii]["ConforTemp"]= AddjValue2;	//ConforTemp
+								root["result"][ii]["CoefInteg"]	= AddjMulti2;	//CoefInteg
+							}
 
 
 						}

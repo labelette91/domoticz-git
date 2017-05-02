@@ -3,6 +3,15 @@ define(['app'], function (app) {
 
 		$scope.HasInitializedEditCustomSensorDialog = false;
 
+        GetThermostatBigTest = function(item){
+            var bigtext;
+            bigtext = item.Data + '\u00B0';
+            if (typeof item.Temp != 'undefined') {
+                bigtext += '/' + item.Temp + '\u00B0 ';
+            }
+            bigtext += $scope.config.TempSign;
+            return bigtext;
+        }
 		DeleteSetpointTimer = function(idx)
 		{
 			bootbox.confirm($.t("Are you sure to delete this timers?\n\nThis action can not be undone..."), function(result) {
@@ -1096,7 +1105,7 @@ define(['app'], function (app) {
 						}
 						else if ((item.Type == "Thermostat")&&(item.SubType=="SetPoint")) {
 							status=item.Data + '\u00B0 ' + $scope.config.TempSign;
-							bigtext=item.Data + '\u00B0 ' + $scope.config.TempSign;
+                            bigtext = GetThermostatBigTest(item);
 						}
 						else if (item.Type == "Radiator 1") {
 							status=item.Data + '\u00B0 ' + $scope.config.TempSign;
@@ -1265,7 +1274,7 @@ define(['app'], function (app) {
 					bHaveAddedDevider=true;
 				  }
 				  var TypeTable;
-				   if (isVirtualThermostat(item)) TypeTable ="itemtable-th"; else TypeTable ="itemtable"
+                  if (isVirtualThermostat(item)) TypeTable = "itemtable-th"; else TypeTable = "itemtable";
 						
 				  var xhtm=
 						'\t<div class="span4" id="' + item.idx + '">\n' +
@@ -1340,7 +1349,7 @@ define(['app'], function (app) {
 								xhtm+= ShowTargetRoomTemp(item.SetPoint, item.Temp) ; 
 						}
 						else if (item.Type == "Thermostat") {
-						  xhtm+=item.Data + '\u00B0 ' + $scope.config.TempSign;
+                            xhtm += GetThermostatBigTest(item);
 						}
 						else if (item.SubType == "Waterflow") {
 						  xhtm+=item.Data;

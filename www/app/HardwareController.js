@@ -203,9 +203,11 @@ define(['app'], function (app) {
                     }
                 }
 
+                var extra = "";
                 if (text.indexOf("Evohome") >= 0)
                 {
-                    var baudrate=$("#hardwarecontent #divbaudrateevohome #combobaudrateevohome option:selected").val();
+                    var baudrate = $("#hardwarecontent #divevohome #combobaudrateevohome option:selected").val();
+                    extra = $("#hardwarecontent #divevohome #controllerid").val();
 
                     if (typeof baudrate == 'undefined')
                     {
@@ -268,7 +270,6 @@ define(['app'], function (app) {
                     Mode3 = ratelimitp1;
                 }
 
-                var extra="";
                 if (text.indexOf("S0 Meter") >= 0)
                 {
 					extra = $.devExtra;
@@ -278,7 +279,7 @@ define(['app'], function (app) {
                 {
                     Mode2 = $("#hardwarecontent #divcrcp1 #disablecrcp1").prop("checked")?0:1;
                 }
-
+                    
                 $.ajax({
                      url: "json.htm?type=command&param=updatehardware&htype=" + hardwaretype +
                         "&port=" + encodeURIComponent(serialport) +
@@ -1216,6 +1217,7 @@ define(['app'], function (app) {
             else if (text.indexOf("USB") >= 0 || text.indexOf("Teleinfo EDF") >= 0)
             {
                 var Mode1 = "0";
+                var extra = "";
                 var serialport=$("#hardwarecontent #divserial #comboserialport option:selected").text();
                 if (typeof serialport == 'undefined')
                 {
@@ -1225,7 +1227,8 @@ define(['app'], function (app) {
 
                 if (text.indexOf("Evohome") >= 0)
                 {
-                    var baudrate=$("#hardwarecontent #divbaudrateevohome #combobaudrateevohome option:selected").val();
+                    var baudrate = $("#hardwarecontent #divevohome #combobaudrateevohome option:selected").val();
+                    extra = $("#hardwarecontent #divevohome #controllerid").val();
 
                     if (typeof baudrate == 'undefined')
                     {
@@ -1289,10 +1292,10 @@ define(['app'], function (app) {
                     Mode3 = ratelimitp1;
 
                 }
-
+            
                 $.ajax({
-                     url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&port=" + encodeURIComponent(serialport) + "&name=" + encodeURIComponent(name) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout + "&restarttype=" + restarttype +
-                          "&Mode1=" + Mode1,
+                     url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&port=" + encodeURIComponent(serialport) + "&extra=" + extra + "&name=" + encodeURIComponent(name) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout + "&restarttype=" + restarttype +
+                          "&Mode1=" + Mode1 ,
                      async: false,
                      dataType: 'json',
                      success: function(data) {
@@ -1485,6 +1488,7 @@ define(['app'], function (app) {
             }
             else if (
 				(text.indexOf("Domoticz") >= 0) ||
+				(text.indexOf("Eco Devices") >= 0) ||
 				(text.indexOf("ETH8020") >= 0) ||
 				(text.indexOf("Daikin") >= 0) ||
 				(text.indexOf("Sterbox") >= 0) ||
@@ -1524,6 +1528,16 @@ define(['app'], function (app) {
                 else if (text.indexOf("MQTT") >= 0) {
                     extra = encodeURIComponent($("#hardwarecontent #divmqtt #filename").val());
                     mode1 = $("#hardwarecontent #divmqtt #combotopicselect").val();
+                }
+                if (text.indexOf("Eco Devices") >= 0)
+                {
+                    Mode1 = $("#hardwarecontent #divmodelecodevices #combomodelecodevices option:selected").val();
+                    var ratelimitp1=$("#hardwarecontent #hardwareparamsratelimitp1 #ratelimitp1").val();
+                    if (ratelimitp1=="")
+                    {
+                        ratelimitp1 = "60";
+                    }
+                    Mode2 = ratelimitp1;
                 }
                 $.ajax({
                      url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&address=" + address + "&port=" + port + "&username=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password) + "&name=" + encodeURIComponent(name) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout + "&extra=" + encodeURIComponent(extra) + "&mode1=" + mode1+ "&restarttype=" + restarttype,
@@ -5146,7 +5160,8 @@ define(['app'], function (app) {
                             $("#hardwarecontent #hardwareparamsserial #comboserialport").val(data["IntPort"]);
                             if (data["Type"].indexOf("Evohome") >= 0)
                             {
-                                $("#hardwarecontent #divbaudrateevohome #combobaudrateevohome").val(data["Mode1"]);
+                                $("#hardwarecontent #divevohome #combobaudrateevohome").val(data["Mode1"]);
+                                $("#hardwarecontent #divevohome #controllerid").val(data["Extra"]);
                             }
                             if (data["Type"].indexOf("MySensors") >= 0)
                             {
@@ -5388,7 +5403,7 @@ define(['app'], function (app) {
             $("#hardwarecontent #username").show();
             $("#hardwarecontent #lblusername").show();
 
-            $("#hardwarecontent #divbaudrateevohome").hide();
+            $("#hardwarecontent #divevohome").hide();
             $("#hardwarecontent #divbaudratemysensors").hide();
             $("#hardwarecontent #divbaudratep1").hide();
             $("#hardwarecontent #divbaudrateteleinfo").hide();
@@ -5426,6 +5441,7 @@ define(['app'], function (app) {
                 $("#hardwarecontent #divserial").hide();
                 $("#hardwarecontent #divremote").hide();
                 $("#hardwarecontent #divlogin").hide();
+                $("#hardwarecontent #divevohome").hide();
                 $("#hardwarecontent #divunderground").hide();
                 $("#hardwarecontent #divhttppoller").hide();
             }
@@ -5465,14 +5481,14 @@ define(['app'], function (app) {
             {
                 if (text.indexOf("Evohome") >= 0)
                 {
-                    $("#hardwarecontent #divbaudrateevohome").show();
+                    $("#hardwarecontent #divevohome").show();
+
                 }
                 if (text.indexOf("MySensors") >= 0)
                 {
                     $("#hardwarecontent #divbaudratemysensors").show();
                 }
-                if (text.indexOf("P1 Smart Meter") >= 0)
-                {
+                if (text.indexOf("P1 Smart Meter") >= 0) {
                     $("#hardwarecontent #divbaudratep1").show();
                     $("#hardwarecontent #divratelimitp1").show();
                     $("#hardwarecontent #divcrcp1").show();
@@ -5554,6 +5570,8 @@ define(['app'], function (app) {
 				$("#hardwarecontent #divsolaredgeapi").show();
                 $("#hardwarecontent #divremote").hide();
                 $("#hardwarecontent #divserial").hide();
+                $("#hardwarecontent #divremote").show();
+                $("#hardwarecontent #divlogin").show();
                 $("#hardwarecontent #divunderground").hide();
                 $("#hardwarecontent #divhttppoller").hide();
             }
@@ -5667,7 +5685,16 @@ define(['app'], function (app) {
                 $("#hardwarecontent #divlogin").show();
                 $("#hardwarecontent #hardwareparamsremote #tcpport").val(1255);
             }
-            else if (text.indexOf("1-Wire") >= 0)
+	    else if (text.indexOf("MyHome OpenWebNet") >= 0)
+            {
+                $("#hardwarecontent #divserial").hide();
+                $("#hardwarecontent #divremote").show();
+                $("#hardwarecontent #divlogin").hide();
+                $("#hardwarecontent #divunderground").hide();
+                $("#hardwarecontent #divhttppoller").hide();
+                $("#hardwarecontent #hardwareparamsremote #tcpport").val(20000);
+            }
+	    else if (text.indexOf("1-Wire") >= 0)
             {
 	        $("#hardwarecontent #div1wire").show();
                 $("#hardwarecontent #divserial").hide();

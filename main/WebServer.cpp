@@ -993,13 +993,14 @@ namespace http {
 				{
 					bDoAdd = false;
 				}
+				if (ii == HTYPE_HomeEasy) 
+					bDoAdd = false;
 #endif
 #ifndef WITH_SYSFS_GPIO
 				if (ii == HTYPE_SysfsGPIO)
 				{
 					bDoAdd = false;
 				}
-				if (ii == HTYPE_HomeEasy) bDoAdd = false;
 #endif
 				if (((ii == HTYPE_1WIRE) && (!C1Wire::Have1WireSystem())) || (ii == HTYPE_PythonPlugin))
 					bDoAdd = false;
@@ -1220,8 +1221,7 @@ namespace http {
 				(htype == HTYPE_NEST) ||
 				(htype == HTYPE_ANNATHERMOSTAT) ||
 				(htype == HTYPE_THERMOSMART) ||
-				(htype == HTYPE_Netatmo) ||
-				(htype == HTYPE_FITBIT)
+				(htype == HTYPE_Netatmo)
 				)
 			{
 				if (
@@ -1573,8 +1573,7 @@ namespace http {
 				(htype == HTYPE_NEST) ||
 				(htype == HTYPE_ANNATHERMOSTAT) ||
 				(htype == HTYPE_THERMOSMART) ||
-				(htype == HTYPE_Netatmo) ||
-				(htype == HTYPE_FITBIT)
+				(htype == HTYPE_Netatmo)
 				)
 			{
 				if (
@@ -11012,10 +11011,6 @@ namespace http {
 					_eHardwareTypes hType = (_eHardwareTypes)atoi(sd[3].c_str());
 					if (hType == HTYPE_DomoticzInternal)
 						continue;
-#ifndef _DEBUG
-					if (hType == HTYPE_FITBIT)
-						continue;
-#endif
 					root["result"][ii]["idx"] = sd[0];
 					root["result"][ii]["Name"] = sd[1];
 					root["result"][ii]["Enabled"] = (sd[2] == "1") ? "true" : "false";

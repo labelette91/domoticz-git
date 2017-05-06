@@ -3916,7 +3916,19 @@ define(['app'], function (app) {
 
 
 
-
+									if (!isVirtualThermostat(item)) {
+									xhtm += '\t    <table id="itemtablesmall" class="itemtablesmall" border="0" cellpadding="0" cellspacing="0">\n';
+									xhtm += '\t    <tr class="' + backgroundClass + '">\n';
+									xhtm += '\t      <td id="name" class="name ' + backgroundClass + '">' + item.Name + '</td>\n';
+									xhtm += '\t      <td id="bigtext" class="bigtext"><span class="wrapper">' + bigtexthtml + '</span></td>\n';
+									xhtm += '\t      <td id="img" class="img img1">' + imagehtml + '</td>';
+									xhtm += '\t      <td id="status" class="status"><span class="wrapper">' + statushtml + '</span></td>\n' +
+										'\t      <td id="lastupdate" class="lastupdate"><span>' + item.LastUpdate + '</span></td>\n' +
+										'\t    </tr>\n' +
+										'\t    </table>\n' +
+										'\t  </div>\n' +
+										'\t</div>\n';
+									}else{	
 									xhtm += '\t    <table id="itemtablesmall" class="itemtablesmall" border="0" cellpadding="0" cellspacing="0">\n';
 									xhtm += '\t    <tr class="' + backgroundClass + '">\n';
 									xhtm += '\t      <td id="name" class="name ' + backgroundClass + '">' + item.Name + '</td>\n';
@@ -3924,21 +3936,18 @@ define(['app'], function (app) {
 									xhtm += '\t      <td id="img" class="img img1">' + imagehtml + '</td>';
 									xhtm += '\t      <td id="status" class="status"><span class="wrapper">' + statushtml + '</span></td>\n';
 									//display thermostat slider
-									if (!isVirtualThermostat(item)) {
-									    xhtm += '\t      <td id="lastupdate" class="lastupdate"><span>' + item.LastUpdate + '</span></td>\n';
-									}
-									else {
-									    xhtm += '<td style="display: flex;">';
-									    xhtm += '<img align="left"  src="images/down.png"  style="width: 32px;"                    height="24px" title="' + $.t('Decrement') + '" onclick="IncrementThermostat(' + item.idx + ',0,\'#dashcontent #utility_\');" onmouseover="cursorhand()" onmouseout="cursordefault()">';
-									    xhtm += getThermostatSlider(item.idx, item.SetPoint, "#dashcontent #utility_");
-									    xhtm += '<img align="right" src="images/up.png"    style="width: 32px;margin-right: 10px;" height="24px"  title="' + $.t('Increment') + '" onclick="IncrementThermostat(' + item.idx + ',1,\'#dashcontent #utility_\');" onmouseover="cursorhand()" onmouseout="cursordefault()">';
-									    xhtm += '</td>';
-									}
+									xhtm += '<td class="no-before" style="display: flex;">';
+									xhtm += '<img align="left"  src="images/down.png"  style="width: 32px;"                    height="24px" title="' + $.t('Decrement') + '" onclick="IncrementThermostat(' + item.idx + ',0,\'#dashcontent #utility_\');" onmouseover="cursorhand()" onmouseout="cursordefault()">';
+									xhtm += getThermostatSlider(item.idx, item.SetPoint, "#dashcontent #utility_");
+									xhtm += '<img align="right" src="images/up.png"    style="width: 32px;margin-right: 10px;" height="24px"  title="' + $.t('Increment') + '" onclick="IncrementThermostat(' + item.idx + ',1,\'#dashcontent #utility_\');" onmouseover="cursorhand()" onmouseout="cursordefault()">';
+									xhtm += '</td>';
 									xhtm += '\t    </tr>\n' +
-                                                    '\t    </table>\n' +
-                                                    '\t  </div>\n' +
-                                                    '\t</div>\n';
-                                }
+										    '\t    </table>\n' +
+										    '\t  </div>\n' +
+										    '\t</div>\n';
+									}
+
+                                				}
 
 								htmlcontent += xhtm;
 								jj += 1;

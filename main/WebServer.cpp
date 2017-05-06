@@ -873,7 +873,7 @@ namespace http {
 				root["language"] = sValue;
 			}
 		}
-                
+
 		void CWebServer::Cmd_GetThemes(WebEmSession & session, const request& req, Json::Value &root)
 		{
 			root["status"] = "OK";
@@ -895,7 +895,7 @@ namespace http {
                         root["title"] = "GetTitle";
                         if (m_sql.GetPreferencesVar("Title", sValue))
                                 root["Title"] = sValue;
-			else 
+			else
 				root["Title"] = "Domoticz";
                 }
 
@@ -1002,7 +1002,7 @@ namespace http {
 					bDoAdd = false;
 				}
 #endif
-				if (((ii == HTYPE_1WIRE) && (!C1Wire::Have1WireSystem())) || (ii == HTYPE_PythonPlugin))
+				if (ii == HTYPE_PythonPlugin)
 					bDoAdd = false;
 				if (bDoAdd)
 					_htypes[Hardware_Type_Desc(ii)] = ii;
@@ -1093,7 +1093,7 @@ namespace http {
                                         // Teleinfo always has decimals. Chances to have a P1 and a Teleinfo device on the same
                                         // Domoticz instance are very low as both are national standards (NL and FR)
                                         m_sql.UpdatePreferencesVar("SmartMeterType", 0);
-                                }		
+                                }
 			}
 			else if (
 				(htype == HTYPE_RFXLAN) || (htype == HTYPE_P1SmartMeterLAN) || (htype == HTYPE_YouLess) || (htype == HTYPE_RazberryZWave) || (htype == HTYPE_OpenThermGatewayTCP) || (htype == HTYPE_LimitlessLights) ||
@@ -3678,7 +3678,7 @@ namespace http {
 					for (std::vector<CGpioPin>::iterator it = pins.begin(); it != pins.end(); ++it) {
 						CGpioPin pin = *it;
 						root["status"] = "OK";
-						root["result"][ii]["idx"] = pin.GetId();
+						root["result"][ii]["idx"] = pin.GetPin();
 						root["result"][ii]["Name"] = pin.ToString();
 						ii++;
 					}
@@ -4150,12 +4150,7 @@ namespace http {
 						root["message"] = "Given pin does not exist on this GPIO hardware";
 						return;
 					}
-					if (!pPin->GetIsExported()) {
-						root["status"] = "ERROR";
-						root["message"] = "Given pin is not exported";
-						return;
-					}
-					if (!pPin->GetIsOutput()) {
+					if (pPin->GetIsInput()) {
 						root["status"] = "ERROR";
 						root["message"] = "Given pin is not configured for output";
 						return;
@@ -4656,9 +4651,6 @@ namespace http {
 					}
 					CGpioPin *pPin = CGpio::GetPPinById(atoi(sunitcode.c_str()));
 					if (pPin == NULL) {
-						return;
-					}
-					if (!pPin->GetIsExported()) {
 						return;
 					}
 #else

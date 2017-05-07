@@ -393,7 +393,55 @@ ProgCopyTimersBtn: function(idx)
 			$( "#dialog-copy" ).dialog( "open" );
 }
 , 
-ShowIhmTimersInt :function(devIdx, name, isdimmer, stype, devsubtype) {
+ShowIhmTimersInt: function (id, name, isdimmer, stype, devsubtype) {
+
+		    $.devIdx = id;
+		    $.isDimmer = isdimmer;
+
+		    $('#modal').show();
+		    var htmlcontent = '';
+
+		    htmlcontent +=
+            '\t<table class="bannav" id="bannav" border="0" cellpadding="0" cellspacing="0" width="100%">\n' +
+            '\t<tr>\n' +
+            '\t  <td align="left"><a class="btnstylerev" onclick="ShowLights();" data-i18n="Back">Back</a></td>\n' +
+            '\t  <td align="right"><a class="btnstyle" onclick="ProgCopyTimersBtn(' + id + ');" data-i18n="Copy">Copy</a>\n' +
+            '\t                    <a class="btnstyle" onclick="ProgAddTimersBtn(' + id + ');" data-i18n="Add">Add</a></td>\n' +
+            '\t</tr>\n' +
+            '\t</table>\n';
+
+		    htmlcontent += '<p><h2><span data-i18n="Name"></span>: ' + name + '</h2></p><br>\n';
+		    htmlcontent +=
+        //		    '<div id="ihmShowTimers" style="display:none;">                                                                                                            ' +
+            '  <table BORDER="0">                                                                                                                                          ' +
+            '	<tr>                                                                                                                                                         ' +
+            '	<td align="right" style="width:80px"><label for="combocommand"><span data-i18n="Command"></span>:</label></td>                                             ' +
+            '   <td>                                                                                                                                                       ' +
+            '    <label> <button id="BtnOn"      class="btn btn-th btn-conf" type="button"  onclick="IhmShowTimer.SetBtn(this);">On</button></label>                                         ' +
+            '    <label> <button id="BtnOff"     class="btn btn-th btn-conf" type="button"  onclick="IhmShowTimer.SetBtn(this);">Off</button></label>                                         ' +
+            '    <label> <button id="BtnToggle"  class="btn btn-th btn-conf" type="button"  onclick="IhmShowTimer.SetBtn(this);">Toggle</button></label>                                         ' +
+            '  </td>                                                                                                                                                       ' +
+            '	</tr>                                                                                                                                                        ' +
+
+            '  <tr style="height:50px;" >                                                                                                                                  ' +
+            '		<td></td>                                                                                                                                                  ' +
+            '		<td>                                                                                                                                                       ' +
+            '			<input type="radio" name="when" id="when1" value="Everyday" checked>&nbsp;<span data-i18n="Everyday" style="margin-right: 20px;">Everyday</span>         ' +
+            '			<input type="radio" name="when" id="when2" value="Weekdays">&nbsp;<span data-i18n="Weekdays" style="margin-right: 20px;">Weekdays</span>                 ' +
+            '			<input type="radio" name="when" id="when3" value="Weekends">&nbsp;<span data-i18n="Weekends" style="margin-right: 20px;">Weekends</span>                 ' +
+            '			<input type="radio" name="when" id="when4" value="SelectedDays">&nbsp;<span data-i18n="Selected Days" style="margin-right: 20px;">SelectedDays</span><br>' +
+            '		</td>                                                                                                                                                      ' +
+            '  <tr>                                                                                                                                                        ' +
+            '  </table>                                                                                                                                                    ';
+		    //            '</div>                                                                                                                                                        ';
+
+		    htmlcontent += IhmShowTimer.createDayHourTable();
+		    $('#lightcontent').html(htmlcontent);
+		    $('#lightcontent').i18n();
+
+
+
+
     $.MouseDown = false;
     $.DayDeb = 0;
     $.DayEnd = 0;
@@ -406,7 +454,7 @@ ShowIhmTimersInt :function(devIdx, name, isdimmer, stype, devsubtype) {
     $.WeekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
     DayTimer = new Array(7);
     clearDayTimer();
-    getTimers(devIdx);
+    getTimers(id);
     DisplayTimerValues();
 
     $("button.btn-timer").mouseover(function () {

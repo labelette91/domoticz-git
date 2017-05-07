@@ -3929,7 +3929,7 @@ define(['app'], function (app) {
 										'\t  </div>\n' +
 										'\t</div>\n';
 									}else{	
-									xhtm += '\t    <table id="itemtablesmall" class="itemtablesmall" border="0" cellpadding="0" cellspacing="0">\n';
+									xhtm += '\t    <table id="itemtablesmall" class="itemtablesmall nolastSeen" border="0" cellpadding="0" cellspacing="0">\n';
 									xhtm += '\t    <tr class="' + backgroundClass + '">\n';
 									xhtm += '\t      <td id="name" class="name ' + backgroundClass + '">' + item.Name + '</td>\n';
 									xhtm += '\t      <td id="bigtext" class="bigtext"><span class="wrapper">' + bigtexthtml + '</span></td>\n';

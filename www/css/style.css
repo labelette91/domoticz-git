@@ -1054,6 +1054,7 @@ body table#itemtablesmall tr td:first-child + td + td + td{
 }
 
 body table#itemtablesmall tr td:first-child + td + td + td:before{
+
 	content: "";
 	font-style: italic;
 	font-size: 90%;
@@ -1065,8 +1066,12 @@ body table#itemtablesmall tr td:first-child + td + td + td + td{
 	font-size: 80%;
 	line-height:86%;
 }
-body table#itemtablesmall tr td:first-child + td + td + td + td:before{
+body table#itemtablesmall.nolastSeen tr td:first-child + td + td + td + td:before{
 	content: "";
+	font-style: italic;
+}
+body table#itemtablesmall tr td:first-child + td + td + td + td:before{
+	content: "Last Seen: ";
 	font-style: italic;
 }
 

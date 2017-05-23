@@ -110,7 +110,6 @@ define(['app'], function (app) {
 					bFavorites = 0;
 				}
 			}
-
 			$.ajax({
 				url: "json.htm?type=devices&filter=all&used=true&favorite=" + bFavorites + "&order=Name&plan=" + window.myglobals.LastPlanSelected + "&lastupdate=" + $scope.LastUpdateTime,
 				async: false,
@@ -1431,6 +1430,12 @@ define(['app'], function (app) {
 											else {
 												if (typeof item.CounterDeliv == 'undefined') {
 													status = item.CounterToday;
+												} else {
+													if ((typeof item.CounterDeliv != 'undefined') && (item.CounterDeliv != 0)) {
+														status += 'U: T: ' + item.CounterToday;
+													} else {
+														status += 'T: ' + item.CounterToday;
+													}
 												}
 											}
 										}
@@ -1482,20 +1487,19 @@ define(['app'], function (app) {
 											status += item.Data + '\u00B0 ' + $scope.config.TempSign;
 										}
 
-										var bHaveReturnUsage=false;
+										var bHaveReturnUsage = false;
 										if (typeof item.CounterDeliv != 'undefined') {
 											if (item.UsageDeliv.charAt(0) != 0) {
-												bHaveReturnUsage=true;
+												bHaveReturnUsage = true;
 											}
 										}
-										
 										if (!bHaveReturnUsage) {
 											if (typeof item.Usage != 'undefined') {
 												if ($scope.config.DashboardType == 0) {
 													status += '<br>' + $.t("Actual") + ': ' + item.Usage;
 												}
 												else {
-													status = item.Usage;
+													status += ", A: " + item.Usage;
 												}
 											}
 										}
@@ -1506,11 +1510,14 @@ define(['app'], function (app) {
 													status += '<br>' + $.t("Actual") + ': ' + item.UsageDeliv;
 												}
 												else {
-													status = "";
-													if (parseInt(item.UsageDeliv)>0) {
-														status = "-";
+													status += '<br>R: T: ' + item.CounterDelivToday;
+													if (bHaveReturnUsage) {
+														status += ", A: ";
+														if (parseInt(item.UsageDeliv) > 0) {
+															status += "-";
+														}
+														status += item.UsageDeliv;
 													}
-													status += item.UsageDeliv;
 												}
 											}
 										}
@@ -1613,13 +1620,11 @@ define(['app'], function (app) {
 											bigtext = item.Usage;
 											if (item.Type != "P1 Smart Meter") {
 												if ($scope.config.DashboardType == 0) {
-													//status+='<br>' + $.t("Actual") + ': ' + item.Usage;
 													if (typeof item.CounterToday != 'undefined') {
 														status += '<br>' + $.t("Today") + ': ' + item.CounterToday;
 													}
 												}
 												else {
-													//status+=", A: " + item.Usage;
 													if (typeof item.CounterToday != 'undefined') {
 														status += ', T: ' + item.CounterToday;
 													}
@@ -3529,8 +3534,10 @@ define(['app'], function (app) {
 											status = '' + $.t("Usage") + ': ' + item.CounterToday;
 										}
 										else {
-											if (typeof item.CounterDeliv == 'undefined') {
-												status = item.CounterToday;
+											if ((typeof item.CounterDeliv != 'undefined') && (item.CounterDeliv != 0)) {
+												status = 'U: T: ' + item.CounterToday;
+											} else {
+												status = 'T: ' + item.CounterToday;
 											}
 										}
 									}
@@ -3561,9 +3568,7 @@ define(['app'], function (app) {
 										(item.SubType == "Custom Sensor")
 									) {
 										if (typeof item.CounterToday != 'undefined') {
-											if ($scope.config.DashboardType == 0) {
-												status += 'T: ' + item.CounterToday;
-											}
+											status += 'T: ' + item.CounterToday;
 										}
 										else {
 											status = item.Data;
@@ -3585,25 +3590,25 @@ define(['app'], function (app) {
 									else if ((item.SubType == "Thermostat Mode") || (item.SubType == "Thermostat Fan Mode")) {
 										status = item.Data;
 									}
-									
-									var bHaveReturnUsage=false;
+
+									var bHaveReturnUsage = false;
 									if (typeof item.CounterDeliv != 'undefined') {
 										if (item.UsageDeliv.charAt(0) != 0) {
-											bHaveReturnUsage=true;
+											bHaveReturnUsage = true;
 										}
 									}
-									
-									if (!bHaveReturnUsage)
-									{
-										if (typeof item.Usage != 'undefined') {
-											if ($scope.config.DashboardType == 0) {
-												status += '<br>' + $.t("Actual") + ': ' + item.Usage;
-											}
-											else {
-												status = item.Usage;
+
+									if (typeof item.Usage != 'undefined') {
+										if ($scope.config.DashboardType == 0) {
+											status += '<br>' + $.t("Actual") + ': ' + item.Usage;
+										}
+										else {
+											if (!bHaveReturnUsage) {
+												status += ", A: " + item.Usage;
 											}
 										}
 									}
+
 									if (typeof item.CounterDeliv != 'undefined') {
 										if (item.CounterDeliv != 0) {
 											if ($scope.config.DashboardType == 0) {
@@ -3611,11 +3616,14 @@ define(['app'], function (app) {
 												status += '<br>' + $.t("Actual") + ': -' + item.UsageDeliv;
 											}
 											else {
-												status = "";
-												if (parseInt(item.UsageDeliv)>0) {
-													status = "-";
+												status += '<br>R: T: ' + item.CounterDelivToday;
+												if (bHaveReturnUsage) {
+													status += ", A: ";
+													if (parseInt(item.UsageDeliv) > 0) {
+														status += "-";
+													}
+													status += item.UsageDeliv;
 												}
-												status += item.UsageDeliv;
 											}
 										}
 									}

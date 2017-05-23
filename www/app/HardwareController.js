@@ -129,8 +129,9 @@ define(['app'], function (app) {
 				(text.indexOf("Evohome") >= 0 && text.indexOf("script") >= 0) ||
 				(text.indexOf("YeeLight") >= 0) ||
 				(text.indexOf("Arilux AL-LC0x") >= 0) ||
-				(text.indexOf("sysfs gpio") >= 0)
-			) {
+				(text.indexOf("sysfs GPIO") >= 0)
+				)
+			 {
 				// if hardwaretype == 1000 => I2C sensors grouping
 				if (hardwaretype == 1000) {
 					hardwaretype = $("#hardwareparamsi2clocal #comboi2clocal").find('option:selected').val();
@@ -140,7 +141,7 @@ define(['app'], function (app) {
 					var i2caddress = $("#hardwareparami2caddress #i2caddress").val();
 					var port = "&port=" + encodeURIComponent(i2caddress);
 				}
-				if ((text.indexOf("GPIO") >= 0) && (text.indexOf("sysfs gpio") == -1)) {
+				if ((text.indexOf("GPIO") >= 0) && (text.indexOf("sysfs GPIO") == -1)) {
 					var gpiodebounce = $("#hardwareparamsgpio #gpiodebounce").val();
 					var gpioperiod = $("#hardwareparamsgpio #gpioperiod").val();
 					var gpiopollinterval = $("#hardwareparamsgpio #gpiopollinterval").val();
@@ -156,6 +157,9 @@ define(['app'], function (app) {
 					Mode1 = gpiodebounce;
 					Mode2 = gpioperiod;
 					Mode3 = gpiopollinterval;
+				}
+				if (text.indexOf("sysfs GPIO") >= 0) {
+					Mode1 = $('#hardwarecontent #hardwareparamssysfsgpio #sysfsautoconfigure').prop("checked") ? 1 : 0;
 				}
 				$.ajax({
 					url: "json.htm?type=command&param=updatehardware&htype=" + hardwaretype +
@@ -1031,8 +1035,7 @@ define(['app'], function (app) {
 				(text.indexOf("Tellstick") >= 0) ||
 				(text.indexOf("Motherboard") >= 0) ||
 				(text.indexOf("YeeLight") >= 0) ||
-				(text.indexOf("Arilux AL-LC0x") >= 0) ||
-				(text.indexOf("sysfs gpio") >= 0)
+				(text.indexOf("Arilux AL-LC0x") >= 0)
 			) {
 				$.ajax({
 					url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&name=" + encodeURIComponent(name) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout,
@@ -1072,7 +1075,7 @@ define(['app'], function (app) {
 				     }
 				});
 			}
-			else if (text.indexOf("GPIO") >= 0) {
+			else if ((text.indexOf("GPIO") >= 0) && (text.indexOf("sysfs GPIO") == -1)) {
 				var gpiodebounce = $("#hardwarecontent #hardwareparamsgpio #gpiodebounce").val();
 				var gpioperiod = $("#hardwarecontent #hardwareparamsgpio #gpioperiod").val();
 				var gpiopollinterval = $("#hardwarecontent #hardwareparamsgpio #gpiopollinterval").val();
@@ -1099,6 +1102,25 @@ define(['app'], function (app) {
 					dataType: 'json',
 					success: function (data) {
 						RefreshHardwareTable();
+					},
+					error: function () {
+						ShowNotify($.t('Problem adding hardware!'), 2500, true);
+					}
+				});
+			}
+			else if (text.indexOf("sysfs GPIO") >= 0) {
+				Mode1 = $('#hardwarecontent #hardwareparamssysfsgpio #sysfsautoconfigure').prop("checked") ? 1 : 0;
+				$.ajax({
+					url: "json.htm?type=command&param=addhardware&htype="
+					+ hardwaretype
+					+ "&name=" + encodeURIComponent(name)
+					+ "&enabled=" + bEnabled
+					+ "&datatimeout=" + datatimeout
+					+ "&Mode1=" + Mode1,
+					async: false,
+					dataType: 'json',
+					success: function (data) {
+					RefreshHardwareTable();
 					},
 					error: function () {
 						ShowNotify($.t('Problem adding hardware!'), 2500, true);
@@ -4902,8 +4924,7 @@ define(['app'], function (app) {
 							(data["Type"].indexOf("PiFace") >= 0) ||
 							(data["Type"].indexOf("Tellstick") >= 0) ||
 							(data["Type"].indexOf("Yeelight") >= 0) ||
-							(data["Type"].indexOf("Arilux AL-LC0x") >= 0) ||
-							(data["Type"].indexOf("sysfs gpio") >= 0)
+							(data["Type"].indexOf("Arilux AL-LC0x") >= 0)
 						) {
 							//nothing to be set
 						}
@@ -4918,10 +4939,13 @@ define(['app'], function (app) {
 								$("#hardwareparami2caddress #i2caddress").val(data["Port"].substring(4));
 							}
 						}
-						else if (data["Type"].indexOf("GPIO") >= 0) {
+						else if ((data["Type"].indexOf("GPIO") >= 0) && (data["Type"].indexOf("sysfs GPIO") == -1)) {
 							$("#hardwareparamsgpio #gpiodebounce").val(data["Mode1"]);
 							$("#hardwareparamsgpio #gpioperiod").val(data["Mode2"]);
 							$("#hardwareparamsgpio #gpiopollinterval").val(data["Mode3"]);
+						}
+						else if (data["Type"].indexOf("sysfs GPIO") >= 0) {
+							$("#hardwarecontent #hardwareparamssysfsgpio #sysfsautoconfigure").prop("checked", data["Mode1"] == 1);
 						}
 						else if (data["Type"].indexOf("USB") >= 0 || data["Type"].indexOf("Teleinfo EDF") >= 0) {
 							$("#hardwarecontent #hardwareparamsserial #comboserialport").val(data["IntPort"]);
@@ -5171,17 +5195,16 @@ define(['app'], function (app) {
 			$("#hardwarecontent #divpythonplugin").hide();
 			$("#hardwarecontent #divrelaynet").hide();
 			$("#hardwarecontent #divgpio").hide();
+			$("#hardwarecontent #divsysfsgpio").hide();
 
-			if (
-				(text.indexOf("TE923") >= 0) ||
+			if ((text.indexOf("TE923") >= 0) ||
 				(text.indexOf("Volcraft") >= 0) ||
 				(text.indexOf("Dummy") >= 0) ||
 				(text.indexOf("System Alive") >= 0) ||
 				(text.indexOf("PiFace") >= 0) ||
 				(text.indexOf("Yeelight") >= 0) ||
-				(text.indexOf("Arilux AL-LC0x") >= 0) ||
-				(text.indexOf("sysfs gpio") >= 0)
-			) {
+				(text.indexOf("Arilux AL-LC0x") >= 0))
+			 {
 				$("#hardwarecontent #divserial").hide();
 				$("#hardwarecontent #divremote").hide();
 				$("#hardwarecontent #divlogin").hide();
@@ -5209,14 +5232,21 @@ define(['app'], function (app) {
 					$("#hardwarecontent #divi2caddress").show();
 				}
 			}
-			else if ((text.indexOf("GPIO") >= 0) && (text.indexOf("sysfs gpio") == -1)) {
+			else if ((text.indexOf("GPIO") >= 0) && (text.indexOf("sysfs GPIO") == -1)) {
 				$("#hardwarecontent #divgpio").show();
 				$("#hardwarecontent #divserial").hide();
 				$("#hardwarecontent #divremote").hide();
 				$("#hardwarecontent #divlogin").hide();
 				$("#hardwarecontent #divunderground").hide();
 				$("#hardwarecontent #divhttppoller").hide();
-
+			}
+			else if (text.indexOf("sysfs GPIO") >= 0) {
+				$("#hardwarecontent #divsysfsgpio").show();
+				$("#hardwarecontent #divserial").hide();
+				$("#hardwarecontent #divremote").hide();
+				$("#hardwarecontent #divlogin").hide();
+				$("#hardwarecontent #divunderground").hide();
+				$("#hardwarecontent #divhttppoller").hide();
 			}
 			else if (text.indexOf("USB") >= 0 || text.indexOf("Teleinfo EDF") >= 0) {
 				if (text.indexOf("Evohome") >= 0) {

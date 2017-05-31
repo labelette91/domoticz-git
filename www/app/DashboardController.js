@@ -3699,7 +3699,7 @@ define(['app'], function (app) {
 									var bigtexthtml = "";
 									bigtexthtml += '<span class="value1">';
 									if ((typeof item.Usage != 'undefined') && (typeof item.UsageDeliv == 'undefined')) {
-										//bigtexthtml += item.Usage;
+										bigtexthtml += item.Usage;
 									}
 									else if ((typeof item.Usage != 'undefined') && (typeof item.UsageDeliv != 'undefined')) {
 										if (parseInt(item.Usage) > 0) {
@@ -3737,8 +3737,6 @@ define(['app'], function (app) {
 										(item.SubType == "RFXMeter counter") ||
 										(item.SubType == "Counter Incremental") ||
 										(item.SubType == "Custom Sensor")
-
-
 									) {
 										bigtexthtml += item.Data;
 									}

@@ -1981,6 +1981,8 @@
     <ClInclude Include="..\main\targetver.h" />
     <ClInclude Include="..\main\WebServer.h" />
     <ClInclude Include="..\hardware\SysfsGPIO.h" />
+    <ClInclude Include="..\hardware\EvohomeScript.h" />
+    <ClInclude Include="..\hardware\Rtl433.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\webserver\Base64.cpp">
@@ -2669,6 +2671,18 @@
     </ClCompile>
     <ClCompile Include="..\hardware\SysfsGPIO.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\EvohomeScript.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\Rtl433.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\EventsPythonDevice.cpp">
+      <Filter>EventSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\EventsPythonModule.cpp">
+      <Filter>EventSystem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

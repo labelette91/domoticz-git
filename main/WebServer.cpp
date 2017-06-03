@@ -997,8 +997,6 @@ namespace http {
 				}
 				if (ii == HTYPE_HomeEasy) 
 					bDoAdd = false;
-#endif
-#ifndef WITH_SYSFS_GPIO
 				if (ii == HTYPE_SysfsGpio)
 				{
 					bDoAdd = false;
@@ -3703,7 +3701,7 @@ namespace http {
 			{
 				//used by Add Manual Light/Switch dialog
 				root["title"] = "GetSysfsGpio";
-#ifdef WITH_SYSFS_GPIO
+#ifdef WITH_GPIO
 				std::vector<int> gpio_ids = CSysfsGpio::GetGpioIds();
 				std::vector<std::string> gpio_names = CSysfsGpio::GetGpioNames();
 
@@ -4201,7 +4199,7 @@ namespace http {
 				}
 				else if (lighttype == 69)
 				{
-#ifdef WITH_SYSFS_GPIO
+#ifdef WITH_GPIO
 
 					sunitcode = request::findValue(&req, "unitcode"); // sysfs-gpio number
 					int unitcode = atoi(sunitcode.c_str());
@@ -4741,7 +4739,7 @@ namespace http {
 				}
 				else if (lighttype == 69)
 				{
-#ifdef WITH_SYSFS_GPIO
+#ifdef WITH_GPIO
 					dtype = pTypeLighting2;
 					subtype = sTypeAC;
 					devid = "0";

@@ -72,7 +72,7 @@ void CEventSystem::StartEventSystem()
 #ifdef ENABLE_PYTHON
     Plugins::PythonEventsInitialize(szUserDataFolder);
 #endif
-    
+
 	m_thread = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&CEventSystem::Do_Work, this)));
 }
 
@@ -2221,7 +2221,7 @@ void CEventSystem::EvaluatePython(const std::string &reason, const std::string &
 	//_log.Log(LOG_NORM, "EventSystem: Already scheduled this event, skipping");
 	// _log.Log(LOG_STATUS, "EventSystem: script %s trigger, file: %s, script: %s, deviceName: %s" , reason.c_str(), filename.c_str(), PyString.c_str(), devname.c_str());
 
-    
+
     Plugins::PythonEventsProcessPython(reason, filename, PyString, DeviceID, m_devicestates, m_uservariables, getSunRiseSunSetMinutes("Sunrise"),
         getSunRiseSunSetMinutes("Sunset"));
 
@@ -2276,6 +2276,17 @@ void CEventSystem::exportDeviceStatesToLua(lua_State *lua_state)
 		lua_rawset(lua_state, -3);
 	}
 	lua_setglobal(lua_state, "otherdevices_idx");
+
+	lua_createtable(lua_state, (int)m_devicestates.size(), 0);
+	typedef std::map<uint64_t, _tDeviceStatus>::iterator it_type;
+	for (it_type iterator = m_devicestates.begin(); iterator != m_devicestates.end(); ++iterator)
+	{
+		_tDeviceStatus sitem = iterator->second;
+		lua_pushstring(lua_state, sitem.deviceName.c_str());
+		lua_pushnumber(lua_state, sitem.lastLevel);
+		lua_rawset(lua_state, -3);
+	}
+	lua_setglobal(lua_state, "otherdevices_lastlevel");
 	devicestatesMutexLock2.unlock();
 }
 
@@ -3567,7 +3578,7 @@ std::string CEventSystem::nValueToWording(const uint8_t dType, const uint8_t dSu
 		{
 			lstatus = "Closed";
 		}
-		else
+		else if (lstatus == "Off")
 		{
 			lstatus = "Open";
 		}
@@ -3578,7 +3589,7 @@ std::string CEventSystem::nValueToWording(const uint8_t dType, const uint8_t dSu
 		{
 			lstatus = "Open";
 		}
-		else
+		else if (lstatus == "Off")
 		{
 			lstatus = "Closed";
 		}

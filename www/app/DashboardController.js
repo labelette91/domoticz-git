@@ -361,15 +361,15 @@ define(['app'], function (app) {
 										}
 										else if (item.SwitchType == "Blinds Percentage") {
 											isdimmer = true;
-											if (item.Status == 'Closed') {
-												status =
-													'<button class="btn btn-mini" type="button" onclick="SwitchLight(' + item.idx + ',\'Off\',RefreshFavorites,' + item.Protected + ');">' + $.t("Open") + '</button> ' +
-													'<button class="btn btn-mini btn-info" type="button" onclick="SwitchLight(' + item.idx + ',\'On\',RefreshFavorites,' + item.Protected + ');">' + $.t("Closed") + '</button>';
-											}
-											else {
+											if (item.Status == 'Open') {
 												status =
 													'<button class="btn btn-mini btn-info" type="button" onclick="SwitchLight(' + item.idx + ',\'Off\',RefreshFavorites,' + item.Protected + ');">' + $.t("Open") + '</button> ' +
 													'<button class="btn btn-mini" type="button" onclick="SwitchLight(' + item.idx + ',\'On\',RefreshFavorites,' + item.Protected + ');">' + $.t("Close") + '</button>';
+											}
+											else {
+												status =
+													'<button class="btn btn-mini" type="button" onclick="SwitchLight(' + item.idx + ',\'Off\',RefreshFavorites,' + item.Protected + ');">' + $.t("Open") + '</button> ' +
+													'<button class="btn btn-mini btn-info" type="button" onclick="SwitchLight(' + item.idx + ',\'On\',RefreshFavorites,' + item.Protected + ');">' + $.t("Closed") + '</button>';
 											}
 										}
 										else if (item.SwitchType == "Blinds Percentage Inverted") {
@@ -703,13 +703,13 @@ define(['app'], function (app) {
 										}
 										else if (item.SwitchType == "Blinds Percentage") {
 											isdimmer = true;
-											if (item.Status == 'Closed') {
-												img = '<img src="images/blindsopen48.png" title="' + $.t("Open Blinds") + '" onclick="SwitchLight(' + item.idx + ',\'Off\',RefreshFavorites,' + item.Protected + ');" class="lcursor" height="40" width="40">';
-												img2 = '<img src="images/blinds48sel.png" title="' + $.t("Close Blinds") + '" onclick="SwitchLight(' + item.idx + ',\'On\',RefreshFavorites,' + item.Protected + ');" class="lcursor" height="40" width="40">';
-											}
-											else {
+											if (item.Status == 'Open') {
 												img = '<img src="images/blindsopen48sel.png" title="' + $.t("Open Blinds") + '" onclick="SwitchLight(' + item.idx + ',\'Off\',RefreshFavorites,' + item.Protected + ');" class="lcursor" height="40" width="40">';
 												img2 = '<img src="images/blinds48.png" title="' + $.t("Close Blinds") + '" onclick="SwitchLight(' + item.idx + ',\'On\',RefreshFavorites,' + item.Protected + ');" class="lcursor" height="40" width="40">';
+											}
+											else {
+												img = '<img src="images/blindsopen48.png" title="' + $.t("Open Blinds") + '" onclick="SwitchLight(' + item.idx + ',\'Off\',RefreshFavorites,' + item.Protected + ');" class="lcursor" height="40" width="40">';
+												img2 = '<img src="images/blinds48sel.png" title="' + $.t("Close Blinds") + '" onclick="SwitchLight(' + item.idx + ',\'On\',RefreshFavorites,' + item.Protected + ');" class="lcursor" height="40" width="40">';
 											}
 										}
 										else if (item.SwitchType == "Blinds Percentage Inverted") {
@@ -2114,15 +2114,15 @@ define(['app'], function (app) {
 										}
 									}
 									else if (item.SwitchType == "Blinds Percentage") {
-										if (item.Status == 'Closed') {
-											status =
-												'<button class="btn btn-mini" type="button" onclick="SwitchLight(' + item.idx + ',\'Off\',RefreshFavorites,' + item.Protected + ');">' + $.t("Open") + '</button> ' +
-												'<button class="btn btn-mini btn-info" type="button" onclick="SwitchLight(' + item.idx + ',\'On\',RefreshFavorites,' + item.Protected + ');">' + $.t("Closed") + '</button>';
-										}
-										else {
+										if ((item.Status == 'Open')) {
 											status =
 												'<button class="btn btn-mini btn-info" type="button" onclick="SwitchLight(' + item.idx + ',\'Off\',RefreshFavorites,' + item.Protected + ');">' + $.t("Open") + '</button> ' +
 												'<button class="btn btn-mini" type="button" onclick="SwitchLight(' + item.idx + ',\'On\',RefreshFavorites,' + item.Protected + ');">' + $.t("Close") + '</button>';
+										}
+										else {
+											status =
+												'<button class="btn btn-mini" type="button" onclick="SwitchLight(' + item.idx + ',\'Off\',RefreshFavorites,' + item.Protected + ');">' + $.t("Open") + '</button> ' +
+												'<button class="btn btn-mini btn-info" type="button" onclick="SwitchLight(' + item.idx + ',\'On\',RefreshFavorites,' + item.Protected + ');">' + $.t("Closed") + '</button>';
 										}
 									}
 									else if (item.SwitchType == "Blinds Percentage Inverted") {
@@ -2527,13 +2527,13 @@ define(['app'], function (app) {
 										}
 									}
 									else if (item.SwitchType == "Blinds Percentage") {
-										if (item.Status == 'Closed') {
-											xhtm += '\t      <td id="img" class="img img1"><img src="images/blindsopen48.png" title="' + $.t("Open Blinds") + '" onclick="SwitchLight(' + item.idx + ',\'Off\',RefreshFavorites,' + item.Protected + ');" class="lcursor" height="40" width="40"></td>\n';
-											xhtm += '\t      <td id="img2" class="img2"><img src="images/blinds48sel.png" title="' + $.t("Close Blinds") + '" onclick="SwitchLight(' + item.idx + ',\'On\',RefreshFavorites,' + item.Protected + ');" class="lcursor" height="40" width="40"></td>\n';
-										}
-										else {
+										if (item.Status == 'Open') {
 											xhtm += '\t      <td id="img" class="img img1"><img src="images/blindsopen48sel.png" title="' + $.t("Open Blinds") + '" onclick="SwitchLight(' + item.idx + ',\'Off\',RefreshFavorites,' + item.Protected + ');" class="lcursor" height="40" width="40"></td>\n';
 											xhtm += '\t      <td id="img2" class="img2"><img src="images/blinds48.png" title="' + $.t("Close Blinds") + '" onclick="SwitchLight(' + item.idx + ',\'On\',RefreshFavorites,' + item.Protected + ');" class="lcursor" height="40" width="40"></td>\n';
+										}
+										else {
+											xhtm += '\t      <td id="img" class="img img1"><img src="images/blindsopen48.png" title="' + $.t("Open Blinds") + '" onclick="SwitchLight(' + item.idx + ',\'Off\',RefreshFavorites,' + item.Protected + ');" class="lcursor" height="40" width="40"></td>\n';
+											xhtm += '\t      <td id="img2" class="img2"><img src="images/blinds48sel.png" title="' + $.t("Close Blinds") + '" onclick="SwitchLight(' + item.idx + ',\'On\',RefreshFavorites,' + item.Protected + ');" class="lcursor" height="40" width="40"></td>\n';
 										}
 									}
 									else if (item.SwitchType == "Blinds Percentage Inverted") {
@@ -2878,7 +2878,7 @@ define(['app'], function (app) {
 								jj += 1;
 
 							}
-						}); //temp devices                    
+						}); //temp devices
 						if (bHaveAddedDivider == true) {
 							//close previous devider
 							htmlcontent += '</div>\n';
@@ -3111,7 +3111,7 @@ define(['app'], function (app) {
 								htmlcontent += xhtm;
 								jj += 1;
 							}
-						}); //weather devices    
+						}); //weather devices
 						if (bHaveAddedDivider == true) {
 							//close previous devider
 							htmlcontent += '</div>\n';
@@ -3277,7 +3277,7 @@ define(['app'], function (app) {
 								htmlcontent += xhtm;
 								jj += 1;
 							}
-						}); //security devices                    
+						}); //security devices
 						if (bHaveAddedDivider == true) {
 							//close previous divider
 							htmlcontent += '</div>\n';
@@ -3428,7 +3428,7 @@ define(['app'], function (app) {
 								if (jj == 0) {
 									//first time
 									htmlcontent += '<section class="dashCategory" id="dashUtility">';
-									// mobile util start                  
+									// mobile util start
 									if (($scope.config.DashboardType == 2) || (window.myglobals.ismobile == true)) {
 										if (htmlcontent != "") {
 											htmlcontent += '<br>';
@@ -3648,7 +3648,7 @@ define(['app'], function (app) {
 									    xhtm += '</tr>\n';
 									}
 								}
-								// end of mobile utilities                 
+								// end of mobile utilities
 								else {
 									if ($scope.config.DashboardType == 0) {
 										xhtm = '\t<div class="span4 movable" id="utility_' + item.idx + '">\n';

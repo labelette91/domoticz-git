@@ -373,6 +373,7 @@ public:
 	LastValue TempLog;
 	int			m_ShortLogInterval;
 	bool		m_bLogEventScriptTrigger;
+	bool		m_bDisableDzVentsSystem;
 private:
 	boost::mutex	m_sqlQueryMutex;
 	sqlite3			*m_dbase;

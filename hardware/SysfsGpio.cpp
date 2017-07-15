@@ -107,7 +107,8 @@
 	History:
 	03-jun-2017	HvB		Add interrupt support for edge = rising, falling or both.
 	24-jun-2017	HvB		Add hardware debounce parameter, range 10..750 milli sec.
-	04-jul-2017	HvB		Poll after an interrupt received to recover missed interrupts 
+	04-jul-2017	HvB		Poll after an interrupt received to recover missed interrupts
+	06-jul-2017 HvB		Removed log message for interrupt state change, forum request
 */
 
 #include "stdafx.h"
@@ -198,6 +199,7 @@ bool CSysfsGpio::StopHardware()
 	}
 	catch (...)
 	{
+		_log.Log(LOG_STATUS, "Sysfs GPIO: Worker - error during rundown");
 	}
 
 	try
@@ -209,6 +211,7 @@ bool CSysfsGpio::StopHardware()
 	}
 	catch (...)
 	{
+		_log.Log(LOG_STATUS, "Sysfs GPIO: Edge detection - error during rundown");
 	}
 
 	m_bIsStarted = false;
@@ -259,7 +262,7 @@ void CSysfsGpio::Do_Work()
 		{
 			if (m_polling_enabled)
 			{
-				PollGpioInputs();
+				PollGpioInputs(false);
 				UpdateDomoticzInputs(false);
 			}
 		}
@@ -386,8 +389,6 @@ void CSysfsGpio::EdgeDetectThread()
 					GpioSaveState(i, value);
 					FD_CLR(m_saved_state[i].edge_fd, &tmp_fds);
 					GpioWrite(m_saved_state[i].edge_fd, 1);
-
-					_log.Log(LOG_STATUS, "Sysfs GPIO: Pin%d new state: %d", m_saved_state[i].pin_number, value);
 				}
 			}
 
@@ -404,7 +405,7 @@ void CSysfsGpio::EdgeDetectThread()
 			//
 			if (poll_once)
 			{
-				PollGpioInputs();
+				PollGpioInputs(true);
 				UpdateDomoticzInputs(false);
 				poll_once = false;
 			}
@@ -486,8 +487,12 @@ void CSysfsGpio::Init()
 
 	UpdateDomoticzInputs(false); /* Make sure database inputs are in sync with actual hardware */
 
-	_log.Log(LOG_STATUS, "Sysfs GPIO: Worker startup, polling:%s interrupts:%s debounce:%d inputs:%d outputs:%d",
-		m_polling_enabled ? "yes":"no", m_interrupts_enabled ? "yes":"no", m_debounce_msec, input_count, output_count);
+	_log.Log(LOG_STATUS, "Sysfs GPIO: Startup - polling:%s interrupts:%s debounce:%dmsec inputs:%d outputs:%d",
+		m_polling_enabled ? "yes":"no", 
+		m_interrupts_enabled ? "yes":"no", 
+		m_debounce_msec, 
+		input_count, 
+		output_count);
 
 	if (m_interrupts_enabled)
 	{
@@ -532,7 +537,7 @@ void CSysfsGpio::FindGpioExports()
 	}
 }
 
-void CSysfsGpio::PollGpioInputs()
+void CSysfsGpio::PollGpioInputs(bool PollOnce)
 {
 	if (m_saved_state.size())
 	{
@@ -540,7 +545,7 @@ void CSysfsGpio::PollGpioInputs()
 		{
 			if ((m_saved_state[i].direction == GPIO_IN) &&
 				(m_saved_state[i].read_value_fd != -1) &&
-				((m_saved_state[i].edge == GPIO_EDGE_NONE) || m_saved_state[i].edge == GPIO_EDGE_UNKNOWN))
+				(PollOnce || (m_saved_state[i].edge == GPIO_EDGE_NONE) || (m_saved_state[i].edge == GPIO_EDGE_UNKNOWN)))
 			{
 				GpioSaveState(i, GpioReadFd(m_saved_state[i].read_value_fd));
 			}

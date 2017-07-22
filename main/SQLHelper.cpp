@@ -7127,6 +7127,10 @@ void CSQLHelper::FixDaylightSaving()
 std::string CSQLHelper::DeleteUserVariable(const std::string &idx)
 {
 	safe_query("DELETE FROM UserVariables WHERE (ID=='%q')", idx.c_str());
+	if (!m_bDisableEventSystem)
+	{
+		m_mainworker.m_eventsystem.GetCurrentUserVariables();
+	}
 
 	return "OK";
 
@@ -7160,7 +7164,10 @@ std::string CSQLHelper::SaveUserVariable(const std::string &varname, const std::
 		vId_str >> vId;
 		m_mainworker.m_eventsystem.ProcessUserVariable(vId);
 	}
-
+	if (!m_bDisableEventSystem)
+	{
+		m_mainworker.m_eventsystem.GetCurrentUserVariables();
+	}
 
 	return "OK";
 
@@ -7189,15 +7196,24 @@ std::string CSQLHelper::UpdateUserVariable(const std::string &idx, const std::st
 	time_t now = mytime(NULL);
 	struct tm ltime;
 	localtime_r(&now, &ltime);
-
+	std::string szVarValue = CURLEncode::URLDecode(varvalue.c_str());
 	safe_query(
 		"UPDATE UserVariables SET Name='%q', ValueType='%d', Value='%q', LastUpdate='%04d-%02d-%02d %02d:%02d:%02d' WHERE (ID == '%q')",
 		varname.c_str(),
 		typei,
-		CURLEncode::URLDecode(varvalue.c_str()).c_str(),
+		szVarValue.c_str(),
 		ltime.tm_year + 1900, ltime.tm_mon + 1, ltime.tm_mday, ltime.tm_hour, ltime.tm_min, ltime.tm_sec,
 		idx.c_str()
 		);
+	if (!m_bDisableEventSystem)
+	{
+		std::stringstream ssLastUpdate;
+		std::stringstream vId_str(idx);
+		uint64_t vId;
+		vId_str >> vId;
+		ssLastUpdate << (ltime.tm_year + 1900) << "-" << (ltime.tm_mon + 1) << "-" << ltime.tm_mday << " " << ltime.tm_hour << ":" << ltime.tm_min << ":" << ltime.tm_sec;
+		m_mainworker.m_eventsystem.UpdateUserVariable(vId, varname, szVarValue, typei, ssLastUpdate.str());
+	}
 	if (eventtrigger) {
 		std::stringstream vId_str(idx);
 		uint64_t vId;
@@ -7212,13 +7228,21 @@ bool CSQLHelper::SetUserVariable(const uint64_t idx, const std::string &varvalue
 	time_t now = mytime(NULL);
 	struct tm ltime;
 	localtime_r(&now, &ltime);
+	std::string szVarValue = CURLEncode::URLDecode(varvalue.c_str());
 	safe_query(
 		"UPDATE UserVariables SET Value='%q', LastUpdate='%04d-%02d-%02d %02d:%02d:%02d' WHERE (ID == %" PRIu64 ")",
-		CURLEncode::URLDecode(varvalue.c_str()).c_str(),
+		szVarValue.c_str(),
 		ltime.tm_year + 1900, ltime.tm_mon + 1, ltime.tm_mday, ltime.tm_hour, ltime.tm_min, ltime.tm_sec,
 		idx
 		);
-	if (eventtrigger) {
+	if (!m_bDisableEventSystem)
+	{
+		std::stringstream ssLastUpdate;
+		ssLastUpdate << (ltime.tm_year + 1900) << "-" << (ltime.tm_mon + 1) << "-" << ltime.tm_mday << " " << ltime.tm_hour << ":" << ltime.tm_min << ":" << ltime.tm_sec;
+		m_mainworker.m_eventsystem.UpdateUserVariable(idx, "", szVarValue, 0, ssLastUpdate.str());
+	}
+	if (eventtrigger)
+	{
 		m_mainworker.m_eventsystem.ProcessUserVariable(idx);
 	}
 	return true;

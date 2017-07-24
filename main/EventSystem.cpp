@@ -1391,8 +1391,6 @@ void CEventSystem::EvaluateEvent(const std::string &reason, const uint64_t Devic
 	if (!m_bEnabled)
 		return;
 
-	boost::unique_lock<boost::shared_mutex> uservariablesMutexLock(m_uservariablesMutex);
-
 	std::vector<std::string> FileEntries;
 	std::vector<std::string>::const_iterator itt;
 	std::string filename;
@@ -1478,6 +1476,8 @@ void CEventSystem::EvaluateEvent(const std::string &reason, const uint64_t Devic
 	}
 
 #ifdef ENABLE_PYTHON
+
+	boost::unique_lock<boost::shared_mutex> uservariablesMutexLock(m_uservariablesMutex);
 	try
 	{
 		FileEntries.clear();
@@ -1512,6 +1512,7 @@ void CEventSystem::EvaluateEvent(const std::string &reason, const uint64_t Devic
 	catch (...)
 	{
 	}
+	uservariablesMutexLock.unlock();
 #endif
 
 	EvaluateBlockly(reason, DeviceID, devname, nValue, sValue, nValueWording, varId);
@@ -1532,6 +1533,7 @@ void CEventSystem::EvaluateEvent(const std::string &reason, const uint64_t Devic
 				}
 				if (it->Interpreter == "Python") {
 #ifdef ENABLE_PYTHON
+					boost::unique_lock<boost::shared_mutex> uservariablesMutexLock(m_uservariablesMutex);
 					if (reason == "device")			EvaluatePython(reason, it->Name, it->Actions, DeviceID, devname, nValue, sValue, nValueWording, 0);
 					if (reason == "time")			EvaluatePython(reason, it->Name, it->Actions);
 					if (reason == "security")		EvaluatePython(reason, it->Name, it->Actions);
@@ -1595,6 +1597,7 @@ lua_State *CEventSystem::CreateBlocklyLuaState()
 	lua_setglobal(lua_state, "device");
 	devicestatesMutexLock.unlock();
 
+	boost::shared_lock<boost::shared_mutex> uservariablesMutexLock(m_uservariablesMutex);
 	lua_createtable(lua_state, (int)m_uservariables.size(), 0);
 
 	typedef std::map<uint64_t, _tUserVariable>::iterator it_var;
@@ -1620,6 +1623,7 @@ lua_State *CEventSystem::CreateBlocklyLuaState()
 		}
 	}
 	lua_setglobal(lua_state, "variable");
+	uservariablesMutexLock.unlock();
 
 	boost::lock_guard<boost::mutex> measurementStatesMutexLock(m_measurementStatesMutex);
 	GetCurrentMeasurementStates();
@@ -2545,7 +2549,6 @@ void CEventSystem::EvaluatePython(const std::string &reason, const std::string &
 	//_log.Log(LOG_NORM, "EventSystem: Already scheduled this event, skipping");
 	// _log.Log(LOG_STATUS, "EventSystem: script %s trigger, file: %s, script: %s, deviceName: %s" , reason.c_str(), filename.c_str(), PyString.c_str(), devname.c_str());
 
-
     Plugins::PythonEventsProcessPython(reason, filename, PyString, DeviceID, m_devicestates, m_uservariables, getSunRiseSunSetMinutes("Sunrise"),
         getSunRiseSunSetMinutes("Sunset"));
 
@@ -2819,6 +2822,7 @@ void CEventSystem::ExportDomoticzDataToLua(lua_State *lua_state, uint64_t device
 	char *vtype;
 
 	// Now do the user variables.
+	boost::shared_lock<boost::shared_mutex> uservariablesMutexLock(m_uservariablesMutex);
 	typedef std::map<uint64_t, _tUserVariable>::iterator it_var;
 	for (it_var iterator = m_uservariables.begin(); iterator != m_uservariables.end(); ++iterator)
 	{
@@ -3383,6 +3387,7 @@ void CEventSystem::EvaluateLua(const std::string &reason, const std::string &fil
 		if (filename == dzv_Dir + "dzVents.lua")
 			ExportDomoticzDataToLua(lua_state, DeviceID, varId);
 
+	boost::shared_lock<boost::shared_mutex> uservariablesMutexLock(m_uservariablesMutex);
 	lua_createtable(lua_state, (int)m_uservariables.size(), 0);
 
 	typedef std::map<uint64_t, _tUserVariable>::iterator it_var;
@@ -3435,6 +3440,7 @@ void CEventSystem::EvaluateLua(const std::string &reason, const std::string &fil
 			}
 		}
 	}
+	uservariablesMutexLock.unlock();
 
 	boost::shared_lock<boost::shared_mutex> scenesgroupsMutexLock(m_scenesgroupsMutex);
 	lua_createtable(lua_state, (int)m_scenesgroups.size(), 0);

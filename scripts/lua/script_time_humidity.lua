@@ -42,31 +42,43 @@ if (humCounter < SAMPLE_INTERVAL) then
    return commandArray
 end
  
-    humCounter = 0 -- reset the cycle counter
-		FanTimeOn = FanTimeOn + SAMPLE_INTERVAL
+humCounter = 0 -- reset the cycle counter
+FanTimeOn = FanTimeOn + SAMPLE_INTERVAL
   
--- get the global variables:
-humThresHold = tonumber(uservariables['humThresHold'])
+-- get the humidity thresHold:
+--humThresHold = tonumber(uservariables['humThresHold'])
+humThresHold = tonumber(otherdevices_svalues['SeuilHumidite'])
+
+--if deactivated
+if (humThresHold == 0) then
+    return commandArray
+end
 
 -- get the current humidity value
 if (TEST_MODE) then
-    current = tonumber(uservariables[TEST_MODE_HUMVAR])
+    currentHum = tonumber(uservariables[TEST_MODE_HUMVAR])
 else
-    current = otherdevices_humidity[SENSOR_NAME]
+    currentHum = otherdevices_humidity[SENSOR_NAME]
 end
  
 -- check if the sensor is on or has some weird reading
-if (current == 0 or current == nil) then
-    print('current is 0 or nil. Skipping this reading')
+if (currentHum == 0 or currentHum == nil) then
+    print('currentHum is 0 or nil. Skipping this reading')
     return commandArray
 end
 
 extHum = otherdevices_humidity[EXTERIOR_NAME]
 
+-- get the temperature value
+extTemp     = otherdevices_temperature[EXTERIOR_NAME]
+currentTemp = otherdevices_temperature[SENSOR_NAME]
+
+
 lastState = otherdevices[FAN_NAME]
-delta = (current - extHum)
- 
-if (current >= humThresHold) and (delta > 1 ) then
+delta = (currentHum - extHum)
+deltaTemp = ( extTemp-currentTemp )
+--si humidity greater than  humThresHold and exterior humidity is less and exterior temperature is less than interior temp + 5 
+if (currentHum >= humThresHold) and (delta > 1 ) and (deltaTemp < 5 ) then
 	  if (FanTimeOn >= TIME_OFF ) then
     	newCmd  = 'On'
     else
@@ -87,7 +99,7 @@ if (newCmd ~= lastState) then
 end
 
 if PRINT_MODE == true then
-    print('Current  humidity:' .. current..' Exterior humidity:' .. extHum..  ' humThresHold:' .. humThresHold .. ' FanTimeOn:' .. FanTimeOn .. ' Last Vmc State:' .. lastState ..' New  Vmc State:' .. newCmd )
+    print('Cave: '..currentTemp..'C/'..currentHum..'%'..' Ext: '..extTemp..'C/'..extHum..'%'..' ThresHold:' .. humThresHold .. '% FanTimeOn:' .. FanTimeOn .. ' Last Vmc State:' .. lastState ..' New  Vmc State:' .. newCmd )
 end
  
 -- save the globals

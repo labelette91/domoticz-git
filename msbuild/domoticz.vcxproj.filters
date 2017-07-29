@@ -1333,6 +1333,9 @@
     <None Include="..\www\views\temperatures\temperatureWidget.html">
       <Filter>www\views\temperatures</Filter>
     </None>
+    <None Include="..\www\app\MobileNotificationsController.js">
+      <Filter>www\app</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\webserver\Base64.h">

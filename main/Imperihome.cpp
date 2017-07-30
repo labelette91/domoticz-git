@@ -787,8 +787,10 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
 					 manageTypeGeneral(  row  , params ) ;
           break;
         case pTypeGeneralSwitch:
-          SetKey(0,"Status",nValueGlb) ;
-		  updateRoot(iroot++, row, DevSwitch);
+//          SetKey(0,"Status",nValueGlb) ;
+//		  updateRoot(iroot++, row, DevSwitch);
+			updateRoot(iroot++, row, LightType(row, params));
+
           break;
         case pTypeLux :
           SetKey(0,PKEYVALUE ,sValueGlb[0] , TLUX ,false );

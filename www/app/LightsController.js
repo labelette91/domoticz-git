@@ -3442,7 +3442,7 @@ define(['app'], function (app) {
 				tothousecodes = 16;
 				totunits = 64;
 			}
-			else if (lighttype == 60) {
+			else if (lighttype == 106) {
 				//Blyss
 				tothousecodes = 16;
 				totunits = 5;
@@ -3543,7 +3543,7 @@ define(['app'], function (app) {
 				$("#dialog-addmanuallightdevice #lighting2params").show();
 				$("#dialog-addmanuallightdevice #lighting3params").hide();
 			}
-			else if (lighttype == 60) {
+			else if (lighttype == 106) {
 				//Blyss
 				$('#dialog-addmanuallightdevice #lightparams3 #combogroupcode >option').remove();
 				$('#dialog-addmanuallightdevice #lightparams3 #combounitcode >option').remove();
@@ -3775,7 +3775,7 @@ define(['app'], function (app) {
 			mParams += "&switchtype=" + $("#dialog-addmanuallightdevice #lighttable #comboswitchtype option:selected").val();
 			var lighttype = $("#dialog-addmanuallightdevice #lighttable #combolighttype option:selected").val();
 			mParams += "&lighttype=" + lighttype;
-			if (lighttype == 60) {
+			if (lighttype == 106) {
 				//Blyss
 				mParams += "&groupcode=" + $("#dialog-addmanuallightdevice #lightparams3 #combogroupcode option:selected").val();
 				mParams += "&unitcode=" + $("#dialog-addmanuallightdevice #lightparams3 #combounitcode option:selected").val();

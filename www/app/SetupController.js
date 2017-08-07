@@ -665,6 +665,12 @@ define(['app'], function (app) {
 					if (typeof data.SendErrorsAsNotification != 'undefined') {
 						$("#emailtable #SendErrorsAsNotification").prop('checked', data.SendErrorsAsNotification == 1);
 					}
+					if (typeof data.IFTTTEnabled != 'undefined') {
+						$("#ifttttable #IFTTTEnabled").prop('checked', data.IFTTTEnabled == 1);
+					}
+					if (typeof data.IFTTTAPI != 'undefined') {
+						$("#ifttttable #IFTTTAPI").val(atob(data.IFTTTAPI));
+					}
 				}
 			});
 		}

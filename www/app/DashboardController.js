@@ -150,6 +150,10 @@ define(['app'], function (app) {
 									}
 									else {
 										if (item.Type.indexOf('Group') == 0) {
+											var backgroundClass = $rootScope.GetItemBackgroundStatus(item);
+											$(id + " #bstatus").removeClass('statusNormal').removeClass('statusProtected').removeClass('statusTimeout').removeClass('statusLowBattery');
+											$(id + " #bstatus").addClass(backgroundClass);
+
 											var img1 = "";
 											var img2 = "";
 											var onclass = "";
@@ -862,14 +866,9 @@ define(['app'], function (app) {
 												}
 											}
 										}
-
-										$(id + " #name").addClass('statusNormal');
-										if (item.HaveTimeout == true) {
-											$(id + " #name").removeClass('statusNormal').addClass('statusTimeout');
-										}
-										else if (item.Protected == true) {
-											$(id + " #name").removeClass('statusNormal').addClass('statusProtected');
-										}
+										var backgroundClass = $rootScope.GetItemBackgroundStatus(item);
+										$(id + " #bstatus").removeClass('statusNormal').removeClass('statusProtected').removeClass('statusTimeout').removeClass('statusLowBattery');
+										$(id + " #bstatus").addClass(backgroundClass);
 
 										if ($(id + " #img").html() != img) {
 											$(id + " #img").html(img);
@@ -1044,6 +1043,11 @@ define(['app'], function (app) {
 										if ($(id + " #lastupdate > span").html() != item.LastUpdate) {
 											$(id + " #lastupdate > span").html(item.LastUpdate);
 										}
+
+										var backgroundClass = $rootScope.GetItemBackgroundStatus(item);
+										$(id + " #bstatus").removeClass('statusNormal').removeClass('statusProtected').removeClass('statusTimeout').removeClass('statusLowBattery');
+										$(id + " #bstatus").addClass(backgroundClass);
+
 										if ($scope.config.ShowUpdatedEffect == true) {
 											$(id + " #name").effect("highlight", { color: '#EEFFEE' }, 1000);
 										}
@@ -1214,6 +1218,10 @@ define(['app'], function (app) {
 										if ($(id + " #lastupdate > span").html() != item.LastUpdate) {
 											$(id + " #lastupdate > span").html(item.LastUpdate);
 										}
+										var backgroundClass = $rootScope.GetItemBackgroundStatus(item);
+										$(id + " #bstatus").removeClass('statusNormal').removeClass('statusProtected').removeClass('statusTimeout').removeClass('statusLowBattery');
+										$(id + " #bstatus").addClass(backgroundClass);
+
 										if ($scope.config.ShowUpdatedEffect == true) {
 											$(id + " #name").effect("highlight", { color: '#EEFFEE' }, 1000);
 										}
@@ -1309,15 +1317,9 @@ define(['app'], function (app) {
 											}
 										}
 
-										$(id + " #name").addClass('statusNormal');
-										if (item.HaveTimeout == true) {
-											$(id + " #name").removeClass('statusNormal');
-											$(id + " #name").addClass('statusTimeout');
-										}
-										else if (item.Protected == true) {
-											$(id + " #name").removeClass('statusNormal');
-											$(id + " #name").addClass('statusProtected');
-										}
+										var backgroundClass = $rootScope.GetItemBackgroundStatus(item);
+										$(id + " #bstatus").removeClass('statusNormal').removeClass('statusProtected').removeClass('statusTimeout').removeClass('statusLowBattery');
+										$(id + " #bstatus").addClass(backgroundClass);
 
 										if ($(id + " #img").html() != img) {
 											$(id + " #img").html(img);
@@ -1656,19 +1658,9 @@ define(['app'], function (app) {
 											}
 										}
 
-										$(id + " #name").addClass('statusNormal');
-										if (item.HaveTimeout == true) {
-											$(id + " #name").removeClass('statusNormal');
-											$(id + " #name").addClass('statusTimeout');
-										} else {
-											var BatteryLevel = parseInt(item.BatteryLevel);
-											if (BatteryLevel != 255) {
-												if (BatteryLevel <= 10) {
-													$(id + " #name").removeClass('statusNormal');
-													$(id + " #name").addClass('statusLowBattery');
-												}
-											}
-										}
+										var backgroundClass = $rootScope.GetItemBackgroundStatus(item);
+										$(id + " #bstatus").removeClass('statusNormal').removeClass('statusProtected').removeClass('statusTimeout').removeClass('statusLowBattery');
+										$(id + " #bstatus").addClass(backgroundClass);
 
 										if ($(id + " #status > span").html() != status) {
 											$(id + " #status > span").html(status);
@@ -1843,23 +1835,17 @@ define(['app'], function (app) {
 									else if ($scope.config.DashboardType == 1) {
 										xhtm = '\t<div class="span3 movable" id="scene_' + item.idx + '">\n';
 									}
-									xhtm += '\t  <div class="item">\n';
+									var backgroundClass = $rootScope.GetItemBackgroundStatus(item);
+									xhtm += '\t  <div id="bstatus" class="item ' + backgroundClass + '">\n';
 									if (item.Type.indexOf('Scene') == 0) {
 										xhtm += '\t    <table id="itemtablesmall" class="itemtablesmall" border="0" cellpadding="0" cellspacing="0">\n';
 									}
 									else {
 										xhtm += '\t    <table id="itemtablesmalldoubleicon" class="itemtablesmalldoubleicon" border="0" cellpadding="0" cellspacing="0">\n';
 									}
-									backgroundClass = "statusNormal";
-									if (item.HaveTimeout == true) {
-										backgroundClass = "statusTimeout";
-									}
-									else if (item.Protected == true) {
-										backgroundClass = "statusProtected";
-									}
 									xhtm +=
-										'\t    <tr class="' + backgroundClass + '">\n' +
-										'\t      <td id="name" class="name ' + backgroundClass + '">' + item.Name + '</td>\n' +
+										'\t    <t>\n' +
+										'\t      <td id="name" class="name">' + item.Name + '</td>\n' +
 										'\t      <td id="bigtext" class="bigtext"><span>';
 									var bigtext = TranslateStatusShort(item.Status);
 									if (item.UsedByCamera == true) {
@@ -1961,13 +1947,7 @@ define(['app'], function (app) {
 									htmlcontent += '<div class="row divider">\n';
 									bHaveAddedDivider = true;
 								}
-								backgroundClass = "statusNormal";
-								if (item.HaveTimeout == true) {
-									backgroundClass = "statusTimeout";
-								}
-								else if (item.Protected == true) {
-									backgroundClass = "statusProtected";
-								}
+								var backgroundClass = $rootScope.GetItemBackgroundStatus(item);
 								var status = "";
 								var xhtm = "";
 								if (($scope.config.DashboardType == 2) || (window.myglobals.ismobile == true)) {
@@ -2347,7 +2327,7 @@ define(['app'], function (app) {
 									else if ($scope.config.DashboardType == 1) {
 										xhtm = '\t<div class="span3 movable" id="light_' + item.idx + '">\n';
 									}
-									xhtm += '\t  <div class="item">\n';
+									xhtm += '\t  <div id="bstatus" class="item ' + backgroundClass + '">\n';
 									if ((item.Type.indexOf('Blind') == 0) || (item.SwitchType == "Blinds") || (item.SwitchType == "Blinds Inverted") || (item.SwitchType == "Blinds Percentage") || (item.SwitchType == "Blinds Percentage Inverted") || (item.SwitchType.indexOf("Venetian Blinds") == 0) || (item.SwitchType.indexOf("Media Player") == 0)) {
 										if (
 											(item.SubType == "RAEX") ||
@@ -2376,8 +2356,8 @@ define(['app'], function (app) {
 										xhtm += '\t    <table id="itemtablesmall" class="itemtablesmall" border="0" cellpadding="0" cellspacing="0">\n';
 									}
 									xhtm +=
-										'\t    <tr class="' + backgroundClass + '">\n' +
-										'\t      <td id="name" class="name ' + backgroundClass + '">' + item.Name + '</td>\n' +
+										'\t    <tr>\n' +
+										'\t      <td id="name" class="name">' + item.Name + '</td>\n' +
 										'\t      <td id="bigtext" class="bigtext"><span>';
 									var bigtext = TranslateStatusShort(item.Status);
 									if (item.UsedByCamera == true) {
@@ -2771,6 +2751,9 @@ define(['app'], function (app) {
 									bHaveAddedDivider = true;
 								}
 								var xhtm = "";
+
+								var backgroundClass = $rootScope.GetItemBackgroundStatus(item);
+
 								if (($scope.config.DashboardType == 2) || (window.myglobals.ismobile == true)) {
 									var vname = '<img src="images/next.png" onclick="ShowTempLog(\'#dashcontent\',\'ShowFavorites\',' + item.idx + ',\'' + escape(item.Name) + '\');" height="16" width="16">' + " " + item.Name;
 
@@ -2813,22 +2796,10 @@ define(['app'], function (app) {
 									else if ($scope.config.DashboardType == 1) {
 										xhtm = '\t<div class="span3 movable" id="temp_' + item.idx + '">\n';
 									}
-									xhtm += '\t  <div class="item">\n';
+									xhtm += '\t  <div id="bstatus" class="item ' + backgroundClass + '">\n';
 									xhtm += '\t    <table id="itemtablesmall" class="itemtablesmall" border="0" cellpadding="0" cellspacing="0">\n';
-									backgroundClass = "statusNormal";
-									if (item.HaveTimeout == true) {
-										backgroundClass = "statusTimeout";
-									}
-									else {
-										var BatteryLevel = parseInt(item.BatteryLevel);
-										if (BatteryLevel != 255) {
-											if (BatteryLevel <= 10) {
-												backgroundClass = "statusLowBattery";
-											}
-										}
-									}
-									xhtm += '\t    <tr class="' + backgroundClass + '">\n';
-									xhtm += '\t      <td id="name" class="name ' + backgroundClass + '">' + item.Name + '</td>\n';
+									xhtm += '\t    <tr>\n';
+									xhtm += '\t      <td id="name" class="name">' + item.Name + '</td>\n';
 									xhtm += '\t      <td id="bigtext" class="bigtext"><span>';
 									var bigtext = "";
 									if (typeof item.Temp != 'undefined') {
@@ -2935,6 +2906,8 @@ define(['app'], function (app) {
 									htmlcontent += '<div class="row divider">\n';
 									bHaveAddedDivider = true;
 								}
+								// generate protected/timeout/lowbattery status
+								var backgroundClass = $rootScope.GetItemBackgroundStatus(item);
 								var xhtm = "";
 								if (($scope.config.DashboardType == 2) || (window.myglobals.ismobile == true)) {
 									var vname = item.Name;
@@ -3008,23 +2981,10 @@ define(['app'], function (app) {
 									else if ($scope.config.DashboardType == 1) {
 										xhtm = '\t<div class="span3 movable" id="weather_' + item.idx + '">\n';
 									}
-									xhtm += '\t  <div class="item">\n';
+									xhtm += '\t  <div id="bstatus" class="item ' + backgroundClass + '">\n';
 									xhtm += '\t    <table id="itemtablesmall" class="itemtablesmall" border="0" cellpadding="0" cellspacing="0">\n';
-
-									backgroundClass = "statusNormal";
-									if (item.HaveTimeout == true) {
-										backgroundClass = "statusTimeout";
-									}
-									else {
-										var BatteryLevel = parseInt(item.BatteryLevel);
-										if (BatteryLevel != 255) {
-											if (BatteryLevel <= 10) {
-												backgroundClass = "statusLowBattery";
-											}
-										}
-									}
-									xhtm += '\t    <tr class="' + backgroundClass + '">\n';
-									xhtm += '\t      <td id="name" class="name ' + backgroundClass + '">' + item.Name + '</td>\n';
+									xhtm += '\t    <tr>\n';
+									xhtm += '\t      <td id="name" class="name">' + item.Name + '</td>\n';
 									xhtm += '\t      <td id="bigtext" class="bigtext"><span>';
 									if (typeof item.Barometer != 'undefined') {
 										xhtm += item.Barometer + ' hPa';
@@ -3197,22 +3157,16 @@ define(['app'], function (app) {
 									else if ($scope.config.DashboardType == 1) {
 										xhtm = '\t<div class="span3 movable" id="security_' + item.idx + '">\n';
 									}
-									xhtm += '\t  <div class="item">\n';
+									var backgroundClass = $rootScope.GetItemBackgroundStatus(item);
+									xhtm += '\t  <div id="bstatus" class="item ' + backgroundClass + '">\n';
 									if ($scope.config.DashboardType == 0) {
 										xhtm += '\t    <table id="itemtablesmall" class="itemtablesmall" border="0" cellpadding="0" cellspacing="0">\n';
 									}
 									else if ($scope.config.DashboardType == 1) {
 										xhtm += '\t    <table id="itemtablesmall" class="itemtablesmall" border="0" cellpadding="0" cellspacing="0">\n';
 									}
-									backgroundClass = "statusNormal";
-									if (item.HaveTimeout == true) {
-										backgroundClass = "statusTimeout";
-									}
-									else if (item.Protected == true) {
-										backgroundClass = "statusProtected";
-									}
-									xhtm += '\t    <tr class="' + backgroundClass + '">\n' +
-										'\t      <td id="name" class="name ' + backgroundClass + '">' + item.Name + '</td>\n' +
+									xhtm += '\t    <tr>\n' +
+										'\t      <td id="name" class="name">' + item.Name + '</td>\n' +
 										'\t      <td id="bigtext" class="bigtext"><span>' + TranslateStatusShort(item.Status) + '</span></td>\n';
 
 									if (item.SubType == "Security Panel") {
@@ -3358,13 +3312,7 @@ define(['app'], function (app) {
 										else if ($scope.config.DashboardType == 1) {
 											xhtm += '\t    <table id="itemtablesmall" class="itemtablesmall" border="0" cellpadding="0" cellspacing="0">\n';
 										}
-										backgroundClass = "statusNormal";
-										if (item.HaveTimeout == true) {
-											backgroundClass = "statusTimeout";
-										}
-										else if (item.Protected == true) {
-											backgroundClass = "statusProtected";
-										}
+										var backgroundClass = $rootScope.GetItemBackgroundStatus(item);
 
 										xhtm +=
 											'\t    <tr class="' + backgroundClass + '">\n' +
@@ -3664,13 +3612,6 @@ define(['app'], function (app) {
 									else if ($scope.config.DashboardType == 1) {
 										xhtm = '\t<div class="span3 movable" id="utility_' + item.idx + '">\n';
 									}
-									//if (typeof item.Type != 'undefined') {
-									//    var itemtypeclass= ' ' + item.Type.slice(0);
-									//    itemtypeclass = itemtypeclass.replace(/\s/g,'');
-									//}
-									//var itemsubtypeclass=item.SubType.slice(0);
-									//itemsubtypeclass=itemsubtypeclass.replace(/\s/g,'');
-
 									/* generate item classes.  */
 
 									/* type of device */
@@ -3687,22 +3628,6 @@ define(['app'], function (app) {
 										itemsubtypeclass = itemsubtypeclass.replace(/\\/g, '');
 										itemsubtypeclass = itemsubtypeclass.replace(/\//g, '');
 									}
-
-									/* generate protected/timeout/lowbattery status */
-									backgroundClass = "statusNormal";
-									if (item.HaveTimeout == true) {
-										backgroundClass = "statusTimeout";
-									}
-									else {
-										var BatteryLevel = parseInt(item.BatteryLevel);
-										if (BatteryLevel != 255) {
-											if (BatteryLevel <= 10) {
-												backgroundClass = "statusLowBattery";
-											}
-										}
-									}
-
-
 									/* generate bigtext html */
 									var bigtexthtml = "";
 									bigtexthtml += '<span class="value1">';
@@ -3808,11 +3733,6 @@ define(['app'], function (app) {
 											statushtml = "&nbsp;";
 										}
 									}
-
-
-
-
-
 									else if ((item.Type == "Energy") || (item.Type == "Power") || (item.SubType == "kWh")) {
 										if (((item.Type == "Energy") || (item.Type == "Power") || (item.SubType == "kWh")) && (item.SwitchTypeVal == 4)) {
 											imagehtml += 'PV48.png" class="lcursor" onclick="ShowCounterLogSpline(\'#dashcontent\',\'ShowFavorites\',' + item.idx + ',\'' + escape(item.Name) + '\', ' + item.SwitchTypeVal + ');" height="40" width="40"></td>\n';
@@ -3931,34 +3851,21 @@ define(['app'], function (app) {
 									}
 									statushtml = '<span class="value1">' + statushtml + '</span>';
 
+									// generate protected/timeout/lowbattery status
+									var backgroundClass = $rootScope.GetItemBackgroundStatus(item);
 									/* checking the generated html for even more classes, then fill in the HTML */
-									var count = 1;
-									//temporary = $(statushtml).html().trim();
-									//temporary = statushtml.replace(/^[ \t]+/gm, '');
-									count = (statushtml.match(/<span/g) || []).length;//$(statushtml).find("span").length;
+									var count = (statushtml.match(/<span/g) || []).length;//$(statushtml).find("span").length;
 									// if ($(escape(statushtml)).text().length != $(escape(bigtexthtml)).text().length){
 									if (statushtml.length != bigtexthtml.length) {
-										xhtm += '\t  <div class="item ' + itemtypeclass + ' ' + itemsubtypeclass + ' ' + backgroundClass + ' withstatus statuscount' + count + '">\n';
+										xhtm += '\t  <div id="bstatus" class="item ' + itemtypeclass + ' ' + itemsubtypeclass + ' ' + backgroundClass + ' withstatus statuscount' + count + '">\n';
 									} else {
-										xhtm += '\t  <div class="item ' + itemtypeclass + ' ' + itemsubtypeclass + ' ' + backgroundClass + ' withoutstatus statuscount' + count + '">\n';
+										xhtm += '\t  <div id="bstatus" class="item ' + itemtypeclass + ' ' + itemsubtypeclass + ' ' + backgroundClass + ' withoutstatus statuscount' + count + '">\n';
 									}
-
-									//temporary = $.parseHTML( xhtm );
-									//var count = $('.status > span').length;
-									//var statusSubstring = $(temporary).filter('status > span').text();
-									//var count = (statusSubstring.match(/span/g) || []).length;
-									//console.log("COUNT COUNT COUNT is " + count);
-									//if(count > 0){
-									//    xhtm='\t<div class="span4 movable" id="scene_' + item.idx +'">\n';
-									//      xhtm = xhtm.replace(/class=\"item/g, "class=\"item complex" + count);
-									//}
-
-
 
 									if (!isVirtualThermostat(item)) {
 									xhtm += '\t    <table id="itemtablesmall" class="itemtablesmall" border="0" cellpadding="0" cellspacing="0">\n';
-									xhtm += '\t    <tr class="' + backgroundClass + '">\n';
-									xhtm += '\t      <td id="name" class="name ' + backgroundClass + '">' + item.Name + '</td>\n';
+									xhtm += '\t    <tr">\n';
+									xhtm += '\t      <td id="name" class="name">' + item.Name + '</td>\n';
 									xhtm += '\t      <td id="bigtext" class="bigtext"><span class="wrapper">' + bigtexthtml + '</span></td>\n';
 									xhtm += '\t      <td id="img" class="img img1">' + imagehtml + '</td>';
 									xhtm += '\t      <td id="status" class="status"><span class="wrapper">' + statushtml + '</span></td>\n' +
@@ -3969,11 +3876,11 @@ define(['app'], function (app) {
 										'\t</div>\n';
 									}else{	
 									xhtm += '\t    <table id="itemtablesmall" class="itemtablesmall nolastSeen" border="0" cellpadding="0" cellspacing="0">\n';
-									xhtm += '\t    <tr class="' + backgroundClass + '">\n';
-									xhtm += '\t      <td id="name" class="name ' + backgroundClass + '">' + item.Name + '</td>\n';
+									xhtm += '\t    <tr">\n';
+									xhtm += '\t      <td id="name" class="name">' + item.Name + '</td>\n';
 									xhtm += '\t      <td id="bigtext" class="bigtext"><span class="wrapper">' + bigtexthtml + '</span></td>\n';
 									xhtm += '\t      <td id="img" class="img img1">' + imagehtml + '</td>';
-									xhtm += '\t      <td id="status" class="status"><span class="wrapper">' + statushtml + '</span></td>\n';
+									xhtm += '\t      <td id="status" class="status"><span class="wrapper">' + statushtml + '</span></td>\n' ;
 									//display thermostat slider
 									xhtm += '<td class="no-before" style="display: flex;">';
 									xhtm += '<img align="left"  src="images/down.png"  style="width: 32px;"                    height="24px" title="' + $.t('Decrement') + '" onclick="IncrementThermostat(' + item.idx + ',0,\'#dashcontent #utility_\');" onmouseover="cursorhand()" onmouseout="cursordefault()">';

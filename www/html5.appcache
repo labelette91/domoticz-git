@@ -11,7 +11,8 @@ css/jquery.dataTables.min.css
 css/demo_table_jui.css
 css/jquery.uix.multiselect.css
 css/jquery-ui-timepicker-addon.css
-##css/style.css
+css/legacy.css
+css/style.css
 css/ui-darkness/jquery-ui.min.css
 secpanel/css/font.less
 secpanel/css/reset.less

@@ -1050,10 +1050,6 @@ body table#mobileitem {
 							font-size: 80%;
 							line-height: 86%;
 						}
-body table#itemtablesmall.nolastSeen tr td:first-child + td + td + td + td:before{
-	content: "";
-	font-style: italic;
-}
 							body table#itemtablesmall tr td:first-child + td + td + td + td:before {
 								content: "Last Seen: ";
 								font-style: italic;
@@ -1692,7 +1688,7 @@ table.mobileitem {
 	border-radius: 25px;
 	width: 100%;
 	margin-top: 0px;
-/*	position: absolute;*/
+	position: absolute;
 	height: 13px;
 	background-color: #8e8d8d;
 	background: url('images/bg-track.png') repeat top left;
@@ -2883,7 +2879,10 @@ div.item.statusLowBattery td#name{
 }
 
 /* *** ******** new for thermostat ************* */
-
+body table#itemtablesmall.nolastSeen tr td:first-child + td + td + td + td:before{
+	content: "";
+	font-style: italic;
+}
 body table#itemtable-th,
 body table#itemtable-th tbody{
 	display: block;

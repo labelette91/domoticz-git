@@ -1571,6 +1571,9 @@ define(['app'], function (app) {
 			var systemsHTML = '<input type="checkbox" id="selectorHiddenOff" name="selectorHiddenOff" value="0"><label for="selectorHiddenOff"/>';
 			$('#lightcontent #id_selectorHiddenOff').html(systemsHTML);
 
+			var systemsHTML = '<input type="checkbox" id="log"><label for="log" />';
+			$('#lightcontent #id_log').html(systemsHTML);
+
 			oTable = $('#lightcontent #subdevicestable').dataTable({
 				"sDom": '<"H"frC>t<"F"i>',
 				"oTableTools": {

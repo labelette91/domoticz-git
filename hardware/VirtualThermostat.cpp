@@ -192,7 +192,7 @@ try
 
 					}
 					if (( lastPowerModulation != PowerModulation) || (lastTemp != RoomTemperature ) || (SwitchStateAsChanged) )
-						m_sql.safe_query("UPDATE DeviceStatus SET RoomTemp='%4.1f',Power=%d,nValue=%d, LastUpdate='%s' WHERE (ID = %s )", RoomTemperature , PowerModulation ,SwitchValue,  GetCurrentAsciiTime ().c_str(), idxThermostat  	);
+						m_sql.safe_query("UPDATE DeviceStatus SET RoomTemp='%4.1f',Power=%d,nValue=%d, LastUpdate='%s' WHERE (ID = %s )", RoomTemperature , PowerModulation ,SwitchValue, TimeToString(NULL, TF_DateTime).c_str(), idxThermostat  	);
 													if ((Minute % 10 )==0)
 				{
 					//compute delta room temperature

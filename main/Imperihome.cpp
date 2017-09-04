@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include <string>
+#include <time.h>
+#include "localtime_r.h"
 #include "../main/Logger.h"
 #include "../main/Helper.h"
 #include "../main/SQLHelper.h"
@@ -1714,6 +1716,36 @@ bool  ImperiHomeRequest( std::string &request_path , std::string &rep_content)
 			_log.Log(LOG_TRACE, "IMPA: IIS Answer %s", rep_content.c_str());
 
   return ret;
+}
+//convert date string 10/12/2014 10:45:58 en  struct tm
+void DateAsciiTotmTime(std::string &sTime, struct tm &tmTime)
+{
+	tmTime.tm_isdst = 0; //dayly saving time
+	tmTime.tm_year = atoi(sTime.substr(0, 4).c_str()) - 1900;
+	tmTime.tm_mon = atoi(sTime.substr(5, 2).c_str()) - 1;
+	tmTime.tm_mday = atoi(sTime.substr(8, 2).c_str());
+	tmTime.tm_hour = atoi(sTime.substr(11, 2).c_str());
+	tmTime.tm_min = atoi(sTime.substr(14, 2).c_str());
+	tmTime.tm_sec = atoi(sTime.substr(17, 2).c_str());
+}
+//convert struct tm time to char
+void AsciiTime(struct tm &ltime, char * pTime)
+{
+	sprintf(pTime, "%04d-%02d-%02d %02d:%02d:%02d", ltime.tm_year + 1900, ltime.tm_mon + 1, ltime.tm_mday, ltime.tm_hour, ltime.tm_min, ltime.tm_sec);
+}
+
+void AsciiTime(time_t DateStart, char * DateStr)
+{
+	struct tm ltime;
+	localtime_r(&DateStart, &ltime);
+	AsciiTime(ltime, DateStr);
+}
+
+time_t DateAsciiToTime_t(std::string & DateStr)
+{
+	struct tm tmTime;
+	DateAsciiTotmTime(DateStr, tmTime);
+	return mktime(&tmTime);
 }
 
 void ImperiHome::getGraphic(std::string &idx , std::string TableName , std::string FieldName , std::string KeyName , time_t DateStart , time_t  DateEnd, std::string &rep_content )

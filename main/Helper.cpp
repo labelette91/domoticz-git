@@ -526,117 +526,52 @@ std::vector<std::string> ExecuteCommandAndReturn(const std::string &szCommand, i
 	return ret;
 }
 
-//convert date string 10/12/2014 10:45:58 en  struct tm
-void DateAsciiTotmTime (std::string &sTime , struct tm &tmTime  )
+std::string TimeToString(const time_t *ltime, const _eTimeFormat format)
 {
-		tmTime.tm_isdst=0; //dayly saving time
-		tmTime.tm_year=atoi(sTime.substr(0,4).c_str())-1900;
-		tmTime.tm_mon=atoi(sTime.substr(5,2).c_str())-1;
-		tmTime.tm_mday=atoi(sTime.substr(8,2).c_str());
-		tmTime.tm_hour=atoi(sTime.substr(11,2).c_str());
-		tmTime.tm_min=atoi(sTime.substr(14,2).c_str());
-		tmTime.tm_sec=atoi(sTime.substr(17,2).c_str());
+	struct tm timeinfo;
+	struct timeval tv;
+	std::stringstream sstr;
+	if (ltime == NULL) // current time
+	{
+#ifdef CLOCK_REALTIME
+		struct timespec ts;
+		if (!clock_gettime(CLOCK_REALTIME, &ts))
+		{
+			tv.tv_sec = ts.tv_sec;
+			tv.tv_usec = ts.tv_nsec / 1000;
+		}
+		else
+#endif
+			gettimeofday(&tv, NULL);
+#ifdef WIN32
+		time_t tv_sec = tv.tv_sec;
+		localtime_r(&tv_sec, &timeinfo);
+#else
+		localtime_r(&tv.tv_sec, &timeinfo);
+#endif
+	}
+	else
+		localtime_r(&(*ltime), &timeinfo);
 
+	if (format > TF_Time)
+	{
+		sstr << (timeinfo.tm_year + 1900) << "-"
+		<< std::setw(2)	<< std::setfill('0') << (timeinfo.tm_mon + 1) << "-"
+		<< std::setw(2) << std::setfill('0') << timeinfo.tm_mday << " ";
+	}
 
-}
-//convert struct tm time to char
-void AsciiTime (struct tm &ltime , char * pTime )
-{
-		sprintf(pTime, "%04d-%02d-%02d %02d:%02d:%02d", ltime.tm_year + 1900, ltime.tm_mon + 1, ltime.tm_mday, ltime.tm_hour, ltime.tm_min, ltime.tm_sec);
-}
+	if (format != TF_Date)
+	{
+		sstr
+		<< std::setw(2) << std::setfill('0') << timeinfo.tm_hour << ":"
+		<< std::setw(2) << std::setfill('0') << timeinfo.tm_min << ":"
+		<< std::setw(2) << std::setfill('0') << timeinfo.tm_sec;
+	}
 
-std::string  GetCurrentAsciiTime ()
-{
-	    time_t now = time(0)+1;
-		struct tm ltime;
-		localtime_r(&now, &ltime);
-		char pTime[40];
-		AsciiTime (ltime ,  pTime );
-		return pTime ;
-}
+	if (format > TF_DateTime && ltime == NULL)
+		sstr << "." << std::setw(3) << std::setfill('0') << ((int)tv.tv_usec / 1000);
 
-void AsciiTime ( time_t DateStart, char * DateStr )
-{
-	struct tm ltime;
-	localtime_r(&DateStart, &ltime);
-	AsciiTime (ltime ,  DateStr );
-
-}
-
-time_t DateAsciiToTime_t ( std::string & DateStr )
-{
-	struct tm tmTime ;
-	DateAsciiTotmTime (DateStr , tmTime  );
-	return mktime(&tmTime);
-
-}
-
-void CircularBuffer::Clear ()
-{
-  for (int i=0;i<Size;i++)Value[i]=0;
-  index=0;
-  Sum=0;
-}
-CircularBuffer::CircularBuffer (int pSize)
-{
-  Value=new double[pSize];
-  Size = pSize;
-  Clear();
-}
-CircularBuffer::~CircularBuffer ()
-{
-  delete [] Value;
-}
-int CircularBuffer::GetNext()
-{
-  if (index>=(Size-1) )
-    return 0;
-  else
-    return index+1;
-}
-double CircularBuffer::Put(double val)
-{
-  double lastv = Value[index];
-  Value[index]= val;
-  index = GetNext();
-  Sum-=lastv;
-  Sum+=val;
-  return lastv;
-}
-double CircularBuffer::GetLast()
-{
-  //return last recorded value
-  return Value[index];
-}
-
-double CircularBuffer::GetSum()
-{
-  return Sum;
-}
-LastValue::LastValue(float pdelta)
-{
-  Delta = pdelta ;
-}
-double LastValue::Get(int index)
-{
-  return LastValues[index];
-}
-void   LastValue::Put(int index , double value)
-{
-  LastValues[index] = value;
-}
-bool LastValue::AsChanged(int index , double value  )
-{
-  return AsChanged( index ,  value , Delta );
-}
-bool LastValue::AsChanged(int index , double value  , double delta )
-{
-  if ( fabs(LastValues[index]-value)  > delta )
-  {
-    LastValues[index] = value ;
-    return true;
-  }
-    return false;
+	return sstr.str();
 }
 
 std::string GenerateMD5Hash(const std::string &InputString, const std::string &Salt)
@@ -1004,4 +939,71 @@ uint32_t SystemUptime()
 #else
 	return 0;
 #endif
+}
+void CircularBuffer::Clear ()
+{
+  for (int i=0;i<Size;i++)Value[i]=0;
+  index=0;
+  Sum=0;
+}
+CircularBuffer::CircularBuffer (int pSize)
+{
+  Value=new double[pSize];
+  Size = pSize;
+  Clear();
+}
+CircularBuffer::~CircularBuffer ()
+{
+  delete [] Value;
+}
+int CircularBuffer::GetNext()
+{
+  if (index>=(Size-1) )
+    return 0;
+  else
+    return index+1;
+}
+double CircularBuffer::Put(double val)
+{
+  double lastv = Value[index];
+  Value[index]= val;
+  index = GetNext();
+  Sum-=lastv;
+  Sum+=val;
+  return lastv;
+}
+double CircularBuffer::GetLast()
+{
+  //return last recorded value
+  return Value[index];
+}
+
+double CircularBuffer::GetSum()
+{
+  return Sum;
+}
+LastValue::LastValue(float pdelta)
+{
+  Delta = pdelta ;
+}
+double LastValue::Get(int index)
+{
+  return LastValues[index];
+}
+void   LastValue::Put(int index , double value)
+{
+  LastValues[index] = value;
+}
+bool LastValue::AsChanged(int index , double value  )
+{
+  return AsChanged( index ,  value , Delta );
+}
+bool LastValue::AsChanged(int index , double value  , double delta )
+{
+  if ( fabs(LastValues[index]-value)  > delta )
+  {
+    LastValues[index] = value ;
+    return true;
+  }
+    return false;
 }

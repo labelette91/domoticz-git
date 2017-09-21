@@ -1195,7 +1195,7 @@ namespace http {
 			else if (htype == HTYPE_Tellstick) {
 				//all fine here!
 			}
-			else if (htype == HTYPE_EVOHOME_SCRIPT || htype == HTYPE_EVOHOME_SERIAL || htype == HTYPE_EVOHOME_WEB) {
+			else if (htype == HTYPE_EVOHOME_SCRIPT || htype == HTYPE_EVOHOME_SERIAL || htype == HTYPE_EVOHOME_WEB || htype == HTYPE_EVOHOME_TCP) {
 				//all fine here!
 			}
 			else if (htype == HTYPE_PiFace) {
@@ -1547,7 +1547,7 @@ namespace http {
 			else if (htype == HTYPE_Dummy) {
 				//All fine here
 			}
-			else if (htype == HTYPE_EVOHOME_SCRIPT || htype == HTYPE_EVOHOME_SERIAL || htype == HTYPE_EVOHOME_WEB) {
+			else if (htype == HTYPE_EVOHOME_SCRIPT || htype == HTYPE_EVOHOME_SERIAL || htype == HTYPE_EVOHOME_WEB || htype == HTYPE_EVOHOME_TCP) {
 				//All fine here
 			}
 			else if (htype == HTYPE_PiFace) {
@@ -3660,6 +3660,7 @@ namespace http {
 							(Type == HTYPE_EVOHOME_SCRIPT) ||
 							(Type == HTYPE_EVOHOME_SERIAL) ||
 							(Type == HTYPE_EVOHOME_WEB) ||
+							(Type == HTYPE_EVOHOME_TCP) ||
 							(Type == HTYPE_RaspberryGPIO) ||
 							(Type == HTYPE_RFLINKUSB) ||
 							(Type == HTYPE_RFLINKTCP) ||

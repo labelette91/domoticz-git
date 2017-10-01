@@ -371,7 +371,7 @@ void HomeEasy::Do_Work()
                 Sensors[s->getSensID()] = s;
                 if (s->available(Sensor::haveTemperature))
                 {
-                  SendTempHumSensor(s->getSensID(), !s->isBatteryLow(), (float)s->getTemperature(), (int)s->getHumidity(), "Home TempHum", sTypeTH1);
+                  SendTempHumSensor(s->getSensID(), !s->isBatteryLow(), (float)s->getTemperature(), (int)s->getHumidity(), "Home TempHum", 12,sTypeTH1);
                   _log.Log(LOG_TRACE, "RCOOK %s ID Code:%04X  Rolling:%0X Temp : %f Humidity : %f Channel : %d ", s->getSensorName().c_str(), s->getSensType(), s->getSensID(), s->getTemperature(), s->getHumidity(), s->getChannel());
                 }
                 if (s->available(Sensor::haveOnOff))

@@ -6017,19 +6017,34 @@ void CSQLHelper::DeleteEvent(const std::string &idx)
 //Argument, one or multiple devices separated by a semicolumn (;)
 void CSQLHelper::DeleteDevices(const std::string &idx)
 {
+	std::string DeviceID ;
+	int NbDeviceId=0;
 	std::vector<std::string> _idx;
 	StringSplit(idx, ";", _idx);
 	if (!_idx.empty())
 	{
-		//Avoid mutex deadlock here
-		boost::lock_guard<boost::mutex> l(m_sqlQueryMutex);
+
 		std::vector<std::string>::const_iterator itt;
 
 		char* errorMessage;
-		sqlite3_exec(m_dbase, "BEGIN TRANSACTION", NULL, NULL, &errorMessage);
 
 		for (itt = _idx.begin(); itt != _idx.end(); ++itt)
 		{
+			std::vector<std::vector<std::string> > result;
+//			result = m_sql.safe_query("SELECT a.DeviceID , b.Type FROM DeviceStatus a,  Hardware b WHERE (a.ID==%s) AND (b.ID == a.HardwareID)", (*itt).c_str());
+			result = m_sql.safe_query("SELECT DeviceID  FROM DeviceStatus   WHERE (ID==%s) ", (*itt).c_str());
+			if (result.size()>0)
+			{
+				DeviceID = result[0][0];
+			}
+			result = m_sql.safe_query("SELECT DeviceID FROM DeviceStatus  WHERE (DeviceID=='%s') ", DeviceID.c_str());
+			NbDeviceId = result.size();
+			while (DeviceID.size() != 8)
+				DeviceID = "0" + DeviceID;
+
+			//Avoid mutex deadlock here
+			boost::lock_guard<boost::mutex> l(m_sqlQueryMutex);
+			sqlite3_exec(m_dbase, "BEGIN TRANSACTION", NULL, NULL, &errorMessage);
 			safe_exec_no_return("DELETE FROM LightingLog WHERE (DeviceRowID == '%q')", (*itt).c_str());
 			safe_exec_no_return("DELETE FROM LightSubDevices WHERE (ParentID == '%q')", (*itt).c_str());
 			safe_exec_no_return("DELETE FROM LightSubDevices WHERE (DeviceRowID == '%q')", (*itt).c_str());
@@ -6054,12 +6069,14 @@ void CSQLHelper::DeleteDevices(const std::string &idx)
 			safe_exec_no_return("DELETE FROM DeviceToPlansMap WHERE (DeviceRowID == '%q')", (*itt).c_str());
 			safe_exec_no_return("DELETE FROM CamerasActiveDevices WHERE (DevSceneType==0) AND (DevSceneRowID == '%q')", (*itt).c_str());
 			safe_exec_no_return("DELETE FROM SharedDevices WHERE (DeviceRowID== '%q')", (*itt).c_str());
+			if (NbDeviceId==1)
+				safe_exec_no_return("DELETE FROM EnoceanSensors WHERE (DeviceID == '%q')", DeviceID.c_str() );
 			//notify eventsystem device is no longer present
 			m_mainworker.m_eventsystem.RemoveSingleState(atoi((*itt).c_str()));
 			//and now delete all records in the DeviceStatus table itself
 			safe_exec_no_return("DELETE FROM DeviceStatus WHERE (ID == '%q')", (*itt).c_str());
+			sqlite3_exec(m_dbase, "COMMIT TRANSACTION", NULL, NULL, &errorMessage);
 		}
-		sqlite3_exec(m_dbase, "COMMIT TRANSACTION", NULL, NULL, &errorMessage);
 	}
 	else
 		return;

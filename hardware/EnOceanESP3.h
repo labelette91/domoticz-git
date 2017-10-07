@@ -3,10 +3,12 @@
 #include <vector>
 #include "ASyncSerial.h"
 #include "DomoticzHardware.h"
+#include "EnOcean.h"
+
 
 #define ENOCEAN3_READ_BUFFER_SIZE 65*1024
 
-class CEnOceanESP3: public AsyncSerial, public CDomoticzHardwareBase
+class CEnOceanESP3: public CEnOcean
 {
 	enum _eEnOcean_Receive_State
 	{
@@ -32,7 +34,6 @@ public:
     ~CEnOceanESP3();
 	bool WriteToHardware(const char *pdata, const unsigned char length);
 	void SendDimmerTeachIn(const char *pdata, const unsigned char length);
-	unsigned long m_id_base;
 private:
 	void Init();
 	bool StartHardware();

@@ -10972,14 +10972,10 @@ bool MainWorker::SwitchLightInt(const std::vector<std::string> &sd, std::string 
 
 			lcmd.LIGHTING2.level=(unsigned char)level;
 			//Special Teach-In for EnOcean Dimmers
-			if ((pHardware->HwdType == HTYPE_EnOceanESP2)&&(IsTesting)&&(switchtype==STYPE_Dimmer))
+			CEnOcean *pEnocean = reinterpret_cast<CEnOcean*>(pHardware);
+
+			if ((pEnocean != NULL )&&(IsTesting)&&(switchtype==STYPE_Dimmer))
 			{
-				CEnOceanESP2 *pEnocean = reinterpret_cast<CEnOceanESP2*>(pHardware);
-				pEnocean->SendDimmerTeachIn((const char*)&lcmd,sizeof(lcmd.LIGHTING1));
-			}
-			else if ((pHardware->HwdType == HTYPE_EnOceanESP3)&&(IsTesting)&&(switchtype==STYPE_Dimmer))
-			{
-				CEnOceanESP3 *pEnocean = reinterpret_cast<CEnOceanESP3*>(pHardware);
 				pEnocean->SendDimmerTeachIn((const char*)&lcmd,sizeof(lcmd.LIGHTING1));
 			}
 			else

@@ -4145,25 +4145,18 @@ namespace http {
 						)
 						return;
 					sunitcode = sgroupcode;//Button A or B
-					CDomoticzHardwareBase *pBaseHardware = reinterpret_cast<CDomoticzHardwareBase*>(m_mainworker.GetHardware(atoi(hwdid.c_str())));
-					if (pBaseHardware == NULL)
+					CEnOcean *pEnoceanHardware = reinterpret_cast<CEnOcean*>(m_mainworker.GetHardware(atoi(hwdid.c_str())));
+					if (pEnoceanHardware == NULL)
 						return;
-					if ((pBaseHardware->HwdType != HTYPE_EnOceanESP2) && (pBaseHardware->HwdType != HTYPE_EnOceanESP3))
+					if (!pEnoceanHardware->IsRunning())
+					{
+						root["status"] = "ERROR";
+						root["message"] = "BaseID not found, is the hardware running?";
 						return;
-					unsigned long rID = 0;
-					if (pBaseHardware->HwdType == HTYPE_EnOceanESP2)
-					{
-						CEnOceanESP2 *pEnoceanHardware = reinterpret_cast<CEnOceanESP2 *>(pBaseHardware);
-						rID = pEnoceanHardware->m_id_base + iUnitTest;
-					}
-					else
-					{
-						CEnOceanESP3 *pEnoceanHardware = reinterpret_cast<CEnOceanESP3 *>(pBaseHardware);
-						rID = pEnoceanHardware->m_id_base + iUnitTest;
 					}
 					//convert to hex, and we have our ID
 					std::stringstream s_strid;
-					s_strid << std::hex << std::uppercase << rID;
+					s_strid << std::hex << std::uppercase << (pEnoceanHardware->GetAdress(iUnitTest));
 					devid = s_strid.str();
 				}
 				else if (lighttype == 68)
@@ -4690,35 +4683,18 @@ namespace http {
 						)
 						return;
 					sunitcode = sgroupcode;//Button A/B
-					CDomoticzHardwareBase *pBaseHardware = reinterpret_cast<CDomoticzHardwareBase*>(m_mainworker.GetHardware(atoi(hwdid.c_str())));
-					if (pBaseHardware == NULL)
+					CEnOcean *pEnoceanHardware = reinterpret_cast<CEnOcean*>(m_mainworker.GetHardware(atoi(hwdid.c_str())));
+					if (pEnoceanHardware == NULL)
 						return;
-					if ((pBaseHardware->HwdType != HTYPE_EnOceanESP2) && (pBaseHardware->HwdType != HTYPE_EnOceanESP3))
+					if (!pEnoceanHardware->IsRunning())
+					{
+						root["status"] = "ERROR";
+						root["message"] = "BaseID not found, is the hardware running?";
 						return;
-					unsigned long rID = 0;
-					if (pBaseHardware->HwdType == HTYPE_EnOceanESP2)
-					{
-						CEnOceanESP2 *pEnoceanHardware = reinterpret_cast<CEnOceanESP2*>(pBaseHardware);
-						if (pEnoceanHardware->m_id_base == 0)
-						{
-							root["message"] = "BaseID not found, is the hardware running?";
-							return;
-						}
-						rID = pEnoceanHardware->m_id_base + iUnitTest;
-					}
-					else
-					{
-						CEnOceanESP3 *pEnoceanHardware = reinterpret_cast<CEnOceanESP3*>(pBaseHardware);
-						if (pEnoceanHardware->m_id_base == 0)
-						{
-							root["message"] = "BaseID not found, is the hardware running?";
-							return;
-						}
-						rID = pEnoceanHardware->m_id_base + iUnitTest;
 					}
 					//convert to hex, and we have our ID
 					std::stringstream s_strid;
-					s_strid << std::hex << std::uppercase << rID;
+					s_strid << std::hex << std::uppercase << (pEnoceanHardware->GetAdress(iUnitTest));
 					devid = s_strid.str();
 				}
 				else if (lighttype == 68)
@@ -12191,7 +12167,15 @@ szQuery << "UPDATE DeviceStatus SET "
 
 			unsigned char dType = atoi(sd[0].c_str());
 			//unsigned char dSubType=atoi(sd[1].c_str());
-			//int HwdID = atoi(sd[2].c_str());
+			int HwdID = atoi(sd[2].c_str());
+
+//update vbase id for EnOcean device
+			CEnOcean *pEnoceanHardware = reinterpret_cast<CEnOcean*>(m_mainworker.GetHardware(HwdID));
+			if (pEnoceanHardware != NULL) {
+				pEnoceanHardware->UpdateBaseAddress(idx);
+			}
+
+
 
 			int nEvoMode = 0;
 

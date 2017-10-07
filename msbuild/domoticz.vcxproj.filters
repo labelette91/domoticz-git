@@ -1336,9 +1336,6 @@
     <None Include="..\www\app\MobileNotificationsController.js">
       <Filter>www\app</Filter>
     </None>
-    <None Include="..\www\views\mobile_notifications.html">
-      <Filter>www\views</Filter>
-    </None>
     <None Include="..\www\views\dpgooglepubsub.html">
       <Filter>www\views</Filter>
     </None>
@@ -1433,45 +1430,6 @@
     </ClInclude>
     <ClInclude Include="..\webserver\utf.hpp">
       <Filter>Webserver</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\appversion.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\CmdLine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\Helper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\localtime_r.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\mainworker.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\RFXNames.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\RFXtrx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\Scheduler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\SQLHelper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\SunRiseSet.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\WebServer.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WindowsHelper.h">
       <Filter>Windows</Filter>
@@ -2040,39 +1998,38 @@
     <ClInclude Include="..\hardware\plugins\PythonObjects.h">
       <Filter>Devices\Python Plugins</Filter>
     </ClInclude>
-    <ClInclude Include="..\main\LuaCommon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\hardware\SysfsGPIO.h">
-      <Filter>Devices\SysfsGPIO</Filter>
-    </ClInclude>
-    <ClInclude Include="..\hardware\EvohomeScript.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\hardware\Rtl433.h">
-      <Filter>Devices\RTL_433</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\EventsPythonDevice.h">
-      <Filter>EventSystem</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\EventsPythonModule.h">
-      <Filter>EventSystem</Filter>
-    </ClInclude>
-    <ClInclude Include="..\hardware\OnkyoAVTCP.h">
-      <Filter>Devices\OnkyoAVTCP</Filter>
-    </ClInclude>
     <ClInclude Include="..\main\IFTTT.h">
       <Filter>IFTTT</Filter>
     </ClInclude>
     <ClInclude Include="..\hardware\DenkoviSmartdenIPIn.h">
       <Filter>Devices\Denkovi</Filter>
     </ClInclude>
-    <ClInclude Include="..\tinyxpath\tinyxml.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\tinyxpath\xpath_processor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <ClInclude Include="..\hardware\EvohomeScript.h" />
+    <ClInclude Include="..\hardware\Rtl433.h" />
+    <ClInclude Include="..\hardware\SysfsGpio.h" />
+    <ClInclude Include="..\hardware\OnkyoAVTCP.h" />
+    <ClInclude Include="..\main\appversion.h" />
+    <ClInclude Include="..\main\CmdLine.h" />
+    <ClInclude Include="..\main\concurrent_queue.h" />
+    <ClInclude Include="..\main\localtime_r.h" />
+    <ClInclude Include="..\main\Logger.h" />
+    <ClInclude Include="..\main\LuaCommon.h" />
+    <ClInclude Include="..\main\LuaHandler.h" />
+    <ClInclude Include="..\main\mainstructs.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="..\main\Scheduler.h" />
+    <ClInclude Include="..\main\SQLHelper.h" />
+    <ClInclude Include="..\main\Helper.h" />
+    <ClInclude Include="..\main\mainworker.h" />
+    <ClInclude Include="..\main\RFXNames.h" />
+    <ClInclude Include="..\main\RFXtrx.h" />
+    <ClInclude Include="Version.h" />
+    <ClInclude Include="..\main\WindCalculation.h" />
+    <ClInclude Include="..\tinyxpath\tinyxml.h" />
+    <ClInclude Include="..\tinyxpath\xpath_processor.h" />
+    <ClInclude Include="..\main\stdafx.h" />
+    <ClInclude Include="..\main\SunRiseSet.h" />
+    <ClInclude Include="..\main\WebServer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\webserver\Base64.cpp">
@@ -2780,14 +2737,17 @@
     <ClCompile Include="..\main\EventsPythonModule.cpp">
       <Filter>EventSystem</Filter>
     </ClCompile>
-    <ClCompile Include="..\hardware\OnkyoAVTCP.cpp">
-      <Filter>Devices\OnkyoAVTCP</Filter>
-    </ClCompile>
     <ClCompile Include="..\main\IFTTT.cpp">
       <Filter>IFTTT</Filter>
     </ClCompile>
     <ClCompile Include="..\hardware\DenkoviSmartdenIPIn.cpp">
       <Filter>Devices\Denkovi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\OnkyoAVTCP.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\EnOcean.cpp">
+      <Filter>Devices\EnOcean</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

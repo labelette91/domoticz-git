@@ -637,6 +637,9 @@ void CEnOceanESP3::readCallback(const char *data, size_t len)
 
 bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length)
 {
+	int unitCode = 0;
+	unsigned long unitBaseAddr = 0;
+
 	if (m_id_base==0)
 		return false;
 	if (!isOpen())
@@ -646,11 +649,22 @@ bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length
 		return false; //only allowed to control switches
 
 	unsigned long sID=(tsen->LIGHTING2.id1<<24)|(tsen->LIGHTING2.id2<<16)|(tsen->LIGHTING2.id3<<8)|tsen->LIGHTING2.id4;
-	if ((sID<m_id_base)||(sID>m_id_base+129))
+	if ((sID<m_id_base) || (sID>m_id_base + 129))
 	{
-		_log.Log(LOG_ERROR,"EnOcean (1): Can not switch with this DeviceID, use a switch created with our id_base!...");
-		return false;
+		//get unit from db
+		int unit = getUnitFromDeviceId(sID);
+		tsen->LIGHTING2.unitcode = GetUnitCode(unit);
+		int unitId = GetUnitId(unit);
+		unitBaseAddr = GetAdress(unitId);
+
+		if ((unitBaseAddr<m_id_base) || (unitBaseAddr>m_id_base + 129)) {
+			_log.Log(LOG_ERROR, "EnOcean (1): Can not switch with this DeviceID, use a switch created with our id_base!...");
+			return false;
+		}
+
 	}
+	else
+		unitBaseAddr = sID;
 
 	unsigned char RockerID=0;
 	unsigned char Pressed=1;
@@ -742,10 +756,10 @@ bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length
 
 		buf[1] |= F60201_EB_MASK;		// button is pressed
 
-		buf[2]=(sID >> 24) & 0xff;		// Sender ID
-		buf[3]=(sID >> 16) & 0xff;
-		buf[4]=(sID >> 8) & 0xff;
-		buf[5]=sID & 0xff;
+		buf[2]=(unitBaseAddr >> 24) & 0xff;		// Sender ID
+		buf[3]=(unitBaseAddr >> 16) & 0xff;
+		buf[4]=(unitBaseAddr >> 8) & 0xff;
+		buf[5]= unitBaseAddr & 0xff;
 
 		buf[6] = S_RPS_T21|S_RPS_NU;	// press button			// b5=T21, b4=NU, b3-b0= RepeaterCount
 
@@ -773,10 +787,10 @@ bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length
 		buf[3]=1;	//speed
 		buf[4]=0x09; // Dim Off
 
-		buf[5]=(sID >> 24) & 0xff;
-		buf[6]=(sID >> 16) & 0xff;
-		buf[7]=(sID >> 8) & 0xff;
-		buf[8]=sID & 0xff;
+		buf[5]=(unitBaseAddr >> 24) & 0xff;
+		buf[6]=(unitBaseAddr >> 16) & 0xff;
+		buf[7]=(unitBaseAddr >> 8) & 0xff;
+		buf[8]= unitBaseAddr & 0xff;
 
 		buf[9]=0x30; // status
 
@@ -1864,6 +1878,25 @@ void CEnOceanESP3::ParseRadioDatagram()
 								// If not found, add it to the database
 								m_sql.safe_query("INSERT INTO EnoceanSensors (HardwareID, DeviceID, Manufacturer, Profile, [Type]) VALUES (%d,'%q',%d,%d,%d)", m_HwdID, szDeviceID, manID, func, type);
 								_log.Log(LOG_NORM, "EnOcean: Sender_ID 0x%08X inserted in the database", id);
+
+								//creaqte device
+								if ((rorg == 0xD2) && (func == 0x01) && ((type == 0x12) || (type == 0x0F)))
+								{
+									unsigned char nbc;
+
+									for (nbc = 0; nbc < nb_channel; nbc++)
+									{
+										int unit = nbc + 1;
+										std::string devname = "";
+//										CreateDevice(m_HwdID, szDeviceID, unit, pTypeLighting2, sTypeAC, 0, 0, 0, "", devname);
+
+										_log.Log(LOG_NORM, "EnOcean message: 0xD4 Node 0x%08x Channel : %02d ",
+											id,
+											unit
+											);
+									}
+									return;
+								}
 							}
 							else
 								_log.Log(LOG_NORM, "EnOcean: Sender_ID 0x%08X already in the database", id);

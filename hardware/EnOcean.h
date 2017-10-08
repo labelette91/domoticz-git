@@ -38,15 +38,9 @@ public:
 	
 	long GetDeviceId(std::string DeviceID, int HardwareId);
 
-	int GetUnitCode(unsigned long unit);
-
-	int GetUnitId(unsigned long unit);
-
-	int CEnOcean::GetUnit(int unitId, int unitCode);
-
 	void UpdateBaseAddress(std::string idx );
 
-	int getUnitFromDeviceId(unsigned long devIDx);
+	int getUnitFromDeviceId(unsigned long devIDx, int UnitCode);
 
 protected:
 

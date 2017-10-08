@@ -8680,7 +8680,12 @@ namespace http {
 							root["result"][ii]["ID"] = sd[1];
 						}
 					}
-					root["result"][ii]["Unit"] = atoi(sd[2].c_str());
+					if ((_hardwareNames[hardwareID].HardwareTypeVal == HTYPE_EnOceanESP2) || (_hardwareNames[hardwareID].HardwareTypeVal == HTYPE_EnOceanESP3)) {
+						//add Base Id of enocean switch
+						root["result"][ii]["Unit"] = atoi(sd[INDEX_POWER].c_str()) * 100 +  atoi(sd[2].c_str());
+					}
+					else
+						root["result"][ii]["Unit"] = atoi(sd[2].c_str());
 					root["result"][ii]["Type"] = RFX_Type_Desc(dType, 1);
 					root["result"][ii]["SubType"] = RFX_Type_SubType_Desc(dType, dSubType);
 					root["result"][ii]["TypeImg"] = RFX_Type_Desc(dType, 2);

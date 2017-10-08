@@ -652,9 +652,7 @@ bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length
 	if ((sID<m_id_base) || (sID>m_id_base + 129))
 	{
 		//get unit from db
-		int unit = getUnitFromDeviceId(sID);
-		tsen->LIGHTING2.unitcode = GetUnitCode(unit);
-		int unitId = GetUnitId(unit);
+		int unitId = getUnitFromDeviceId(sID, tsen->LIGHTING2.unitcode);
 		unitBaseAddr = GetAdress(unitId);
 
 		if ((unitBaseAddr<m_id_base) || (unitBaseAddr>m_id_base + 129)) {
@@ -1878,25 +1876,6 @@ void CEnOceanESP3::ParseRadioDatagram()
 								// If not found, add it to the database
 								m_sql.safe_query("INSERT INTO EnoceanSensors (HardwareID, DeviceID, Manufacturer, Profile, [Type]) VALUES (%d,'%q',%d,%d,%d)", m_HwdID, szDeviceID, manID, func, type);
 								_log.Log(LOG_NORM, "EnOcean: Sender_ID 0x%08X inserted in the database", id);
-
-								//creaqte device
-								if ((rorg == 0xD2) && (func == 0x01) && ((type == 0x12) || (type == 0x0F)))
-								{
-									unsigned char nbc;
-
-									for (nbc = 0; nbc < nb_channel; nbc++)
-									{
-										int unit = nbc + 1;
-										std::string devname = "";
-//										CreateDevice(m_HwdID, szDeviceID, unit, pTypeLighting2, sTypeAC, 0, 0, 0, "", devname);
-
-										_log.Log(LOG_NORM, "EnOcean message: 0xD4 Node 0x%08x Channel : %02d ",
-											id,
-											unit
-											);
-									}
-									return;
-								}
 							}
 							else
 								_log.Log(LOG_NORM, "EnOcean: Sender_ID 0x%08X already in the database", id);

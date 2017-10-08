@@ -6,8 +6,7 @@
 #include "../main/SQLHelper.h"
 
 #include <string>
-
-
+#define BASEID_FIELD_NAME "Power"
 CEnOcean::CEnOcean() {
 	m_id_base = 0;
 };
@@ -77,19 +76,6 @@ long CEnOcean::GetDeviceId(std::string DeviceID, int HardwareId)
 	return lid;
 }
 
-
-int CEnOcean::GetUnitCode(unsigned long unit) {
-return unit % 10;
-}
-
-int CEnOcean::GetUnitId(unsigned long unit) {
-return (unit / 100) % MAX_BASE_ADDRESS ;
-}
-
-int CEnOcean::GetUnit(int unitId , int unitCode ) {
-return unitId * 100 + unitCode;
-}
-
 //convert divice ID string to long
 unsigned long DeviceIdToLong(std::string &DeviceID) {
 	unsigned long ID;
@@ -100,20 +86,18 @@ unsigned long DeviceIdToLong(std::string &DeviceID) {
 }
 
 
-int CEnOcean::getUnitFromDeviceId(unsigned long devIDx )
+int CEnOcean::getUnitFromDeviceId(unsigned long devIDx , int UnitCode )
 {
 	std::vector<std::vector<std::string> > result;
 
 	//get Dev UnitCode 
 
-	result = m_sql.safe_query("SELECT Unit   FROM DeviceStatus WHERE (DeviceID='%0X')  ", devIDx );
+	result = m_sql.safe_query("SELECT " BASEID_FIELD_NAME "   FROM DeviceStatus WHERE (DeviceID='%0X') and (Unit=%d) ", devIDx, UnitCode);
 	if (result.size() > 0) {
 	return  atoi(result[0][0].c_str());
 	}
 	else
 	return 0 ;
-
-
 }
 
 
@@ -136,26 +120,23 @@ void CEnOcean::UpdateBaseAddress(std::string idx) {
 		return;
 
 	//search if a same device ID already allocated exist
-	result = m_sql.safe_query("SELECT Unit  FROM DeviceStatus WHERE (DeviceId='%s') and (HardwareId=%d)  ", DeviceId.c_str(), m_HwdID);
+	result = m_sql.safe_query("SELECT " BASEID_FIELD_NAME " FROM DeviceStatus WHERE (DeviceId='%s') and (HardwareId=%d)  ", DeviceId.c_str(), m_HwdID);
 	for (int i = 0; i < result.size(); i++)
 	{
 		//take the same
-		int unit   = atoi(result[i][0].c_str());
-		int unitId = GetUnitId(unit);
+		int unitId = atoi(result[i][0].c_str());
 		if (unitId != 0) {
-			m_sql.UpdateDeviceValue("Unit", GetUnit(unitId, DevunitCode), idx);
+			m_sql.UpdateDeviceValue(BASEID_FIELD_NAME, unitId , idx);
 			return;
 		}
 
 	}
 
-	result = m_sql.safe_query("SELECT Unit , DeviceId FROM DeviceStatus WHERE (Type=%d) and (SubType=%d) and (HardwareId=%d)  ", pTypeLighting2, sTypeAC , m_HwdID );
+	result = m_sql.safe_query("SELECT " BASEID_FIELD_NAME ", DeviceId FROM DeviceStatus WHERE (Type=%d) and (SubType=%d) and (HardwareId=%d)  ", pTypeLighting2, sTypeAC , m_HwdID );
 	//get all BaseId allready affected to switch device
 	for (int i = 0; i < result.size(); i++)
 	{
-		int unit = atoi(result[i][0].c_str());
-		int unitId = GetUnitId(unit);
-		int unitCode = GetUnitCode(unit);
+		int unitId = atoi(result[i][0].c_str());
 		std::string DeviceId = result[i][1];
 		unsigned long ID = DeviceIdToLong(DeviceId);
 		//if dummy virtual rocker swicth device 
@@ -167,7 +148,7 @@ void CEnOcean::UpdateBaseAddress(std::string idx) {
 	for (int i = 1; i < MAX_BASE_ADDRESS; i++)
 	{
 		if (UsedUnitId[i] == false) {
-				m_sql.UpdateDeviceValue("Unit", GetUnit(i, DevunitCode), idx);
+				m_sql.UpdateDeviceValue(BASEID_FIELD_NAME, i , idx);
 				return;
 		}
 	}

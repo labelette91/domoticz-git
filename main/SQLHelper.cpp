@@ -643,6 +643,22 @@ const char *sqlCreateMobileDevices =
 "[LastUpdate] DATETIME DEFAULT(datetime('now', 'localtime'))"
 ");";
 
+char * TITEM_name[] = {
+	"SWITCHCMD",
+	"EXECUTE_SCRIPT",
+	"EMAIL_CAMERA_SNAPSHOT",
+	"SEND_EMAIL",
+	"SWITCHCMD_EVENT",
+	"SWITCHCMD_SCENE",
+	"GETURL",
+	"SEND_EMAIL_TO",
+	"SET_VARIABLE",
+	"SEND_SMS",
+	"SEND_NOTIFICATION",
+	"SET_SETPOINT",
+	"SEND_IFTTT_TRIGGER",
+};
+
 extern std::string szUserDataFolder;
 
 CSQLHelper::CSQLHelper(void)
@@ -2873,8 +2889,9 @@ void CSQLHelper::Do_Work()
 		std::vector<_tTaskItem>::iterator itt = _items2do.begin();
 		while (itt != _items2do.end())
 		{
-			if (_log.isTraceEnabled())
-				_log.Log(LOG_TRACE, "SQLH: Do Task ItemType:%d Cmd:%s Value:%s ", itt->_ItemType, itt->_command.c_str(), itt->_sValue.c_str());
+			if (_log.isTraceEnabled()) {
+				_log.Log(LOG_TRACE, "SQLH: Do Task ItemType:%d = %s  Cmd:%s Value:%s ", itt->_ItemType, TITEM_name[itt->_ItemType], itt->_command.c_str(), itt->_sValue.c_str());
+			}
 
 			if (itt->_ItemType == TITEM_SWITCHCMD)
 			{
@@ -6416,7 +6433,7 @@ void CSQLHelper::AddTaskItem(const _tTaskItem &tItem)
 
 	// Check if an event for the same device is already in queue, and if so, replace it
 	if (_log.isTraceEnabled())
-	   _log.Log(LOG_TRACE, "SQLH AddTask: Request to add task: idx=%" PRIu64 ", DelayTime=%f, Command='%s', Level=%d, Hue=%d, RelatedEvent='%s'", tItem._idx, tItem._DelayTime, tItem._command.c_str(), tItem._level, tItem._Hue, tItem._relatedEvent.c_str());
+	   _log.Log(LOG_TRACE, "SQLH AddTask: Request to add task: idx=%" PRIu64 ", Type:%s DelayTime=%f, Command='%s', Level=%d, Hue=%d, RelatedEvent='%s'", tItem._idx, TITEM_name[tItem._ItemType] ,tItem._DelayTime, tItem._command.c_str(), tItem._level, tItem._Hue, tItem._relatedEvent.c_str());
 	// Remove any previous task linked to the same device
 
 	if (

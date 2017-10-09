@@ -38,9 +38,20 @@ public:
 	
 	long GetDeviceId(std::string DeviceID, int HardwareId);
 
-	void UpdateBaseAddress(std::string idx );
+	void UpdateDeviceAddress(std::string idx );
+
+	void UpdateBaseAddress(std::string idx, int offsetID);
 
 	int getUnitFromDeviceId(unsigned long devIDx, int UnitCode);
+
+	int DeviceExist(unsigned int Deviceid);
+
+	int DeviceExist(char * szDeviceID);
+
+	void CreateSensors(char * szDeviceID, int manufacturer, int profile, int ttype);
+
+	void CreateSensors(unsigned int DeviceID, int manufacturer, int profile, int ttype);
+
 
 protected:
 

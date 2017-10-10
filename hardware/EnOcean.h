@@ -30,19 +30,21 @@ public:
 	bool IsRunning();
 	//id offset of device
 	//src : source rocker
-	unsigned long GetAdress(int unitid);
+	unsigned int GetAdress(int unitid);
 
 	virtual void SendDimmerTeachIn(const char *pdata, const unsigned char length) = 0 ;
 
 	uint64_t CreateDevice(const int HardwareID, const char* ID, const int unit, const unsigned char devType, const unsigned char subType, const unsigned char signallevel, const unsigned char batterylevel, const int nValue, const char* sValue, std::string &devname);
 	
-	long GetDeviceId(std::string DeviceID, int HardwareId);
+	long GetId(std::string DeviceID, int HardwareId);
 
 	void UpdateDeviceAddress(std::string idx );
 
 	void UpdateBaseAddress(std::string idx, int offsetID);
 
-	int getUnitFromDeviceId(unsigned long devIDx, int UnitCode);
+	static int getUnitFromDeviceId(unsigned int devIDx, int UnitCode);
+
+	static int getUnitFromDeviceId(std::string devIDx, int UnitCode);
 
 	int DeviceExist(unsigned int Deviceid);
 
@@ -51,6 +53,15 @@ public:
 	void CreateSensors(char * szDeviceID, int manufacturer, int profile, int ttype);
 
 	void CreateSensors(unsigned int DeviceID, int manufacturer, int profile, int ttype);
+
+	void AddSensors(unsigned int DeviceID, int manufacturer, int profile, int ttype);
+
+	void AddSensors(unsigned int DeviceID, int manufacturer, int profile, int ttype, int OffsetAddr);
+
+	static std::string DeviceIDToString(unsigned int DeviceID);
+
+	static void ToSensorsId(std::string &DeviceId);
+
 
 
 protected:

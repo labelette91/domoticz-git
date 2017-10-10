@@ -6,7 +6,7 @@
 #include "../main/SQLHelper.h"
 
 #include <string>
-#define BASEID_FIELD_NAME "Power"
+#define BASEID_FIELD_NAME "Address"
 CEnOcean::CEnOcean() {
 	m_id_base = 0;
 };
@@ -17,7 +17,7 @@ bool CEnOcean::IsRunning()
 }
 //id offset of device
 //src : source rocker
-unsigned long CEnOcean::GetAdress(int unitid) {
+unsigned int CEnOcean::GetAdress(int unitid) {
 	return(m_id_base + unitid);
 }
 
@@ -63,7 +63,7 @@ uint64_t CEnOcean::CreateDevice(const int HardwareID, const char* ID, const int 
 
 //return the ID of DiviceId 
 //0 if not exist 
-long CEnOcean::GetDeviceId(std::string DeviceID, int HardwareId)
+long CEnOcean::GetId(std::string DeviceID, int HardwareId)
 {
 
 	long lid = 0;
@@ -86,13 +86,19 @@ unsigned long DeviceIdToLong(std::string &DeviceID) {
 }
 
 
-int CEnOcean::getUnitFromDeviceId(unsigned long devIDx , int UnitCode )
+int CEnOcean::getUnitFromDeviceId(unsigned int devIDx, int UnitCode)
+{
+	return getUnitFromDeviceId(DeviceIDToString(devIDx) , UnitCode);
+}
+int CEnOcean::getUnitFromDeviceId(std::string devIDx , int UnitCode )
 {
 	std::vector<std::vector<std::string> > result;
 
+	ToSensorsId(devIDx);
+
 	//get Dev UnitCode 
 
-	result = m_sql.safe_query("SELECT " BASEID_FIELD_NAME "   FROM DeviceStatus WHERE (DeviceID='%0X') and (Unit=%d) ", devIDx, UnitCode);
+	result = m_sql.safe_query("SELECT " BASEID_FIELD_NAME "   FROM EnoceanSensors WHERE (DeviceID='%s')  ", devIDx.c_str() );
 	if (result.size() > 0) {
 	return  atoi(result[0][0].c_str());
 	}
@@ -100,10 +106,12 @@ int CEnOcean::getUnitFromDeviceId(unsigned long devIDx , int UnitCode )
 	return 0 ;
 }
 
-//idx : ID of device in devistatus
+//DeviceId : ID of device in EnoceanSensor
 //offsetID : offset of device from controler base adress 0..127
-void CEnOcean::UpdateBaseAddress(std::string idx, int offsetID ) {
-	m_sql.UpdateDeviceValue(BASEID_FIELD_NAME, offsetID , idx);
+void CEnOcean::UpdateBaseAddress(std::string DeviceId , int offsetID ) {
+//	m_sql.UpdateDeviceValue(BASEID_FIELD_NAME, offsetID , idx);
+	m_sql.safe_query("UPDATE EnoceanSensors SET %s=%d   WHERE (DeviceID = '%s' )", BASEID_FIELD_NAME , offsetID , DeviceId.c_str() );
+
 }
 
 //find a base adress for enOcean device and store it in db
@@ -121,44 +129,40 @@ void CEnOcean::UpdateDeviceAddress(std::string idx) {
 	if (result.size() > 0) {
 		DevunitCode = atoi(result[0][0].c_str());
 		DeviceId = result[0][1];
+		ToSensorsId(DeviceId);
 	}
 	else
 		return;
 
 	//search if a same device ID already allocated exist
-	result = m_sql.safe_query("SELECT " BASEID_FIELD_NAME " FROM DeviceStatus WHERE (DeviceId='%s') and (HardwareId=%d)  ", DeviceId.c_str(), m_HwdID);
+	result = m_sql.safe_query("SELECT " BASEID_FIELD_NAME " FROM EnoceanSensors WHERE (DeviceId='%s') and (HardwareId=%d)  ", DeviceId.c_str(), m_HwdID);
 	for (unsigned int i = 0; i < result.size(); i++)
 	{
 		//take the same
 		int unitId = atoi(result[i][0].c_str());
 		if (unitId != 0) {
-			UpdateBaseAddress( idx, unitId );
+			UpdateBaseAddress(DeviceId, unitId );
 			return;
 		}
 
 	}
 
-	result = m_sql.safe_query("SELECT " BASEID_FIELD_NAME ", DeviceId FROM DeviceStatus WHERE (Type=%d) and (SubType=%d) and (HardwareId=%d)  ", pTypeLighting2, sTypeAC , m_HwdID );
+	result = m_sql.safe_query("SELECT " BASEID_FIELD_NAME " FROM EnoceanSensors WHERE (HardwareId=%d)  ",  m_HwdID );
 	//get all BaseId allready affected to switch device
 	for (unsigned int i = 0; i < result.size(); i++)
 	{
 		int unitId = atoi(result[i][0].c_str());
-		std::string DeviceId = result[i][1];
-		unsigned long ID = DeviceIdToLong(DeviceId);
-		//if dummy virtual rocker swicth device 
-		if ((ID>=m_id_base) && (ID< m_id_base + MAX_BASE_ADDRESS )) {
-			unitId = ID % MAX_BASE_ADDRESS ;
-		}
+		unitId = unitId % MAX_BASE_ADDRESS ;//robustess
+		//ID already used
 		UsedUnitId[unitId] = true;
 	}
 	for (int i = 1; i < MAX_BASE_ADDRESS; i++)
 	{
 		if (UsedUnitId[i] == false) {
-			UpdateBaseAddress(idx, i);
+			UpdateBaseAddress(DeviceId, i);
 			return;
 		}
 	}
-
 
 }
 
@@ -203,4 +207,37 @@ void CEnOcean::CreateSensors(unsigned int DeviceID, int manufacturer, int profil
 
 	CreateSensors(szDeviceID, manufacturer, profile, ttype);
 
+}
+
+void CEnOcean::AddSensors(unsigned int DeviceID, int manufacturer, int profile, int ttype)
+{
+
+	if (!DeviceExist(DeviceID))
+	{
+		// If not found, add it to the database
+		CreateSensors(DeviceID, manufacturer, profile, ttype);
+		_log.Log(LOG_NORM, "EnOcean: Sender_ID 0x%08X inserted in the database", DeviceID);
+	}
+	else
+		_log.Log(LOG_NORM, "EnOcean: Sender_ID 0x%08X already in the database", DeviceID);
+}
+
+void CEnOcean::AddSensors(unsigned int DeviceID, int manufacturer, int profile, int ttype , int OffsetAddr )
+{
+	AddSensors(DeviceID, manufacturer, profile, ttype);
+
+	UpdateBaseAddress(DeviceIDToString(DeviceID).c_str(),  OffsetAddr );
+}
+
+std::string CEnOcean::DeviceIDToString(unsigned int DeviceID)
+{
+	char szDeviceID[20];
+	sprintf(szDeviceID, "%08X", (unsigned int)DeviceID);
+	return szDeviceID;
+}
+
+void CEnOcean::ToSensorsId(std::string &DeviceId)
+{
+	while (DeviceId.size() < 8)
+		DeviceId = '0' + DeviceId;
 }

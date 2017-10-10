@@ -508,7 +508,8 @@ const char *sqlCreateEnoceanSensors =
 	"[DeviceID] VARCHAR(25) NOT NULL, "
 	"[Manufacturer] INTEGER NOT NULL, "
 	"[Profile] INTEGER NOT NULL, "
-	"[Type] INTEGER NOT NULL);";
+	"[Type] INTEGER NOT NULL, "
+	"[Address] INTEGER DEFAULT 0);";
 
 const char *sqlCreateHttpLink =
 	"CREATE TABLE IF NOT EXISTS [HttpLink] ("
@@ -2334,6 +2335,13 @@ bool CSQLHelper::OpenDatabase()
 			}
 			DeletePreferencesVar("DisableEventScriptSystem");
 		}
+		if (dbversion < 120)
+		{
+			//Add Address in EnOcean table 
+				query("ALTER TABLE EnoceanSensors ADD COLUMN [Address] INTEGER DEFAULT 0");
+		}
+
+		
 	}
 	else if (bNewInstall)
 	{

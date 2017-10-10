@@ -4696,6 +4696,9 @@ namespace http {
 					std::stringstream s_strid;
 					s_strid << std::hex << std::uppercase << (pEnoceanHardware->GetAdress(iUnitTest));
 					devid = s_strid.str();
+
+					//add to enOcean table device
+					pEnoceanHardware->AddSensors(pEnoceanHardware->GetAdress(iUnitTest), 0, 0xD2, 01 , iUnitTest );
 				}
 				else if (lighttype == 68)
 				{
@@ -8682,7 +8685,8 @@ namespace http {
 					}
 					if ((_hardwareNames[hardwareID].HardwareTypeVal == HTYPE_EnOceanESP2) || (_hardwareNames[hardwareID].HardwareTypeVal == HTYPE_EnOceanESP3)) {
 						//add Base Id of enocean switch
-						root["result"][ii]["Unit"] = atoi(sd[INDEX_POWER].c_str()) * 100 +  atoi(sd[2].c_str());
+						int Addr = CEnOcean::getUnitFromDeviceId(sd[1], 0);
+						root["result"][ii]["Unit"] = Addr * 100 +  atoi(sd[2].c_str());
 					}
 					else
 						root["result"][ii]["Unit"] = atoi(sd[2].c_str());

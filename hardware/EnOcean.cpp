@@ -114,25 +114,14 @@ void CEnOcean::UpdateBaseAddress(std::string DeviceId , int offsetID ) {
 
 }
 
-//find a base adress for enOcean device and store it in db
-void CEnOcean::UpdateDeviceAddress(std::string idx) {
+//find a base adress for enOcean device DeviceId : 0x12345678 
+int CEnOcean::UpdateDeviceAddress(std::string DeviceId) {
 	std::vector<std::vector<std::string> > result;
 	bool  UsedUnitId[MAX_BASE_ADDRESS + 1];
-	int DevunitCode = 0;
-	std::string DeviceId;
 
 	memset(UsedUnitId, 0, sizeof(UsedUnitId));
-
-
-	//get Dev UnitCode 
-	result = m_sql.safe_query("SELECT Unit  , DeviceId  FROM DeviceStatus WHERE (ID=%s)  ", idx.c_str());
-	if (result.size() > 0) {
-		DevunitCode = atoi(result[0][0].c_str());
-		DeviceId = result[0][1];
-		ToSensorsId(DeviceId);
-	}
-	else
-		return;
+	//convert to 8 char
+	ToSensorsId(DeviceId);
 
 	//search if a same device ID already allocated exist
 	result = m_sql.safe_query("SELECT " BASEID_FIELD_NAME " FROM EnoceanSensors WHERE (DeviceId='%s') and (HardwareId=%d)  ", DeviceId.c_str(), m_HwdID);
@@ -141,10 +130,9 @@ void CEnOcean::UpdateDeviceAddress(std::string idx) {
 		//take the same
 		int unitId = atoi(result[i][0].c_str());
 		if (unitId != 0) {
-			UpdateBaseAddress(DeviceId, unitId );
-			return;
+			//UpdateBaseAddress(DeviceId, unitId );
+			return unitId ;
 		}
-
 	}
 
 	result = m_sql.safe_query("SELECT " BASEID_FIELD_NAME " FROM EnoceanSensors WHERE (HardwareId=%d)  ",  m_HwdID );
@@ -156,13 +144,16 @@ void CEnOcean::UpdateDeviceAddress(std::string idx) {
 		//ID already used
 		UsedUnitId[unitId] = true;
 	}
+	//find not used addess
 	for (int i = 1; i < MAX_BASE_ADDRESS; i++)
 	{
 		if (UsedUnitId[i] == false) {
 			UpdateBaseAddress(DeviceId, i);
-			return;
+			return i ;
 		}
 	}
+	//device full 
+	return 0;
 
 }
 
@@ -240,4 +231,31 @@ void CEnOcean::ToSensorsId(std::string &DeviceId)
 {
 	while (DeviceId.size() < 8)
 		DeviceId = '0' + DeviceId;
+}
+
+//convert id from  buffer[] to unsigned int
+unsigned int getIdent(unsigned char m_buffer[])
+{
+	unsigned int id = (m_buffer[0] << 24) + (m_buffer[1] << 16) + (m_buffer[2] << 8) + m_buffer[3];
+	return id;
+}
+
+bool CEnOcean::getProfile(std::string szDeviceID, int &Rorg, int &Profile, int &Type)
+{
+	Rorg = Profile = Type = 0;
+
+	std::vector<std::vector<std::string> > result;
+	result = m_sql.safe_query("SELECT  Profile, [Type] FROM EnoceanSensors WHERE (HardwareID==%d) AND (DeviceID=='%q')", m_HwdID, szDeviceID.c_str());
+	if (result.size() == 1)
+	{
+		// hardware device was already teached-in
+		Profile = atoi(result[0][0].c_str());
+		Type = atoi(result[0][1].c_str());
+		return true;
+	}
+	return false;
+}
+bool CEnOcean::getProfile(unsigned int DeviceID, int &Rorg, int &Profile, int &Type)
+{
+	return getProfile(DeviceIDToString(DeviceID), Rorg, Profile, Type);
 }

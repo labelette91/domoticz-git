@@ -38,7 +38,7 @@ public:
 	
 	long GetId(std::string DeviceID, int HardwareId);
 
-	void UpdateDeviceAddress(std::string idx );
+	int UpdateDeviceAddress(std::string idx );
 
 	void UpdateBaseAddress(std::string idx, int offsetID);
 
@@ -62,12 +62,18 @@ public:
 
 	static void ToSensorsId(std::string &DeviceId);
 
+	bool getProfile(std::string szDeviceID, int &Rorg, int &Profile, int &Type);
+
+	bool getProfile(unsigned int DeviceID, int &Rorg, int &Profile, int &Type);
 
 
 protected:
 
 	unsigned long m_id_base;
 };
+
+//convert id from  buffer[] to unsigned int
+unsigned int getIdent(unsigned char m_buffer[]);
 
 #endif
 

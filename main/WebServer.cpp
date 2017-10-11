@@ -12179,11 +12179,11 @@ szQuery << "UPDATE DeviceStatus SET "
 			int HwdID = atoi(sd[2].c_str());
 
 //update vbase id for EnOcean device
-			CEnOcean *pEnoceanHardware = reinterpret_cast<CEnOcean*>(m_mainworker.GetHardware(HwdID));
+/*			CEnOcean *pEnoceanHardware = reinterpret_cast<CEnOcean*>(m_mainworker.GetHardware(HwdID));
 			if (pEnoceanHardware != NULL) {
 				pEnoceanHardware->UpdateDeviceAddress(idx);
 			}
-
+*/
 
 
 			int nEvoMode = 0;

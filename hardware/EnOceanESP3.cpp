@@ -638,7 +638,7 @@ void CEnOceanESP3::readCallback(const char *data, size_t len)
 bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length)
 {
 	int unitCode = 0;
-	unsigned long unitBaseAddr = 0;
+	unsigned int unitBaseAddr = 0;
 
 	if (m_id_base==0)
 		return false;
@@ -672,6 +672,7 @@ bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length
 			_log.Log(LOG_ERROR, "EnOcean (1): Can not switch with this DeviceID, use a switch created with our id_base!...");
 			return false;
 		}
+		sendVld(unitBaseAddr, tsen->LIGHTING2.unitcode-1,  tsen->LIGHTING2.cmnd*64);
 
 	}
 	else
@@ -1166,10 +1167,9 @@ void CEnOceanESP3::ParseRadioDatagram()
 			break;
 		case RORG_4BS: // 4 byte communication
 			{
-				sprintf(szTmp,"4BS data: Sender id: 0x%02x%02x%02x%02x Status: %02x Data: %02x",
+				_log.Log(LOG_NORM, "EnOcean: 4BS data: Sender id: 0x%02x%02x%02x%02x Status: %02x Data: %02x",
 					m_buffer[5],m_buffer[6],m_buffer[7],m_buffer[8],m_buffer[9],m_buffer[3]
 				);
-				_log.Log(LOG_NORM, "EnOcean: %s", szTmp);
 
 				unsigned char DATA_BYTE3 = m_buffer[1];
 				unsigned char DATA_BYTE2 = m_buffer[2];
@@ -1646,12 +1646,8 @@ void CEnOceanESP3::ParseRadioDatagram()
 		case RORG_RPS: // repeated switch communication
 			{				
 #ifdef ENOCEAN_BUTTON_DEBUG
-				_log.Log(LOG_NORM, "EnOcean: RPS data: Sender id: 0x%02x%02x%02x%02x Status: %02x Data: %02x",
-					m_buffer[2],m_buffer[3],m_buffer[4],m_buffer[5],m_buffer[6],m_buffer[1]				);
-				if (m_buffer[6] & (1 << 2))
-				{
-					_log.Log(LOG_NORM, "EnOcean: T21");
-				}
+				_log.Log(LOG_NORM, "EnOcean: RPS data: Sender id: 0x%02x%02x%02x%02x Status: %02x Data: %02x T21:%d",
+					m_buffer[2],m_buffer[3],m_buffer[4],m_buffer[5],m_buffer[6],m_buffer[1], (m_buffer[6] & (1 << 2)));
 #endif // ENOCEAN_BUTTON_DEBUG
 				
 				unsigned char STATUS=m_buffer[6];
@@ -1666,6 +1662,8 @@ void CEnOceanESP3::ParseRadioDatagram()
 				long id = (ID_BYTE3 << 24) + (ID_BYTE2 << 16) + (ID_BYTE1 << 8) + ID_BYTE0;
 				char szDeviceID[20];
 				sprintf(szDeviceID,"%08X",(unsigned int)id);
+				int Rorg, Profile, iType;
+				getProfile(id, Rorg, Profile, iType);
 
 				// if a button is attached to a module, we should ignore it else its datagram will conflict with status reported by the module using VLD datagram
 				std::vector<std::vector<std::string> > result;
@@ -1879,6 +1877,15 @@ void CEnOceanESP3::ParseRadioDatagram()
 								// If not found, add it to the database
 								m_sql.safe_query("INSERT INTO EnoceanSensors (HardwareID, DeviceID, Manufacturer, Profile, [Type]) VALUES (%d,'%q',%d,%d,%d)", m_HwdID, szDeviceID, manID, func, type);
 								_log.Log(LOG_NORM, "EnOcean: Sender_ID 0x%08X inserted in the database", id);
+								//allocate base adress
+								int OffsetId = UpdateDeviceAddress(szDeviceID);
+								if (OffsetId != 0) {
+									unsigned int  BaseAddress = GetAdress(OffsetId);
+									//send teachin message
+									SendRpsTeachIn(BaseAddress);
+									_log.Log(LOG_NORM, "EnOcean: Teach In Sender_ID 0x%08X : 0x%08X", id, BaseAddress);
+								}
+
 							}
 							else
 								_log.Log(LOG_NORM, "EnOcean: Sender_ID 0x%08X already in the database", id);
@@ -1918,6 +1925,8 @@ void CEnOceanESP3::ParseRadioDatagram()
 
 								_log.Log(LOG_NORM, "EnOcean: channel = %d", nbc+1);
 								sDecodeRXMessage(this, (const unsigned char *)&tsen.LIGHTING2, NULL, 255);
+//								SendSwitch(id, nbc + 1, 0, light2_sOff, 0, NULL,  /* =12 */);
+
 							}
 							return;
 						}

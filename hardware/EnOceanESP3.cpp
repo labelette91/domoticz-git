@@ -1660,25 +1660,17 @@ void CEnOceanESP3::ParseRadioDatagram()
 				unsigned char ID_BYTE1=m_buffer[4];
 				unsigned char ID_BYTE0=m_buffer[5];
 				long id = (ID_BYTE3 << 24) + (ID_BYTE2 << 16) + (ID_BYTE1 << 8) + ID_BYTE0;
-				char szDeviceID[20];
-				sprintf(szDeviceID,"%08X",(unsigned int)id);
-				int Rorg, Profile, iType;
-				getProfile(id, Rorg, Profile, iType);
 
+				int Rorg, Profile, iType;
+				if (getProfile(id, Rorg, Profile, iType) ) 
 				// if a button is attached to a module, we should ignore it else its datagram will conflict with status reported by the module using VLD datagram
-				std::vector<std::vector<std::string> > result;
-				result = m_sql.safe_query("SELECT ID, Profile, [Type] FROM EnoceanSensors WHERE (HardwareID==%d) AND (DeviceID=='%q')", m_HwdID, szDeviceID);
-				if (result.size() == 1)
 				{
-					// hardware device was already teached-in
-					int Profile=atoi(result[0][1].c_str());
-					int iType=atoi(result[0][2].c_str());
 					if( (Profile == 0x01) &&						// profile 1 (D2-01) is Electronic switches and dimmers with Energy Measurement and Local Control
 						 ((iType == 0x0F) || (iType == 0x12))	// type 0F and 12 have external switch/push button control, it means they also act as rocker
 						)
 					{
 #ifdef ENOCEAN_BUTTON_DEBUG
-						_log.Log(LOG_STATUS,"EnOcean: %s, ignore button press", szDeviceID);
+						_log.Log(LOG_STATUS,"EnOcean: %08X, ignore button press", id);
 #endif // ENOCEAN_BUTTON_DEBUG
 						break;
 					}

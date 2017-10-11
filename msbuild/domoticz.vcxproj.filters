@@ -2749,6 +2749,9 @@
     <ClCompile Include="..\hardware\EnOcean.cpp">
       <Filter>Devices\EnOcean</Filter>
     </ClCompile>
+    <ClCompile Include="..\main\dzVents.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="domoticz.rc">

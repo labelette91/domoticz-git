@@ -649,6 +649,19 @@ bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length
 		return false; //only allowed to control switches
 
 	unsigned long sID=(tsen->LIGHTING2.id1<<24)|(tsen->LIGHTING2.id2<<16)|(tsen->LIGHTING2.id3<<8)|tsen->LIGHTING2.id4;
+
+/*
+	sendVld(  0xff99df01, 0 , 0 );
+	sleep_milliseconds(500);
+	sendVld(0xff99df01, 0, 64);
+	sleep_milliseconds(500);
+
+	sendVld(0xff99df01, 1, 0);
+	sleep_milliseconds(500);
+	sendVld(0xff99df01, 1, 64);
+	sleep_milliseconds(500);
+*/
+
 	if ((sID<m_id_base) || (sID>m_id_base + 129))
 	{
 		//get unit from db
@@ -1121,12 +1134,8 @@ void CEnOceanESP3::ParseRadioDatagram()
 	{
 		case RORG_1BS: // 1 byte communication (Contacts/Switches)
 			{
-				sprintf(szTmp,"1BS data: Sender id: 0x%02x%02x%02x%02x Data: %02x",
-					m_buffer[2],m_buffer[3],m_buffer[4],m_buffer[5],
-					m_buffer[0]
-				);
-
-				_log.Log(LOG_NORM, "EnOcean: %s", szTmp);
+				_log.Log(LOG_NORM, "EnOcean: 1BS data: Sender id: 0x%02x%02x%02x%02x Data: %02x",
+					m_buffer[2],m_buffer[3],m_buffer[4],m_buffer[5],m_buffer[0]		);
 
 				unsigned char DATA_BYTE0 = m_buffer[1];
 
@@ -1158,9 +1167,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 		case RORG_4BS: // 4 byte communication
 			{
 				sprintf(szTmp,"4BS data: Sender id: 0x%02x%02x%02x%02x Status: %02x Data: %02x",
-					m_buffer[5],m_buffer[6],m_buffer[7],m_buffer[8],
-					m_buffer[9],
-					m_buffer[3]
+					m_buffer[5],m_buffer[6],m_buffer[7],m_buffer[8],m_buffer[9],m_buffer[3]
 				);
 				_log.Log(LOG_NORM, "EnOcean: %s", szTmp);
 
@@ -1639,12 +1646,8 @@ void CEnOceanESP3::ParseRadioDatagram()
 		case RORG_RPS: // repeated switch communication
 			{				
 #ifdef ENOCEAN_BUTTON_DEBUG
-				sprintf(szTmp, "RPS data: Sender id: 0x%02x%02x%02x%02x Status: %02x Data: %02x",
-					m_buffer[2],m_buffer[3],m_buffer[4],m_buffer[5],
-					m_buffer[6],
-					m_buffer[1]
-				);
-				_log.Log(LOG_NORM, "EnOcean: %s", szTmp);
+				_log.Log(LOG_NORM, "EnOcean: RPS data: Sender id: 0x%02x%02x%02x%02x Status: %02x Data: %02x",
+					m_buffer[2],m_buffer[3],m_buffer[4],m_buffer[5],m_buffer[6],m_buffer[1]				);
 				if (m_buffer[6] & (1 << 2))
 				{
 					_log.Log(LOG_NORM, "EnOcean: T21");
@@ -2006,4 +2009,58 @@ void CEnOceanESP3::ParseRadioDatagram()
 			_log.Log(LOG_NORM, "EnOcean: Unhandled RORG (%02x)", m_buffer[0]);
 			break;
 	}
+}
+//send F6 01 01 : rocker button for teach in
+void CEnOceanESP3::SendRpsTeachIn(unsigned int sID)
+{
+	unsigned char buff[16];
+
+	//F6 10 ff 99 df 01 30
+	//F6 00 ff 99 df 01 20
+
+	buff[0] = RORG_RPS ;
+	buff[1] = 0x10;// rocker 0 press
+	buff[2] = (sID >> 24) & 0xff;		// Sender ID
+	buff[3] = (sID >> 16) & 0xff;
+	buff[4] = (sID >> 8) & 0xff;
+	buff[5] = sID & 0xff;
+	buff[6] = 0x30;
+	sendFrameQueue(PACKET_RADIO, buff, 7, NULL, 0);
+
+	//Next command is send a bit later (button release)
+	buff[1] = 0;				// no button press
+	buff[6] = S_RPS_T21;	// release button			// b5=T21, b4=NU, b3-b0= RepeaterCount
+
+	sendFrameQueue(PACKET_RADIO, buff, 7, NULL, 0);
+
+}
+
+void CEnOceanESP3::sendVld (unsigned int sID, int channel, int value)
+{
+	unsigned char buff[16];
+	unsigned char opt[16];
+
+	buff[0] = RORG_VLD; //vld
+	buff[1] = 0x01;
+	buff[2] = channel;
+	buff[3] = value;
+	buff[4] = (sID >> 24) & 0xff;		// Sender ID
+	buff[5] = (sID >> 16) & 0xff;
+	buff[6] = (sID >> 8) & 0xff;
+	buff[7] = sID & 0xff;
+	buff[8] = 0; //status
+
+	//optionnal data
+	opt[0] = 0x03; //subtel
+	opt[1] = 0xff;
+	opt[2] = 0xff;
+	opt[3] = 0xff;
+	opt[4] = 0xff;
+	opt[5] = 0xff;
+	opt[6] = 00;//RSI 
+
+	//D2 01 00 00 FF 99 DF 01 00
+	//03 FF FF FF FF FF 00
+
+	sendFrameQueue(PACKET_RADIO, buff, 9, opt, 7);
 }

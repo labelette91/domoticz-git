@@ -808,6 +808,7 @@
     <ClCompile Include="..\hardware\DomoticzHardware.cpp" />
     <ClCompile Include="..\hardware\DomoticzInternal.cpp" />
     <ClCompile Include="..\hardware\DomoticzTCP.cpp" />
+    <ClCompile Include="..\main\dzVents.cpp" />
     <ClCompile Include="..\main\EventsPythonDevice.cpp" />
     <ClCompile Include="..\main\EventsPythonModule.cpp" />
     <ClCompile Include="..\main\EventSystem.cpp" />

@@ -74,6 +74,10 @@ private:
      * Read callback, stores data in the buffer
      */
     void readCallback(const char *data, size_t len);
+	void sendVld(unsigned int sID, int channel, int value);
+	void SendRpsTeachIn(unsigned int sID);
+
+
 
 };
 

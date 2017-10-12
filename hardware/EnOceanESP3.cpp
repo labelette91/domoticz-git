@@ -1860,22 +1860,21 @@ void CEnOceanESP3::ParseRadioDatagram()
 
 						// Record EnOcean device profile
 						{
-							char szDeviceID[20];
-							std::vector<std::vector<std::string> > result;
-							sprintf(szDeviceID,"%08X",(unsigned int)id);
-							result = m_sql.safe_query("SELECT ID FROM EnoceanSensors WHERE (HardwareID==%d) AND (DeviceID=='%q')", m_HwdID, szDeviceID);
-							if (result.size()<1)
+							if (DeviceExist(id)==0)
 							{
 								// If not found, add it to the database
-								m_sql.safe_query("INSERT INTO EnoceanSensors (HardwareID, DeviceID, Manufacturer, Profile, [Type]) VALUES (%d,'%q',%d,%d,%d)", m_HwdID, szDeviceID, manID, func, type);
+
+								//m_sql.safe_query("INSERT INTO EnoceanSensors (HardwareID, DeviceID, Manufacturer, Profile, [Type]) VALUES (%d,'%q',%d,%d,%d)", m_HwdID, szDeviceID, manID, func, type);
+								CreateSensors(id , 0 , manID, func, type );
+
 								_log.Log(LOG_NORM, "EnOcean: Sender_ID 0x%08X inserted in the database", id);
 								//allocate base adress
-								int OffsetId = UpdateDeviceAddress(szDeviceID);
+								int OffsetId = UpdateDeviceAddress(id);
 								if (OffsetId != 0) {
 									unsigned int  BaseAddress = GetAdress(OffsetId);
 									//send teachin message
-//									Send1BSTeachIn(BaseAddress);
-									SendRpsTeachIn(BaseAddress);
+									Send1BSTeachIn(BaseAddress);
+//									SendRpsTeachIn(BaseAddress);
 									_log.Log(LOG_NORM, "EnOcean: Teach In Sender_ID 0x%08X : 0x%08X", id, BaseAddress);
 								}
 
@@ -2065,7 +2064,27 @@ void CEnOceanESP3::Send1BSTeachIn(unsigned int sID)
 	sendFrameQueue(PACKET_RADIO, buff, 7, opt, 7 );
 
 }
+void CEnOceanESP3::Send4BSTeachIn(unsigned int sID )
+{
+	if (isOpen()) {
 
+		unsigned char buf[100];
+		buf[0] = RORG_4BS ;
+		buf[1] = 0x2;
+		buf[2] = 0;
+		buf[3] = 0;
+		buf[4] = 0x0; // DB0.3=0 -> teach in with no EEP
+
+		buf[5] = (sID >> 24) & 0xff;
+		buf[6] = (sID >> 16) & 0xff;
+		buf[7] = (sID >> 8) & 0xff;
+		buf[8] = sID & 0xff;
+
+		buf[9] = 0x30; // status
+
+		sendFrame(PACKET_RADIO, buf, 10, NULL, 0);
+	}
+}
 
 void CEnOceanESP3::sendVld (unsigned int sID, int channel, int value)
 {

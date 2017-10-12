@@ -109,7 +109,6 @@ int CEnOcean::getUnitFromDeviceId(std::string devIDx , int UnitCode )
 //DeviceId : ID of device in EnoceanSensor
 //offsetID : offset of device from controler base adress 0..127
 void CEnOcean::UpdateBaseAddress(std::string DeviceId , int offsetID ) {
-//	m_sql.UpdateDeviceValue(BASEID_FIELD_NAME, offsetID , idx);
 	m_sql.safe_query("UPDATE EnoceanSensors SET %s=%d   WHERE (DeviceID = '%s' )", BASEID_FIELD_NAME , offsetID , DeviceId.c_str() );
 
 }
@@ -157,16 +156,15 @@ int CEnOcean::UpdateDeviceAddress(std::string DeviceId) {
 
 }
 
+int CEnOcean::UpdateDeviceAddress(unsigned int  DeviceId) 
+	{
+		return (UpdateDeviceAddress(DeviceIDToString(DeviceId)) );
+	}
 //test if deviceId exist in in database
 //return 0 if not found
 int CEnOcean::DeviceExist( unsigned int Deviceid)
 {
-char szDeviceID[20];
-
-sprintf(szDeviceID, "%08X", (unsigned int)Deviceid);
-
-return DeviceExist(szDeviceID);
-
+return DeviceExist((char *)DeviceIDToString(Deviceid).c_str());
 }
 
 int CEnOcean::DeviceExist(char * szDeviceID)
@@ -185,19 +183,14 @@ int CEnOcean::DeviceExist(char * szDeviceID)
 }
 
 //create sensor in database
-void CEnOcean::CreateSensors(char * szDeviceID, int manufacturer, int profile, int ttype)
+void CEnOcean::CreateSensors(char * szDeviceID, int rorg , int manufacturer, int profile, int ttype)
 {
 	m_sql.safe_query("INSERT INTO EnoceanSensors (HardwareID, DeviceID, Manufacturer, Profile, [Type]) VALUES (%d,'%q',%d,%d,%d)", m_HwdID, szDeviceID, manufacturer, profile, ttype);
 
 }
-void CEnOcean::CreateSensors(unsigned int DeviceID, int manufacturer, int profile, int ttype)
+void CEnOcean::CreateSensors(unsigned int DeviceID, int rorg, int manufacturer, int profile, int ttype)
 {
-	char szDeviceID[20];
-
-	sprintf(szDeviceID, "%08X", (unsigned int)DeviceID);
-
-	CreateSensors(szDeviceID, manufacturer, profile, ttype);
-
+	CreateSensors((char *)DeviceIDToString(DeviceID).c_str(), rorg, manufacturer, profile, ttype);
 }
 
 void CEnOcean::AddSensors(unsigned int DeviceID, int manufacturer, int profile, int ttype)
@@ -206,7 +199,7 @@ void CEnOcean::AddSensors(unsigned int DeviceID, int manufacturer, int profile, 
 	if (!DeviceExist(DeviceID))
 	{
 		// If not found, add it to the database
-		CreateSensors(DeviceID, manufacturer, profile, ttype);
+		CreateSensors(DeviceID, 0,manufacturer, profile, ttype);
 		_log.Log(LOG_NORM, "EnOcean: Sender_ID 0x%08X inserted in the database", DeviceID);
 	}
 	else
@@ -234,7 +227,7 @@ void CEnOcean::ToSensorsId(std::string &DeviceId)
 }
 
 //convert id from  buffer[] to unsigned int
-unsigned int getIdent(unsigned char m_buffer[])
+unsigned int getIdentCharToInt(unsigned char m_buffer[])
 {
 	unsigned int id = (m_buffer[0] << 24) + (m_buffer[1] << 16) + (m_buffer[2] << 8) + m_buffer[3];
 	return id;

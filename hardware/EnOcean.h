@@ -40,6 +40,8 @@ public:
 
 	int UpdateDeviceAddress(std::string idx );
 
+	int UpdateDeviceAddress(unsigned int  DeviceId);
+
 	void UpdateBaseAddress(std::string idx, int offsetID);
 
 	static int getUnitFromDeviceId(unsigned int devIDx, int UnitCode);
@@ -50,9 +52,9 @@ public:
 
 	int DeviceExist(char * szDeviceID);
 
-	void CreateSensors(char * szDeviceID, int manufacturer, int profile, int ttype);
+	void CreateSensors(char * szDeviceID, int rorg, int manufacturer, int profile, int ttype);
 
-	void CreateSensors(unsigned int DeviceID, int manufacturer, int profile, int ttype);
+	void CreateSensors(unsigned int DeviceID, int rorg, int manufacturer, int profile, int ttype);
 
 	void AddSensors(unsigned int DeviceID, int manufacturer, int profile, int ttype);
 
@@ -73,7 +75,7 @@ protected:
 };
 
 //convert id from  buffer[] to unsigned int
-unsigned int getIdent(unsigned char m_buffer[]);
+unsigned int getIdentCharToInt(unsigned char m_buffer[]);
 
 #endif
 

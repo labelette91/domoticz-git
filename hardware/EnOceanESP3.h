@@ -77,6 +77,7 @@ private:
 	void sendVld(unsigned int sID, int channel, int value);
 	void SendRpsTeachIn(unsigned int sID);
 	void Send1BSTeachIn(unsigned int sID);
+	void Send4BSTeachIn(unsigned int sID);
 
 };
 

@@ -76,8 +76,7 @@ private:
     void readCallback(const char *data, size_t len);
 	void sendVld(unsigned int sID, int channel, int value);
 	void SendRpsTeachIn(unsigned int sID);
-
-
+	void Send1BSTeachIn(unsigned int sID);
 
 };
 

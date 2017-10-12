@@ -1874,6 +1874,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 								if (OffsetId != 0) {
 									unsigned int  BaseAddress = GetAdress(OffsetId);
 									//send teachin message
+//									Send1BSTeachIn(BaseAddress);
 									SendRpsTeachIn(BaseAddress);
 									_log.Log(LOG_NORM, "EnOcean: Teach In Sender_ID 0x%08X : 0x%08X", id, BaseAddress);
 								}
@@ -2036,10 +2037,39 @@ void CEnOceanESP3::SendRpsTeachIn(unsigned int sID)
 
 }
 
+//send data              1BS D5 00 FF 99 DF 01 00
+//opt                                             03 FF FF FF FF FF 00
+//esp3     55 00 07 07 01 7A D5 00 FF 99 DF 01 00 03 FF FF FF FF FF 00 64
+void CEnOceanESP3::Send1BSTeachIn(unsigned int sID)
+{
+	unsigned char buff[16];
+
+	buff[0] = RORG_1BS;
+	buff[1] = 0 ;
+	buff[2] = (sID >> 24) & 0xff;		// Sender ID
+	buff[3] = (sID >> 16) & 0xff;
+	buff[4] = (sID >> 8) & 0xff;
+	buff[5] = sID & 0xff;
+	buff[6] = 0 ;
+
+	//optionnal data
+	unsigned char opt[16];
+	opt[0] = 0x03; //subtel
+	opt[1] = 0xff;
+	opt[2] = 0xff;
+	opt[3] = 0xff;
+	opt[4] = 0xff;
+	opt[5] = 0xff;
+	opt[6] = 00;//RSI 
+
+	sendFrameQueue(PACKET_RADIO, buff, 7, opt, 7 );
+
+}
+
+
 void CEnOceanESP3::sendVld (unsigned int sID, int channel, int value)
 {
 	unsigned char buff[16];
-	unsigned char opt[16];
 
 	buff[0] = RORG_VLD; //vld
 	buff[1] = 0x01;
@@ -2052,6 +2082,7 @@ void CEnOceanESP3::sendVld (unsigned int sID, int channel, int value)
 	buff[8] = 0; //status
 
 	//optionnal data
+	unsigned char opt[16];
 	opt[0] = 0x03; //subtel
 	opt[1] = 0xff;
 	opt[2] = 0xff;

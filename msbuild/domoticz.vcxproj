@@ -604,6 +604,7 @@
     <ClInclude Include="..\notifications\NotificationPushover.h" />
     <ClInclude Include="..\notifications\NotificationPushsafer.h" />
     <ClInclude Include="..\notifications\NotificationSMS.h" />
+    <ClInclude Include="..\notifications\NotificationTelegram.h" />
     <ClInclude Include="..\push\FibaroPush.h" />
     <ClInclude Include="..\push\GooglePubSubPush.h" />
     <ClInclude Include="..\push\HttpPush.h" />
@@ -925,6 +926,7 @@
     <ClCompile Include="..\notifications\NotificationPushover.cpp" />
     <ClCompile Include="..\notifications\NotificationPushsafer.cpp" />
     <ClCompile Include="..\notifications\NotificationSMS.cpp" />
+    <ClCompile Include="..\notifications\NotificationTelegram.cpp" />
     <ClCompile Include="..\push\FibaroPush.cpp" />
     <ClCompile Include="..\push\GooglePubSubPush.cpp" />
     <ClCompile Include="..\push\HttpPush.cpp" />

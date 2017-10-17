@@ -68,14 +68,15 @@ public:
 
 	bool getProfile(unsigned int DeviceID, int &Rorg, int &Profile, int &Type);
 
-
 protected:
 
 	unsigned long m_id_base;
 };
 
 //convert id from  buffer[] to unsigned int
-unsigned int getIdentCharToInt(unsigned char m_buffer[]);
+unsigned int DeviceIDCharToInt(unsigned char m_buffer[]);
+
+void DeviceIDIntToChar(unsigned int DeviceID, char szDeviceID[]);
 
 #endif
 

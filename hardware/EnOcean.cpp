@@ -216,7 +216,7 @@ void CEnOcean::AddSensors(unsigned int DeviceID, int manufacturer, int profile, 
 std::string CEnOcean::DeviceIDToString(unsigned int DeviceID)
 {
 	char szDeviceID[20];
-	sprintf(szDeviceID, "%08X", (unsigned int)DeviceID);
+	DeviceIDIntToChar(DeviceID, szDeviceID);
 	return szDeviceID;
 }
 
@@ -226,11 +226,16 @@ void CEnOcean::ToSensorsId(std::string &DeviceId)
 		DeviceId = '0' + DeviceId;
 }
 
-//convert id from  buffer[] to unsigned int
-unsigned int getIdentCharToInt(unsigned char m_buffer[])
+//convert device ID id from  buffer[] to unsigned int
+unsigned int DeviceIDCharToInt(unsigned char m_buffer[])
 {
 	unsigned int id = (m_buffer[0] << 24) + (m_buffer[1] << 16) + (m_buffer[2] << 8) + m_buffer[3];
 	return id;
+}
+void DeviceIDIntToChar(unsigned int DeviceID ,  char szDeviceID[])
+{
+	sprintf(szDeviceID, "%08X", (unsigned int)DeviceID);
+
 }
 
 bool CEnOcean::getProfile(std::string szDeviceID, int &Rorg, int &Profile, int &Type)

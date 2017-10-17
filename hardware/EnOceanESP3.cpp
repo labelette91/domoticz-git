@@ -1889,36 +1889,13 @@ void CEnOceanESP3::ParseRadioDatagram()
 
 							for(nbc = 0; nbc < nb_channel; nbc ++)
 							{
-								RBUF tsen;
-
-								memset(&tsen,0,sizeof(RBUF));
-								tsen.LIGHTING2.packetlength=sizeof(tsen.LIGHTING2)-1;
-								tsen.LIGHTING2.packettype=pTypeLighting2;
-								tsen.LIGHTING2.subtype=sTypeAC;
-								tsen.LIGHTING2.seqnbr=0;
-
-								tsen.LIGHTING2.id1=(BYTE)ID_BYTE3;
-								tsen.LIGHTING2.id2=(BYTE)ID_BYTE2;
-								tsen.LIGHTING2.id3=(BYTE)ID_BYTE1;
-								tsen.LIGHTING2.id4=(BYTE)ID_BYTE0;
-								tsen.LIGHTING2.level=0;
-								tsen.LIGHTING2.rssi=12;
-
-								tsen.LIGHTING2.unitcode = nbc + 1;
-								tsen.LIGHTING2.cmnd     = light2_sOff;								
 
 #ifdef ENOCEAN_BUTTON_DEBUG						
-								_log.Log(LOG_NORM, "EnOcean message: 0xD4 Node 0x%08x UnitID: %02X cmd: %02X ",
-											id,
-											tsen.LIGHTING2.unitcode,
-											tsen.LIGHTING2.cmnd
-										);
+								_log.Log(LOG_NORM, "EnOcean message: 0xD2 Node 0x%08x UnitID: %02X cmd: %02X ",
+											id,	nbc + 1,	light2_sOff	);
 #endif //ENOCEAN_BUTTON_DEBUG
 
-								_log.Log(LOG_NORM, "EnOcean: channel = %d", nbc+1);
-								sDecodeRXMessage(this, (const unsigned char *)&tsen.LIGHTING2, NULL, 255);
-//								SendSwitch(id, nbc + 1, 0, light2_sOff, 0, NULL,  /* =12 */);
-
+								SendSwitchRaw(id, nbc + 1, 0, light2_sOff, 0, "" );
 							}
 							return;
 						}

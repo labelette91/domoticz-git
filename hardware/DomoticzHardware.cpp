@@ -616,6 +616,42 @@ void CDomoticzHardwareBase::SendSwitch(const int NodeID, const int ChildID, cons
 	sDecodeRXMessage(this, (const unsigned char *)&lcmd.LIGHTING2, defaultname.c_str(), BatteryLevel);
 }
 
+void CDomoticzHardwareBase::SendSwitchRaw(const int NodeID, const int ChildID, const int BatteryLevel, const bool bOn, const double level, const std::string &defaultname, const int RssiLevel /* =12 */)
+{
+	//make device ID
+	unsigned char ID1 = (unsigned char)((NodeID & 0xFF000000) >> 24);
+	unsigned char ID2 = (unsigned char)((NodeID & 0xFF0000) >> 16);
+	unsigned char ID3 = (unsigned char)((NodeID & 0xFF00) >> 8);
+	unsigned char ID4 = (unsigned char)NodeID & 0xFF;
+
+	//Send as Lighting 2
+	tRBUF lcmd;
+	memset(&lcmd, 0, sizeof(RBUF));
+	lcmd.LIGHTING2.packetlength = sizeof(lcmd.LIGHTING2) - 1;
+	lcmd.LIGHTING2.packettype = pTypeLighting2;
+	lcmd.LIGHTING2.subtype = sTypeAC;
+	lcmd.LIGHTING2.id1 = ID1;
+	lcmd.LIGHTING2.id2 = ID2;
+	lcmd.LIGHTING2.id3 = ID3;
+	lcmd.LIGHTING2.id4 = ID4;
+	lcmd.LIGHTING2.unitcode = ChildID;
+	if (!bOn)
+	{
+		lcmd.LIGHTING2.cmnd = light2_sOff;
+	}
+	else
+	{
+		if (level != 0)
+			lcmd.LIGHTING2.cmnd = light2_sSetLevel;
+		else
+			lcmd.LIGHTING2.cmnd = light2_sOn;
+	}
+	lcmd.LIGHTING2.level = level;
+	lcmd.LIGHTING2.filler = 0;
+	lcmd.LIGHTING2.rssi = RssiLevel;
+	sDecodeRXMessage(this, (const unsigned char *)&lcmd.LIGHTING2, defaultname.c_str(), BatteryLevel);
+}
+
 void CDomoticzHardwareBase::SendBlindSensor(const int NodeID, const int ChildID, const int BatteryLevel, const int Command, const std::string &defaultname, const int RssiLevel /* =12 */)
 {
 	//Send as Blinds

@@ -105,6 +105,20 @@ typedef enum
 
 } PACKET_TYPE;
 
+char * PACKET_TYPE_name[] = {
+	"PACKET_RESERVED"          ,
+	"PACKET_RADIO"             ,
+	"PACKET_RESPONSE"          ,
+	"PACKET_RADIO_SUB_TEL"     ,
+	"PACKET_EVENT"             ,
+	"PACKET_COMMON_COMMAND"    ,
+	"PACKET_SMART_ACK_COMMAND" ,
+	"PACKET_REMOTE_MAN_COMMAND",
+	"PACKET_PRODUCTION_COMMAND",
+	"PACKET_RADIO_MESSAGE"     ,
+	"PACKET_RADIO_ADVANCED"
+};
+
 //! Response type
 typedef enum
 {
@@ -673,6 +687,7 @@ bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length
 			return false;
 		}
 		sendVld(unitBaseAddr, tsen->LIGHTING2.unitcode-1,  tsen->LIGHTING2.cmnd*64);
+		return true ;
 
 	}
 	else
@@ -912,7 +927,7 @@ bool CEnOceanESP3::ParseData()
 #ifdef ENABLE_LOGGING
 	std::stringstream sstr;
 
-	sstr << std::hex << std::uppercase << std::setw(2) << std::setfill('0') << (unsigned int)m_ReceivedPacketType << " (";
+	sstr << std::hex << std::uppercase << std::setw(2) << std::setfill('0') << (unsigned int)m_ReceivedPacketType << " " << PACKET_TYPE_name[m_ReceivedPacketType] << " (";
 	sstr << std::hex << std::uppercase << std::setw(2) << std::setfill('0') << (unsigned int)m_DataSize << "/";
 	sstr << std::hex << std::uppercase << std::setw(2) << std::setfill('0') << (unsigned int)m_OptionalDataSize << ") ";
 
@@ -922,7 +937,7 @@ bool CEnOceanESP3::ParseData()
 		if (idx!=m_bufferpos-1)
 			sstr << " ";
 	}
-	_log.Log(LOG_STATUS,"EnOcean: %s",sstr.str().c_str());	
+	_log.Log(LOG_STATUS,"EnOcean: recv %s",sstr.str().c_str());	
 #endif
 
 	if (m_ReceivedPacketType==PACKET_RESPONSE)
@@ -1850,11 +1865,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 						unsigned char func = m_buffer[6];
 						unsigned char rorg = m_buffer[7];
 
-						unsigned char ID_BYTE3=m_buffer[8];
-						unsigned char ID_BYTE2=m_buffer[9];
-						unsigned char ID_BYTE1=m_buffer[10];
-						unsigned char ID_BYTE0=m_buffer[11];
-						long id = (ID_BYTE3 << 24) + (ID_BYTE2 << 16) + (ID_BYTE1 << 8) + ID_BYTE0;
+						long id = DeviceIDCharToInt(&m_buffer[8]);
 
 						_log.Log(LOG_NORM, "EnOcean: teach-in request received from %08X (manufacturer: %03X). number of channels: %d, device profile: %02X-%02X-%02X", id, manID, nb_channel, rorg,func,type);
 
@@ -1912,64 +1923,46 @@ void CEnOceanESP3::ParseRadioDatagram()
 				unsigned char func = (m_buffer[1] >> 2) & 0x3F;
 				unsigned char type = ((m_buffer[2] >> 3) & 0x1F) | ((m_buffer[1] & 0x03) << 5);
 
+				//compute senderId offese : 4byte for senderId and 1 for status
+				int senderOfs = m_DataSize - 4 - 1;
+				if (senderOfs <= 0)
+					return;
+				//conpute sender ID
+				unsigned senderId = DeviceIDCharToInt(&m_buffer[senderOfs]);
+				int Rorg, Func, iType;
+				if (!getProfile(senderId, Rorg, Func, iType))
+				{
+					_log.Log(LOG_NORM, "EnOcean: Need Teach-In for %08X", senderId );
+					return;
+				}
+
+				_log.Log(LOG_NORM, "EnOcean message VLD: senderID: %08X Func:%02X  Type:%02X", senderId,Func,iType );
+
 				_log.Log(LOG_NORM, "EnOcean message VLD: func: %02X Type: %02X", func, type);
 				if(func == 0x01)
 				{
+					//get command 
+					int CMD = m_buffer[1] & 0xF;
 					// D2-01
-					switch(type)
+					switch(CMD)
 					{
-						case 0x0C:	// D2-01-0C
+						//! <b>Actuator Status Response</b> 4
+						case 0x04:	// D2-01-xx
 									{
 										unsigned char channel = m_buffer[2] & 0x7;
 
 										unsigned char dim_power = m_buffer[3] & 0x7F;		// 0=off, 0x64=100%
 
-										unsigned char ID_BYTE3=m_buffer[4];
-										unsigned char ID_BYTE2=m_buffer[5];
-										unsigned char ID_BYTE1=m_buffer[6];
-										unsigned char ID_BYTE0=m_buffer[7];
-										long id = (ID_BYTE3 << 24) + (ID_BYTE2 << 16) + (ID_BYTE1 << 8) + ID_BYTE0;
-										
-										// report status only if it is a known device else we may have an incorrect profile
-										char szDeviceID[20];
-										std::vector<std::vector<std::string> > result;
-										sprintf(szDeviceID,"%08X",(unsigned int)id);
-
-										result = m_sql.safe_query("SELECT ID, Manufacturer, Profile, [Type] FROM EnoceanSensors WHERE (HardwareID==%d) AND (DeviceID=='%q')", m_HwdID, szDeviceID);
-										if (result.size()<1)
-										{
-											_log.Log(LOG_NORM, "EnOcean: Need Teach-In for %s", szDeviceID);
-											return;
-										}
-
-										RBUF tsen;
-										memset(&tsen,0,sizeof(RBUF));
-										tsen.LIGHTING2.packetlength=sizeof(tsen.LIGHTING2)-1;
-										tsen.LIGHTING2.packettype=pTypeLighting2;
-										tsen.LIGHTING2.subtype=sTypeAC;
-										tsen.LIGHTING2.seqnbr=0;
-
-										tsen.LIGHTING2.id1=(BYTE)ID_BYTE3;
-										tsen.LIGHTING2.id2=(BYTE)ID_BYTE2;
-										tsen.LIGHTING2.id3=(BYTE)ID_BYTE1;
-										tsen.LIGHTING2.id4=(BYTE)ID_BYTE0;
-										tsen.LIGHTING2.level=dim_power;
-										tsen.LIGHTING2.rssi=12;
-
-										tsen.LIGHTING2.unitcode = channel + 1;
-										tsen.LIGHTING2.cmnd     = (dim_power>0) ? light2_sOn : light2_sOff;								
+										int unitcode = channel + 1;
+										int cmnd     = (dim_power>0) ? light2_sOn : light2_sOff;								
 
 #ifdef ENOCEAN_BUTTON_DEBUG						
 										_log.Log(LOG_NORM, "EnOcean message: 0x%02X Node 0x%08x UnitID: %02X cmd: %02X ",
-											DATA_BYTE3,
-											id,
-											tsen.LIGHTING2.unitcode,
-											tsen.LIGHTING2.cmnd
-										);
+											DATA_BYTE3, senderId,unitcode,cmnd	);
 #endif //ENOCEAN_BUTTON_DEBUG
 
-										// Never learn device from D2-01-0C because subtype may be incorrect
-										sDecodeRXMessage(this, (const unsigned char *)&tsen.LIGHTING2, NULL, 255);
+										SendSwitchRaw(senderId, unitcode, 0, cmnd , 0, "");
+
 
 										// Note: if a device uses simultaneously RPS and VLD (ex: nodon inwall module), it can be partially initialized.
 										//			Domoticz will show device status but some functions may not work because EnoceanSensors table has no info on this device (until teach-in is performed)

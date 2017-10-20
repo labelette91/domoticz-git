@@ -1906,7 +1906,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 											id,	nbc + 1,	light2_sOff	);
 #endif //ENOCEAN_BUTTON_DEBUG
 
-								SendSwitchRaw(id, nbc + 1, 0, light2_sOff, 0, "" );
+								SendSwitchRaw(id, nbc + 1, -1, light2_sOff, 0, "" );
 							}
 							return;
 						}
@@ -1961,7 +1961,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 											DATA_BYTE3, senderId,unitcode,cmnd	);
 #endif //ENOCEAN_BUTTON_DEBUG
 
-										SendSwitchRaw(senderId, unitcode, 0, cmnd , 0, "");
+										SendSwitchRaw(senderId, unitcode, -1 , cmnd , 0, "");
 
 
 										// Note: if a device uses simultaneously RPS and VLD (ex: nodon inwall module), it can be partially initialized.

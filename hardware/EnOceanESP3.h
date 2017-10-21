@@ -78,6 +78,8 @@ private:
 	void SendRpsTeachIn(unsigned int sID);
 	void Send1BSTeachIn(unsigned int sID);
 	void Send4BSTeachIn(unsigned int sID);
+	void TestData(char *  data);
+	void TestData(char * sdata, char * optData);
 
 };
 

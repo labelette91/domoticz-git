@@ -424,13 +424,7 @@ CEnOceanESP3::CEnOceanESP3(const int ID, const std::string& devname, const int t
 	m_receivestate=ERS_SYNCBYTE;
 	m_stoprequested=false;
 
-	//Test
-	//m_ReceivedPacketType = 0x01;
-	//m_DataSize = 0x0A;
-	//m_OptionalDataSize = 0x07;
-	//m_bufferpos = 0;
-	//m_buffer[m_bufferpos++] = 0xA5;
-	//ParseData();
+	
 }
 
 CEnOceanESP3::~CEnOceanESP3()
@@ -482,6 +476,37 @@ void CEnOceanESP3::Do_Work()
 			{
 				m_LastHeartbeat = mytime(NULL);
 			}
+#ifndef TEST
+//			if (sec_counter == 5)	TestData("D5 0 01 02 03 04 00 ");
+//			if (sec_counter == 25)	TestData("D5 1 01 02 03 04 00 ");
+
+//			if (sec_counter == 5)	TestData("D2 04 60 80 01 A6 54 28 00 "); //vld ch 0
+//			if (sec_counter == 15)	TestData("D2 04 60 E4 01 A6 54 28 00 "); //vld ch 0
+
+//			if (sec_counter == 5)	TestData("D2 04 61 80 01 A6 54 28 00 "); // vld ch1
+//			if (sec_counter == 15)	TestData("D2 04 61 E4 01 A6 54 28 00 "); // vld ch1
+
+
+//			if (sec_counter == 6)	TestData("D4 A0 02 46 00 12 01 D2 01 A6 54 28 00 "); // ute 
+
+			if (sec_counter == 6)	TestData("D4 A0 02 46 00 12 01 D2 01 A6 54 28 00 ", "01 FF FF FF FF 2D 00");
+
+//			if (sec_counter == 5)	TestData("F6 10 01 A6 54 28 30 "); //rps switch up
+//			if (sec_counter == 6)	TestData("F6 00 01 A6 54 28 20 "); //rps switch
+
+//			if (sec_counter == 5)	TestData("F6 30 01 A6 54 28 30 "); //rps switch down
+//			if (sec_counter == 5)	TestData("F6 00 01 A6 54 28 20 "); //rps switch
+
+
+			
+//			if (sec_counter == 2)	TestData("A5 02 00 00 00 FF 99 DF 01 30 "); //4BS teach in variation 1 : noo eep
+
+			if (sec_counter == 2)	TestData("A5 b1000 b1000 46 b10000000 FF 99 DF 01 30 "); //4BS teach in variation 1 : noo eep func A-02-01
+//														        | eep
+//													         | manufactuer ID nodon
+
+
+#endif
 		}
 
 		if (!isOpen())
@@ -510,6 +535,7 @@ void CEnOceanESP3::Do_Work()
 				m_sendqueue.erase(itt);
 			}
 		}
+
 	}
 	_log.Log(LOG_STATUS,"EnOcean: Serial Worker stopped...");
 }
@@ -924,21 +950,23 @@ float CEnOceanESP3::GetValueRange(const float InValue, const float ScaleMax, con
 
 bool CEnOceanESP3::ParseData()
 {
-#ifdef ENABLE_LOGGING
-	std::stringstream sstr;
-
-	sstr << std::hex << std::uppercase << std::setw(2) << std::setfill('0') << (unsigned int)m_ReceivedPacketType << " " << PACKET_TYPE_name[m_ReceivedPacketType] << " (";
-	sstr << std::hex << std::uppercase << std::setw(2) << std::setfill('0') << (unsigned int)m_DataSize << "/";
-	sstr << std::hex << std::uppercase << std::setw(2) << std::setfill('0') << (unsigned int)m_OptionalDataSize << ") ";
-
-	for (int idx=0;idx<m_bufferpos;idx++)
+	if (_log.isTraceEnabled())
 	{
-		sstr << std::hex << std::uppercase << std::setw(2) << std::setfill('0') << (unsigned int)m_buffer[idx];
-		if (idx!=m_bufferpos-1)
-			sstr << " ";
+		std::stringstream sstr;
+
+		sstr << std::hex << std::uppercase << std::setw(2) << std::setfill('0') << (unsigned int)m_ReceivedPacketType << " " << PACKET_TYPE_name[m_ReceivedPacketType] << " (";
+		sstr << std::hex << std::uppercase << std::setw(2) << std::setfill('0') << (unsigned int)m_DataSize << "/";
+		sstr << std::hex << std::uppercase << std::setw(2) << std::setfill('0') << (unsigned int)m_OptionalDataSize << ") ";
+
+		for (int idx=0;idx<m_bufferpos;idx++)
+		{
+			sstr << std::hex << std::uppercase << std::setw(2) << std::setfill('0') << (unsigned int)m_buffer[idx];
+			if (idx!=m_bufferpos-1)
+				sstr << " ";
+		}
+		_log.Log(LOG_TRACE,"EnOcean: recv %s",sstr.str().c_str());
+
 	}
-	_log.Log(LOG_STATUS,"EnOcean: recv %s",sstr.str().c_str());	
-#endif
 
 	if (m_ReceivedPacketType==PACKET_RESPONSE)
 	{
@@ -993,142 +1021,7 @@ bool CEnOceanESP3::ParseData()
 		sprintf(szTmp,"Unhandled Packet Type (0x%02x)",m_ReceivedPacketType);
 		_log.Log(LOG_STATUS,szTmp);
 	}
-/*
-	enocean_data_structure *pFrame=(enocean_data_structure*)&m_buffer;
-	unsigned char Checksum=enocean_calc_checksum(pFrame);
-	if (Checksum!=pFrame->CHECKSUM)
-		return false; //checksum Mismatch!
 
-	long id = (pFrame->ID_BYTE3 << 24) + (pFrame->ID_BYTE2 << 16) + (pFrame->ID_BYTE1 << 8) + pFrame->ID_BYTE0;
-	char szDeviceID[20];
-	sprintf(szDeviceID,"%08X",(unsigned int)id);
-
-	//Handle possible OK/Errors
-	bool bStopProcessing=false;
-	if (pFrame->H_SEQ_LENGTH==0x8B)
-	{
-		switch (pFrame->ORG)
-		{
-		case 0x58:
-			//OK
-#ifdef _DEBUG
-			_log.Log(LOG_NORM,"EnOcean: OK");
-#endif
-			bStopProcessing=true;
-			break;
-		case 0x28:
-			_log.Log(LOG_ERROR,"EnOcean: ERR_MODEM_NOTWANTEDACK");
-			bStopProcessing=true;
-			break;
-		case 0x29:
-			_log.Log(LOG_ERROR,"EnOcean: ERR_MODEM_NOTACK");
-			bStopProcessing=true;
-			break;
-		case 0x0C:
-			_log.Log(LOG_ERROR,"EnOcean: ERR_MODEM_DUP_ID");
-			bStopProcessing=true;
-			break;
-		case 0x08:
-			_log.Log(LOG_ERROR,"EnOcean: Error in H_SEQ");
-			bStopProcessing=true;
-			break;
-		case 0x09:
-			_log.Log(LOG_ERROR,"EnOcean: Error in LENGTH");
-			bStopProcessing=true;
-			break;
-		case 0x0A:
-			_log.Log(LOG_ERROR,"EnOcean: Error in CHECKSUM");
-			bStopProcessing=true;
-			break;
-		case 0x0B:
-			_log.Log(LOG_ERROR,"EnOcean: Error in ORG");
-			bStopProcessing=true;
-			break;
-		case 0x22:
-			_log.Log(LOG_ERROR,"EnOcean: ERR_TX_IDRANGE");
-			bStopProcessing=true;
-			break;
-		case 0x1A:
-			_log.Log(LOG_ERROR,"EnOcean: ERR_ IDRANGE");
-			bStopProcessing=true;
-			break;
-		}
-	}
-	if (bStopProcessing)
-		return true;
-
-	switch (pFrame->ORG)
-	{
-	case C_ORG_INF_IDBASE:
-		m_id_base = (pFrame->DATA_BYTE3 << 24) + (pFrame->DATA_BYTE2 << 16) + (pFrame->DATA_BYTE1 << 8) + pFrame->DATA_BYTE0;
-		_log.Log(LOG_STATUS,"EnOcean: Transceiver ID_Base: 0x%08x",m_id_base);
-		break;
-	case C_ORG_RPS:
-		if (pFrame->STATUS & S_RPS_NU) {
-			//Rocker
-			// NU == 1, N-Message
-			unsigned char RockerID=(pFrame->DATA_BYTE3 & DB3_RPS_NU_RID) >> DB3_RPS_NU_RID_SHIFT;
-			unsigned char UpDown=(pFrame->DATA_BYTE3 & DB3_RPS_NU_UD) >> DB3_RPS_NU_UD_SHIFT;
-			unsigned char Pressed=(pFrame->DATA_BYTE3 & DB3_RPS_NU_PR)>>DB3_RPS_NU_PR_SHIFT;
-			unsigned char SecondRockerID=(pFrame->DATA_BYTE3 & DB3_RPS_NU_SRID)>>DB3_RPS_NU_SRID_SHIFT;
-			unsigned char SecondUpDown=(pFrame->DATA_BYTE3 & DB3_RPS_NU_SUD)>>DB3_RPS_NU_SUD_SHIFT;
-			unsigned char SecondAction=(pFrame->DATA_BYTE3 & DB3_RPS_NU_SA)>>DB3_RPS_NU_SA_SHIFT;
-#ifdef _DEBUG
-			_log.Log(LOG_NORM,"Received RPS N-Message Node 0x%08x Rocker ID: %i UD: %i Pressed: %i Second Rocker ID: %i SUD: %i Second Action: %i",
-				id,
-				RockerID, 
-				UpDown, 
-				Pressed,
-				SecondRockerID, 
-				SecondUpDown,
-				SecondAction);
-#endif
-			//We distinguish 3 types of buttons from a switch: Left/Right/Left+Right
-			if (Pressed==1)
-			{
-				RBUF tsen;
-				memset(&tsen,0,sizeof(RBUF));
-				tsen.LIGHTING2.packetlength=sizeof(tsen.LIGHTING2)-1;
-				tsen.LIGHTING2.packettype=pTypeLighting2;
-				tsen.LIGHTING2.subtype=sTypeAC;
-				tsen.LIGHTING2.seqnbr=0;
-				tsen.LIGHTING2.id1=(BYTE)pFrame->ID_BYTE3;
-				tsen.LIGHTING2.id2=(BYTE)pFrame->ID_BYTE2;
-				tsen.LIGHTING2.id3=(BYTE)pFrame->ID_BYTE1;
-				tsen.LIGHTING2.id4=(BYTE)pFrame->ID_BYTE0;
-				tsen.LIGHTING2.level=0;
-				tsen.LIGHTING2.rssi=12;
-
-				if (SecondAction==0)
-				{
-					//Left/Right Up/Down
-					tsen.LIGHTING2.unitcode=RockerID+1;
-					tsen.LIGHTING2.cmnd=(UpDown==1)?light2_sOn:light2_sOff;
-				}
-				else
-				{
-					//Left+Right Up/Down
-					tsen.LIGHTING2.unitcode=SecondRockerID+10;
-					tsen.LIGHTING2.cmnd=(SecondUpDown==1)?light2_sOn:light2_sOff;
-				}
-				sDecodeRXMessage(this, (const unsigned char *)&tsen.LIGHTING2, NULL, 255);
-			}
-		}
-		break;
-	case C_ORG_4BS:
-		break;
-	default:
-		{
-			char *pszHumenTxt=enocean_hexToHuman(pFrame);
-			if (pszHumenTxt)
-			{
-				_log.Log(LOG_NORM, "EnOcean: %s", pszHumenTxt);
-				free(pszHumenTxt);
-			}
-		}
-		break;
-	}
-*/
     return true;
 }
 
@@ -1153,38 +1046,19 @@ void CEnOceanESP3::ParseRadioDatagram()
 				_log.Log(LOG_NORM, "EnOcean: 1BS data: Sender id: 0x%02x%02x%02x%02x Data: %02x",
 					m_buffer[2],m_buffer[3],m_buffer[4],m_buffer[5],m_buffer[0]		);
 
-				unsigned char DATA_BYTE0 = m_buffer[1];
+				int UpDown=(m_buffer[1] &1)==0;
+				//conpute sender ID & cmd
+				unsigned int senderId = DeviceIDCharToInt(&m_buffer[2]);
+				int cmnd = (UpDown == 1) ? light2_sOn : light2_sOff;
+				SendSwitchRaw(senderId, 1, -1, cmnd, 0, "");
 
-				unsigned char ID_BYTE3  = m_buffer[2];
-				unsigned char ID_BYTE2  = m_buffer[3];
-				unsigned char ID_BYTE1  = m_buffer[4];
-				unsigned char ID_BYTE0  = m_buffer[5];
 
-				int UpDown=(DATA_BYTE0&1)==0;
-
-				RBUF tsen;
-				memset(&tsen,0,sizeof(RBUF));
-				tsen.LIGHTING2.packetlength=sizeof(tsen.LIGHTING2)-1;
-				tsen.LIGHTING2.packettype=pTypeLighting2;
-				tsen.LIGHTING2.subtype=sTypeAC;
-				tsen.LIGHTING2.seqnbr=0;
-
-				tsen.LIGHTING2.id1=(BYTE)ID_BYTE3;
-				tsen.LIGHTING2.id2=(BYTE)ID_BYTE2;
-				tsen.LIGHTING2.id3=(BYTE)ID_BYTE1;
-				tsen.LIGHTING2.id4=(BYTE)ID_BYTE0;
-				tsen.LIGHTING2.level=0;
-				tsen.LIGHTING2.rssi=12;
-				tsen.LIGHTING2.unitcode=1;
-				tsen.LIGHTING2.cmnd=(UpDown==1)?light2_sOn:light2_sOff;
-				sDecodeRXMessage(this, (const unsigned char *)&tsen.LIGHTING2, NULL, 255);
 			}
 			break;
 		case RORG_4BS: // 4 byte communication
 			{
-				_log.Log(LOG_NORM, "EnOcean: 4BS data: Sender id: 0x%02x%02x%02x%02x Status: %02x Data: %02x",
-					m_buffer[5],m_buffer[6],m_buffer[7],m_buffer[8],m_buffer[9],m_buffer[3]
-				);
+				_log.Log(LOG_NORM, "EnOcean: 4BS data: Sender id: 0x%02x%02x%02x%02x Status: %02x Data: %02x %02x %02x %02x ",
+					m_buffer[5],m_buffer[6],m_buffer[7],m_buffer[8],m_buffer[9],  m_buffer[1], m_buffer[2], m_buffer[3], m_buffer[4]	);
 
 				unsigned char DATA_BYTE3 = m_buffer[1];
 				unsigned char DATA_BYTE2 = m_buffer[2];
@@ -1231,9 +1105,8 @@ void CEnOceanESP3::ParseRadioDatagram()
 						profile = DATA_BYTE3 >> 2;
 						ttype = ((DATA_BYTE3 & 3) << 5) | (DATA_BYTE2 >> 3);
 
-						_log.Log(LOG_NORM,"EnOcean: 4BS, Variant 2 Teach-in diagram: Sender_ID: 0x%08X\nManufacturer: 0x%02x (%s)\nProfile: 0x%02X\nType: 0x%02X (%s)", 
-							id, manufacturer,Get_EnoceanManufacturer(manufacturer),
-							profile,ttype,Get_Enocean4BSType(0xA5,profile,ttype));
+						_log.Log(LOG_NORM,"EnOcean: 4BS, Variant 2 Teach-in diagram: Sender_ID: 0x%08X Manufacturer: 0x%02x (%s) Profile: 0x%02X Type: 0x%02X (%s)", 
+							id, manufacturer,Get_EnoceanManufacturer(manufacturer),	profile,ttype,Get_Enocean4BSType(0xA5,profile,ttype));
  					}
 
 					// Search the sensor in database
@@ -2034,6 +1907,7 @@ void CEnOceanESP3::Send1BSTeachIn(unsigned int sID)
 	sendFrameQueue(PACKET_RADIO, buff, 7, opt, 7 );
 
 }
+// A5 02 00 00 00 FF 99 DF 01 30
 void CEnOceanESP3::Send4BSTeachIn(unsigned int sID )
 {
 	if (isOpen()) {
@@ -2084,4 +1958,94 @@ void CEnOceanESP3::sendVld (unsigned int sID, int channel, int value)
 	//03 FF FF FF FF FF 00
 
 	sendFrameQueue(PACKET_RADIO, buff, 9, opt, 7);
+}
+
+//---------------------------------------------------------------------------
+// TypFnAToB    : Convertit une chaîne hexadécimale ascii en un tableau binaire
+// Input  Arg.  : Chaîne hexadécimale ascii
+//                Adresse du tableau
+//                Adresse de rangement de la longueur du tableau
+// Output       : true  -> Conversion réussie
+//                false -> Echec
+// Remark       : Le tableau de destination doit être suffisement dimensionné
+//                La conversion s'arrête sur tout caractère non hexa
+//---------------------------------------------------------------------------
+
+int HexToBin(char c)
+{
+	int h = (unsigned char)(c - '0');
+	if (h>9)
+		h = (unsigned char)(h - 7);
+	if (h>15)
+		h = (unsigned char)(h - 32);
+	if (h>15)
+		return 0;
+	return h;
+
+}
+bool TypFnAToB(const char * st, unsigned char bin[], int  *trame_len)
+{
+	std::string x;
+	int  h, l;
+	int i=0;
+	int index=0;
+	/* -------------- */
+	*trame_len = 0 ;
+
+	while (st[index]!=0)
+	{
+		
+		if (st[index] == 'b') {
+			index++;
+			h = 0;
+			while ((st[index] == '0') || (st[index] == '1'))
+			{
+				h = h << 1;
+				if ((st[index] == '1'))
+					h = h + 1;
+				index++;
+			}
+
+			bin[i++] = (unsigned char)(h);
+		}
+
+		else
+		{
+			h = HexToBin(st[index]);
+
+			index++;
+			if (st[index] != ' ')
+			{
+
+				l = HexToBin(st[index]);
+				bin[i++] = (unsigned char)((h << 4) + l);
+			}
+			else
+				bin[i++] = (unsigned char)(h );
+			index++;
+		}
+
+		if(st[index]==' ')
+			index++;
+	}
+	*trame_len = i ;
+	return true;
+};
+
+void CEnOceanESP3::TestData(char * sdata )
+{ 
+	TypFnAToB(sdata , m_buffer, &m_DataSize );
+m_ReceivedPacketType = 0x01; 
+m_OptionalDataSize = 0; 
+m_bufferpos = m_DataSize; 
+ParseData(); 
+}
+
+void CEnOceanESP3::TestData(char * sdata ,  char * optData )
+{
+	TypFnAToB(sdata,    m_buffer, &m_DataSize);
+	TypFnAToB(optData, &m_buffer[m_DataSize], &m_OptionalDataSize);
+	m_ReceivedPacketType = 0x01;
+	m_bufferpos = m_DataSize + m_OptionalDataSize ;
+	ParseData();
 }

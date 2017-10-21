@@ -64,9 +64,9 @@ public:
 
 	static void ToSensorsId(std::string &DeviceId);
 
-	bool getProfile(std::string szDeviceID, int &Rorg, int &Profile, int &Type);
+	bool getProfile(std::string szDeviceID, int &Manufacturer, int &Rorg, int &Profile, int &Type);
 
-	bool getProfile(unsigned int DeviceID, int &Rorg, int &Profile, int &Type);
+	bool getProfile(unsigned int DeviceID , int &Manufacturer, int &Rorg, int &Profile, int &Type);
 
 protected:
 

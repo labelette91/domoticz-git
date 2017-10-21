@@ -488,7 +488,7 @@ void CEnOceanESP3::Do_Work()
 
 //			if (sec_counter == 6)	TestData("D4 A0 02 46 00 12 01 D2 01 A6 54 28 00 "); // ute 
 
-			if (sec_counter == 6)	TestData("D4 A0 02 46 00 12 01 D2 01 A6 54 28 00 ", "01 FF FF FF FF 2D 00");
+//			if (sec_counter == 6)	TestData("D4 A0 02 46 00 12 01 D2 01 A6 54 28 00 ", "01 FF FF FF FF 2D 00");// ute opt data
 
 //			if (sec_counter == 5)	TestData("F6 10 01 A6 54 28 30 "); //rps switch up
 //			if (sec_counter == 6)	TestData("F6 00 01 A6 54 28 20 "); //rps switch
@@ -1109,13 +1109,10 @@ void CEnOceanESP3::ParseRadioDatagram()
  					}
 
 					// Search the sensor in database
-					std::vector<std::vector<std::string> > result;
-					result = m_sql.safe_query("SELECT ID FROM EnoceanSensors WHERE (HardwareID==%d) AND (DeviceID=='%q')", m_HwdID, szDeviceID);
-					if (result.size()<1)
+					if (DeviceExist(id) == 0)
 					{
 						// If not found, add it to the database
-						m_sql.safe_query("INSERT INTO EnoceanSensors (HardwareID, DeviceID, Manufacturer, Profile, [Type]) VALUES (%d,'%q',%d,%d,%d)", m_HwdID, szDeviceID, manufacturer, profile, ttype);
-						_log.Log(LOG_NORM, "EnOcean: Sender_ID 0x%08X inserted in the database", id);
+						CreateSensors(id, 0, manufacturer, profile, ttype);
 					}
 					else
 						_log.Log(LOG_NORM, "EnOcean: Sender_ID 0x%08X already in the database", id);
@@ -1124,16 +1121,13 @@ void CEnOceanESP3::ParseRadioDatagram()
 				else	// RORG_4BS_TEACHIN_LRN_BIT is 1 -> Data datagram
 				{
 					//Following sensors need to have had a teach-in
-					std::vector<std::vector<std::string> > result;
-					result = m_sql.safe_query("SELECT ID, Manufacturer, Profile, [Type] FROM EnoceanSensors WHERE (HardwareID==%d) AND (DeviceID=='%q')", m_HwdID, szDeviceID);
-					if (result.size()<1)
+					int Manufacturer, Rorg, Profile, iType;
+					if (!getProfile(id, Manufacturer, Rorg, Profile, iType))
+
 					{
 						_log.Log(LOG_NORM, "EnOcean: Need Teach-In for %s", szDeviceID);
 						return;
 					}
-					int Manufacturer=atoi(result[0][1].c_str());
-					int Profile=atoi(result[0][2].c_str());
-					int iType=atoi(result[0][3].c_str());
 
 					const std::string szST=Get_Enocean4BSType(0xA5,Profile,iType);
 
@@ -1546,8 +1540,8 @@ void CEnOceanESP3::ParseRadioDatagram()
 				unsigned char ID_BYTE0=m_buffer[5];
 				long id = (ID_BYTE3 << 24) + (ID_BYTE2 << 16) + (ID_BYTE1 << 8) + ID_BYTE0;
 
-				int Rorg, Profile, iType;
-				if (getProfile(id, Rorg, Profile, iType) ) 
+				int Manufacturer,Rorg, Profile, iType;
+				if (getProfile(id, Manufacturer,Rorg, Profile, iType) )
 				// if a button is attached to a module, we should ignore it else its datagram will conflict with status reported by the module using VLD datagram
 				{
 					if( (Profile == 0x01) &&						// profile 1 (D2-01) is Electronic switches and dimmers with Energy Measurement and Local Control
@@ -1768,8 +1762,8 @@ void CEnOceanESP3::ParseRadioDatagram()
 					return;
 				//conpute sender ID
 				unsigned senderId = DeviceIDCharToInt(&m_buffer[senderOfs]);
-				int Rorg, Func, iType;
-				if (!getProfile(senderId, Rorg, Func, iType))
+				int Manufacturer,Rorg, Func, iType;
+				if (!getProfile(senderId, Manufacturer,Rorg, Func, iType))
 				{
 					_log.Log(LOG_NORM, "EnOcean: Need Teach-In for %08X", senderId );
 					return;
@@ -1777,7 +1771,6 @@ void CEnOceanESP3::ParseRadioDatagram()
 
 				_log.Log(LOG_NORM, "EnOcean: VLD: senderID: %08X Func:%02X  Type:%02X", senderId,Func,iType );
 
-				_log.Log(LOG_NORM, "EnOcean: VLD: func: %02X Type: %02X", func, type);
 				if(func == 0x01)
 				{
 					//get command 

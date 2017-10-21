@@ -238,22 +238,23 @@ void DeviceIDIntToChar(unsigned int DeviceID ,  char szDeviceID[])
 
 }
 
-bool CEnOcean::getProfile(std::string szDeviceID, int &Rorg, int &Profile, int &Type)
+bool CEnOcean::getProfile(std::string szDeviceID, int &Manufacturer, int &Rorg, int &Profile, int &Type)
 {
-	Rorg = Profile = Type = 0;
+	Rorg = Profile = Type = Manufacturer = 0;
 
 	std::vector<std::vector<std::string> > result;
-	result = m_sql.safe_query("SELECT  Profile, [Type] FROM EnoceanSensors WHERE (HardwareID==%d) AND (DeviceID=='%q')", m_HwdID, szDeviceID.c_str());
+	result = m_sql.safe_query("SELECT  Profile, [Type], Manufacturer FROM EnoceanSensors WHERE (HardwareID==%d) AND (DeviceID=='%q')", m_HwdID, szDeviceID.c_str());
 	if (result.size() == 1)
 	{
 		// hardware device was already teached-in
 		Profile = atoi(result[0][0].c_str());
 		Type = atoi(result[0][1].c_str());
+		Manufacturer = atoi(result[0][2].c_str());
 		return true;
 	}
 	return false;
 }
-bool CEnOcean::getProfile(unsigned int DeviceID, int &Rorg, int &Profile, int &Type)
+bool CEnOcean::getProfile(unsigned int DeviceID, int &Manufacturer, int &Rorg, int &Profile, int &Type)
 {
-	return getProfile(DeviceIDToString(DeviceID), Rorg, Profile, Type);
+	return getProfile(DeviceIDToString(DeviceID), Manufacturer, Rorg, Profile, Type);
 }

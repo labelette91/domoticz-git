@@ -76,7 +76,9 @@ protected:
 //convert id from  buffer[] to unsigned int
 unsigned int DeviceIDCharToInt(unsigned char m_buffer[]);
 
-void DeviceIDIntToChar(unsigned int DeviceID, char szDeviceID[]);
+void DeviceIDIntToChar(unsigned int DeviceID,  char szDeviceID[]);
+
+void  DeviceIDBufferToInt(unsigned int sID, unsigned char buf[]);
 
 #endif
 

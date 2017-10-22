@@ -500,12 +500,15 @@ void CEnOceanESP3::Do_Work()
 			
 //			if (sec_counter == 2)	TestData("A5 02 00 00 00 FF 99 DF 01 30 "); //4BS teach in variation 1 : noo eep
 
-			if (sec_counter == 2)	TestData("A5 b1000 b1000 46 b10000000 01 02 03 04 30 "); //4BS teach in variation 1 :  eep func A-02-01
+//			if (sec_counter == 2)	TestData("A5 b1000 b1000 46 b10000000 01 02 03 04 30 "); //4BS teach in variation 1 :  eep func A-02-01
 //														        | eep
 //													         | manufactuer ID nodon
 
-			if (sec_counter == 3)	TestData("A5 00 00 46 b00001000 01 02 03 04 30 "); //4BS data  :  eep func A-02-01
+//			if (sec_counter == 3)	TestData("A5 00 00 46 b00001000 01 02 03 04 30 "); //4BS data  :  eep func A-02-01
 
+			if (sec_counter == 3)	remoteLearning(0x01A65428 , true ); //4BS data  :  eep func A-02-01
+
+			if (sec_counter == 5)	remoteLearning(0x01A65428, false); //4BS data  :  eep func A-02-01
 #endif
 		}
 
@@ -1916,6 +1919,45 @@ void CEnOceanESP3::sendVld (unsigned int sID, int channel, int value)
 
 	sendFrameQueue(PACKET_RADIO, buff, 9, opt, 7);
 }
+
+void CEnOceanESP3::remoteLearning(unsigned int destID, bool StartLearning , int channel )
+{
+	unsigned char buff[16];
+
+	buff[0] = RORG_SYS_EX; 
+	
+	m_Seq++;
+	if (m_Seq > 3) m_Seq = 1;
+	buff[1] = m_Seq << 6 ;       //SEQ 40/80/C0
+	buff[2] = 0x01;			//data len = 2
+	buff[3] = 0x7F ;		//mamanufacturer 7FF
+	buff[4] = 0xF2;			//function 220
+	buff[5] = 0x20;
+	
+	//payload 4 bytes
+	if (StartLearning)buff[6] = 0; else buff[6] = 0x80 ;
+	buff[7] = channel ;
+	buff[8] = 0;
+	buff[9] = 0;
+
+	buff[10] = 0; //sender ID = 0
+	buff[11] = 0;
+	buff[12] = 0;
+	buff[13] = 0;
+
+	buff[14] = 0x8F ; //status
+	
+	//optionnal data
+	unsigned char opt[16];
+	opt[0] = 0x03; //subtel
+	DeviceIDBufferToInt(destID, &opt[1]);
+	opt[5] = 0xff;
+	opt[6] = 00;//RSI 
+
+
+	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
+}
+
 
 //---------------------------------------------------------------------------
 // TypFnAToB    : Convertit une chaîne hexadécimale ascii en un tableau binaire

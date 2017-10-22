@@ -66,7 +66,7 @@ private:
     unsigned char m_buffer[ENOCEAN3_READ_BUFFER_SIZE];
 	int m_bufferpos;
 	int m_retrycntr;
-
+	int m_Seq;
 	boost::mutex m_sendMutex;
 	std::vector<std::string> m_sendqueue;
 
@@ -80,6 +80,7 @@ private:
 	void Send4BSTeachIn(unsigned int sID);
 	void TestData(char *  data);
 	void TestData(char * sdata, char * optData);
+	void remoteLearning(unsigned int destID, bool StartLearning,  int channel = 0 );
 
 };
 

@@ -232,6 +232,17 @@ unsigned int DeviceIDCharToInt(unsigned char m_buffer[])
 	unsigned int id = (m_buffer[0] << 24) + (m_buffer[1] << 16) + (m_buffer[2] << 8) + m_buffer[3];
 	return id;
 }
+
+//convert device ID id from   unsigned int to buffer[]  
+void  DeviceIDBufferToInt(unsigned int sID, unsigned char buf[])
+{
+
+buf[0] = (sID >> 24) & 0xff;
+buf[1] = (sID >> 16) & 0xff;
+buf[2] = (sID >> 8) & 0xff;
+buf[3] = sID & 0xff;
+}
+
 void DeviceIDIntToChar(unsigned int DeviceID ,  char szDeviceID[])
 {
 	sprintf(szDeviceID, "%08X", (unsigned int)DeviceID);

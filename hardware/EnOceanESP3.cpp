@@ -506,9 +506,9 @@ void CEnOceanESP3::Do_Work()
 
 //			if (sec_counter == 3)	TestData("A5 00 00 46 b00001000 01 02 03 04 30 "); //4BS data  :  eep func A-02-01
 
-			if (sec_counter == 3)	remoteLearning(0x01A65428 , true ); //4BS data  :  eep func A-02-01
+//			if (sec_counter == 3)	remoteLearning(0x01A65428 , true ); //4BS data  :  eep func A-02-01
 
-			if (sec_counter == 5)	remoteLearning(0x01A65428, false); //4BS data  :  eep func A-02-01
+//			if (sec_counter == 5)	remoteLearning(0x01A65428, false); //4BS data  :  eep func A-02-01
 #endif
 		}
 
@@ -708,9 +708,8 @@ bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length
 
 	if ((sID<m_id_base) || (sID>m_id_base + 129))
 	{
-		//get unit from db
-		int unitId = getUnitFromDeviceId(sID, tsen->LIGHTING2.unitcode);
-		unitBaseAddr = GetAdress(unitId);
+		//get sender adress from db
+		unitBaseAddr = getSenderAdressFromDeviceId(sID);
 
 		if ((unitBaseAddr<m_id_base) || (unitBaseAddr>m_id_base + 129)) {
 			_log.Log(LOG_ERROR, "EnOcean: (1): Can not switch with this DeviceID, use a switch created with our id_base!...");
@@ -1050,7 +1049,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 
 				int UpDown=(m_buffer[1] &1)==0;
 				//conpute sender ID & cmd
-				unsigned int senderId = DeviceIDCharToInt(&m_buffer[2]);
+				unsigned int senderId = DeviceIDArrayToInt(&m_buffer[2]);
 				int cmnd = (UpDown == 1) ? light2_sOn : light2_sOff;
 				SendSwitchRaw(senderId, 1, -1, cmnd, 0, "");
 
@@ -1703,7 +1702,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 						unsigned char func = m_buffer[6];
 						unsigned char rorg = m_buffer[7];
 
-						long id = DeviceIDCharToInt(&m_buffer[8]);
+						long id = DeviceIDArrayToInt(&m_buffer[8]);
 
 						_log.Log(LOG_NORM, "EnOcean: teach-in request received from %08X (manufacturer: %03X). number of channels: %d, device profile: %02X-%02X-%02X", id, manID, nb_channel, rorg,func,type);
 
@@ -1714,7 +1713,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 								// If not found, add it to the database
 
 								//m_sql.safe_query("INSERT INTO EnoceanSensors (HardwareID, DeviceID, Manufacturer, Profile, [Type]) VALUES (%d,'%q',%d,%d,%d)", m_HwdID, szDeviceID, manID, func, type);
-								CreateSensors(id , 0 , manID, func, type );
+								CreateSensors(id , rorg, manID, func, type );
 
 								_log.Log(LOG_NORM, "EnOcean: Sender_ID 0x%08X inserted in the database", id);
 								//allocate base adress
@@ -1722,8 +1721,10 @@ void CEnOceanESP3::ParseRadioDatagram()
 								if (OffsetId != 0) {
 									unsigned int  BaseAddress = GetAdress(OffsetId);
 									//send teachin message
-									Send1BSTeachIn(BaseAddress);
-//									SendRpsTeachIn(BaseAddress);
+//									Send1BSTeachIn(BaseAddress);
+									SendRpsTeachIn(BaseAddress);
+//									Send4BSTeachIn(BaseAddress);
+
 									_log.Log(LOG_NORM, "EnOcean: Teach In Sender_ID 0x%08X : 0x%08X", id, BaseAddress);
 								}
 
@@ -1764,7 +1765,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 				if (senderOfs <= 0)
 					return;
 				//conpute sender ID
-				unsigned senderId = DeviceIDCharToInt(&m_buffer[senderOfs]);
+				unsigned senderId = DeviceIDArrayToInt(&m_buffer[senderOfs]);
 				int Manufacturer,Rorg, Func, iType;
 				if (!getProfile(senderId, Manufacturer,Rorg, Func, iType))
 				{
@@ -1924,6 +1925,7 @@ void CEnOceanESP3::remoteLearning(unsigned int destID, bool StartLearning , int 
 {
 	unsigned char buff[16];
 
+
 	buff[0] = RORG_SYS_EX; 
 	
 	m_Seq++;
@@ -1950,7 +1952,7 @@ void CEnOceanESP3::remoteLearning(unsigned int destID, bool StartLearning , int 
 	//optionnal data
 	unsigned char opt[16];
 	opt[0] = 0x03; //subtel
-	DeviceIDBufferToInt(destID, &opt[1]);
+	DeviceIDIntToArray(destID, &opt[1]);
 	opt[5] = 0xff;
 	opt[6] = 00;//RSI 
 
@@ -1958,7 +1960,25 @@ void CEnOceanESP3::remoteLearning(unsigned int destID, bool StartLearning , int 
 	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
 }
 
+void CEnOceanESP3::TeachIn(std::string& sidx, std::string& hardwareid)
+{
+	std::vector<std::vector<std::string> > result;
+	result = m_sql.safe_query("SELECT DeviceID,Unit  FROM DeviceStatus WHERE (ID='%s')  ", sidx.c_str() );
+	if (result.size() > 0)
+	{
+		std::string deviceId = result[0][0]  ;
 
+		int channel          = atoi(result[0][1].c_str());
+		//get sender adress from db
+		unsigned int SenderAdress = DeviceIdCharToInt(deviceId );
+
+		_log.Log(LOG_NORM, "EnOcean: send remoteLearning to device %s channel:%d", deviceId.c_str(), channel );
+
+		remoteLearning(SenderAdress, true, channel - 1);
+
+	}
+
+}
 //---------------------------------------------------------------------------
 // TypFnAToB    : Convertit une chaîne hexadécimale ascii en un tableau binaire
 // Input  Arg.  : Chaîne hexadécimale ascii

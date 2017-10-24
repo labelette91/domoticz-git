@@ -7307,6 +7307,18 @@ namespace http {
 		root["status"]="OK";
 		root["title"]="thermostat";
       }
+	else if (cparam == "teachin") {
+		std::string idx = request::findValue(&req, "idx");
+		std::string hwdid = request::findValue(&req, "hardwareid");
+		if ((idx == ""))	return;
+		CEnOceanESP3 *pEnoceanHardware = reinterpret_cast<CEnOceanESP3*>(m_mainworker.GetHardware(atoi(hwdid.c_str())));
+		if (pEnoceanHardware == NULL)
+			return;
+		pEnoceanHardware->TeachIn(idx, hwdid);
+
+		root["status"] = "OK";
+		root["title"] = "teachin";
+	}
 		}
 
 		void CWebServer::DisplaySwitchTypesCombo(std::string & content_part)
@@ -8685,7 +8697,7 @@ namespace http {
 					}
 					if ((_hardwareNames[hardwareID].HardwareTypeVal == HTYPE_EnOceanESP2) || (_hardwareNames[hardwareID].HardwareTypeVal == HTYPE_EnOceanESP3)) {
 						//add Base Id of enocean switch
-						int Addr = CEnOcean::getUnitFromDeviceId(sd[1], 0);
+						int Addr = CEnOcean::getUnitFromDeviceId(sd[1]);
 						root["result"][ii]["Unit"] = Addr * 100 +  atoi(sd[2].c_str());
 					}
 					else

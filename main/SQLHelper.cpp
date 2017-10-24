@@ -507,6 +507,7 @@ const char *sqlCreateEnoceanSensors =
 	"[HardwareID] INTEGER NOT NULL, "
 	"[DeviceID] VARCHAR(25) NOT NULL, "
 	"[Manufacturer] INTEGER NOT NULL, "
+	"[Rorg]    INTEGER NOT NULL, "
 	"[Profile] INTEGER NOT NULL, "
 	"[Type] INTEGER NOT NULL, "
 	"[Address] INTEGER DEFAULT 0);";
@@ -2338,7 +2339,8 @@ bool CSQLHelper::OpenDatabase()
 		if (dbversion < 120)
 		{
 			//Add Address in EnOcean table 
-				query("ALTER TABLE EnoceanSensors ADD COLUMN [Address] INTEGER DEFAULT 0");
+			query("ALTER TABLE EnoceanSensors ADD COLUMN [Address] INTEGER DEFAULT 0");
+			query("ALTER TABLE EnoceanSensors ADD COLUMN [Rorg] INTEGER DEFAULT 0");
 		}
 		if (dbversion < 120)
 		{

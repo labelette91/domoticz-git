@@ -36,17 +36,19 @@ public:
 
 	uint64_t CreateDevice(const int HardwareID, const char* ID, const int unit, const unsigned char devType, const unsigned char subType, const unsigned char signallevel, const unsigned char batterylevel, const int nValue, const char* sValue, std::string &devname);
 	
-	long GetId(std::string DeviceID, int HardwareId);
-
 	int UpdateDeviceAddress(std::string idx );
 
 	int UpdateDeviceAddress(unsigned int  DeviceId);
 
 	void UpdateBaseAddress(std::string idx, int offsetID);
 
-	static int getUnitFromDeviceId(unsigned int devIDx, int UnitCode);
+	static int getUnitFromDeviceId(unsigned int devIDx);
 
-	static int getUnitFromDeviceId(std::string devIDx, int UnitCode);
+	static int getUnitFromDeviceId(std::string devIDx);
+
+	unsigned int getSenderAdressFromDeviceId(unsigned int devIDx);
+
+	unsigned int getSenderAdressFromDeviceId(std::string devIDx);
 
 	int DeviceExist(unsigned int Deviceid);
 
@@ -74,11 +76,12 @@ protected:
 };
 
 //convert id from  buffer[] to unsigned int
-unsigned int DeviceIDCharToInt(unsigned char m_buffer[]);
+unsigned int DeviceIDArrayToInt(unsigned char m_buffer[]);
+void         DeviceIDIntToArray(unsigned int sID, unsigned char buf[]);
 
-void DeviceIDIntToChar(unsigned int DeviceID,  char szDeviceID[]);
+void         DeviceIDIntToChar(unsigned int DeviceID,  char szDeviceID[]);
+unsigned int DeviceIdCharToInt(std::string &DeviceID);
 
-void  DeviceIDBufferToInt(unsigned int sID, unsigned char buf[]);
 
 #endif
 

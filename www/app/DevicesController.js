@@ -296,6 +296,12 @@ define(['app'], function (app) {
 									itemSubIcons += '<img src="images/rename.png" title="' + $.t('Rename Device') + '" onclick="RenameDevice(' + item.idx + ',\'' + item.Type + '\',\'' + escape(item.Name) + '\')">';
 								}
 							}
+                            //teach in icon
+							if (item.HardwareType.indexOf("EnOcean") == 0)
+							    itemSubIcons += '&nbsp;<img src="images/edit.png" title="' + $.t('TeachIn') + '" onclick="SendTeachIn(' + item.idx + ',' + item.HardwareID + ',\''  + escape(item.Name) + '\');">';
+							else 
+							    itemSubIcons += '&nbsp;<img src="images/empty16.png">';
+
 							if (
 								(item.Type.indexOf("Light") == 0) ||
 								(item.Type.indexOf("Chime") == 0) ||
@@ -427,6 +433,27 @@ define(['app'], function (app) {
 			else {
 				trow.hide();
 			}
+		}
+
+		SendTeachIn = function (idx, HardwareID, itemname) {
+		    $.devIdx = idx;
+		    ShowNotify($.t('TeachIn device!' + itemname), 2500, true);
+		    $.ajax({
+		        url: "json.htm?type=command&param=teachin&idx=" + idx + "&hardwareid=" + HardwareID,
+		        async: false,
+		        dataType: 'json',
+		        success: function (data) {
+		            //wait 1 second
+		            setTimeout(function () {
+		                HideNotify();
+		            }, 1000);
+		        },
+		        error: function () {
+		            HideNotify();
+		            alert($.t('Problem sending TeachIn command'));
+		        }
+		    });
+
 		}
 
 		jQuery.fn.dataTableExt.oSort['numeric-battery-asc'] = function (a, b) {

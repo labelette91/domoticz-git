@@ -34,6 +34,8 @@ public:
     ~CEnOceanESP3();
 	bool WriteToHardware(const char *pdata, const unsigned char length);
 	void SendDimmerTeachIn(const char *pdata, const unsigned char length);
+	void TeachIn(std::string& idx, std::string& hardwareid);
+
 private:
 	void Init();
 	bool StartHardware();

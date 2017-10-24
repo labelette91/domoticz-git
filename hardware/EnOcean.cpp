@@ -6,7 +6,6 @@
 #include "../main/SQLHelper.h"
 
 #include <string>
-#define BASEID_FIELD_NAME "Address"
 CEnOcean::CEnOcean() {
 	m_id_base = 0;
 };
@@ -61,36 +60,12 @@ uint64_t CEnOcean::CreateDevice(const int HardwareID, const char* ID, const int 
 	return ulID;
 }
 
-//return the ID of DiviceId 
-//0 if not exist 
-long CEnOcean::GetId(std::string DeviceID, int HardwareId)
+//return the unit that correspond to the offset from controler base adress
+int CEnOcean::getUnitFromDeviceId(unsigned int devIDx )
 {
-
-	long lid = 0;
-	std::vector<std::vector<std::string> > result;
-	result = m_sql.safe_query("SELECT ID  FROM DeviceStatus WHERE (DeviceID='%s') and (HardwareId=%d)  ", DeviceID.c_str(), HardwareId);
-	if (result.size() > 0)
-	{
-		lid = atoi(result[0][0].c_str());
-	}
-	return lid;
+	return getUnitFromDeviceId(DeviceIDToString(devIDx) );
 }
-
-//convert divice ID string to long
-unsigned long DeviceIdToLong(std::string &DeviceID) {
-	unsigned long ID;
-	std::stringstream s_strid;
-	s_strid << std::hex << DeviceID;
-	s_strid >> ID;
-	return ID;
-}
-
-
-int CEnOcean::getUnitFromDeviceId(unsigned int devIDx, int UnitCode)
-{
-	return getUnitFromDeviceId(DeviceIDToString(devIDx) , UnitCode);
-}
-int CEnOcean::getUnitFromDeviceId(std::string devIDx , int UnitCode )
+int CEnOcean::getUnitFromDeviceId(std::string devIDx  )
 {
 	std::vector<std::vector<std::string> > result;
 
@@ -98,7 +73,7 @@ int CEnOcean::getUnitFromDeviceId(std::string devIDx , int UnitCode )
 
 	//get Dev UnitCode 
 
-	result = m_sql.safe_query("SELECT " BASEID_FIELD_NAME "   FROM EnoceanSensors WHERE (DeviceID='%s')  ", devIDx.c_str() );
+	result = m_sql.safe_query("SELECT Address FROM EnoceanSensors WHERE (DeviceID='%s')  ", devIDx.c_str() );
 	if (result.size() > 0) {
 	return  atoi(result[0][0].c_str());
 	}
@@ -106,10 +81,23 @@ int CEnOcean::getUnitFromDeviceId(std::string devIDx , int UnitCode )
 	return 0 ;
 }
 
+
+//return the sender adress fro enOcean deviceId 0x12345678
+unsigned int CEnOcean::getSenderAdressFromDeviceId(std::string devIDx)
+{
+	int unitId = getUnitFromDeviceId(devIDx);
+	unsigned int SenderAdress = GetAdress(unitId);
+	return SenderAdress;
+}
+
+unsigned int CEnOcean::getSenderAdressFromDeviceId(unsigned int devIDx)
+{
+	return getSenderAdressFromDeviceId(DeviceIDToString(devIDx));
+}
 //DeviceId : ID of device in EnoceanSensor
 //offsetID : offset of device from controler base adress 0..127
 void CEnOcean::UpdateBaseAddress(std::string DeviceId , int offsetID ) {
-	m_sql.safe_query("UPDATE EnoceanSensors SET %s=%d   WHERE (DeviceID = '%s' )", BASEID_FIELD_NAME , offsetID , DeviceId.c_str() );
+	m_sql.safe_query("UPDATE EnoceanSensors SET %s=%d   WHERE (DeviceID = '%s' )", "Address" , offsetID , DeviceId.c_str() );
 
 }
 
@@ -123,7 +111,7 @@ int CEnOcean::UpdateDeviceAddress(std::string DeviceId) {
 	ToSensorsId(DeviceId);
 
 	//search if a same device ID already allocated exist
-	result = m_sql.safe_query("SELECT " BASEID_FIELD_NAME " FROM EnoceanSensors WHERE (DeviceId='%s') and (HardwareId=%d)  ", DeviceId.c_str(), m_HwdID);
+	result = m_sql.safe_query("SELECT Address FROM EnoceanSensors WHERE (DeviceId='%s') and (HardwareId=%d)  ", DeviceId.c_str(), m_HwdID);
 	for (unsigned int i = 0; i < result.size(); i++)
 	{
 		//take the same
@@ -134,7 +122,7 @@ int CEnOcean::UpdateDeviceAddress(std::string DeviceId) {
 		}
 	}
 
-	result = m_sql.safe_query("SELECT " BASEID_FIELD_NAME " FROM EnoceanSensors WHERE (HardwareId=%d)  ",  m_HwdID );
+	result = m_sql.safe_query("SELECT Address FROM EnoceanSensors WHERE (HardwareId=%d)  ",  m_HwdID );
 	//get all BaseId allready affected to switch device
 	for (unsigned int i = 0; i < result.size(); i++)
 	{
@@ -185,7 +173,7 @@ int CEnOcean::DeviceExist(char * szDeviceID)
 //create sensor in database
 void CEnOcean::CreateSensors(char * szDeviceID, int rorg , int manufacturer, int profile, int ttype)
 {
-	m_sql.safe_query("INSERT INTO EnoceanSensors (HardwareID, DeviceID, Manufacturer, Profile, [Type]) VALUES (%d,'%q',%d,%d,%d)", m_HwdID, szDeviceID, manufacturer, profile, ttype);
+	m_sql.safe_query("INSERT INTO EnoceanSensors (HardwareID, DeviceID, Manufacturer, Rorg,Profile, [Type]) VALUES (%d,'%q',%d,%d,%d,%d)", m_HwdID, szDeviceID, manufacturer, rorg,profile, ttype);
 
 }
 void CEnOcean::CreateSensors(unsigned int DeviceID, int rorg, int manufacturer, int profile, int ttype)
@@ -227,14 +215,14 @@ void CEnOcean::ToSensorsId(std::string &DeviceId)
 }
 
 //convert device ID id from  buffer[] to unsigned int
-unsigned int DeviceIDCharToInt(unsigned char m_buffer[])
+unsigned int DeviceIDArrayToInt(unsigned char m_buffer[])
 {
 	unsigned int id = (m_buffer[0] << 24) + (m_buffer[1] << 16) + (m_buffer[2] << 8) + m_buffer[3];
 	return id;
 }
 
 //convert device ID id from   unsigned int to buffer[]  
-void  DeviceIDBufferToInt(unsigned int sID, unsigned char buf[])
+void  DeviceIDIntToArray(unsigned int sID, unsigned char buf[])
 {
 
 buf[0] = (sID >> 24) & 0xff;
@@ -248,19 +236,28 @@ void DeviceIDIntToChar(unsigned int DeviceID ,  char szDeviceID[])
 	sprintf(szDeviceID, "%08X", (unsigned int)DeviceID);
 
 }
+//convert divice ID string to long
+unsigned int DeviceIdCharToInt(std::string &DeviceID) {
+	unsigned int ID;
+	std::stringstream s_strid;
+	s_strid << std::hex << DeviceID;
+	s_strid >> ID;
+	return ID;
+}
 
 bool CEnOcean::getProfile(std::string szDeviceID, int &Manufacturer, int &Rorg, int &Profile, int &Type)
 {
 	Rorg = Profile = Type = Manufacturer = 0;
 
 	std::vector<std::vector<std::string> > result;
-	result = m_sql.safe_query("SELECT  Profile, [Type], Manufacturer FROM EnoceanSensors WHERE (HardwareID==%d) AND (DeviceID=='%q')", m_HwdID, szDeviceID.c_str());
+	result = m_sql.safe_query("SELECT  Rorg, Profile, [Type], Manufacturer FROM EnoceanSensors WHERE (HardwareID==%d) AND (DeviceID=='%q')", m_HwdID, szDeviceID.c_str());
 	if (result.size() == 1)
 	{
 		// hardware device was already teached-in
-		Profile = atoi(result[0][0].c_str());
-		Type = atoi(result[0][1].c_str());
-		Manufacturer = atoi(result[0][2].c_str());
+		Rorg         = atoi(result[0][0].c_str());
+		Profile      = atoi(result[0][1].c_str());
+		Type         = atoi(result[0][2].c_str());
+		Manufacturer = atoi(result[0][3].c_str());
 		return true;
 	}
 	return false;

@@ -1706,47 +1706,43 @@ void CEnOceanESP3::ParseRadioDatagram()
 
 						_log.Log(LOG_NORM, "EnOcean: teach-in request received from %08X (manufacturer: %03X). number of channels: %d, device profile: %02X-%02X-%02X", id, manID, nb_channel, rorg,func,type);
 
-						// Record EnOcean device profile
+						//if accept new hardware 
+						if (m_sql.m_bAcceptNewHardware)
 						{
+							// If not found, add it to the database
 							if (DeviceExist(id)==0)
 							{
-								// If not found, add it to the database
-
-								//m_sql.safe_query("INSERT INTO EnoceanSensors (HardwareID, DeviceID, Manufacturer, Profile, [Type]) VALUES (%d,'%q',%d,%d,%d)", m_HwdID, szDeviceID, manID, func, type);
 								CreateSensors(id , rorg, manID, func, type );
 
-								_log.Log(LOG_NORM, "EnOcean: Sender_ID 0x%08X inserted in the database", id);
 								//allocate base adress
 								int OffsetId = UpdateDeviceAddress(id);
-								if (OffsetId != 0) {
-									unsigned int  BaseAddress = GetAdress(OffsetId);
-									//send teachin message
-//									Send1BSTeachIn(BaseAddress);
-									SendRpsTeachIn(BaseAddress);
-//									Send4BSTeachIn(BaseAddress);
+								unsigned int senderBaseAddr = GetAdress(OffsetId);
+								if (OffsetId != 0)
+									_log.Log(LOG_NORM, "EnOcean: Sender_ID 0x%08X inserted in the database Sender_ID 0x%08X : ", id, senderBaseAddr );
 
-									_log.Log(LOG_NORM, "EnOcean: Teach In Sender_ID 0x%08X : 0x%08X", id, BaseAddress);
-								}
-
+								//automatic teach in 
+								//send teachin message
+								//Send1BSTeachIn(senderBaseAddr);
+								SendRpsTeachIn(senderBaseAddr);
+								//Send4BSTeachIn(senderBaseAddr);
 							}
 							else
 								_log.Log(LOG_NORM, "EnOcean: Sender_ID 0x%08X already in the database", id);
-						}
 
-						if((rorg == 0xD2) && (func == 0x01) && ( (type == 0x12) || (type == 0x0F) ))
-						{
-							unsigned char nbc;
-
-							for(nbc = 0; nbc < nb_channel; nbc ++)
+							//create device switch
+							if((rorg == 0xD2) && (func == 0x01) && ( (type == 0x12) || (type == 0x0F) ))
 							{
-
-								_log.Log(LOG_TRACE, "EnOcean: TEACH : 0xD2 Node 0x%08x UnitID: %02X cmd: %02X ",
-											id,	nbc + 1,	light2_sOff	);
-
-								SendSwitchRaw(id, nbc + 1, -1, light2_sOff, 0, "" );
+								for(int nbc = 0; nbc < nb_channel; nbc ++)
+								{
+									_log.Log(LOG_TRACE, "EnOcean: TEACH : 0xD2 Node 0x%08x UnitID: %02X cmd: %02X ", id,	nbc + 1,	light2_sOff	);
+									SendSwitchRaw(id, nbc + 1, -1, light2_sOff, 0, "" );
+								}
+								return;
 							}
-							return;
 						}
+						else
+							_log.Log(LOG_NORM, "EnOcean: New hardware is not allowed. Turn on AcceptNewHardware in settings" );
+
 						break;
 					}
 

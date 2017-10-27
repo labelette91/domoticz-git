@@ -4483,6 +4483,24 @@ namespace http {
 					int nodeID = atoi(sd[2].c_str());
 					//if (nodeID>1) //Don't include the controller
 					{
+						root["result"][ii]["idx"] = "idx";
+						root["result"][ii]["HomeID"] = "homeID";
+						root["result"][ii]["NodeID"] = "nodeID";
+						root["result"][ii]["Name"] = "name";
+						root["result"][ii]["Description"] = "desc";
+						root["result"][ii]["PollEnabled"] = "true";
+						root["result"][ii]["Version"] = "Version";
+						root["result"][ii]["Manufacturer_id"] = "MId";
+						root["result"][ii]["Manufacturer_name"] = "Mname";
+						root["result"][ii]["Product_type"] = "type";
+						root["result"][ii]["Product_id"] = "Product_id";
+						root["result"][ii]["Product_name"] = "Product_name";
+						root["result"][ii]["State"] = "on";
+						root["result"][ii]["HaveUserCodes"] = "code";
+						root["result"][ii]["IsPlus"] = "IsPlus";
+						root["result"][ii]["LastUpdate"] = "2017-10-26 21:50:01";
+						ii++;
+
 						COpenZWave::NodeInfo *pNode = pOZWHardware->GetNodeInfo(homeID, nodeID);
 						if (pNode == NULL)
 							continue;

@@ -2004,9 +2004,6 @@
     <ClInclude Include="..\main\IFTTT.h">
       <Filter>IFTTT</Filter>
     </ClInclude>
-    <ClInclude Include="..\hardware\DenkoviSmartdenIPIn.h">
-      <Filter>Devices\Denkovi</Filter>
-    </ClInclude>
     <ClInclude Include="..\hardware\EvohomeScript.h" />
     <ClInclude Include="..\hardware\Rtl433.h" />
     <ClInclude Include="..\hardware\SysfsGpio.h" />
@@ -2746,9 +2743,6 @@
     <ClCompile Include="..\main\IFTTT.cpp">
       <Filter>IFTTT</Filter>
     </ClCompile>
-    <ClCompile Include="..\hardware\DenkoviSmartdenIPIn.cpp">
-      <Filter>Devices\Denkovi</Filter>
-    </ClCompile>
     <ClCompile Include="..\hardware\OnkyoAVTCP.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -2757,6 +2751,9 @@
     </ClCompile>
     <ClCompile Include="..\main\dzVents.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\DenkoviSmartdenIPInOut.cpp">
+      <Filter>Devices</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

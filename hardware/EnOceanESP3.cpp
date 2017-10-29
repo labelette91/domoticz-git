@@ -422,7 +422,7 @@ CEnOceanESP3::CEnOceanESP3(const int ID, const std::string& devname, const int t
 	m_id_base=0;
 	m_receivestate=ERS_SYNCBYTE;
 	m_stoprequested=false;
-
+	m_Seq = 0;
 	
 }
 
@@ -509,6 +509,20 @@ void CEnOceanESP3::Do_Work()
 //			if (sec_counter == 3)	remoteLearning(0x01A65428 , true ); //4BS data  :  eep func A-02-01
 
 //			if (sec_counter == 5)	remoteLearning(0x01A65428, false); //4BS data  :  eep func A-02-01
+//			if (sec_counter == 2)	ping(0x01A65428); 
+			if (sec_counter == 1)	unlock(0x01A65428,1);
+//			if (sec_counter == 2)	action(0x01A65428);
+//			if (sec_counter == 3)	action(0x01A65428);
+//			if (sec_counter == 3)	getProductId();
+
+//			if (sec_counter == 10)	getLinkTableMedadata(0x01A65428);
+//			if (sec_counter == 12)	getallLinkTable(0x01A65428,0,1);
+			if (sec_counter == 4)	getProductFunction(0x01A65428);
+
+			
+
+
+
 #endif
 		}
 
@@ -1028,6 +1042,94 @@ bool CEnOceanESP3::ParseData()
 	}
 	else if (m_ReceivedPacketType==PACKET_RADIO)
 		ParseRadioDatagram();
+	else if (m_ReceivedPacketType == PACKET_REMOTE_MAN_COMMAND) {
+		//get function
+		int fct = m_buffer[0] * 256  + m_buffer[1];
+		//ping response
+		if (fct==0x606)
+		{
+			// ping
+			//	55 00 0F 07 01 2B         C5 80 00 7F F0 06 00 00 00 00 00 00 00 00 8F        03 01 A6 54 28 FF 00 83
+			//response
+			//	55 00 08 0A 07 C6         06 06 07 FF D2 01 12 2D                             05 01 33 BE 01 A6 54 28 2D 00 34
+			int profile = m_buffer[4] * 65536  + (int)m_buffer[5] * 256  + (int)m_buffer[6];
+			unsigned int senderId = setArrayToInt(&m_buffer[12]);
+			addSensorProfile(senderId, profile);
+
+			_log.Log(LOG_NORM, "EnOcean: Ping SenderId: %08X Profile:%06X ", senderId, profile );
+		}
+		//product id  response
+		else if (fct == 0x827)
+		{
+			//get product id  cmd 227 
+			//55 00 0F 07 01 2B         C5 80 00 7F F2 27 00 00 00 00 00 00 00 00 8F        03 FF FF FF FF FF 00             55
+			//reponse  manu 46 procuct ref 00010003
+			//55 00 0A 0A 07 10         08 27 07 FF 00 46 00 01 00 03                       FF FF FF FF 01 A6 54 28 2C 00     B3
+			int manuf  = m_buffer[5] ;
+			unsigned int senderId = setArrayToInt(&m_buffer[14]);
+			_log.Log(LOG_NORM, "EnOcean: getProductId SenderId: %08X Manufacturer:%s  ", senderId, Get_EnoceanManufacturer(manuf));
+			addSensorManuf(senderId, manuf);
+			ping(senderId);
+		}
+		//get link table medatadate cmd 0210 : taille current / max  table
+		else if (fct == 0x810)
+		{
+			//get link table medatadate cmd 0210 : taille current/ max  table
+			//55 00 0F 07 01 2B         C5 40 00 7F F2 10 00 00 00 00 00 00 00 00 8F        03 01 A6 54 28 FF 00  AD
+			//response curren size 03 max x18=24
+			//55 00 09 0A 07 AD         08 10 07 FF 50 00 00 03 18                          FF FF FF FF 01 A6 54 28 2D 00 08
+			int currentSize = m_buffer[7];
+			int maxSize		= m_buffer[8];
+			unsigned int senderId = setArrayToInt(&m_buffer[13]);
+			_log.Log(LOG_NORM, "EnOcean: getLink table medatadata SenderId: %08X Size:%d Max:%d ", senderId, currentSize, maxSize );
+			setLinkTableMedadata(senderId, currentSize, maxSize);
+		}
+		else if (fct == 0x811)
+		{
+			//get all link table
+			//55 00 0F 07 01 2B         C5 40 01 FF F2 11 00 00 17 00 00 00 00 00 8F        03 01 A6 54 28 FF 00 56
+			//response
+			//55 00 20 0A 07 D4         08 11 07 FF  00 00 FF 99 DF 01 D5 00 01  00 01 FF 99 DF 02 F6 02 01   00 02 FF 99 DF 02 F6 02 01 01       FF FF FF FF 01 A6 54 28 2E 00 FB
+			//55 00 20 0A 07 D4         08 11 07 FF  00 03 00 00 00 00 FF FF FF  00 04 00 00 00 00 FF FF FF   00 05 00 00 00 00 FF FF FF 00       FF FF FF FF 01 A6 54 28 2E 00 8F
+			//55 00 20 0A 07 D4         08 11 07 FF  00 06 00 00 00 00 FF FF FF  00 07 00 00 00 00 FF FF FF   00 08 00 00 00 00 FF FF FF 00       FF FF FF FF 01 A6 54 28 2E 00 DE
+			//55 00 20 0A 07 D4         08 11 07 FF  00 09 00 00 00 00 FF FF FF  00 0A 00 00 00 00 FF FF FF   00 0B 00 00 00 00 FF FF FF 00       FF FF FF FF 01 A6 54 28 2E 00 F4
+			//55 00 20 0A 07 D4         08 11 07 FF  00 0C 00 00 00 00 FF FF FF  00 0D 00 00 00 00 FF FF FF   00 0E 00 00 00 00 FF FF FF 00       FF FF FF FF 01 A6 54 28 2E 00 E1
+			//55 00 20 0A 07 D4         08 11 07 FF  00 0F 00 00 00 00 FF FF FF  00 10 00 00 00 00 FF FF FF   00 11 00 00 00 00 FF FF FF 00       FF FF FF FF 01 A6 54 28 2E 00 BC
+			//55 00 20 0A 07 D4         08 11 07 FF  00 15 00 00 00 00 FF FF FF  00 16 00 00 00 00 FF FF FF   00 17 00 00 00 00 FF FF FF 00       FF FF FF FF 01 A6 54 28 2E 00 66
+
+			unsigned int senderId = setArrayToInt(&m_buffer[m_DataSize+4]);
+			int nb = m_DataSize - 5;
+			nb /= 9;
+			for (int i = 0; i < nb; i++) {
+
+			int  offs         = m_buffer[5+i*9];
+			uint entryId      = setArrayToInt(&m_buffer[6+i*9] ) ;
+			uint entryProfile = setArrayToInt(&m_buffer[10+i*9]);
+			entryProfile /= 256;
+			addLinkTable(senderId,offs , entryProfile, entryId );
+			if (entryId>0)
+			_log.Log(LOG_NORM, "EnOcean: SenderId: %08X Link table entry %02d EntryId: %08X Profile %06X ", senderId, offs , entryId, entryProfile);
+
+			printSensors();
+			}
+		}
+		else if (fct == 0x607)
+		{
+			//query function
+			//55 00 0F 07 01 2B	C5 80 00 7F F0 07 00 00 00 00 00 00 00 00 8F 				03 01 A6 54 28 FF 00     8D  opt 7
+			//55 00 34 0A 07 DD 06 07 07 FF 02 24 07 FF 02 27 07 FF 02 20 07 FF 02 10 07 FF 02 11 07 FF 02 12 07 FF 02 30 07 FF 02 31 07 FF 02 32 07 FF 02 33 07 FF 02 26 07 FF 00 00 00 00      FF FF FF FF 01 A6 54 28 2C 00     2E opt 10
+			unsigned int senderId = setArrayToInt(&m_buffer[m_DataSize + 4]);
+			int nb = m_DataSize - 4;
+			nb /= 4;
+			for (int i = 0; i < nb; i++) {
+
+				int  function = m_buffer[4 + i * 4] * 256 + m_buffer[5 + i * 4];
+				if (function)
+					_log.Log(LOG_NORM, "EnOcean: SenderId: %08X Function :%0X  ", senderId, function);
+			}
+
+		}
+	}
 	else
 	{
 		char szTmp[100];
@@ -1049,7 +1151,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 
 				int UpDown=(m_buffer[1] &1)==0;
 				//conpute sender ID & cmd
-				unsigned int senderId = DeviceIDArrayToInt(&m_buffer[2]);
+				unsigned int senderId = setArrayToInt(&m_buffer[2]);
 				int cmnd = (UpDown == 1) ? light2_sOn : light2_sOff;
 				SendSwitchRaw(senderId, 1, -1, cmnd, 0, "");
 
@@ -1702,7 +1804,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 						unsigned char func = m_buffer[6];
 						unsigned char rorg = m_buffer[7];
 
-						long id = DeviceIDArrayToInt(&m_buffer[8]);
+						long id = setArrayToInt(&m_buffer[8]);
 
 						_log.Log(LOG_NORM, "EnOcean: teach-in request received from %08X (manufacturer: %03X). number of channels: %d, device profile: %02X-%02X-%02X", id, manID, nb_channel, rorg,func,type);
 
@@ -1761,7 +1863,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 				if (senderOfs <= 0)
 					return;
 				//conpute sender ID
-				unsigned senderId = DeviceIDArrayToInt(&m_buffer[senderOfs]);
+				unsigned senderId = setArrayToInt(&m_buffer[senderOfs]);
 				int Manufacturer,Rorg, Func, iType;
 				if (!getProfile(senderId, Manufacturer,Rorg, Func, iType))
 				{
@@ -1917,16 +2019,33 @@ void CEnOceanESP3::sendVld (unsigned int sID, int channel, int value)
 	sendFrameQueue(PACKET_RADIO, buff, 9, opt, 7);
 }
 
-void CEnOceanESP3::remoteLearning(unsigned int destID, bool StartLearning , int channel )
+void CEnOceanESP3::setRorg(unsigned char * buff)
 {
-	unsigned char buff[16];
+	buff[0] = RORG_SYS_EX;
 
-
-	buff[0] = RORG_SYS_EX; 
-	
 	m_Seq++;
 	if (m_Seq > 3) m_Seq = 1;
-	buff[1] = m_Seq << 6 ;       //SEQ 40/80/C0
+	buff[1] = m_Seq << 6;       //SEQ 40/80/C0
+
+}
+
+void setDestination(unsigned char * opt,unsigned int destID)
+{
+	//optionnal data
+	opt[0] = 0x03; //subtel
+	setIntToArray(destID, &opt[1]);
+	opt[5] = 0xff;
+	opt[6] = 00;//RSI 
+
+}
+void CEnOceanESP3::remoteLearning(unsigned int destID, bool StartLearning, int channel)
+{
+	unsigned char buff[16];
+	unsigned char opt[16];
+
+	memset(buff, 0, sizeof(buff));
+	setRorg(buff);
+
 	buff[2] = 0x01;			//data len = 2
 	buff[3] = 0x7F ;		//mamanufacturer 7FF
 	buff[4] = 0xF2;			//function 220
@@ -1935,26 +2054,263 @@ void CEnOceanESP3::remoteLearning(unsigned int destID, bool StartLearning , int 
 	//payload 4 bytes
 	if (StartLearning)buff[6] = 0; else buff[6] = 0x80 ;
 	buff[7] = channel ;
-	buff[8] = 0;
-	buff[9] = 0;
-
-	buff[10] = 0; //sender ID = 0
-	buff[11] = 0;
-	buff[12] = 0;
-	buff[13] = 0;
 
 	buff[14] = 0x8F ; //status
 	
 	//optionnal data
-	unsigned char opt[16];
-	opt[0] = 0x03; //subtel
-	DeviceIDIntToArray(destID, &opt[1]);
-	opt[5] = 0xff;
-	opt[6] = 00;//RSI 
+	setDestination(opt,destID);
 
-
+	_log.Log(LOG_TRACE, "EnOcean: send remoteLearning");
 	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
 }
+
+void CEnOceanESP3::unlock(unsigned int destID, unsigned int code )
+{
+	unsigned char buff[16];
+	unsigned char opt[16];
+
+	memset(buff, 0, sizeof(buff));
+	setRorg(buff);
+
+	buff[2] = 0x02;			//data len = 4
+	buff[3] = 0x7F;			//mamanufacturer 7FF
+	buff[4] = 0xF0;
+	buff[5] = 0x01;			//function 001
+	buff[14]= 0x8F; //status
+
+	setIntToArray(code, &buff[6]);
+
+	//optionnal data
+	setDestination(opt, destID);
+
+	_log.Log(LOG_TRACE, "EnOcean: send unlock");
+	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
+}
+
+void CEnOceanESP3::lock(unsigned int destID, unsigned int code)
+{
+	unsigned char buff[16];
+	unsigned char opt[16];
+
+	memset(buff, 0, sizeof(buff));
+	setRorg(buff);
+
+	buff[2] = 0x02;			//data len = 4
+	buff[3] = 0x7F;			//mamanufacturer 7FF
+	buff[4] = 0xF0;			
+	buff[5] = 0x02;			//function 002
+	buff[14] = 0x8F; //status
+
+	setIntToArray(code, &buff[6]);
+
+	//optionnal data
+	setDestination(opt, destID);
+
+	_log.Log(LOG_TRACE, "EnOcean: send lock");
+	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
+
+}
+
+void CEnOceanESP3::setcode(unsigned int destID, unsigned int code)
+{
+	unsigned char buff[16];
+	unsigned char opt[16];
+
+	memset(buff, 0, sizeof(buff));
+	setRorg(buff);
+
+	buff[2] = 0x02;			//data len = 4
+	buff[3] = 0x7F;			//mamanufacturer 7FF
+	buff[4] = 0xF0;
+	buff[5] = 0x03;			//function 003
+	buff[14] = 0x8F; //status
+
+	setIntToArray(code, &buff[6]);
+
+	//optionnal data
+	setDestination(opt, destID);
+
+	_log.Log(LOG_TRACE, "EnOcean: send setcode");
+	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
+
+}
+
+void CEnOceanESP3::ping(unsigned int destID)
+{
+	unsigned char buff[16];
+	unsigned char opt[16];
+
+	memset(buff, 0, sizeof(buff));
+	setRorg(buff);
+
+	buff[2] = 0x00;			//data len = 0
+	buff[3] = 0x7F;			//mamanufacturer 7FF
+	buff[4] = 0xF0;
+	buff[5] = 0x06;			//function 006
+	buff[14] = 0x8F; //status
+
+	//optionnal data
+	setDestination(opt, destID);
+
+	_log.Log(LOG_TRACE, "EnOcean: send ping");
+	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
+
+}
+
+void CEnOceanESP3::action(unsigned int destID)
+{
+	unsigned char buff[16];
+	unsigned char opt[16];
+
+	memset(buff, 0, sizeof(buff));
+	setRorg(buff);
+
+	buff[2] = 0x00;			//data len = 0
+	buff[3] = 0x7F;			//mamanufacturer 7FF
+	buff[4] = 0xF0;
+	buff[5] = 0x05;			//function 005
+	buff[14] = 0x8F;		//status
+
+					 //optionnal data
+	setDestination(opt, destID);
+
+	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
+	_log.Log(LOG_TRACE, "EnOcean: send action");
+
+}
+
+void CEnOceanESP3::getProductId()
+{
+	unsigned char buff[16];
+	unsigned char opt[16];
+
+	memset(buff, 0, sizeof(buff));
+	setRorg(buff);
+
+	buff[2] = 0x00;			//data len = 0
+	buff[3] = 0x7F;			//mamanufacturer 7FF
+	buff[4] = 0xF2;
+	buff[5] = 0x27;			//function 227
+	buff[14] = 0x8F;		//status
+
+							//optionnal data
+	setDestination(opt, 0xFFFFFFFF);
+
+	_log.Log(LOG_TRACE, "EnOcean: send getProductId");
+	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
+
+}
+
+void CEnOceanESP3::addSensorManuf(uint SensorId, uint Manuf)
+{
+	m_sensors[SensorId].Manufacturer = Manuf;
+}
+
+void CEnOceanESP3::addSensorProfile(uint SensorId, uint Profile)
+{
+	m_sensors[SensorId].Profile = Profile;
+}
+
+void CEnOceanESP3::getLinkTableMedadata(uint destID)
+{
+	unsigned char buff[16];
+	unsigned char opt[16];
+
+	memset(buff, 0, sizeof(buff));
+	setRorg(buff);
+
+	buff[2] = 0x00;			//data len = 0
+	buff[3] = 0x7F;			//mamanufacturer 7FF
+	buff[4] = 0xF2;
+	buff[5] = 0x10;			//function 210
+	buff[14] = 0x8F; //status
+
+					 //optionnal data
+	setDestination(opt, destID);
+
+	_log.Log(LOG_TRACE, "EnOcean: send getLinkTableMedadata");
+	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
+
+}
+
+void CEnOceanESP3::setLinkTableMedadata(uint SensorId, int csize, int MaxSize)
+{
+	m_sensors[SensorId].CurrentSize = csize;
+	m_sensors[SensorId].MaxSize = MaxSize;
+}
+
+void CEnOceanESP3::getProductFunction(uint destID)
+{
+	unsigned char buff[16];
+	unsigned char opt[16];
+	//C5 80 00 7F F0 07 00 00 00 00 00 00 00 00 8F
+
+	memset(buff, 0, sizeof(buff));
+	setRorg(buff);
+
+	buff[2] = 0x00;			//data len = 0
+	buff[3] = 0x7F;			//mamanufacturer 7FF
+	buff[4] = 0xF0;
+	buff[5] = 0x07;			//function 007
+	buff[14] = 0x8F; //status
+
+					 //optionnal data
+	setDestination(opt, destID);
+
+	_log.Log(LOG_TRACE, "EnOcean: send getProductFunction");
+	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
+
+}
+
+
+void CEnOceanESP3::getallLinkTable(uint SensorId,int begin , int end  )
+{
+	unsigned char buff[16];
+	unsigned char opt[16];
+
+	memset(buff, 0, sizeof(buff));
+	setRorg(buff);
+
+	buff[2] = 0x01;			//data len = 3
+	buff[3] = 0xFF;			//mamanufacturer 7FF
+	buff[4] = 0xF2;
+	buff[5] = 0x11;			//function 211
+
+	buff[7] = begin;		//end offset table 
+	buff[8] = end;		//end offset table 
+
+	buff[14] = 0x8F; //status
+
+					 //optionnal data
+	setDestination(opt, SensorId);
+
+	_log.Log(LOG_TRACE, "EnOcean: send getallLinkTable");
+	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
+
+}
+
+void CEnOceanESP3::addLinkTable(uint DeviceId ,  int entry, int profile, uint sensorId)
+{
+	if (entry < SIZE_LINK_TABLE) {
+		m_sensors[DeviceId].LinkTable[entry].Profile  = profile;
+		m_sensors[DeviceId].LinkTable[entry].SenderId = sensorId;
+	}
+
+}
+
+void CEnOceanESP3::printSensors()
+{
+	for (T_SENSOR_MAP::iterator itt = m_sensors.begin(); itt != m_sensors.end(); itt++)
+	{
+			
+		_log.Log(LOG_NORM, "DeviceId:%08X  Profile:%0X Manufacturer:%d CurrentSize:%d MaxSize:%d", itt->first  , itt->second.Profile, itt->second.Manufacturer, itt->second.CurrentSize, itt->second.MaxSize );
+		for (int i = 0; i < itt->second.CurrentSize;i++)
+			_log.Log(LOG_NORM, "                  Entry:%d Id:%08X Profile:%X", i ,  itt->second.LinkTable[i].SenderId , itt->second.LinkTable[i].Profile);
+
+	}
+
+}
+
 
 void CEnOceanESP3::TeachIn(std::string& sidx, std::string& hardwareid)
 {
@@ -1970,6 +2326,7 @@ void CEnOceanESP3::TeachIn(std::string& sidx, std::string& hardwareid)
 
 		_log.Log(LOG_NORM, "EnOcean: send remoteLearning to device %s channel:%d", deviceId.c_str(), channel );
 
+		unlock(SenderAdress, 1);
 		remoteLearning(SenderAdress, true, channel - 1);
 
 	}

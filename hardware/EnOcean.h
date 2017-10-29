@@ -76,8 +76,8 @@ protected:
 };
 
 //convert id from  buffer[] to unsigned int
-unsigned int DeviceIDArrayToInt(unsigned char m_buffer[]);
-void         DeviceIDIntToArray(unsigned int sID, unsigned char buf[]);
+unsigned int setArrayToInt(unsigned char m_buffer[]);
+void         setIntToArray(unsigned int sID, unsigned char buf[]);
 
 void         DeviceIDIntToChar(unsigned int DeviceID,  char szDeviceID[]);
 unsigned int DeviceIdCharToInt(std::string &DeviceID);

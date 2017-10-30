@@ -515,9 +515,9 @@ void CEnOceanESP3::Do_Work()
 //			if (sec_counter == 3)	action(0x01A65428);
 //			if (sec_counter == 3)	getProductId();
 
-//			if (sec_counter == 10)	getLinkTableMedadata(0x01A65428);
-//			if (sec_counter == 12)	getallLinkTable(0x01A65428,0,1);
-			if (sec_counter == 4)	getProductFunction(0x01A65428);
+			if (sec_counter == 10)	getLinkTableMedadata(0x01A65428);
+			if (sec_counter == 12)	getallLinkTable(0x01A65428,0,3);
+//			if (sec_counter == 4)	getProductFunction(0x01A65428);
 
 			
 
@@ -1105,10 +1105,11 @@ bool CEnOceanESP3::ParseData()
 			int  offs         = m_buffer[5+i*9];
 			uint entryId      = setArrayToInt(&m_buffer[6+i*9] ) ;
 			uint entryProfile = setArrayToInt(&m_buffer[10+i*9]);
+			int  channel      = m_buffer[13 + i * 9] ;
 			entryProfile /= 256;
-			addLinkTable(senderId,offs , entryProfile, entryId );
+			addLinkTable(senderId,offs , entryProfile, entryId, channel);
 			if (entryId>0)
-			_log.Log(LOG_NORM, "EnOcean: SenderId: %08X Link table entry %02d EntryId: %08X Profile %06X ", senderId, offs , entryId, entryProfile);
+			_log.Log(LOG_NORM, "EnOcean: SenderId: %08X Link table entry %02d EntryId: %08X Profile %06X Channel:%d", senderId, offs , entryId, entryProfile, channel);
 
 			printSensors();
 			}
@@ -2289,11 +2290,12 @@ void CEnOceanESP3::getallLinkTable(uint SensorId,int begin , int end  )
 
 }
 
-void CEnOceanESP3::addLinkTable(uint DeviceId ,  int entry, int profile, uint sensorId)
+void CEnOceanESP3::addLinkTable(uint DeviceId ,  int entry, int profile, uint sensorId, int channel )
 {
 	if (entry < SIZE_LINK_TABLE) {
 		m_sensors[DeviceId].LinkTable[entry].Profile  = profile;
 		m_sensors[DeviceId].LinkTable[entry].SenderId = sensorId;
+		m_sensors[DeviceId].LinkTable[entry].Channel  = channel;
 	}
 
 }
@@ -2305,7 +2307,7 @@ void CEnOceanESP3::printSensors()
 			
 		_log.Log(LOG_NORM, "DeviceId:%08X  Profile:%0X Manufacturer:%d CurrentSize:%d MaxSize:%d", itt->first  , itt->second.Profile, itt->second.Manufacturer, itt->second.CurrentSize, itt->second.MaxSize );
 		for (int i = 0; i < itt->second.CurrentSize;i++)
-			_log.Log(LOG_NORM, "                  Entry:%d Id:%08X Profile:%X", i ,  itt->second.LinkTable[i].SenderId , itt->second.LinkTable[i].Profile);
+			_log.Log(LOG_NORM, "                  Entry:%d Id:%08X Profile:%X Channel:%d", i ,  itt->second.LinkTable[i].SenderId , itt->second.LinkTable[i].Profile, itt->second.LinkTable[i].Channel);
 
 	}
 

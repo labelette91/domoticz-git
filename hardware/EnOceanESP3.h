@@ -15,6 +15,7 @@
 typedef struct {
 	int		Profile;	
 	uint	SenderId;
+	int		Channel;
 }T_LINK_TABLE;
 
 
@@ -122,7 +123,7 @@ private:
 	void getProductFunction(uint SensorId);
 
 	void getallLinkTable(uint SensorId, int begin, int end);
-	void addLinkTable(uint DeviceId, int entry , int profile , uint sensorId);
+	void addLinkTable(uint DeviceId, int entry , int profile , uint sensorId, int channel);
 	void printSensors();
 
 

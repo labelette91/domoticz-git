@@ -499,8 +499,10 @@ const char *sqlCreateEnoceanSensors =
 	"[HardwareID] INTEGER NOT NULL, "
 	"[DeviceID] VARCHAR(25) NOT NULL, "
 	"[Manufacturer] INTEGER NOT NULL, "
+	"[Rorg]    INTEGER NOT NULL, "
 	"[Profile] INTEGER NOT NULL, "
-	"[Type] INTEGER NOT NULL);";
+	"[Type] INTEGER NOT NULL, "
+	"[Address] INTEGER DEFAULT 0);";
 
 const char *sqlCreateHttpLink =
 	"CREATE TABLE IF NOT EXISTS [HttpLink] ("
@@ -635,6 +637,21 @@ const char *sqlCreateMobileDevices =
 "[LastUpdate] DATETIME DEFAULT(datetime('now', 'localtime'))"
 ");";
 
+char * TITEM_name[] = {
+	"SWITCHCMD",
+	"EXECUTE_SCRIPT",
+	"EMAIL_CAMERA_SNAPSHOT",
+	"SEND_EMAIL",
+	"SWITCHCMD_EVENT",
+	"SWITCHCMD_SCENE",
+	"GETURL",
+	"SEND_EMAIL_TO",
+	"SET_VARIABLE",
+	"SEND_SMS",
+	"SEND_NOTIFICATION",
+	"SET_SETPOINT",
+	"SEND_IFTTT_TRIGGER",
+};
 extern std::string szUserDataFolder;
 
 CSQLHelper::CSQLHelper(void)
@@ -2299,6 +2316,12 @@ bool CSQLHelper::OpenDatabase()
 		}
 		if (dbversion < 120)
 		{
+			//Add Address in EnOcean table 
+			query("ALTER TABLE EnoceanSensors ADD COLUMN [Address] INTEGER DEFAULT 0");
+			query("ALTER TABLE EnoceanSensors ADD COLUMN [Rorg] INTEGER DEFAULT 0");
+		}
+		if (dbversion < 120)
+		{
 			// remove old dzVents dirs
 			std::string dzv_Dir, dzv_scripts;
 #ifdef WIN32
@@ -2876,7 +2899,7 @@ void CSQLHelper::Do_Work()
 		while (itt != _items2do.end())
 		{
 			if (_log.isTraceEnabled())
-				_log.Log(LOG_TRACE, "SQLH: Do Task ItemType:%d Cmd:%s Value:%s ", itt->_ItemType, itt->_command.c_str(), itt->_sValue.c_str());
+				_log.Log(LOG_TRACE, "SQLH: Do Task ItemType:%d = %s  Cmd:%s Value:%s ", itt->_ItemType, TITEM_name[itt->_ItemType], itt->_command.c_str(), itt->_sValue.c_str());
 
 			if (itt->_ItemType == TITEM_SWITCHCMD)
 			{
@@ -5990,19 +6013,34 @@ void CSQLHelper::DeleteEvent(const std::string &idx)
 //Argument, one or multiple devices separated by a semicolumn (;)
 void CSQLHelper::DeleteDevices(const std::string &idx)
 {
+	std::string DeviceID ;
+	int NbDeviceId=0;
 	std::vector<std::string> _idx;
 	StringSplit(idx, ";", _idx);
 	if (!_idx.empty())
 	{
-		//Avoid mutex deadlock here
-		boost::lock_guard<boost::mutex> l(m_sqlQueryMutex);
+
 		std::vector<std::string>::const_iterator itt;
 
 		char* errorMessage;
-		sqlite3_exec(m_dbase, "BEGIN TRANSACTION", NULL, NULL, &errorMessage);
 
 		for (itt = _idx.begin(); itt != _idx.end(); ++itt)
 		{
+			std::vector<std::vector<std::string> > result;
+//			result = m_sql.safe_query("SELECT a.DeviceID , b.Type FROM DeviceStatus a,  Hardware b WHERE (a.ID==%s) AND (b.ID == a.HardwareID)", (*itt).c_str());
+			result = m_sql.safe_query("SELECT DeviceID  FROM DeviceStatus   WHERE (ID==%s) ", (*itt).c_str());
+			if (result.size()>0)
+			{
+				DeviceID = result[0][0];
+			}
+			result = m_sql.safe_query("SELECT DeviceID FROM DeviceStatus  WHERE (DeviceID=='%s') ", DeviceID.c_str());
+			NbDeviceId = result.size();
+			while (DeviceID.size() != 8)
+				DeviceID = "0" + DeviceID;
+
+			//Avoid mutex deadlock here
+			boost::lock_guard<boost::mutex> l(m_sqlQueryMutex);
+			sqlite3_exec(m_dbase, "BEGIN TRANSACTION", NULL, NULL, &errorMessage);
 			safe_exec_no_return("DELETE FROM LightingLog WHERE (DeviceRowID == '%q')", (*itt).c_str());
 			safe_exec_no_return("DELETE FROM LightSubDevices WHERE (ParentID == '%q')", (*itt).c_str());
 			safe_exec_no_return("DELETE FROM LightSubDevices WHERE (DeviceRowID == '%q')", (*itt).c_str());
@@ -6027,6 +6065,8 @@ void CSQLHelper::DeleteDevices(const std::string &idx)
 			safe_exec_no_return("DELETE FROM DeviceToPlansMap WHERE (DeviceRowID == '%q')", (*itt).c_str());
 			safe_exec_no_return("DELETE FROM CamerasActiveDevices WHERE (DevSceneType==0) AND (DevSceneRowID == '%q')", (*itt).c_str());
 			safe_exec_no_return("DELETE FROM SharedDevices WHERE (DeviceRowID== '%q')", (*itt).c_str());
+			if (NbDeviceId==1)
+				safe_exec_no_return("DELETE FROM EnoceanSensors WHERE (DeviceID == '%q')", DeviceID.c_str() );
 			//notify eventsystem device is no longer present
 			std::stringstream sstridx(*itt);
 			uint64_t ullidx;
@@ -6034,8 +6074,8 @@ void CSQLHelper::DeleteDevices(const std::string &idx)
 			m_mainworker.m_eventsystem.RemoveSingleState(ullidx, m_mainworker.m_eventsystem.REASON_DEVICE);
 			//and now delete all records in the DeviceStatus table itself
 			safe_exec_no_return("DELETE FROM DeviceStatus WHERE (ID == '%q')", (*itt).c_str());
+			sqlite3_exec(m_dbase, "COMMIT TRANSACTION", NULL, NULL, &errorMessage);
 		}
-		sqlite3_exec(m_dbase, "COMMIT TRANSACTION", NULL, NULL, &errorMessage);
 	}
 	else
 		return;
@@ -6375,7 +6415,7 @@ void CSQLHelper::AddTaskItem(const _tTaskItem &tItem)
 
 	// Check if an event for the same device is already in queue, and if so, replace it
 	if (_log.isTraceEnabled())
-	   _log.Log(LOG_TRACE, "SQLH AddTask: Request to add task: idx=%" PRIu64 ", DelayTime=%f, Command='%s', Level=%d, Hue=%d, RelatedEvent='%s'", tItem._idx, tItem._DelayTime, tItem._command.c_str(), tItem._level, tItem._Hue, tItem._relatedEvent.c_str());
+	   _log.Log(LOG_TRACE, "SQLH AddTask: Request to add task: idx=%" PRIu64 ", Type:%s DelayTime=%f, Command='%s', Level=%d, Hue=%d, RelatedEvent='%s'", tItem._idx, TITEM_name[tItem._ItemType] ,tItem._DelayTime, tItem._command.c_str(), tItem._level, tItem._Hue, tItem._relatedEvent.c_str());
 	// Remove any previous task linked to the same device
 
 	if (

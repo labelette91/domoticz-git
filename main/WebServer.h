@@ -363,6 +363,9 @@ private:
 	void ZWaveCPTestHeal(WebEmSession & session, const request& req, reply & rep);
 	//RTypes
 	void RType_OpenZWaveNodes(WebEmSession & session, const request& req, Json::Value &root);
+	//enocean
+	void RType_OpenEnOcean(WebEmSession & session, const request& req, Json::Value &root);
+
 	int m_ZW_Hwidx;
 #endif
 #ifdef WITH_TELLDUSCORE

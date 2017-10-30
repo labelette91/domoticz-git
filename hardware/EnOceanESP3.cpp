@@ -11,8 +11,14 @@
 #include <boost/bind.hpp>
 #include "hardwaretypes.h"
 #include "../main/localtime_r.h"
+#include "../main/WebServer.h"
+#include "../main/mainworker.h"
+#include "../json/json.h"
+#include <boost/lexical_cast.hpp>
 
 #include <ctime>
+
+#define SendSwitchRaw SendSwitch
 
 #if _DEBUG
 	#define ENOCEAN_BUTTON_DEBUG
@@ -2422,4 +2428,65 @@ void CEnOceanESP3::TestData(char * sdata ,  char * optData )
 	m_ReceivedPacketType = 0x01;
 	m_bufferpos = m_DataSize + m_OptionalDataSize ;
 	ParseData();
+}
+
+
+std::string IntToString(int val, int nbDigit)
+{
+	char fmt[16];
+	char intStr[32];
+	sprintf(fmt, "%%0%dX", nbDigit);
+	sprintf(intStr, fmt, val);
+	return intStr;
+}
+
+//Webserver helpers
+namespace http {
+	namespace server {
+		void CWebServer::RType_OpenEnOcean(WebEmSession & session, const request& req, Json::Value &root)
+		{
+			std::string hwid = request::findValue(&req, "idx");
+			if (hwid == "")
+				return;
+			int iHardwareID = atoi(hwid.c_str());
+			CEnOceanESP3 *pEnocean = reinterpret_cast<CEnOceanESP3*>(m_mainworker.GetHardware(iHardwareID));
+
+			if (pEnocean == NULL)
+				return;
+
+			root["status"] = "OK";
+			root["title"] = "EnOceanNodes";
+
+			std::vector<std::vector<std::string> > result;
+			result = m_sql.safe_query("SELECT   DeviceId , Rorg, Profile, [Type], Manufacturer , ID FROM EnoceanSensors WHERE (HardwareID==%d) ", iHardwareID);
+
+			if (result.size() > 0)
+			{
+				std::vector<std::vector<std::string> >::const_iterator itt;
+				int ii = 0;
+				for (itt = result.begin(); itt != result.end(); ++itt)
+				{
+					std::vector<std::string> sd = *itt;
+
+					//					unsigned int homeID = boost::lexical_cast<unsigned int>(sd[1]);
+					{
+						root["result"][ii]["DeviceID"] = sd[0];
+						root["result"][ii]["Profile"] = IntToString( atoi(sd[1].c_str()),2)   + "-" + IntToString(atoi(sd[2].c_str()), 2) + "-" + IntToString(atoi(sd[3].c_str()), 2);
+						root["result"][ii]["Manufacturer_id"] = sd[4];
+						root["result"][ii]["Manufacturer_name"] = Get_EnoceanManufacturer(atoi(sd[4].c_str()));
+						root["result"][ii]["ID"] = sd[5];
+
+						char szDate[80]="";
+						struct tm loctime;
+						//						localtime_r(&pNode->LastSeen, &loctime);
+						//strftime(szDate, 80, "%Y-%m-%d %X", &loctime);
+
+						root["result"][ii]["LastUpdate"] = szDate;
+
+						ii++;
+					}
+				}
+			}
+		}
+	}
 }

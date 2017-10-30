@@ -638,6 +638,7 @@ namespace http {
 			//scenepost.html
 			//thpost.html
 			RegisterRType("openzwavenodes", boost::bind(&CWebServer::RType_OpenZWaveNodes, this, _1, _2, _3));
+			RegisterRType("enocean"       , boost::bind(&CWebServer::RType_OpenEnOcean, this, _1, _2, _3));
 #endif
 
 #ifdef WITH_TELLDUSCORE

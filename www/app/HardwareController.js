@@ -3877,7 +3877,6 @@ define(['app'], function (app) {
 						else {
 							$("#zwavenodesqueried").show();
 						}
-
 						$("#ownNodeId").val(String(data.ownNodeId));
 
 						$.each(data.result, function (i, item) {
@@ -4187,6 +4186,127 @@ define(['app'], function (app) {
 
 			RefreshOpenZWaveNodeTable();
 		}
+
+
+		RefreshOpenEnOceanNodeTable = function () {
+		    $('#modal').show();
+
+		    $('#updelclr #nodeupdate').attr("class", "btnstyle3-dis");
+		    $('#updelclr #nodedelete').attr("class", "btnstyle3-dis");
+		    $("#hardwarecontent #configuration").html("");
+		    $("#hardwarecontent #nodeparamstable #nodename").val("");
+
+		    var oTable = $('#nodestable').dataTable();
+		    oTable.fnClearTable();
+
+		    $.ajax({
+		        url: "json.htm?type=enocean&idx=" + $.devIdx,
+		        async: false,
+		        dataType: 'json',
+		        success: function (data) {
+		            if (typeof data.result != 'undefined') {
+
+		                $("#ownNodeId").val(String(data.ownNodeId));
+
+		                $.each(data.result, function (i, item) {
+		                    var status = "ok";
+		                    var statusImg = '<img src="images/' + status + '.png" />';
+		                    var healButton = '<img src="images/heal.png" onclick="ZWaveHealNode(' + item.ID + ')" class="lcursor" title="' + $.t("Heal node") + '" />';
+
+//		                    var Description = item.Description;
+//		                    var nodeStr = addLeadingZeros(item.NodeID, 3) + " (0x" + addLeadingZeros(item.NodeID.toString(16), 2) + ")";
+		                    var addId = oTable.fnAddData({
+//		                        "Name": item.Name,
+		                        //"State": item.State,
+		                        "NodeID"  : item.ID,
+		                        "DeviceID": item.DeviceID,
+		                        "0": item.DeviceID,
+		                        "1": "Name",
+		                        "2": "Description",
+		                        "3": item.Manufacturer_name,
+		                        "4": item.Profile,
+		                        "5": "type",
+		                        "6": item.LastUpdate,
+		                        "7": "Yes" ,
+		                        "8": statusImg + '&nbsp;&nbsp;' + healButton,
+		                    });
+		                });
+		            }
+		        }
+		    });
+
+		    /* Add a click handler to the rows - this could be used as a callback */
+		    $("#nodestable tbody").off();
+		    $("#nodestable tbody").on('click', 'tr', function () {
+		        $('#updelclr #nodedelete').attr("class", "btnstyle3-dis");
+		        if ($(this).hasClass('row_selected')) {
+		            $(this).removeClass('row_selected');
+		            $('#updelclr #nodeupdate').attr("class", "btnstyle3-dis");
+		            $("#hardwarecontent #configuration").html("");
+		            $("#hardwarecontent #nodeparamstable #nodename").val("");
+		            $('#hardwarecontent #usercodegrp').hide();
+		        }
+		        else {
+		            var iOwnNodeId = parseInt($("#ownNodeId").val());
+		            var oTable = $('#nodestable').dataTable();
+		            oTable.$('tr.row_selected').removeClass('row_selected');
+		            $(this).addClass('row_selected');
+		            $('#updelclr #nodeupdate').attr("class", "btnstyle3");
+		            var anSelected = fnGetSelected(oTable);
+		            if (anSelected.length !== 0) {
+		                var data = oTable.fnGetData(anSelected[0]);
+		                var idx = data["DT_RowId"];
+		                var iNode = parseInt(data["NodeID"]);
+		                $("#updelclr #nodeupdate").attr("href", "javascript:UpdateNode(" + idx + ")");
+		                $("#hardwarecontent #zwavecodemanagement").attr("href", "javascript:ZWaveUserCodeManagement(" + idx + ")");
+		                if (iNode != iOwnNodeId) {
+		                    $('#updelclr #nodedelete').attr("class", "btnstyle3");
+		                    $("#updelclr #nodedelete").attr("href", "javascript:DeleteNode(" + idx + ")");
+		                }
+		                $("#hardwarecontent #nodeparamstable #nodename").val(data["DeviceID"]);
+
+		                var szConfig = "";
+		                $("#hardwarecontent #configuration").html(szConfig);
+		                $("#hardwarecontent #configuration").i18n();
+		            }
+		        }
+		    });
+
+		    $('#modal').hide();
+		}
+
+		EditEnOcean = function (idx, name, Mode1, Mode2, Mode3, Mode4, Mode5, Mode6) {
+			$.devIdx = idx;
+			$.devName = name;
+			cursordefault();
+			var htmlcontent = '';
+			htmlcontent = '<p><center><h2><span data-i18n="Device"></span>: ' + name + '</h2></center></p>\n';
+			htmlcontent += $('#enocean').html();
+			$('#hardwarecontent').html(GetBackbuttonHTMLTable('ShowHardware') + htmlcontent);
+			$('#hardwarecontent').i18n();
+
+			var oTable = $('#nodestable').dataTable({
+				"sDom": '<"H"lfrC>t<"F"ip>',
+				"oTableTools": {
+					"sRowSelect": "single",
+				},
+				"aaSorting": [[0, "desc"]],
+				"bSortClasses": false,
+				"bProcessing": true,
+				"bStateSave": true,
+				"bJQueryUI": true,
+				"aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
+				"iDisplayLength": 25,
+				"sPaginationType": "full_numbers",
+				language: $.DataTableLanguage
+			});
+
+			$('#hardwarecontent #idx').val(idx);
+
+			RefreshOpenEnOceanNodeTable();
+		}
+
+
 
 		SetOpenThermSettings = function () {
 			$.post("setopenthermsettings.webem", $("#hardwarecontent #openthermform").serialize(), function (data) {
@@ -4786,6 +4906,11 @@ define(['app'], function (app) {
 									}
 									HwTypeStr += ' <span class="label ' + lblStatus + ' lcursor" onclick="EditOpenZWave(' + item.idx + ',\'' + item.Name + '\',' + item.Mode1 + ',' + item.Mode2 + ',' + item.Mode3 + ',' + item.Mode4 + ',' + item.Mode5 + ',' + item.Mode6 + ');">' + $.t("Setup") + '</span>';
 								}
+							}
+							else if (HwTypeStr.indexOf("EnOcean") >= 0) {
+								HwTypeStr += '<br>Version: ' + item.version;
+
+								HwTypeStr += ' <span class="label label-info lcursor" onclick="EditEnOcean(' + item.idx + ',\'' + item.Name + '\',' + item.Mode1 + ',' + item.Mode2 + ',' + item.Mode3 + ',' + item.Mode4 + ',' + item.Mode5 + ',' + item.Mode6 + ');">' + $.t("Setup") + '</span>';
 							}
 							else if (HwTypeStr.indexOf("SBFSpot") >= 0) {
 								HwTypeStr += ' <span class="label label-info lcursor" onclick="EditSBFSpot(' + item.idx + ',\'' + item.Name + '\',' + item.Mode1 + ',' + item.Mode2 + ',' + item.Mode3 + ',' + item.Mode4 + ',' + item.Mode5 + ',' + item.Mode6 + ');">' + $.t("Setup") + '</span>';

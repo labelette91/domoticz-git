@@ -333,6 +333,7 @@ hardware/Dummy.cpp
 hardware/EcoDevices.cpp
 hardware/EnOceanESP2.cpp
 hardware/EnOceanESP3.cpp
+hardware/EnphaseAPI.cpp
 hardware/Ec3kMeterTCP.cpp
 hardware/EvohomeBase.cpp
 hardware/EvohomeRadio.cpp
@@ -420,6 +421,8 @@ hardware/TeleinfoSerial.cpp
 hardware/Tellstick.cpp
 hardware/Thermosmart.cpp
 hardware/ToonThermostat.cpp
+hardware/USBtin.cpp
+hardware/USBtin_MultiblocV8.cpp
 hardware/VolcraftCO20.cpp
 hardware/RAVEn.cpp
 hardware/Winddelen.cpp

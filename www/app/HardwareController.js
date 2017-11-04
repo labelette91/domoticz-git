@@ -255,6 +255,17 @@ define(['app'], function (app) {
 					extra = $.devExtra;
 				}
 
+				if (text.indexOf("USBtin") >= 0) { 
+					//var Typecan = $("#hardwarecontent #divusbtin #combotypecanusbtin option:selected").val();
+					var ActivateMultiblocV8 = $("#hardwarecontent #divusbtin #activateMultiblocV8").prop("checked") ? 1 : 0;
+					var ActivateCanFree = $("#hardwarecontent #divusbtin #activateCanFree").prop("checked") ? 1 : 0;
+					var DebugActiv = $("#hardwarecontent #divusbtin #combodebugusbtin option:selected").val();
+					Mode1 = (ActivateCanFree&0x01);
+					Mode1 <<= 1;
+					Mode1 += (ActivateMultiblocV8&0x01);
+					Mode2 = DebugActiv;
+				}
+				
 				$.ajax({
 					url: "json.htm?type=command&param=updatehardware&htype=" + hardwaretype +
 					"&port=" + encodeURIComponent(serialport) +
@@ -288,7 +299,8 @@ define(['app'], function (app) {
 					text.indexOf("KMTronic") == -1 &&
 					text.indexOf("MQTT") == -1 &&
 					text.indexOf("Razberry") == -1 &&
-					text.indexOf("MyHome OpenWebNet with LAN interface") == -1
+                    text.indexOf("MyHome OpenWebNet with LAN interface") == -1 &&
+                    text.indexof("EnphaseAPI") == -1
 				)
 			) {
 				var address = $("#hardwarecontent #divremote #tcpaddress").val();
@@ -1303,6 +1315,17 @@ define(['app'], function (app) {
 					Mode3 = ratelimitp1;
 				}
 
+				if (text.indexOf("USBtin") >= 0) {
+					//Mode1 = $("#hardwarecontent #divusbtin #combotypecanusbtin option:selected").val();
+					var ActivateMultiblocV8 = $("#hardwarecontent #divusbtin #activateMultiblocV8").prop("checked") ? 1 : 0;
+					var ActivateCanFree = $("#hardwarecontent #divusbtin #activateCanFree").prop("checked") ? 1 : 0;
+					var DebugActiv = $("#hardwarecontent #divusbtin #combodebugusbtin option:selected").val();
+					Mode1 = (ActivateCanFree&0x01);
+					Mode1 <<= 1;
+					Mode1 += (ActivateMultiblocV8&0x01);
+					Mode2 = DebugActiv;
+				}
+				
 				$.ajax({
 					url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&port=" + encodeURIComponent(serialport) + "&extra=" + extra + "&name=" + encodeURIComponent(name) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout +
 					"&Mode1=" + Mode1,
@@ -5091,6 +5114,13 @@ define(['app'], function (app) {
 									$("#hardwarecontent #divcrcp1").show();
 								}
 							}
+							else if (data["Type"].indexOf("USBtin") >= 0) {
+								//$("#hardwarecontent #divusbtin #combotypecanusbtin").val( data["Mode1"] );
+								$("#hardwarecontent #divusbtin #activateMultiblocV8").prop("checked", (data["Mode1"] &0x01) > 0 );	
+								$("#hardwarecontent #divusbtin #activateCanFree").prop("checked", (data["Mode1"] &0x02) > 0 );	
+								$("#hardwarecontent #divusbtin #combodebugusbtin").val( data["Mode2"] );
+								
+							}
 						}
 						else if (data["Type"].indexOf("HomeEasy RF") >= 0) {
 						    $("#hardwarecontent #divrftransmitter #comboInputPin").val(data["Mode1"]);
@@ -5372,6 +5402,7 @@ define(['app'], function (app) {
 			$("#hardwarecontent #divevohome").hide();
 			$("#hardwarecontent #divevohometcp").hide();
 			$("#hardwarecontent #divevohomeweb").hide();
+			$("#hardwarecontent #divusbtin").hide();
 			$("#hardwarecontent #divbaudratemysensors").hide();
 			$("#hardwarecontent #divbaudratep1").hide();
 			$("#hardwarecontent #divbaudrateteleinfo").hide();
@@ -5464,7 +5495,9 @@ define(['app'], function (app) {
 					$("#hardwarecontent #divratelimitp1").show();
 					$("#hardwarecontent #divcrcp1").show();
 				}
-
+				if (text.indexOf("USBtin") >= 0){
+					$("#hardwarecontent #divusbtin").show();
+				}
 				$("#hardwarecontent #divserial").show();
 				$("#hardwarecontent #divremote").hide();
 				$("#hardwarecontent #divlogin").hide();

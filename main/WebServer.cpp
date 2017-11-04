@@ -42,7 +42,9 @@
 #include "SQLHelper.h"
 #include "../push/BasePush.h"
 #include <algorithm>
-
+#ifdef ENABLE_PYTHON
+#include "../hardware/plugins/Plugins.h"
+#endif
 
 #ifndef WIN32
 #include <sys/utsname.h>
@@ -1218,6 +1220,9 @@ namespace http {
 			else if (htype == HTYPE_Arilux) {
 				//all fine here!
 			}
+			else if (htype == HTYPE_USBtinGateway) {
+				//All fine here
+			}
 			else if (
 				(htype == HTYPE_Wunderground) ||
 				(htype == HTYPE_DarkSky) ||
@@ -1301,6 +1306,9 @@ namespace http {
 				//All fine here
 			}
 			else if (htype == HTYPE_IntergasInComfortLAN2RF) {
+				//All fine here
+			}
+			else if (htype == HTYPE_EnphaseAPI) {
 				//All fine here
 			}
 			else
@@ -1570,6 +1578,9 @@ namespace http {
 			else if (htype == HTYPE_Arilux) {
 				//All fine here
 			}
+			else if (htype == HTYPE_USBtinGateway) {
+				//All fine here
+			}
 			else if (
 				(htype == HTYPE_Wunderground) ||
 				(htype == HTYPE_DarkSky) ||
@@ -1656,6 +1667,9 @@ namespace http {
 			}
 			else if (htype == HTYPE_IntergasInComfortLAN2RF) {
 				//All fine here
+			}
+			else if (htype == HTYPE_EnphaseAPI) {
+				//all fine here!
 			}
 			else
 				return;
@@ -8770,9 +8784,9 @@ namespace http {
 						bHasTimers = m_sql.HasTimers(sd[0]);
 
 						bHaveTimeout = false;
-#ifdef WITH_OPENZWAVE
 						if (pHardware != NULL)
 						{
+#ifdef WITH_OPENZWAVE
 							if (pHardware->HwdType == HTYPE_OpenZWave)
 							{
 								COpenZWave *pZWave = (COpenZWave*)pHardware;
@@ -8783,8 +8797,15 @@ namespace http {
 								int nodeID = (ID & 0x0000FF00) >> 8;
 								bHaveTimeout = pZWave->HasNodeFailed(nodeID);
 							}
-						}
 #endif
+#ifdef ENABLE_PYTHON
+							if (pHardware->HwdType == HTYPE_PythonPlugin)
+							{
+								Plugins::CPlugin *pPlugin = (Plugins::CPlugin*)pHardware;
+								bHaveTimeout = pPlugin->HasNodeFailed(atoi(sd[2].c_str()));
+							}
+#endif
+						}
 						root["result"][ii]["HaveTimeout"] = bHaveTimeout;
 
 						std::string lstatus = "";
@@ -13264,7 +13285,8 @@ szQuery << "UPDATE DeviceStatus SET "
 						root["status"] = "OK";
 						root["title"] = "Graph " + sensor + " " + srange;
 
-						result = m_sql.safe_query("SELECT Value1, Value2, Value3, Value4, Value5, Value6, Date FROM %s WHERE (DeviceRowID==%" PRIu64 ") ORDER BY Date ASC", dbasetable.c_str(), idx);
+						// P1 counter values can only increment, so these are more reliable for sorting than time which can decrement (when DST is turned off)
+						result = m_sql.safe_query("SELECT Value1, Value2, Value3, Value4, Value5, Value6, Date FROM %s WHERE (DeviceRowID==%" PRIu64 ") ORDER BY Value1 ASC, Value5 ASC, Date ASC", dbasetable.c_str(), idx);
 						if (result.size() > 0)
 						{
 							std::vector<std::vector<std::string> >::const_iterator itt;
@@ -13280,6 +13302,7 @@ szQuery << "UPDATE DeviceStatus SET "
 							m_sql.GetPreferencesVar("SmartMeterType", nMeterType);
 
 							int lastDay = 0;
+							int lastDST = -1;
 
 							for (itt = result.begin(); itt != result.end(); ++itt)
 							{
@@ -13304,6 +13327,34 @@ szQuery << "UPDATE DeviceStatus SET "
 									struct tm ntime;
 									time_t atime;
 									ParseSQLdatetime(atime, ntime, stime, -1);
+									if (lastDST > ntime.tm_isdst) // DST was turned off
+									{
+										struct tm ltime;
+										time_t tmptime;
+										localtime_r(&lastTime, &ltime);
+										int year = ltime.tm_year + 1900;
+										int mon = ltime.tm_mon + 1;
+										int day = ltime.tm_mday;
+										int hour = ltime.tm_hour;
+										int min = ltime.tm_min;
+										int sec = ltime.tm_sec;
+										constructTime(tmptime, ltime, year, mon, day, hour, min, sec, 0);
+										if (ltime.tm_isdst == 0)
+											lastTime = tmptime;
+										else // no standard time match for lastTime
+										{
+											localtime_r(&atime, &ltime);
+											year = ltime.tm_year + 1900;
+											mon = ltime.tm_mon + 1;
+											day = ltime.tm_mday;
+											hour = ltime.tm_hour;
+											min = ltime.tm_min;
+											sec = ltime.tm_sec;
+											constructTime(tmptime, ltime, year, mon, day, hour, min, sec, 1);
+											if (ltime.tm_isdst == 1)
+												atime = tmptime;
+										}
+									}
 									if (lastDay != ntime.tm_mday)
 									{
 										lastDay = ntime.tm_mday;
@@ -13320,23 +13371,28 @@ szQuery << "UPDATE DeviceStatus SET "
 										long curDeliv1 = (long)(actDeliv1 - lastDeliv1);
 										long curDeliv2 = (long)(actDeliv2 - lastDeliv2);
 
-										if ((curUsage1 < 0) || (curUsage1 > 100000))
-											curUsage1 = 0;
-										if ((curUsage2 < 0) || (curUsage2 > 100000))
-											curUsage2 = 0;
-										if ((curDeliv1 < 0) || (curDeliv1 > 100000))
-											curDeliv1 = 0;
-										if ((curDeliv2 < 0) || (curDeliv2 > 100000))
-											curDeliv2 = 0;
-
 										float tdiff = static_cast<float>(difftime(atime, lastTime));
 										if (tdiff == 0)
-											tdiff = 1;
+											tdiff = 3600; // only reason for the same time to occur twice is a DST shift, meaning the actual time difference must be an hour
+										else if (tdiff <= -3600)
+											break; // impossible input - meter replaced?
+										else if (tdiff < 0)
+											tdiff += 3600; // assume that DST was turned off - can there be another reason?
+
 										float tlaps = 3600.0f / tdiff;
 										curUsage1 *= int(tlaps);
 										curUsage2 *= int(tlaps);
 										curDeliv1 *= int(tlaps);
 										curDeliv2 *= int(tlaps);
+
+										if (curUsage1 > 100000)
+											curUsage1 = 0;
+										if (curUsage2 > 100000)
+											curUsage2 = 0;
+										if (curDeliv1 > 100000)
+											curDeliv1 = 0;
+										if (curDeliv2 > 100000)
+											curDeliv2 = 0;
 
 										root["result"][ii]["d"] = sd[6].substr(0, 16);
 
@@ -13404,6 +13460,7 @@ szQuery << "UPDATE DeviceStatus SET "
 									lastDeliv1 = actDeliv1;
 									lastDeliv2 = actDeliv2;
 									lastTime = atime;
+									lastDST = ntime.tm_isdst;
 								}
 								else
 								{
@@ -14056,7 +14113,7 @@ szQuery << "UPDATE DeviceStatus SET "
 
 										float tdiff = static_cast<float>(difftime(atime, lastTime));
 										if (tdiff == 0)
-											tdiff = 1;
+											tdiff = 3600; // only reason for the same time to occur twice is a DST shift, meaning the actual time difference must be an hour
 										float tlaps = 3600.0f / tdiff;
 										curValue *= int(tlaps);
 

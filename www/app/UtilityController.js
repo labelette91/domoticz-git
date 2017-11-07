@@ -1544,7 +1544,8 @@ define(['app'], function (app) {
 									if (item.Timers == "true") {
 										xhtm += '<a class="btnsmall-sel" onclick="ShowSetpointTimers(' + item.idx + ',\'' + escape(item.Name) + '\');" data-i18n="Timers">Timers</a> ';
 										xhtm+='<a class="btnsmall-sel" onclick="ShowSetpointWeeklyTimers(' + item.idx + ',\'' + escape(item.Name) + '\'' + ',' + item.EcoTemp + ',' + item.ConforTemp +');" data-i18n="Prog">Prog</a> ';
-									}
+									//	xhtm += '<a class="btnsmall-sel"  href="heating.html?devIdx=' + item.idx + '"  data-i18n="Prog">Prog</a> ';
+                                    }
 									else {
 										xhtm += '<a class="btnsmall" onclick="ShowSetpointTimers(' + item.idx + ',\'' + escape(item.Name) + '\');" data-i18n="Timers">Timers</a> ';
 										xhtm += '<a class="btnsmall"   onclick="ShowSetpointWeeklyTimers(' + item.idx + ',\'' + escape(item.Name) + '\'' + ',' + item.EcoTemp + ',' + item.ConforTemp + ');" data-i18n="Prog">Prog</a> ';

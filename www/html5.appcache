@@ -491,7 +491,7 @@ app/TimerplanController.js
 app/UpdateController.js
 app/UsersController.js
 app/UserVariablesController.js
-###app/UtilityController.js
+app/UtilityController.js
 app/WeatherController.js
 app/ZWaveTopologyController.js
 js/angular-animate.min.js
@@ -552,7 +552,7 @@ js/wow.min.js
 js/ZeroClipboard.js
 secpanel/js/less.js
 secpanel/js/ion.sound.min.js
-#####app/thermostat.js
+app/thermostat.js
 #####app/ihmSetpointTimers.js
 ozwcp/cp.js
 

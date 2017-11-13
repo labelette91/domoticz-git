@@ -10827,7 +10827,19 @@ bool MainWorker::SwitchLightInt(const std::vector<std::string> &sd, std::string 
 
 	//when asking for Toggle, just switch to the opposite value
 	if (switchcmd == "Toggle") {
-		switchcmd = (atoi(sd[7].c_str()) == 1 ? "Off" : "On");
+		//Request current state of switch
+		std::string lstatus = "";
+		int llevel = 0;
+		bool bHaveDimmer = false;
+		bool bHaveGroupCmd = false;
+		int maxDimLevel = 0;
+
+		int nValue = atoi(sd[7].c_str());
+		std::string sValue = sd[8];
+
+		GetLightStatus(dType, dSubType, switchtype, nValue, sValue, lstatus, llevel, bHaveDimmer, maxDimLevel, bHaveGroupCmd);
+		//Flip the status
+		switchcmd = (IsLightSwitchOn(lstatus) == true) ? "Off" : "On";
 	}
 
 	//adjust level
@@ -12638,8 +12650,7 @@ void MainWorker::LoadSharedUsers()
 			suser.Password = sd[2];
 
 			//Get User Devices
-			result2 = m_sql.safe_query("SELECT DeviceRowID FROM SharedDevices WHERE (SharedUserID == '%q')",
-				sd[0].c_str());
+			result2 = m_sql.safe_query("SELECT DeviceRowID FROM SharedDevices WHERE (SharedUserID == '%q')", sd[0].c_str());
 			if (result2.size() > 0)
 			{
 				for (itt2 = result2.begin(); itt2 != result2.end(); ++itt2)

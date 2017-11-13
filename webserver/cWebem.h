@@ -3,8 +3,6 @@
 #include <map>
 #include <boost/asio.hpp>
 #include <boost/function.hpp>
-#include <boost/thread.hpp>
-#include <boost/thread/mutex.hpp>
 #include "server.hpp"
 #include "session_store.hpp"
 
@@ -196,9 +194,9 @@ namespace http {
 			void AddLocalNetworks(std::string network);
 			void ClearLocalNetworks();
 			std::vector<_tIPNetwork> m_localnetworks;
-			void SetDigistRealm(std::string realm);
+			void SetDigistRealm(const std::string &realm);
 			std::string m_DigistRealm;
-			void SetZipPassword(std::string password);
+			void SetZipPassword(const std::string &password);
 
 			// Session store manager
 			void SetSessionStore(session_store_impl_ptr sessionStore);

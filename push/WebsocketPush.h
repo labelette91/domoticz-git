@@ -1,5 +1,4 @@
 #pragma once
-#include <boost/signals2.hpp>
 #include "BasePush.h"
 
 namespace http {
@@ -11,7 +10,7 @@ namespace http {
 class CWebSocketPush : public CBasePush
 {
 public:
-	CWebSocketPush(http::server::CWebsocketHandler *sock);
+	explicit CWebSocketPush(http::server::CWebsocketHandler *sock);
 	void Start();
 	void Stop();
 	void ListenTo(const unsigned long long DeviceRowIdx);

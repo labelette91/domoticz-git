@@ -2764,6 +2764,18 @@
     <ClCompile Include="..\hardware\USBtin_MultiblocV8.cpp">
       <Filter>Devices</Filter>
     </ClCompile>
+    <ClCompile Include="..\webserver\WebsocketHandler.cpp">
+      <Filter>Webserver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\webserver\Websockets.cpp">
+      <Filter>Webserver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\notifications\NotificationBrowser.cpp">
+      <Filter>Notifications</Filter>
+    </ClCompile>
+    <ClCompile Include="..\push\WebsocketPush.cpp">
+      <Filter>Pushers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="domoticz.rc">

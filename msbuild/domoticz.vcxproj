@@ -915,6 +915,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\notifications\NotificationBase.cpp" />
+    <ClCompile Include="..\notifications\NotificationBrowser.cpp" />
     <ClCompile Include="..\notifications\NotificationGCM.cpp" />
     <ClCompile Include="..\notifications\NotificationHelper.cpp" />
     <ClCompile Include="..\notifications\NotificationEmail.cpp" />
@@ -934,6 +935,7 @@
     <ClCompile Include="..\push\HttpPush.cpp" />
     <ClCompile Include="..\push\InfluxPush.cpp" />
     <ClCompile Include="..\push\BasePush.cpp" />
+    <ClCompile Include="..\push\WebsocketPush.cpp" />
     <ClCompile Include="..\smtpclient\SMTPClient.cpp" />
     <ClCompile Include="..\sqlite\sqlite3.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
@@ -972,6 +974,8 @@
     <ClCompile Include="..\webserver\request_parser.cpp" />
     <ClCompile Include="..\webserver\server.cpp" />
     <ClCompile Include="..\hardware\BleBox.cpp" />
+    <ClCompile Include="..\webserver\WebsocketHandler.cpp" />
+    <ClCompile Include="..\webserver\Websockets.cpp" />
     <ClCompile Include="WindowsHelper.cpp" />
     <ClCompile Include="..\hardware\YouLess.cpp" />
     <ClCompile Include="..\hardware\XiaomiGateway.cpp" />

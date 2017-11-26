@@ -4193,7 +4193,7 @@ define(['app'], function (app) {
 
 		    $('#updelclr #nodeupdate').attr("class", "btnstyle3-dis");
 		    $('#updelclr #nodedelete').attr("class", "btnstyle3-dis");
-		    $("#hardwarecontent #configuration").html("");
+//		    $("#hardwarecontent #configuration").html("");
 		    $("#hardwarecontent #nodeparamstable #nodename").val("");
 
 		    var oTable = $('#nodestable').dataTable();
@@ -4218,16 +4218,16 @@ define(['app'], function (app) {
 		                    var addId = oTable.fnAddData({
 //		                        "Name": item.Name,
 		                        //"State": item.State,
-		                        "NodeID"  : item.ID,
+		                        //"NodeID"  : item.ID,
 		                        "DeviceID": item.DeviceID,
 		                        "0": item.DeviceID,
-		                        "1": "Name",
+		                        "1": item.Name ,
 		                        "2": "Description",
 		                        "3": item.Manufacturer_name,
 		                        "4": item.Profile,
-		                        "5": "type",
-		                        "6": item.LastUpdate,
-		                        "7": "Yes" ,
+		                        "5": item.TypeName,
+		                        "6": item.BaseAddress,
+		                        "7": item.EnoTypeName,
 		                        "8": statusImg + '&nbsp;&nbsp;' + healButton,
 		                    });
 		                });
@@ -4265,9 +4265,24 @@ define(['app'], function (app) {
 		                }
 		                $("#hardwarecontent #nodeparamstable #nodename").val(data["DeviceID"]);
 
-		                var szConfig = "";
-		                $("#hardwarecontent #configuration").html(szConfig);
-		                $("#hardwarecontent #configuration").i18n();
+//		                var szConfig = "";
+//		                $("#hardwarecontent #configuration").html(szConfig);
+		                //$("#hardwarecontent #configuration").i18n();
+		                var oTable = $('#inboundlinktable').dataTable();
+		                oTable.fnClearTable();
+		                var statusImg = '<img src="images/' + status + '.png" />';
+		                var healButton = '<img src="images/heal.png" onclick="ZWaveHealNode(' + '1' + ')" class="lcursor" title="' + $.t("Heal node") + '" />';
+
+		                var addId = oTable.fnAddData({
+		                    "entry": 1,
+		                    "0": "Entry",
+		                    "1": "Profile",
+		                    "2": data[0],
+		                    "3": "Channel",
+		                    "4": statusImg + '&nbsp;&nbsp;' + healButton,
+		                });
+
+
 		            }
 		        }
 		    });

@@ -2483,11 +2483,18 @@ namespace http {
 						root["result"][ii]["SwitchType"] = sd[03];
 						root["result"][ii]["TypeName"] = RFX_Type_SubType_Desc(atoi(sd[01].c_str()), atoi(sd[02].c_str()) );
 						root["result"][ii]["Unit"] = sd[04];
-						root["result"][ii]["DeviceId"] = sd[05];
-						root["result"][ii]["Profile"] = IntToString(atoi(sd[6].c_str()), 2) + "-" + IntToString(atoi(sd[7].c_str()), 2) + "-" + IntToString(atoi(sd[8].c_str()), 2);
+						root["result"][ii]["DeviceID"] = sd[05];
+						int rorg = atoi(sd[6].c_str());
+						int func = atoi(sd[7].c_str());
+						int type = atoi(sd[8].c_str());
+
+						root["result"][ii]["Profile"] = IntToString(rorg, 2) + "-" + IntToString(func, 2) + "-" + IntToString(type, 2);
 						root["result"][ii]["Manufacturer"] = sd[9];
 						root["result"][ii]["Manufacturer_name"] = Get_EnoceanManufacturer(atoi(sd[9].c_str()));
-						root["result"][ii]["Address"] = pEnocean->GetAdress(stoi (sd[10],0,10) ) ;
+						root["result"][ii]["BaseAddress"] = pEnocean->GetAdress(stoi (sd[10],0,10) ) ;
+						root["result"][ii]["EnoTypeName"] = Get_Enocean4BSType( rorg ,func,type);
+
+						
 
 
 

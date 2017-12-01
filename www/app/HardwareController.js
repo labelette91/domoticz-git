@@ -304,7 +304,7 @@ define(['app'], function (app) {
 					text.indexOf("MQTT") == -1 &&
 					text.indexOf("Razberry") == -1 &&
                     text.indexOf("MyHome OpenWebNet with LAN interface") == -1 &&
-                    text.indexof("EnphaseAPI") == -1
+                    text.indexOf("EnphaseAPI") == -1
 				)
 			) {
 				var address = $("#hardwarecontent #divremote #tcpaddress").val();

@@ -4187,6 +4187,31 @@ define(['app'], function (app) {
 			RefreshOpenZWaveNodeTable();
 		}
 
+		EnOceanCmd = function (cmd) {
+
+//		    $.ajax({ type: 'POST', url: url + "api/" + topic, data: payload, async: true });
+		    var oTable = $('#nodestable').dataTable();
+		    var anSelected = fnGetSelected(oTable);
+		    var payload = {};
+		    for (i=0;i<anSelected.length ;i++ ) {
+		        var data = oTable.fnGetData(anSelected[0]);
+		        payload[i] = data[0];
+		    }
+
+		    $.ajax({
+//		        type: 'POST',
+		        url: "json.htm?type=enocean&hwid=" + $.devIdx +"&cmd=" + cmd,
+		        data: payload,
+		        async: false,
+		        dataType: 'json',
+		        success: function (data) {
+		            if (typeof data.result != 'undefined') {
+
+		            }
+		        }
+		    });
+
+		}
 
 		RefreshOpenEnOceanNodeTable = function () {
 		    $('#modal').show();
@@ -4200,7 +4225,7 @@ define(['app'], function (app) {
 		    oTable.fnClearTable();
 
 		    $.ajax({
-		        url: "json.htm?type=enocean&idx=" + $.devIdx,
+		        url: "json.htm?type=enocean&hwid=" + $.devIdx + "&cmd=GetNodeList",
 		        async: false,
 		        dataType: 'json',
 		        success: function (data) {
@@ -4255,15 +4280,14 @@ define(['app'], function (app) {
 		            var anSelected = fnGetSelected(oTable);
 		            if (anSelected.length !== 0) {
 		                var data = oTable.fnGetData(anSelected[0]);
-		                var idx = data["DT_RowId"];
-		                var iNode = parseInt(data["NodeID"]);
-		                $("#updelclr #nodeupdate").attr("href", "javascript:UpdateNode(" + idx + ")");
-		                $("#hardwarecontent #zwavecodemanagement").attr("href", "javascript:ZWaveUserCodeManagement(" + idx + ")");
-		                if (iNode != iOwnNodeId) {
+		                var DeviceID = data["DeviceID"];
+		                $("#updelclr #nodeupdate").attr("href", "javascript:UpdateNode(" + DeviceID + ")");
+		                $("#hardwarecontent #zwavecodemanagement").attr("href", "javascript:ZWaveUserCodeManagement(" + DeviceID + ")");
+		                {
 		                    $('#updelclr #nodedelete').attr("class", "btnstyle3");
-		                    $("#updelclr #nodedelete").attr("href", "javascript:DeleteNode(" + idx + ")");
+		                    $("#updelclr #nodedelete").attr("href", "javascript:DeleteNode(" + DeviceID + ")");
 		                }
-		                $("#hardwarecontent #nodeparamstable #nodename").val(data["DeviceID"]);
+		                $("#hardwarecontent #nodeparamstable #nodename").val(DeviceID);
 
 //		                var szConfig = "";
 //		                $("#hardwarecontent #configuration").html(szConfig);
@@ -5355,6 +5379,10 @@ define(['app'], function (app) {
 			});
 
 			$('#modal').hide();
+
+            //-----------------------------test
+			EditEnOcean  (2, "enOcean",1,2,3,4,5,6) ;
+
 		}
 
 		RegisterPhilipsHue = function () {

@@ -1090,6 +1090,7 @@ bool CEnOceanESP3::ParseData()
 			_log.Log(LOG_NORM, "EnOcean: getLink table medatadata SenderId: %08X Size:%d Max:%d ", senderId, currentSize, maxSize );
 			setLinkTableMedadata(senderId, currentSize, maxSize);
 		}
+		//get all link table
 		else if (fct == 0x811)
 		{
 			//get all link table
@@ -1120,6 +1121,7 @@ bool CEnOceanESP3::ParseData()
 			printSensors();
 			}
 		}
+		//query function
 		else if (fct == 0x607)
 		{
 			//query function
@@ -2440,76 +2442,92 @@ std::string IntToString(int val, int nbDigit)
 	return intStr;
 }
 
+void CEnOceanESP3::GetNodeList (http::server::WebEmSession & session, const http::server::request& req, Json::Value &root)
+{
+	int nbParam = req.parameters.size() - 3;
+	root["status"] = "OK";
+	root["title"] = "EnOceanNodes";
+
+	std::vector<std::vector<std::string> > result;
+	result = m_sql.safe_query("SELECT D.Name, D.Type, d.SubType, d.SwitchType, d.Unit, E.DeviceId, E.Rorg, E.Profile, E.Type, E.Manufacturer, E.Address FROM DeviceStatus as d LEFT OUTER JOIN EnoceanSensors as e ON(instr(E.DeviceID, D.SensorID) <> 0)  WHERE (D.HardwareID==%d) ", m_HwdID);
+
+	if (result.size() > 0)
+	{
+		std::vector<std::vector<std::string> >::const_iterator itt;
+		int ii = 0;
+		for (itt = result.begin(); itt != result.end(); ++itt)
+		{
+			std::vector<std::string> sd = *itt;
+
+			//					unsigned int homeID = boost::lexical_cast<unsigned int>(sd[1]);
+			{
+
+				root["result"][ii]["Name"] = sd[00];
+				root["result"][ii]["Type"] = sd[01];
+				root["result"][ii]["SubType"] = sd[02];
+				root["result"][ii]["SwitchType"] = sd[03];
+				root["result"][ii]["TypeName"] = RFX_Type_SubType_Desc(atoi(sd[01].c_str()), atoi(sd[02].c_str()));
+				root["result"][ii]["Unit"] = sd[04];
+				root["result"][ii]["DeviceID"] = sd[05];
+				int rorg = atoi(sd[6].c_str());
+				int func = atoi(sd[7].c_str());
+				int type = atoi(sd[8].c_str());
+
+				root["result"][ii]["Profile"] = IntToString(rorg, 2) + "-" + IntToString(func, 2) + "-" + IntToString(type, 2);
+				root["result"][ii]["Manufacturer"] = sd[9];
+				root["result"][ii]["Manufacturer_name"] = Get_EnoceanManufacturer(atoi(sd[9].c_str()));
+				root["result"][ii]["BaseAddress"] = GetAdress(stoi(sd[10], 0, 10));
+				root["result"][ii]["EnoTypeName"] = Get_Enocean4BSType(rorg, func, type);
+
+
+				char szDate[80] = "";
+				struct tm loctime;
+				//						localtime_r(&pNode->LastSeen, &loctime);
+				//strftime(szDate, 80, "%Y-%m-%d %X", &loctime);
+
+				root["result"][ii]["LastUpdate"] = szDate;
+
+				ii++;
+			}
+		}
+	}
+}
+
+void CEnOceanESP3::SetCode(http::server::WebEmSession & session, const http::server::request & req, Json::Value & root)
+{
+	int nbParam = req.parameters.size() - 3;
+	for (int i = 0; i < nbParam; i++) {
+		std::string id = std::to_string(i);
+		std::string devIdx = http::server::request::findValue(&req, id.c_str());
+	}
+
+}
+
+
+
 //Webserver helpers
 namespace http {
 	namespace server {
 		void CWebServer::RType_OpenEnOcean(WebEmSession & session, const request& req, Json::Value &root)
 		{
-			std::string hwid = request::findValue(&req, "idx");
-			if (hwid == "")
+			std::string hwid = request::findValue(&req, "hwid");
+			if (hwid.empty())
+				return;
+			std::string cmd = request::findValue(&req, "cmd");
+			if (cmd.empty())
 				return;
 			int iHardwareID = atoi(hwid.c_str());
 			CEnOceanESP3 *pEnocean = reinterpret_cast<CEnOceanESP3*>(m_mainworker.GetHardware(iHardwareID));
 
 			if (pEnocean == NULL)
 				return;
+			int nbParam = req.parameters.size() - 3 ;
 
-			root["status"] = "OK";
-			root["title"] = "EnOceanNodes";
+			if (cmd=="GetNodeList")
+				pEnocean->GetNodeList(session, req, root);
+			else if (cmd == "SetCode")
+				pEnocean->SetCode(session, req, root);
 
-			std::vector<std::vector<std::string> > result;
-			result = m_sql.safe_query("SELECT D.Name, D.Type, d.SubType, d.SwitchType, d.Unit, E.DeviceId, E.Rorg, E.Profile, E.Type, E.Manufacturer, E.Address FROM DeviceStatus as d LEFT OUTER JOIN EnoceanSensors as e ON(instr(E.DeviceID, D.SensorID) <> 0)  WHERE (D.HardwareID==%d) ", iHardwareID);
-
-			if (result.size() > 0)
-			{
-				std::vector<std::vector<std::string> >::const_iterator itt;
-				int ii = 0;
-				for (itt = result.begin(); itt != result.end(); ++itt)
-				{
-					std::vector<std::string> sd = *itt;
-
-					//					unsigned int homeID = boost::lexical_cast<unsigned int>(sd[1]);
-					{
-
-/*						root["result"][ii]["DeviceID"] = sd[0];
-						root["result"][ii]["Profile"] = IntToString( atoi(sd[1].c_str()),2)   + "-" + IntToString(atoi(sd[2].c_str()), 2) + "-" + IntToString(atoi(sd[3].c_str()), 2);
-						root["result"][ii]["Manufacturer_id"] = sd[4];
-						root["result"][ii]["Manufacturer_name"] = Get_EnoceanManufacturer(atoi(sd[4].c_str()));
-						root["result"][ii]["ID"] = sd[5];
-*/
-						root["result"][ii]["Name"] = sd[00];
-						root["result"][ii]["Type"] = sd[01];
-						root["result"][ii]["SubType"] = sd[02];
-						root["result"][ii]["SwitchType"] = sd[03];
-						root["result"][ii]["TypeName"] = RFX_Type_SubType_Desc(atoi(sd[01].c_str()), atoi(sd[02].c_str()) );
-						root["result"][ii]["Unit"] = sd[04];
-						root["result"][ii]["DeviceID"] = sd[05];
-						int rorg = atoi(sd[6].c_str());
-						int func = atoi(sd[7].c_str());
-						int type = atoi(sd[8].c_str());
-
-						root["result"][ii]["Profile"] = IntToString(rorg, 2) + "-" + IntToString(func, 2) + "-" + IntToString(type, 2);
-						root["result"][ii]["Manufacturer"] = sd[9];
-						root["result"][ii]["Manufacturer_name"] = Get_EnoceanManufacturer(atoi(sd[9].c_str()));
-						root["result"][ii]["BaseAddress"] = pEnocean->GetAdress(stoi (sd[10],0,10) ) ;
-						root["result"][ii]["EnoTypeName"] = Get_Enocean4BSType( rorg ,func,type);
-
-						
-
-
-
-
-						char szDate[80]="";
-						struct tm loctime;
-						//						localtime_r(&pNode->LastSeen, &loctime);
-						//strftime(szDate, 80, "%Y-%m-%d %X", &loctime);
-
-						root["result"][ii]["LastUpdate"] = szDate;
-
-						ii++;
-					}
-				}
-			}
 		}
 	}
 }

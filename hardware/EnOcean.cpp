@@ -181,6 +181,16 @@ void CEnOcean::CreateSensors(unsigned int DeviceID, int rorg, int manufacturer, 
 	CreateSensors((char *)DeviceIDToString(DeviceID).c_str(), rorg, manufacturer, profile, ttype);
 }
 
+
+//update profile  sensor in database
+void CEnOcean::UpdateProfileSensors(char * szDeviceID, int rorg,  int profile, int ttype)
+{
+	m_sql.safe_query("UPDATE EnoceanSensors SET  Rorg=%d , Profile=%d , Type=%d  WHERE (DeviceID = '%s' )", rorg, profile, ttype, szDeviceID);
+
+}
+
+
+
 void CEnOcean::AddSensors(unsigned int DeviceID, int manufacturer, int profile, int ttype)
 {
 

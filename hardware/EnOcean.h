@@ -70,6 +70,8 @@ public:
 
 	bool getProfile(unsigned int DeviceID , int &Manufacturer, int &Rorg, int &Profile, int &Type);
 
+	void UpdateProfileSensors(char * szDeviceID, int rorg, int profile, int ttype);
+
 protected:
 
 	unsigned long m_id_base;

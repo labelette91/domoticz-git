@@ -1811,8 +1811,8 @@
 						<span class="caret"></span>
 					  </button>
 					  <ul class="dropdown-menu pull-right" role="menu" aria-labelledby="dropdownMenu1">
-						<li ><a href="javascript:ZWaveIncludeNode(false);" ><button type="button" data-i18n="Include Node" class="btn btn-primary">Include Node</button></a></li>
-						<li ><a href="javascript:ZWaveIncludeNode(true);" ><button type="button" data-i18n="Include Node Secure" class="btn btn-primary">Include Node Secure</button></a></li>
+						<li ><a href='javascript:EnOceanCmd("SetCode");'      ><button type="button" data-i18n=">Set Code" class="btn btn-primary">Set Code</button></a></li>
+						<li ><a href='javascript:EnOceanCmd("GetProductId");' ><button type="button" data-i18n="Get Product Id" class="btn btn-primary">Get Product Id</button></a></li>
 						<li><a href="javascript:ZWaveExcludeNode();" ><button type="button" data-i18n="Exclude Node" class="btn btn-primary">Exclude Node</button></a></li>
 						<li><a href="javascript:ZWaveHealNetwork();" ><button type="button" data-i18n="Heal network" class="btn btn-warning">Heal network</button></a></li>
 					  </ul>
@@ -1821,7 +1821,7 @@
 			</tr>
 		</table>
 	</div>
-    <table class="display" id="nodestable" border="0" cellpadding="0" cellspacing="0" width="100%">
+    <table class="display" id="nodestable" border="0" cellpadding="0" cellspacing="0" width="100%"> 
         <thead>
             <tr>
                 <th width="80" align="center" data-i18n="DeviceID">DeviceID</th>

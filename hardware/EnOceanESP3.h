@@ -5,6 +5,14 @@
 #include "DomoticzHardware.h"
 #include "EnOcean.h"
 
+#include "../webserver/cWebem.h"
+#include "../webserver/request.hpp"
+#include "../webserver/session_store.hpp"
+
+namespace Json
+{
+	class Value;
+};
 
 #define ENOCEAN3_READ_BUFFER_SIZE 65*1024
 
@@ -58,6 +66,8 @@ public:
 	bool WriteToHardware(const char *pdata, const unsigned char length);
 	void SendDimmerTeachIn(const char *pdata, const unsigned char length);
 	void TeachIn(std::string& idx, std::string& hardwareid);
+	void GetNodeList(http::server::WebEmSession & session, const http::server::request& req, Json::Value &root);
+	void SetCode(http::server::WebEmSession & session, const http::server::request& req, Json::Value &root);
 
 private:
 	void Init();
@@ -125,11 +135,6 @@ private:
 	void getallLinkTable(uint SensorId, int begin, int end);
 	void addLinkTable(uint DeviceId, int entry , int profile , uint sensorId, int channel);
 	void printSensors();
-
-
-
-
-
 
 };
 

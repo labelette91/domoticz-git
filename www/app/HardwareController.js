@@ -4194,10 +4194,24 @@ define(['app'], function (app) {
 		    var anSelected = fnGetSelected(oTable);
 		    var payload = {};
 		    for (i=0;i<anSelected.length ;i++ ) {
-		        var data = oTable.fnGetData(anSelected[0]);
+		        var data = oTable.fnGetData(anSelected[i]);
 		        payload[i] = data[0];
 		    }
 
+
+		    var totalselected = $('#nodestable input:checkbox:checked').length;
+		    if (totalselected == 0) {
+		        bootbox.alert($.t('No Devices selected !'));
+		        return;
+		    }
+		    payload = {};
+		    var cnt = 0;
+		    $('#nodestable input:checkbox:checked').each(function () {
+		        payload[cnt] = $(this).val();
+		        cnt++;
+		    });
+
+    
 		    $.ajax({
 //		        type: 'POST',
 		        url: "json.htm?type=enocean&hwid=" + $.devIdx +"&cmd=" + cmd,
@@ -4237,6 +4251,7 @@ define(['app'], function (app) {
 		                    var status = "ok";
 		                    var statusImg = '<img src="images/' + status + '.png" />';
 		                    var healButton = '<img src="images/heal.png" onclick="ZWaveHealNode(' + item.ID + ')" class="lcursor" title="' + $.t("Heal node") + '" />';
+		                    var itemChecker = '<input type="checkbox" class="noscheck" name="Check-' + item.DeviceID + ' id="Check-' + item.DeviceID + '" value="' + item.DeviceID + '" />';
 
 //		                    var Description = item.Description;
 //		                    var nodeStr = addLeadingZeros(item.NodeID, 3) + " (0x" + addLeadingZeros(item.NodeID.toString(16), 2) + ")";
@@ -4253,7 +4268,8 @@ define(['app'], function (app) {
 		                        "5": item.TypeName,
 		                        "6": item.BaseAddress,
 		                        "7": item.EnoTypeName,
-		                        "8": statusImg + '&nbsp;&nbsp;' + healButton,
+//		                        "8": statusImg + '&nbsp;&nbsp;' + healButton,
+		                        "8": statusImg + '&nbsp;&nbsp;' + itemChecker,
 		                    });
 		                });
 		            }

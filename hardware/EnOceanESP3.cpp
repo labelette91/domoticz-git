@@ -2139,7 +2139,7 @@ void CEnOceanESP3::setcode(unsigned int destID, unsigned int code)
 	//optionnal data
 	setDestination(opt, destID);
 
-	_log.Log(LOG_TRACE, "EnOcean: send setcode");
+	_log.Log(LOG_TRACE, "EnOcean: send setcode %08X , %d",destID,   code);
 	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
 
 }
@@ -2161,7 +2161,7 @@ void CEnOceanESP3::ping(unsigned int destID)
 	//optionnal data
 	setDestination(opt, destID);
 
-	_log.Log(LOG_TRACE, "EnOcean: send ping");
+	_log.Log(LOG_TRACE, "EnOcean: send ping %08X ", destID );
 	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
 
 }
@@ -2184,7 +2184,7 @@ void CEnOceanESP3::action(unsigned int destID)
 	setDestination(opt, destID);
 
 	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
-	_log.Log(LOG_TRACE, "EnOcean: send action");
+	_log.Log(LOG_TRACE, "EnOcean: send action %08X ", destID);
 
 }
 
@@ -2237,7 +2237,7 @@ void CEnOceanESP3::getLinkTableMedadata(uint destID)
 					 //optionnal data
 	setDestination(opt, destID);
 
-	_log.Log(LOG_TRACE, "EnOcean: send getLinkTableMedadata");
+	_log.Log(LOG_TRACE, "EnOcean: send getLinkTableMedadata %08X ", destID);
 	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
 
 }
@@ -2266,7 +2266,7 @@ void CEnOceanESP3::getProductFunction(uint destID)
 					 //optionnal data
 	setDestination(opt, destID);
 
-	_log.Log(LOG_TRACE, "EnOcean: send getProductFunction");
+	_log.Log(LOG_TRACE, "EnOcean: send getProductFunction %08X ", destID);
 	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
 
 }
@@ -2293,7 +2293,7 @@ void CEnOceanESP3::getallLinkTable(uint SensorId,int begin , int end  )
 					 //optionnal data
 	setDestination(opt, SensorId);
 
-	_log.Log(LOG_TRACE, "EnOcean: send getallLinkTable");
+	_log.Log(LOG_TRACE, "EnOcean: send getallLinkTable %08X ", SensorId);
 	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
 
 }
@@ -2498,7 +2498,8 @@ void CEnOceanESP3::SetCode(http::server::WebEmSession & session, const http::ser
 	int nbParam = req.parameters.size() - 3;
 	for (int i = 0; i < nbParam; i++) {
 		std::string id = std::to_string(i);
-		std::string devIdx = http::server::request::findValue(&req, id.c_str());
+		std::string destId  = http::server::request::findValue(&req, id.c_str());
+		setcode(DeviceIdCharToInt(destId) , 1);
 	}
 
 }

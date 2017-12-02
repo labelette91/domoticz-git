@@ -4266,20 +4266,28 @@ define(['app'], function (app) {
 		        $('#updelclr #nodedelete').attr("class", "btnstyle3-dis");
 		        if ($(this).hasClass('row_selected')) {
 		            $(this).removeClass('row_selected');
-		            $('#updelclr #nodeupdate').attr("class", "btnstyle3-dis");
+
+/*		            $('#updelclr #nodeupdate').attr("class", "btnstyle3-dis");
 		            $("#hardwarecontent #configuration").html("");
 		            $("#hardwarecontent #nodeparamstable #nodename").val("");
 		            $('#hardwarecontent #usercodegrp').hide();
+*/
 		        }
 		        else {
+		            $(this).addClass('row_selected');
+		        }
+
+		        {
 		            var iOwnNodeId = parseInt($("#ownNodeId").val());
 		            var oTable = $('#nodestable').dataTable();
-		            oTable.$('tr.row_selected').removeClass('row_selected');
-		            $(this).addClass('row_selected');
+//		            oTable.$('tr.row_selected').removeClass('row_selected');
+
 		            $('#updelclr #nodeupdate').attr("class", "btnstyle3");
-		            var anSelected = fnGetSelected(oTable);
-		            if (anSelected.length !== 0) {
-		                var data = oTable.fnGetData(anSelected[0]);
+//		            var anSelected = fnGetSelected(oTable);
+		            //		            if (anSelected.length !== 0) 
+		            {
+//		                var data = oTable.fnGetData(anSelected[0]);
+		                var data = oTable.fnGetData($(this));
 		                var DeviceID = data["DeviceID"];
 		                $("#updelclr #nodeupdate").attr("href", "javascript:UpdateNode(" + DeviceID + ")");
 		                $("#hardwarecontent #zwavecodemanagement").attr("href", "javascript:ZWaveUserCodeManagement(" + DeviceID + ")");

@@ -472,7 +472,7 @@ app/FloorplanController.js
 app/FloorplanEditController.js
 app/ForecastController.js
 app/FrontpageController.js
-app/HardwareController.js
+//app/HardwareController.js
 app/HistoryController.js
 app/LightsController.js
 app/LogController.js

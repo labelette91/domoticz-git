@@ -1161,7 +1161,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 				int UpDown=(m_buffer[1] &1)==0;
 				//conpute sender ID & cmd
 				unsigned int senderId = setArrayToInt(&m_buffer[2]);
-				int cmnd = (UpDown == 1) ? light2_sOn : light2_sOff;
+				bool cmnd = (UpDown == 1) ? true : false;
 				SendSwitchRaw(senderId, 1, -1, cmnd, 0, "");
 
 
@@ -1897,7 +1897,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 										unsigned char dim_power = m_buffer[3] & 0x7F;		// 0=off, 0x64=100%
 
 										int unitcode = channel + 1;
-										int cmnd     = (dim_power>0) ? light2_sOn : light2_sOff;								
+										bool cmnd     = (dim_power>0) ? true : false;								
 
 										_log.Log(LOG_TRACE, "EnOcean: VLD : 0x%02X Node 0x%08x UnitID: %02X cmd: %02X ",
 											DATA_BYTE3, senderId,unitcode,cmnd	);
@@ -2322,7 +2322,7 @@ void CEnOceanESP3::printSensors()
 }
 
 
-void CEnOceanESP3::TeachIn(std::string& sidx, std::string& hardwareid)
+void CEnOceanESP3::TeachIn(std::string& sidx)
 {
 	std::vector<std::vector<std::string> > result;
 	result = m_sql.safe_query("SELECT DeviceID,Unit  FROM DeviceStatus WHERE (ID='%s')  ", sidx.c_str() );
@@ -2481,7 +2481,7 @@ void CEnOceanESP3::GetNodeList (http::server::WebEmSession & session, const http
 
 
 				char szDate[80] = "";
-				struct tm loctime;
+				//struct tm loctime;
 				//						localtime_r(&pNode->LastSeen, &loctime);
 				//strftime(szDate, 80, "%Y-%m-%d %X", &loctime);
 
@@ -2495,11 +2495,8 @@ void CEnOceanESP3::GetNodeList (http::server::WebEmSession & session, const http
 
 void CEnOceanESP3::SetCode(http::server::WebEmSession & session, const http::server::request & req, Json::Value & root)
 {
-	int nbParam = req.parameters.size() - 3;
-	for (int i = 0; i < nbParam; i++) {
-		std::string id = std::to_string(i);
-		std::string destId  = http::server::request::findValue(&req, id.c_str());
-		setcode(DeviceIdCharToInt(destId) , 1);
+	for (unsigned int i = 0; i < req.parameters.size() - 3; i++) {
+		setcode(DeviceIdCharToInt(http::server::request::findValue(&req, std::to_string(i).c_str())) , 1);
 	}
 
 }

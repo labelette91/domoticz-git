@@ -7272,7 +7272,7 @@ namespace http {
 		CEnOceanESP3 *pEnoceanHardware = reinterpret_cast<CEnOceanESP3*>(m_mainworker.GetHardware(atoi(hwdid.c_str())));
 		if (pEnoceanHardware == NULL)
 			return;
-		pEnoceanHardware->TeachIn(idx, hwdid);
+		pEnoceanHardware->TeachIn(idx);
 
 		root["status"] = "OK";
 		root["title"] = "teachin";

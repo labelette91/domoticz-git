@@ -65,7 +65,7 @@ public:
     ~CEnOceanESP3();
 	bool WriteToHardware(const char *pdata, const unsigned char length);
 	void SendDimmerTeachIn(const char *pdata, const unsigned char length);
-	void TeachIn(std::string& idx, std::string& hardwareid);
+	void TeachIn(std::string& idx);
 	void GetNodeList(http::server::WebEmSession & session, const http::server::request& req, Json::Value &root);
 	void SetCode(http::server::WebEmSession & session, const http::server::request& req, Json::Value &root);
 

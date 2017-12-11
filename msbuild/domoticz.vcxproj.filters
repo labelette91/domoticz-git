@@ -473,6 +473,9 @@
     <Filter Include="IFTTT">
       <UniqueIdentifier>{779670e0-dcb8-4783-8864-1ef443ac8bad}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Devices\eHouse">
+      <UniqueIdentifier>{10c77088-04a6-41c1-b9b3-b7c752aa0339}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\CMakeLists.txt">
@@ -2030,6 +2033,10 @@
     <ClInclude Include="..\main\stdafx.h" />
     <ClInclude Include="..\main\SunRiseSet.h" />
     <ClInclude Include="..\main\WebServer.h" />
+    <ClInclude Include="..\hardware\eHouse\EventsCodes.h" />
+    <ClInclude Include="..\hardware\eHouse\globals.h" />
+    <ClInclude Include="..\hardware\eHouse\status.h" />
+    <ClInclude Include="..\hardware\eHouseTCP.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\webserver\Base64.cpp">
@@ -2775,6 +2782,18 @@
     </ClCompile>
     <ClCompile Include="..\push\WebsocketPush.cpp">
       <Filter>Pushers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\eHouse\EhouseEvents.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\eHouse\EhouseTcpClient.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\eHouse\EhouseUdpListener.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\eHouseTCP.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

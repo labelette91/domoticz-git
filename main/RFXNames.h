@@ -151,8 +151,6 @@ enum _eHardwareTypes {
 	HTYPE_CurrentCostMeterLAN,	//66
 	HTYPE_DomoticzInternal,		//67
 	HTYPE_NefitEastLAN,			//68
-	HTYPE_HomeEasy, 			//70
-	HTYPE_VirtualThermostat,	//70
 	HTYPE_PanasonicTV,			//69
 	HTYPE_OpenWebNetTCP,		//70
 	HTYPE_RaspberryHTU21D,		//71
@@ -195,6 +193,10 @@ enum _eHardwareTypes {
 	HTYPE_EnphaseAPI,			//108
 	HTYPE_RaspberryMCP23017,	//109
 	HTYPE_eHouseTCP,			//110
+
+	HTYPE_HomeEasy, 			//70
+	HTYPE_VirtualThermostat,	//70
+
 	HTYPE_END
 };
 

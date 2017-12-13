@@ -221,6 +221,7 @@ const char *Hardware_Type_Desc(int hType)
 		{ HTYPE_CurrentCostMeterLAN, "CurrentCost Meter with LAN interface" },
 		{ HTYPE_DomoticzInternal, "Domoticz Internal interface" },
 		{ HTYPE_HomeEasy, "HomeEasy RF Transmiter" },
+		{ HTYPE_VirtualThermostat, "Virtual Thermostat" },
 		{ HTYPE_NefitEastLAN, "Nefit Easy HTTP server over LAN interface" },
 		{ HTYPE_OpenWebNetTCP, "MyHome OpenWebNet with LAN interface" },
 		{ HTYPE_RaspberryHTU21D, "I2C sensor HTU21D(F)/SI702x Humidity+Temp" },

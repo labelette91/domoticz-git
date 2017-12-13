@@ -888,6 +888,9 @@ bool MainWorker::AddHardwareFromParams(
 	case HTYPE_HomeEasy:
 		pHardware = new HomeEasy(ID);
 		break;
+	case HTYPE_VirtualThermostat:
+		pHardware = new VirtualThermostat(ID);
+		break;
 	case HTYPE_RaspberryHTU21D:
 		pHardware = new I2C(ID, I2C::I2CTYPE_HTU21D, 0);
 		break;
@@ -12278,7 +12281,7 @@ bool MainWorker::SetThermostatState(const std::string &idx, const int newState)
 	else if (pHardware->HwdType == HTYPE_Dummy) 
 	//virtual thermostat set state confor/eco/off/frozen
 	{
-		return m_VirtualThermostat.SetThermostatState(idx,newState);
+		return m_VirtualThermostat->SetThermostatState(idx,newState);
 	}
 	if (pHardware->HwdType == HTYPE_AtagOne)
 	{

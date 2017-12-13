@@ -116,6 +116,7 @@ define(['app'], function (app) {
 			else if (
 				(text.indexOf("Panasonic") >= 0) ||
 				(text.indexOf("HomeEasy RF") >= 0) || 				
+				(text.indexOf("Virtual Thermostat") >= 0) ||
 				(text.indexOf("BleBox") >= 0) ||
 				(text.indexOf("TE923") >= 0) ||
 				(text.indexOf("Volcraft") >= 0) ||
@@ -1132,6 +1133,7 @@ define(['app'], function (app) {
 				(text.indexOf("TE923") >= 0) ||
 				(text.indexOf("Volcraft") >= 0) ||
 				(text.indexOf("Dummy") >= 0) ||
+				(text.indexOf("Virtual Thermostat") >= 0) ||
 				(text.indexOf("System Alive") >= 0) ||
 				(text.indexOf("Kodi Media") >= 0) ||
 				(text.indexOf("PiFace") >= 0) ||
@@ -4526,6 +4528,31 @@ define(['app'], function (app) {
 			}
 		}
 
+		CreateVirtualThermostatSensors = function (idx, name) {
+		    var SensorName ="";
+		    var SensorType = 0 ;
+		    $.ajax({
+		        url: "json.htm?type=createdevice&idx=" + $.devIdx +
+                "&sensorname=" + encodeURIComponent(SensorName) +
+                "&sensormappedtype=" + SensorType ,
+		        async: false,
+		        dataType: 'json',
+		        success: function (data) {
+		            if (data.status == 'OK') {
+		                ShowNotify($.t('Virtua Thermostat Sensor Created, and can be found in the devices tab!'), 2500);
+		            }
+		            else {
+		                ShowNotify($.t('Problem creating Sensor!'), 2500, true);
+		            }
+		        },
+		        error: function () {
+		            HideNotify();
+		            ShowNotify($.t('Problem creating Sensor!'), 2500, true);
+		        }
+		    });
+
+		}
+
 		CreateDummySensors = function (idx, name) {
 			$.devIdx = idx;
 
@@ -4903,6 +4930,9 @@ define(['app'], function (app) {
 							else if (HwTypeStr.indexOf("Dummy") >= 0) {
 								HwTypeStr += ' <span class="label label-info lcursor" onclick="CreateDummySensors(' + item.idx + ',\'' + item.Name + '\');">' + $.t("Create Virtual Sensors") + '</span>';
 							}
+							else if (HwTypeStr.indexOf("Virtual Thermostat") >= 0) {
+							    HwTypeStr += ' <span class="label label-info lcursor" onclick="CreateVirtualThermostatSensors(' + item.idx + ',\'' + item.Name + '\');">' + $.t("Create Virtual Thermostat Sensors") + '</span>';
+							}
 							else if (HwTypeStr.indexOf("YeeLight") >= 0) {
 								HwTypeStr += ' <span class="label label-info lcursor" onclick="AddYeeLight(' + item.idx + ',\'' + item.Name + '\');">' + $.t("Add Light") + '</span>';
 							}
@@ -5063,6 +5093,7 @@ define(['app'], function (app) {
 							(data["Type"].indexOf("TE923") >= 0) ||
 							(data["Type"].indexOf("Volcraft") >= 0) ||
 							(data["Type"].indexOf("Dummy") >= 0) ||
+				            (data["Type"].indexOf("Virtual Thermostat") >= 0) ||
 							(data["Type"].indexOf("System Alive") >= 0) ||
 							(data["Type"].indexOf("PiFace") >= 0) ||
 							(data["Type"].indexOf("Tellstick") >= 0) ||
@@ -5441,6 +5472,7 @@ define(['app'], function (app) {
 			if ((text.indexOf("TE923") >= 0) ||
 				(text.indexOf("Volcraft") >= 0) ||
 				(text.indexOf("Dummy") >= 0) ||
+				(text.indexOf("Virtual Thermostat") >= 0) ||
 				(text.indexOf("System Alive") >= 0) ||
 				(text.indexOf("PiFace") >= 0) ||
 				(text.indexOf("Yeelight") >= 0) ||

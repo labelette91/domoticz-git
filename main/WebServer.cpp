@@ -1186,6 +1186,9 @@ namespace http {
 				//output pin in mode2
 				std::string oPin = request::findValue(&req, "mode2"); if (!oPin.empty()) mode2 = atoi(oPin.c_str());
 			}
+			else if (htype == HTYPE_VirtualThermostat) {
+				//all fine here!
+			}
 			else if (htype == HTYPE_RaspberryHTU21D) {
 				//all fine here!
 			}
@@ -1549,6 +1552,9 @@ namespace http {
 			}
 			else if (htype == HTYPE_HomeEasy) {
 				//All fine here
+			}
+			else if (htype == HTYPE_VirtualThermostat) {
+				//all fine here!
 			}
 			else if (htype == HTYPE_RaspberryHTU21D) {
 				//All fine here
@@ -7355,7 +7361,7 @@ namespace http {
 		if ((idx==""))	return;
 		std::string duration=request::findValue(&req,"duration"); //duration in hours
 		std::string setTemp=request::findValue(&req,"setTemp"); //duration in hours
-		m_VirtualThermostat.ThermostatToggleEcoConfort ((char*)idx.c_str() ,(char*)setTemp.c_str()  ,  (char*)duration.c_str() );
+		m_VirtualThermostat->ThermostatToggleEcoConfort ((char*)idx.c_str() ,(char*)setTemp.c_str()  ,  (char*)duration.c_str() );
 		root["status"]="OK";
 		root["title"]="thermostat";
       }

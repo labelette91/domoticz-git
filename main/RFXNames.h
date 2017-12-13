@@ -152,6 +152,7 @@ enum _eHardwareTypes {
 	HTYPE_DomoticzInternal,		//67
 	HTYPE_NefitEastLAN,			//68
 	HTYPE_HomeEasy, 			//70
+	HTYPE_VirtualThermostat,	//70
 	HTYPE_PanasonicTV,			//69
 	HTYPE_OpenWebNetTCP,		//70
 	HTYPE_RaspberryHTU21D,		//71

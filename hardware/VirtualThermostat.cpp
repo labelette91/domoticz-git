@@ -6,18 +6,71 @@
 
 #include "VirtualThermostat.h"
 
+#include "../main/localtime_r.h"
 #include "../main/mainworker.h"
 
-VirtualThermostat m_VirtualThermostat;
+VirtualThermostat * m_VirtualThermostat;
 
-VirtualThermostat::VirtualThermostat()
+VirtualThermostat::VirtualThermostat(const int ID)
 {
+	m_HwdID = ID;
+	m_VirtualThermostat = this;
+
 }
 
 VirtualThermostat::~VirtualThermostat()
 {
+	m_bIsStarted = false;
 }
+bool VirtualThermostat::StartHardware()
+{
+	m_stoprequested = false;
 
+
+	//Start worker thread
+	m_thread = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&VirtualThermostat::Do_Work, this)));
+	sOnConnected(this);
+	m_bIsStarted = true;
+	return (m_thread != NULL);
+}
+bool VirtualThermostat::StopHardware()
+{
+	m_stoprequested = true;
+	if (m_thread != NULL)
+		m_thread->join();
+	m_bIsStarted = false;
+	return true;
+}
+void VirtualThermostat::Do_Work()
+{
+	int sec_counter = 0;
+	_log.Log(LOG_STATUS, "VirtualThermostat: Worker started...");
+	while (!m_stoprequested)
+	{
+		sleep_milliseconds(1000);
+		if (m_stoprequested)
+			break;
+		sec_counter++;
+
+		if (sec_counter % 12 == 0) {
+			m_LastHeartbeat = mytime(NULL);
+		}
+		time_t atime = mytime(NULL);
+		struct tm ltime;
+		localtime_r(&atime, &ltime);
+		if (ltime.tm_min != m_ScheduleLastMinute)
+		{
+			ScheduleThermostat(ltime.tm_min);
+			m_ScheduleLastMinute = ltime.tm_min;
+		}
+
+	}
+	_log.Log(LOG_STATUS, "VirtualThermostat: Worker stopped...");
+}
+bool VirtualThermostat::WriteToHardware(const char *pdata, const unsigned char length)
+{
+	return true;
+}
   //therlostat mode string
   char * ModeStr[]={
     "Eco",
@@ -346,9 +399,9 @@ bool VirtualThermostat::SetMode ( const std::string &idx,VirtualThermostatMode m
   if (mode>=EndMode)
     return false;
   if (mode==Confor)
-		m_mainworker.SetSetPoint(idx, (float)m_VirtualThermostat.GetConfortTemp(idx.c_str()));
+		m_mainworker.SetSetPoint(idx, (float)m_VirtualThermostat->GetConfortTemp(idx.c_str()));
   else   if (mode==Eco)
-	  m_mainworker.SetSetPoint(idx, (float)m_VirtualThermostat.GetEcoTemp(idx.c_str()));
+	  m_mainworker.SetSetPoint(idx, (float)m_VirtualThermostat->GetEcoTemp(idx.c_str()));
   else   if (mode == FrostProtection)
 	  m_mainworker.SetSetPoint(idx, m_sql.ConvertTemperatureUnit((float)TEMPERATURE_HG));
   else   if (mode == Off)

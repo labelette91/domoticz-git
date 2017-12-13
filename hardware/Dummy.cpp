@@ -12,7 +12,6 @@
 #include <inttypes.h>
 #include <sstream>
 #include "../main/localtime_r.h"
-#include "VirtualThermostat.h"
 
 CDummy::CDummy(const int ID)
 {
@@ -69,7 +68,6 @@ void CDummy::Do_Work()
 		localtime_r(&atime, &ltime);
 		if (ltime.tm_min != m_ScheduleLastMinute)
 		{
-				m_VirtualThermostat.ScheduleThermostat(ltime.tm_min);
 				m_ScheduleLastMinute = ltime.tm_min;
 		}
 

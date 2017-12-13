@@ -338,15 +338,15 @@ void ImperiHome::ManageAction (std::string &device , std::string &action	 , std:
 			else if (actionType=="setMode"){
 /*
 				if (actionValue==ConfMode){
-					 m_mainworker.SetSetPoint(ID, (float)m_VirtualThermostat.GetConfortTemp(ID.c_str()));
+					 m_mainworker.SetSetPoint(ID, (float)m_VirtualThermostat->GetConfortTemp(ID.c_str()));
 				}
 				else
 				if (actionValue==EcoMode){
-					 m_mainworker.SetSetPoint(ID, (float)m_VirtualThermostat.GetEcoTemp(ID.c_str()));
+					 m_mainworker.SetSetPoint(ID, (float)m_VirtualThermostat->GetEcoTemp(ID.c_str()));
 				}
 				if (actionValue==OffMode){
 				}*/
-         m_VirtualThermostat.SetMode(ID, actionValue.c_str());
+         m_VirtualThermostat->SetMode(ID, actionValue.c_str());
 
 
 			}
@@ -771,7 +771,7 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
           {
 //            DevThermostat :
           //temperature
-          SetKey(0,"curmode"     ,m_VirtualThermostat.GetMode ( (float)atof(sValueGlb[0].c_str())  , (float)atof((*row)[AddjValue].c_str()),  (float)atof((*row)[AddjValue2].c_str()) )  );
+          SetKey(0,"curmode"     ,m_VirtualThermostat->GetMode ( (float)atof(sValueGlb[0].c_str())  , (float)atof((*row)[AddjValue].c_str()),  (float)atof((*row)[AddjValue2].c_str()) )  );
 					int idx = atoi ((*row)[SwitchIdx].c_str()) ;//virtual thermostat
 					if (idx>0) //virtual thermostat
 	          SetKey(1,"curtemp"     ,(*row)[RoomTemp] ,"°C" ,false );
@@ -780,7 +780,7 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
 
           SetKey(2,"cursetpoint" ,(*row)[sValue] );
           SetKey(3,"step"        ,"0.5" );
-          SetKey(4,"availablemodes" , m_VirtualThermostat.GetAvailableMode() );
+          SetKey(4,"availablemodes" , m_VirtualThermostat->GetAvailableMode() );
           updateRoot( iroot++ , row , DevThermostat );
 
           }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include "DomoticzHardware.h"
 
 typedef std::map<int,  float  > T_Map_LastRoomTemp ;
 
@@ -23,13 +24,14 @@ enum VirtualThermostatMode {
   typedef std::map<int,  CircularBuffer* > T_Map_CircularBuffer;
 
 
-class VirtualThermostat
+class VirtualThermostat : public CDomoticzHardwareBase
 {
 public:
 
 
-	VirtualThermostat();
+	VirtualThermostat(const int ID);
 	~VirtualThermostat();
+	bool WriteToHardware(const char *pdata, const unsigned char length);
 
 	void	ScheduleThermostat(int Minute);
 	int		getPrevThermostatProg ( const char * devID , char * CurrentTime , std::string &Time );
@@ -57,6 +59,15 @@ public:
   std::string GetAvailableMode() ;
   bool SetThermostatState(const std::string &idx, const int newState);
 
+  bool StartHardware();
+  bool StopHardware();
+  void Do_Work();
+
+  boost::shared_ptr<boost::thread> m_thread;
+  volatile bool m_stoprequested;
+  int m_ScheduleLastMinute;
+
+
 };
 
-extern VirtualThermostat m_VirtualThermostat;
+extern VirtualThermostat * m_VirtualThermostat;

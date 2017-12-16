@@ -10224,7 +10224,7 @@ namespace http {
 							root["result"][ii]["HaveTimeout"] = bHaveTimeout;
 							root["result"][ii]["TypeImg"] = "override_mini";
 							//if virtual Thermostat
-							if (_hardwareNames[hardwareID].HardwareTypeVal == HTYPE_Dummy)
+							if (_hardwareNames[hardwareID].HardwareTypeVal == HTYPE_VirtualThermostat)
 							{
 								root["result"][ii]["isVirtualThermostat"] = "yes";
 								root["result"][ii]["Power"]		  = sd[INDEX_POWER];

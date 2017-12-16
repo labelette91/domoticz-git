@@ -12278,7 +12278,7 @@ bool MainWorker::SetThermostatState(const std::string &idx, const int newState)
 		pGateway->SetProgramState(newState);
 		return true;
 	}
-	else if (pHardware->HwdType == HTYPE_Dummy) 
+	else if (pHardware->HwdType == HTYPE_VirtualThermostat)
 	//virtual thermostat set state confor/eco/off/frozen
 	{
 		return m_VirtualThermostat->SetThermostatState(idx,newState);

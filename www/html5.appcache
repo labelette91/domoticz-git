@@ -491,7 +491,7 @@ app/TimerplanController.js
 app/UpdateController.js
 app/UsersController.js
 app/UserVariablesController.js
-app/UtilityController.js
+###app/UtilityController.js
 app/WeatherController.js
 app/ZWaveTopologyController.js
 js/angular-animate.min.js

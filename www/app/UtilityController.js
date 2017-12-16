@@ -953,6 +953,91 @@ define(['app'], function (app) {
 			});
 		}
 
+	    //thermostat mpde^pop up...
+
+		SwitchModal = function (idx, name, status, refreshfunction) {
+		    clearInterval($.myglobals.refreshTimer);
+
+		    ShowNotify($.t('Setting Evohome ') + ' ' + $.t(name));
+
+		    //FIXME avoid conflicts when setting a new status while reading the status from the web gateway at the same time
+		    //(the status can flick back to the previous status after an update)...now implemented with script side lockout
+		    $.ajax({
+		        url: "json.htm?type=command&param=switchmodal" +
+				"&idx=" + idx +
+				"&status=" + status +
+				"&action=1",
+		        async: false,
+		        dataType: 'json',
+		        success: function (data) {
+		            if (data.status == "ERROR") {
+		                HideNotify();
+		                bootbox.alert($.t('Problem sending switch command'));
+		            }
+		            //wait 1 second
+		            setTimeout(function () {
+		                HideNotify();
+		                refreshfunction();
+		            }, 1000);
+		        },
+		        error: function () {
+		            HideNotify();
+		            alert($.t('Problem sending switch command'));
+		        }
+		    });
+		}
+
+
+	    //convert mode number to mode string 
+	    //EnumMode : string "OFF|AUTO|ECO|CONF" 
+	    //modeVAlue number   0    1    2   3
+		getMode = function (ModeName, modeValue)
+		{
+		    return ModeName.split('|')[(modeValue)];
+		}
+
+		EvohomeAddJS = function () {
+		    return "<script type='text/javascript'> function deselect(e,id) { $(id).slideFadeToggle('swing', function() { e.removeClass('selected'); });} $.fn.slideFadeToggle = function(easing, callback) {  return this.animate({ opacity: 'toggle',height: 'toggle' }, 'fast', easing, callback);};</script>";
+		}
+
+		EvohomeImg = function (item) {
+		    return '<div title="Quick Actions" class="' + ((item.Status == "Auto") ? "evoimgnorm" : "evoimg") + '">'
+                 + '<img src="images/evohome/' + item.Status + '.png" class="lcursor" onclick="if($(this).hasClass(\'selected\')){deselect($(this),\'#evopop_' + item.idx + '\');}else{$(this).addClass(\'selected\');$(\'#evopop_' + item.idx + '\').slideFadeToggle();}return false;"></div>';
+		}
+
+		ThermostatImage = function (item) {
+		    var htm = "";
+		    var image;
+		    if (isVirtualThermostat(item)) {
+		        if (item.nValue == 1)
+		            image = '"images/override.png"';
+		        else
+		            image = '"images/nodemand.png"';
+
+		        htm = '\t      <td id="img"  style="display: flex;"><a href="#evohome" id="evohome_' + item.idx + '">' + EvohomeImg(item) + '</a>'
+		        htm += '<img src='+image+' class="lcursor" onclick="ShowSetpointPopup(event, ' + item.idx + ', RefreshUtilities, ' + item.Protected + ', ' + item.Data + ');" height="48" width="48" >';
+		        htm += '</td>\n';
+		        htm += '<div id="evopop_' + item.idx + '" class="ui-popup ui-body-b ui-overlay-shadow ui-corner-all pop">  <ul class="ui-listview ui-listview-inset ui-corner-all ui-shadow">         <li class="ui-li-divider ui-bar-inherit ui-first-child">Choose an action</li>';
+		        $.each(
+                    [{ "name": "Normal", "data": "Auto" },
+                        { "name": "Economy", "data": "AutoWithEco" },
+                        { "name": "Away", "data": "Away" },
+                        { "name": "Day Off", "data": "DayOff" },
+                        { "name": "Custom", "data": "Custom" },
+                        { "name": "Heating Off", "data": "HeatingOff" }],
+                        function (idx, obj) {
+                            htm += '<li><a href="#" class="ui-btn ui-btn-icon-right ui-icon-' + obj.data
+                                + '" onclick="SwitchModal(\'' + item.idx + '\',\'' + obj.name + '\',\'' + obj.data + '\',RefreshLights);'
+                                + 'deselect($(this),\'#evopop_' + item.idx + '\');return false;">' + obj.name + '</a></li>';
+                        });
+		        htm += '</ul></div>';
+		    }
+		    else
+		        htm += '<td id="img"><img src="images/override.png" class="lcursor" onclick="ShowSetpointPopup(event, ' + item.idx + ', RefreshUtilities, ' + item.Protected + ', ' + item.Data + ');" height="48" width="48" ></td>\n';
+
+		    return htm;
+		}
+
 		AddUtilityDevice = function () {
 			bootbox.alert($.t('Please use the devices tab for this.'));
 		}
@@ -1147,6 +1232,7 @@ define(['app'], function (app) {
 			$('#modal').show();
 			document.body.oncontextmenu = function(){return false;}		  
 			var htmlcontent = '';
+			htmlcontent += EvohomeAddJS();
 			var bShowRoomplan = false;
 			$.RoomPlans = [];
 			$.ajax({
@@ -1396,13 +1482,15 @@ define(['app'], function (app) {
 								status = item.Data;
 							}
 							else if (isVirtualThermostat(item)){
-								xhtm = xhtm.substring(0, xhtm.length-37);
+							    xhtm = xhtm.substring(0, xhtm.indexOf('<td id="img">') );
 								xhtm+='\t      <td id="img">' + GetThermostatImg(item,"RefreshUtilities",48) + '</td>\n';
 									status = getTextStatus(item);
 							}
 							else if (((item.Type == "Thermostat") && (item.SubType == "SetPoint")) || (item.Type == "Radiator 1")) {
-								xhtm += 'override.png" class="lcursor" onclick="ShowSetpointPopup(event, ' + item.idx + ', RefreshUtilities, ' + item.Protected + ', ' + item.Data + ');" height="48" width="48" ></td>\n';
-								status = item.Data + '\u00B0 ' + $scope.config.TempSign;
+//								xhtm += 'override.png" class="lcursor" onclick="ShowSetpointPopup(event, ' + item.idx + ', RefreshUtilities, ' + item.Protected + ', ' + item.Data + ');" height="48" width="48" ></td>\n';
+							    xhtm = xhtm.substring(0, xhtm.indexOf('<td id="img">'));
+							    xhtm += ThermostatImage(item);
+							    status = item.Data + '\u00B0 ' + $scope.config.TempSign;
 							}
 							else if (item.SubType == "Thermostat Clock") {
 								xhtm += 'clock48.png" height="48" width="48"></td>\n';

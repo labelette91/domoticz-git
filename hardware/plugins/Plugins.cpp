@@ -38,11 +38,11 @@ extern std::string szAppDate;
 
 namespace Plugins {
 
-	extern boost::mutex PluginMutex;	// controls accessto the message queue
+	extern boost::mutex PluginMutex;	// controls access to the message queue
 	extern std::queue<CPluginMessageBase*>	PluginMessageQueue;
 	extern boost::asio::io_service ios;
 
-	boost::mutex PythonMutex;		// only used during startup when multiple threads could use Python
+	boost::mutex PythonMutex;			// controls access to Python
 
 	//
 	//	Holds per plugin state details, specifically plugin object, read using PyModule_GetState(PyObject *module)
@@ -678,16 +678,16 @@ namespace Plugins {
 						// Tell transport to disconnect if required
 						if (pPluginTransport)
 						{
-							DisconnectDirective*	DisconnectMessage = new DisconnectDirective(this, pPluginTransport->Connection());
+							DisconnectDirective*	onDisconnectCallback = new DisconnectDirective(this, pPluginTransport->Connection());
 							boost::lock_guard<boost::mutex> l(PluginMutex);
-							PluginMessageQueue.push(DisconnectMessage);
+							PluginMessageQueue.push(onDisconnectCallback);
 						}
 					}
 				}
 				else
 				{
 					// otherwise just signal stop
-					StopMessage*	Message = new StopMessage(this);
+					onStopCallback*	Message = new onStopCallback(this);
 					{
 						boost::lock_guard<boost::mutex> l(PluginMutex);
 						PluginMessageQueue.push(Message);
@@ -705,7 +705,34 @@ namespace Plugins {
 				}
 				if (m_bIsStarted)
 				{
-					_log.Log(LOG_ERROR, "(%s) Plugin did not stop after 5 seconds, waiting.", Name.c_str());
+					_log.Log(LOG_ERROR, "(%s) Plugin did not stop after 5 seconds, flushing event queue...", Name.c_str());
+
+					// Copy the event queue to a temporary one, then copy back the events for other plugins
+					boost::lock_guard<boost::mutex> l(PluginMutex);
+					std::queue<CPluginMessageBase*>	TempMessageQueue(PluginMessageQueue);
+					while (!PluginMessageQueue.empty())
+						PluginMessageQueue.pop();
+
+					while (!TempMessageQueue.empty())
+					{
+						CPluginMessageBase* FrontMessage = TempMessageQueue.front();
+						TempMessageQueue.pop();
+						if (FrontMessage->m_pPlugin == this)
+						{
+							// log events that will not be processed
+							CCallbackBase* pCallback = dynamic_cast<CCallbackBase*>(FrontMessage);
+							if (pCallback)
+								_log.Log(LOG_ERROR, "(%s) Callback event '%s' (Python call '%s') discarded.", Name.c_str(), FrontMessage->Name(), pCallback->PythonName());
+							else
+								_log.Log(LOG_ERROR, "(%s) Non-callback event '%s' discarded.", Name.c_str(), FrontMessage->Name());
+						}
+						else
+						{
+							// Message is for a different plugin so requeue it
+							PluginMessageQueue.push(FrontMessage);
+						}
+					}
+					m_bIsStarted = false;
 				}
 			}
 
@@ -739,7 +766,7 @@ namespace Plugins {
 			if (!--scounter)
 			{
 				//	Add heartbeat to message queue
-				HeartbeatCallback*	Message = new HeartbeatCallback(this);
+				onHeartbeatCallback*	Message = new onHeartbeatCallback(this);
 				{
 					boost::lock_guard<boost::mutex> l(PluginMutex);
 					PluginMessageQueue.push(Message);
@@ -855,7 +882,7 @@ namespace Plugins {
 			}
 
 			//	Add start command to message queue
-			StartCallback*	Message = new StartCallback(this);
+			onStartCallback*	Message = new onStartCallback(this);
 			{
 				boost::lock_guard<boost::mutex> l(PluginMutex);
 				PluginMessageQueue.push(Message);
@@ -909,7 +936,6 @@ namespace Plugins {
 
 	bool CPlugin::Start()
 	{
-		boost::lock_guard<boost::mutex> l(PythonMutex);
 		try
 		{
 			PyObject* pModuleDict = PyModule_GetDict((PyObject*)m_PyModule);  // returns a borrowed referece to the __dict__ object for the module
@@ -1096,6 +1122,11 @@ namespace Plugins {
 		{
 			std::string	sPort = PyUnicode_AsUTF8(pConnection->Port);
 			if (m_bDebug) _log.Log(LOG_NORM, "(%s) Transport set to: '%s', %s:%s.", Name.c_str(), sTransport.c_str(), sAddress.c_str(), sPort.c_str());
+			if (!sPort.length())
+			{
+				_log.Log(LOG_ERROR, "(%s) No port number specified for %s connection to: '%s'.", Name.c_str(), sTransport.c_str(), sAddress.c_str());
+				return;
+			}
 			if (!pConnection->pProtocol->Secure())
 				pConnection->pTransport = (CPluginTransport*) new CPluginTransportTCP(m_HwdID, (PyObject*)pConnection, sAddress, sPort);
 			else
@@ -1315,7 +1346,7 @@ namespace Plugins {
 
 			// inform the plugin
 			{
-				DisconnectMessage*	Message = new DisconnectMessage(this, (PyObject*)pConnection);
+				onDisconnectCallback*	Message = new onDisconnectCallback(this, (PyObject*)pConnection);
 				boost::lock_guard<boost::mutex> l(PluginMutex);
 				PluginMessageQueue.push(Message);
 			}
@@ -1323,7 +1354,7 @@ namespace Plugins {
 			// Plugin exiting and all connections have disconnect messages queued
 			if (m_stoprequested && !m_Transports.size()) 
 			{
-				StopMessage*	Message = new StopMessage(this);
+				onStopCallback*	Message = new onStopCallback(this);
 				{
 					boost::lock_guard<boost::mutex> l(PluginMutex);
 					PluginMessageQueue.push(Message);
@@ -1336,7 +1367,7 @@ namespace Plugins {
 	{
 		try
 		{
-			boost::lock_guard<boost::mutex> l(PythonMutex);
+			// Callbacks MUST already have taken the PythonMutex lock otherwise bad things will happen
 			if (m_PyInterpreter) PyEval_RestoreThread((PyThreadState*)m_PyInterpreter);
 			if (m_PyModule && sHandler.length())
 			{
@@ -1481,7 +1512,7 @@ namespace Plugins {
 	void CPlugin::SendCommand(const int Unit, const std::string &command, const int level, const int hue)
 	{
 		//	Add command to message queue
-		CommandMessage*	Message = new CommandMessage(this, Unit, command, level, hue);
+		onCommandCallback*	Message = new onCommandCallback(this, Unit, command, level, hue);
 		{
 			boost::lock_guard<boost::mutex> l(PluginMutex);
 			PluginMessageQueue.push(Message);
@@ -1491,7 +1522,7 @@ namespace Plugins {
 	void CPlugin::SendCommand(const int Unit, const std::string & command, const float level)
 	{
 		//	Add command to message queue
-		CommandMessage*	Message = new CommandMessage(this, Unit, command, level);
+		onCommandCallback*	Message = new onCommandCallback(this, Unit, command, level);
 		{
 			boost::lock_guard<boost::mutex> l(PluginMutex);
 			PluginMessageQueue.push(Message);
@@ -1765,7 +1796,7 @@ namespace Plugins {
 
 		//	Add command to message queue for every plugin
 		boost::lock_guard<boost::mutex> l(PluginMutex);
-		NotificationMessage*	Message = new NotificationMessage(m_pPlugin, Subject, Text, sName, sStatus, Priority, Sound, sIconFile);
+		onNotificationCallback*	Message = new onNotificationCallback(m_pPlugin, Subject, Text, sName, sStatus, Priority, Sound, sIconFile);
 		PluginMessageQueue.push(Message);
 
 		return true;

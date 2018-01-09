@@ -427,8 +427,8 @@ define(['app'], function (app) {
 				var password = encodeURIComponent($("#hardwarecontent #divlogin #password").val());
 				if (text.indexOf("MyHome OpenWebNet with LAN interface") >= 0) {
 					if (password != "") {
-						if ((isNaN(password)) || (password.length < 5)) /* must be a number */ {
-							ShowNotify($.t('Please enter a numeric password of at least 5 characters'), 2500, true);
+						if (/*(isNaN(password)) || */ (password.length < 5)) /* must be a number */ {
+							ShowNotify($.t('Please enter a password of at least 5 characters'), 2500, true);
 							return;
 						}
 					}
@@ -1459,8 +1459,8 @@ define(['app'], function (app) {
 				var password = encodeURIComponent($("#hardwarecontent #divlogin #password").val());
 				if (text.indexOf("MyHome OpenWebNet with LAN interface") >= 0) {
 					if (password != "") {
-						if ((isNaN(password)) || (password.length < 5)) /* must be a number */ {
-							ShowNotify($.t('Please enter a numeric password of at least 5 characters'), 2500, true);
+                        if (/*(isNaN(password)) || */ (password.length < 5)) /* must be a number */ {
+                            ShowNotify($.t('Please enter a password of at least 5 characters'), 2500, true);
 							return;
 						}
 					}

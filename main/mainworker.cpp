@@ -469,6 +469,22 @@ CDomoticzHardwareBase* MainWorker::GetHardware(int HwdId)
 	return NULL;
 }
 
+//get DomoticzHardwareBase object from device Idx :deviceidx in device status table
+CDomoticzHardwareBase* MainWorker::GetDeviceHardware(const std::string & deviceidx)
+{
+
+	//get device hardware ID from device ID
+	std::vector<std::vector<std::string> > result;
+	result = m_sql.safe_query("SELECT HardwareID FROM DeviceStatus WHERE (ID == '%q')", deviceidx.c_str());
+	if (result.size() < 1)
+		return NULL;
+	int HardwareID = atoi(result[0][0].c_str());
+
+	//get CDomoticzHardwareBase 
+	CDomoticzHardwareBase *pHardware = GetHardware(HardwareID);
+		return pHardware;
+}
+
 CDomoticzHardwareBase* MainWorker::GetHardwareByIDType(const std::string &HwdId, const _eHardwareTypes HWType)
 {
 	if (HwdId == "")
@@ -12332,6 +12348,7 @@ bool MainWorker::SetThermostatState(const std::string &idx, const int newState)
 		return false;
 
 	CDomoticzHardwareBase *pHardware = GetHardware(HardwareID);
+	//CDomoticzHardwareBase *pHardware = GetDeviceHardware(idx);
 	if (pHardware == NULL)
 		return false;
 	if (pHardware->HwdType == HTYPE_TOONTHERMOSTAT)

@@ -1025,7 +1025,7 @@ bool CEnOceanESP3::ParseData()
 			m_bBaseIDRequested=false;
 			m_id_base = (m_buffer[1] << 24) + (m_buffer[2] << 16) + (m_buffer[3] << 8) + m_buffer[4];
 			unsigned char changes_left=m_buffer[5];
-			_log.Log(LOG_STATUS,"EnOcean: Transceiver ID_Base: 0x%08x",m_id_base);
+			_log.Log(LOG_STATUS,"EnOcean: Transceiver ID_Base: 0x%08lx",m_id_base);
 		}
 		if (m_bufferpos==33)
 		{
@@ -1135,7 +1135,7 @@ bool CEnOceanESP3::ParseData()
 	{
 		char szTmp[100];
 		sprintf(szTmp,"Unhandled Packet Type (0x%02x)",m_ReceivedPacketType);
-		_log.Log(LOG_STATUS,szTmp);
+		_log.Log(LOG_STATUS, "%s", szTmp);
 	}
 
     return true;
@@ -1189,7 +1189,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 					{
 						// RORG_4BS_TEACHIN_EEP_BIT is 0 -> Teach-in Variant 1 : data doesn't contain EEP and Manufacturer ID
 						// An EEP profile must be manually allocated per sender ID (see EEP 2.6.2 specification §3.3 p173/197)
-						_log.Log(LOG_NORM, "EnOcean: 4BS, Variant 1 Teach-in diagram: Sender_ID: 0x%08X", id);
+						_log.Log(LOG_NORM, "EnOcean: 4BS, Variant 1 Teach-in diagram: Sender_ID: 0x%08lx", id);
 						_log.Log(LOG_NORM, "Teach-in data contains no EEP profile. Created generic A5-02-05 profile (0/40°C temp sensor); please adjust by hand using Setup button on EnOcean adapter in Setup/Hardware menu");
 
 						manufacturer = 0x7FF;			// Generic
@@ -1209,7 +1209,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 						profile = DATA_BYTE3 >> 2;
 						ttype = ((DATA_BYTE3 & 3) << 5) | (DATA_BYTE2 >> 3);
 
-						_log.Log(LOG_NORM,"EnOcean: 4BS, Variant 2 Teach-in diagram: Sender_ID: 0x%08X Manufacturer: 0x%02x (%s) Profile: 0x%02X Type: 0x%02X (%s)", 
+						_log.Log(LOG_NORM,"EnOcean: 4BS, Variant 2 Teach-in diagram: Sender_ID: 0x%08lx Manufacturer: 0x%02x (%s) Profile: 0x%02X Type: 0x%02X (%s)", 
 							id, manufacturer,Get_EnoceanManufacturer(manufacturer),	profile,ttype,Get_Enocean4BSType(0xA5,profile,ttype));
  					}
 
@@ -1220,7 +1220,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 						CreateSensors(id, 0, manufacturer, profile, ttype);
 					}
 					else
-						_log.Log(LOG_NORM, "EnOcean: Sender_ID 0x%08X already in the database", id);
+						_log.Log(LOG_NORM, "EnOcean: Sender_ID 0x%08lx already in the database", id);
 
 				}
 				else	// RORG_4BS_TEACHIN_LRN_BIT is 1 -> Data datagram
@@ -1821,7 +1821,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 								int OffsetId = UpdateDeviceAddress(id);
 								unsigned int senderBaseAddr = GetAdress(OffsetId);
 								if (OffsetId != 0)
-									_log.Log(LOG_NORM, "EnOcean: Sender_ID 0x%08X inserted in the database Sender_ID 0x%08X : ", id, senderBaseAddr );
+									_log.Log(LOG_NORM, "EnOcean: Sender_ID 0x%08lx inserted in the database Sender_ID 0x%08lx : ", id, senderBaseAddr );
 
 								//automatic teach in 
 								//send teachin message
@@ -1830,7 +1830,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 								//Send4BSTeachIn(senderBaseAddr);
 							}
 							else
-								_log.Log(LOG_NORM, "EnOcean: Sender_ID 0x%08X already in the database", id);
+								_log.Log(LOG_NORM, "EnOcean: Sender_ID 0x%08lx already in the database", id);
 
 							//create device switch
 							if((rorg == 0xD2) && (func == 0x01) && ( (type == 0x12) || (type == 0x0F) ))

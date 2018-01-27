@@ -316,9 +316,9 @@ hardware/RfTxRx/hager.cpp
 hardware/VirtualThermostat.cpp
 hardware/AtagOne.cpp
 hardware/BleBox.cpp
-hardware/Comm5TCP.cpp
-hardware/Comm5SMTCP.cpp
 hardware/Comm5Serial.cpp
+hardware/Comm5SMTCP.cpp
+hardware/Comm5TCP.cpp
 hardware/csocket.cpp
 hardware/CurrentCostMeterBase.cpp
 hardware/CurrentCostMeterSerial.cpp
@@ -398,6 +398,7 @@ hardware/PhilipsHue/PhilipsHueSensors.cpp
 hardware/PiFace.cpp
 hardware/Pinger.cpp
 hardware/PVOutput_Input.cpp
+hardware/RAVEn.cpp
 hardware/Razberry.cpp
 hardware/Rego6XXSerial.cpp
 hardware/RelayNet.cpp
@@ -430,7 +431,6 @@ hardware/ToonThermostat.cpp
 hardware/USBtin.cpp
 hardware/USBtin_MultiblocV8.cpp
 hardware/VolcraftCO20.cpp
-hardware/RAVEn.cpp
 hardware/Winddelen.cpp
 hardware/WOL.cpp
 hardware/Wunderground.cpp

@@ -1154,7 +1154,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 				//conpute sender ID & cmd
 				unsigned int senderId = setArrayToInt(&m_buffer[2]);
 				int cmnd = (UpDown == 1) ? light2_sOn : light2_sOff;
-				SendSwitchRaw(senderId, 1, -1, cmnd, 0, "");
+				SendSwitchUnchecked(senderId, 1, -1, cmnd, 0, "");
 
 
 			}
@@ -1838,7 +1838,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 								for(int nbc = 0; nbc < nb_channel; nbc ++)
 								{
 									_log.Log(LOG_TRACE, "EnOcean: TEACH : 0xD2 Node 0x%08x UnitID: %02X cmd: %02X ", id,	nbc + 1,	light2_sOff	);
-									SendSwitchRaw(id, nbc + 1, -1, light2_sOff, 0, "" );
+									SendSwitchUnchecked(id, nbc + 1, -1, light2_sOff, 0, "" );
 								}
 								return;
 							}
@@ -1894,7 +1894,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 										_log.Log(LOG_TRACE, "EnOcean: VLD : 0x%02X Node 0x%08x UnitID: %02X cmd: %02X ",
 											DATA_BYTE3, senderId,unitcode,cmnd	);
 
-										SendSwitchRaw(senderId, unitcode, -1 , cmnd , 0, "");
+										SendSwitchUnchecked(senderId, unitcode, -1 , cmnd , 0, "");
 
 
 										// Note: if a device uses simultaneously RPS and VLD (ex: nodon inwall module), it can be partially initialized.

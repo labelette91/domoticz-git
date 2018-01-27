@@ -269,7 +269,7 @@ define(['app'], function (app) {
 					extra = $.devExtra;
 				}
 
-				if (text.indexOf("USBtin") >= 0) { 
+				if (text.indexOf("USBtin") >= 0) {
 					//var Typecan = $("#hardwarecontent #divusbtin #combotypecanusbtin option:selected").val();
 					var ActivateMultiblocV8 = $("#hardwarecontent #divusbtin #activateMultiblocV8").prop("checked") ? 1 : 0;
 					var ActivateCanFree = $("#hardwarecontent #divusbtin #activateCanFree").prop("checked") ? 1 : 0;
@@ -279,7 +279,7 @@ define(['app'], function (app) {
 					Mode1 += (ActivateMultiblocV8&0x01);
 					Mode2 = DebugActiv;
 				}
-				
+
 				$.ajax({
 					url: "json.htm?type=command&param=updatehardware&htype=" + hardwaretype +
 					"&port=" + encodeURIComponent(serialport) +
@@ -1350,7 +1350,7 @@ define(['app'], function (app) {
 					Mode1 += (ActivateMultiblocV8&0x01);
 					Mode2 = DebugActiv;
 				}
-				
+
 				$.ajax({
 					url: "json.htm?type=command&param=addhardware&htype=" + hardwaretype + "&port=" + encodeURIComponent(serialport) + "&extra=" + extra + "&name=" + encodeURIComponent(name) + "&enabled=" + bEnabled + "&datatimeout=" + datatimeout +
 					"&Mode1=" + Mode1,
@@ -1445,6 +1445,21 @@ define(['app'], function (app) {
 					}
 					Mode1 = pollinterval;
 				}
+
+				if (text.indexOf("eHouse") >= 0) {
+					var pollinterval = $("#hardwarecontent #hardwareparamspollinterval #pollinterval").val();
+					Mode2 = $('#hardwarecontent #hardwareparamsehouse #ehouseautodiscovery').prop("checked") ? 1 : 0;
+					Mode3 = $('#hardwarecontent #hardwareparamsehouse #ehouseaddalarmin').prop("checked") ? 1 : 0;
+					Mode4 = $('#hardwarecontent #hardwareparamsehouse #ehouseprodiscovery').prop("checked") ? 1 : 0;
+					Mode5 = $('#hardwarecontent #hardwareparamsehouse #ehouseopts').val();
+					Mode6 = $('#hardwarecontent #hardwareparamsehouse #ehouseopts2').val();
+					if (pollinterval == "") {
+						ShowNotify($.t('Please enter poll interval!'), 2500, true);
+						return;
+						}
+					Mode1 = pollinterval;
+					}
+
 				if (text.indexOf("Relay-Net") >= 0) {
 					Mode1 = $('#hardwarecontent #hardwareparamsrelaynet #relaynetpollinputs').prop("checked") ? 1 : 0;
 					Mode2 = $('#hardwarecontent #hardwareparamsrelaynet #relaynetpollrelays').prop("checked") ? 1 : 0;
@@ -5143,6 +5158,25 @@ define(['app'], function (app) {
 						$.devExtra = data["Extra"];
 						UpdateHardwareParamControls();
 
+						// Handle plugins 1st because all the text indexof logic below will have unpredictable impacts for plugins
+						// Handle plugins generically.  If the plugin requires a data field it will have been created on page load.
+						if (data["Type"] == "PLUGIN") {
+							$("#hardwarecontent #divpythonplugin #" + data["Extra"] + " #Username").val(data["Username"]);
+							$("#hardwarecontent #divpythonplugin #" + data["Extra"] + " #Password").val(data["Password"]);
+							$("#hardwarecontent #divpythonplugin #" + data["Extra"] + " #Address").val(data["Address"])
+							$("#hardwarecontent #divpythonplugin #" + data["Extra"] + " #Port").val(data["IntPort"]);
+							$("#hardwarecontent #divpythonplugin #" + data["Extra"] + " #SerialPort").val(data["Port"]);
+							$("#hardwarecontent #divpythonplugin #" + data["Extra"] + " #Mode1").val(data["Mode1"]);
+							$("#hardwarecontent #divpythonplugin #" + data["Extra"] + " #Mode2").val(data["Mode2"]);
+							$("#hardwarecontent #divpythonplugin #" + data["Extra"] + " #Mode3").val(data["Mode3"]);
+							$("#hardwarecontent #divpythonplugin #" + data["Extra"] + " #Mode4").val(data["Mode4"]);
+							$("#hardwarecontent #divpythonplugin #" + data["Extra"] + " #Mode5").val(data["Mode5"]);
+							$("#hardwarecontent #divpythonplugin #" + data["Extra"] + " #Mode6").val(data["Mode6"]);
+							$("#hardwarecontent #divpythonplugin #" + data["Extra"] + " #Extra").val(data["Extra"]);
+							UpdateHardwareParamControls();
+							return;
+						}
+
 						if (
 							(data["Type"].indexOf("TE923") >= 0) ||
 							(data["Type"].indexOf("Volcraft") >= 0) ||
@@ -5215,10 +5249,10 @@ define(['app'], function (app) {
 							}
 							else if (data["Type"].indexOf("USBtin") >= 0) {
 								//$("#hardwarecontent #divusbtin #combotypecanusbtin").val( data["Mode1"] );
-								$("#hardwarecontent #divusbtin #activateMultiblocV8").prop("checked", (data["Mode1"] &0x01) > 0 );	
-								$("#hardwarecontent #divusbtin #activateCanFree").prop("checked", (data["Mode1"] &0x02) > 0 );	
+								$("#hardwarecontent #divusbtin #activateMultiblocV8").prop("checked", (data["Mode1"] &0x01) > 0 );
+								$("#hardwarecontent #divusbtin #activateCanFree").prop("checked", (data["Mode1"] &0x02) > 0 );
 								$("#hardwarecontent #divusbtin #combodebugusbtin").val( data["Mode2"] );
-								
+
 							}
 						}
 						else if (data["Type"].indexOf("HomeEasy RF") >= 0) {
@@ -5379,21 +5413,6 @@ define(['app'], function (app) {
 							$("#hardwarecontent #divevohomeweb #comboevotcs").val((Location >>> 4) & 15);
 						}
 
-						// Handle plugins generically.  If the plugin requires a data field it will have been created on page load.
-						if (data["Type"] == "PLUGIN") {
-							$("#hardwarecontent #divpythonplugin #" + data["Extra"] + " #Username").val(data["Username"]);
-							$("#hardwarecontent #divpythonplugin #" + data["Extra"] + " #Password").val(data["Password"]);
-							$("#hardwarecontent #divpythonplugin #" + data["Extra"] + " #Address").val(data["Address"])
-							$("#hardwarecontent #divpythonplugin #" + data["Extra"] + " #Port").val(data["IntPort"]);
-							$("#hardwarecontent #divpythonplugin #" + data["Extra"] + " #SerialPort").val(data["Port"]);
-							$("#hardwarecontent #divpythonplugin #" + data["Extra"] + " #Mode1").val(data["Mode1"]);
-							$("#hardwarecontent #divpythonplugin #" + data["Extra"] + " #Mode2").val(data["Mode2"]);
-							$("#hardwarecontent #divpythonplugin #" + data["Extra"] + " #Mode3").val(data["Mode3"]);
-							$("#hardwarecontent #divpythonplugin #" + data["Extra"] + " #Mode4").val(data["Mode4"]);
-							$("#hardwarecontent #divpythonplugin #" + data["Extra"] + " #Mode5").val(data["Mode5"]);
-							$("#hardwarecontent #divpythonplugin #" + data["Extra"] + " #Mode6").val(data["Mode6"]);
-							$("#hardwarecontent #divpythonplugin #" + data["Extra"] + " #Extra").val(data["Extra"]);
-						}
 						UpdateHardwareParamControls();
 					}
 				}
@@ -5527,6 +5546,20 @@ define(['app'], function (app) {
 			$("#hardwarecontent #divgpio").hide();
 			$("#hardwarecontent #divsysfsgpio").hide();
 
+			// Handle plugins 1st because all the text indexof logic below will have unpredictable impacts for plugins
+			// Python Plugins have the plugin name, not the hardware type id, as the value
+			if (!$.isNumeric($("#hardwarecontent #hardwareparamstable #combotype option:selected").val())) {
+				$("#hardwarecontent #divpythonplugin .plugin").hide();
+				var plugin = $("#hardwarecontent #hardwareparamstable #combotype option:selected").attr("id");
+				$("#hardwarecontent #divpythonplugin .plugin").each(function () { if ($(this).attr("id") === plugin) $(this).show(); });
+				$("#hardwarecontent #divpythonplugin").show();
+				return;
+			}
+
+			if (text.indexOf("eHouse") >= 0) {
+				$("#hardwarecontent #divehouse").show();
+			}
+
 			if ((text.indexOf("TE923") >= 0) ||
 				(text.indexOf("Volcraft") >= 0) ||
 				(text.indexOf("Dummy") >= 0) ||
@@ -5651,6 +5684,14 @@ define(['app'], function (app) {
 				if (text.indexOf("Satel Integra") >= 0) {
 					$("#hardwarecontent #divpollinterval").show();
 					$("#hardwarecontent #hardwareparamspollinterval #pollinterval").val(1000);
+				}
+				if (text.indexOf("eHouse") >= 0) {
+					$("#hardwarecontent #divpollinterval").show();
+					$("#hardwarecontent #hardwareparamspollinterval #pollinterval").val(1000);
+					//$("#hardwarecontent #password").show();
+					//$("#hardwarecontent #lblpassword").show();
+					//$("#hardwarecontent #divlogin").hide();
+					$("#hardwarecontent #divehouse").show();
 				}
 
 				if (text.indexOf("MyHome OpenWebNet with LAN interface") >= 0) {
@@ -5832,16 +5873,9 @@ define(['app'], function (app) {
 			}
 			if (text.indexOf("MySensors Gateway with MQTT") >= 0) {
 				$("#hardwarecontent #divmysensorsmqtt").show();
-			} 
+			}
 			else if (text.indexOf("MQTT") >= 0) {
 				$("#hardwarecontent #divmqtt").show();
-			}
-			// Python Plugins have the plugin name, not the hardware type id, as the value
-			if (!$.isNumeric($("#hardwarecontent #hardwareparamstable #combotype option:selected").val())) {
-				$("#hardwarecontent #divpythonplugin .plugin").hide();
-				var plugin = $("#hardwarecontent #hardwareparamstable #combotype option:selected").attr("id");
-				$("#hardwarecontent #divpythonplugin .plugin").each(function () { if ($(this).attr("id") === plugin) $(this).show(); });
-				$("#hardwarecontent #divpythonplugin").show();
 			}
 		}
 

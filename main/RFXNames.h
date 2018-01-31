@@ -208,10 +208,9 @@ enum _eHardwareTypes {
 	HTYPE_RaspberryMCP23017,	//109
 	HTYPE_eHouseTCP,			//110
 	HTYPE_Comm5SMTCP,			//111
-
+	HTYPE_Nest_OAuthAPI,		//105
 	HTYPE_HomeEasy, 			//
 	HTYPE_VirtualThermostat,	//
-
 	HTYPE_END
 };
 

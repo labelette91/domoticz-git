@@ -1253,6 +1253,13 @@ namespace http {
 					)
 					return;
 			}
+			else if (htype == HTYPE_Nest_OAuthAPI) {
+				if (
+					(username == "") &&
+					(extra == "||")
+					)
+					return;
+			}
 			else if (htype == HTYPE_SBFSpot) {
 				if (username.empty())
 					return;
@@ -1614,6 +1621,13 @@ namespace http {
 			{
 				if (
 					(username.empty())
+					)
+					return;
+			}
+			else if (htype == HTYPE_Nest_OAuthAPI) {
+				if (
+					(username == "") &&
+					(extra == "||")
 					)
 					return;
 			}

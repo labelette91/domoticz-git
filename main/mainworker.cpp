@@ -135,6 +135,7 @@
 #include "../hardware/USBtin_MultiblocV8.h"
 #include "../hardware/EnphaseAPI.h"
 #include "../hardware/eHouseTCP.h"
+#include "../hardware/EcoCompteur.h"
 // load notifications configuration
 #include "../notifications/NotificationHelper.h"
 
@@ -1134,6 +1135,9 @@ bool MainWorker::AddHardwareFromParams(
 		break;
 	case HTYPE_Comm5SMTCP:
 		pHardware = new Comm5SMTCP(ID, Address, Port);
+		break;
+	case HTYPE_EcoCompteur:
+		pHardware = new CEcoCompteur(ID, Address, Port);
 		break;
 	}
 

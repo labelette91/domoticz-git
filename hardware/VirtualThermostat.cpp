@@ -149,7 +149,7 @@ int VirtualThermostat::ComputeThermostatPower ( int index , float RoomTemp , flo
 void VirtualThermostat::ScheduleThermostat(int Minute )
 {
 
-    int SwitchValue,nValue,lastSwitchValue;
+    int SwitchValue,nValue,lastSwitchValue, SwitchCommand;
     std::string RoomTemperatureName ;
     float ThermostatTemperatureSet=0 ;
     const char *ThermostatSwitchName  ;
@@ -168,6 +168,7 @@ void VirtualThermostat::ScheduleThermostat(int Minute )
 	std::string SwitchIdxStr;
 	const char * SetPoint ;
 	float CoefProportional , CoefIntegral;
+	bool CommandePolarity ;  // if true the Output switch shall be inverse for power ON 
 try
 {	
 	//AddjMulti  : value of coef for proportinnal command (PID)
@@ -194,6 +195,14 @@ try
 		CoefProportional	= (float)atof((*row)[10].c_str() ); //coef for propotianal command PID
 		CoefIntegral  		= (float)atof((*row)[11].c_str() ); //coef for propotianal command PID
 
+		//test if command shall be inversed
+		if (CoefProportional<0){
+			CommandePolarity = true ;
+			CoefProportional = - CoefProportional;
+		}
+		else
+			CommandePolarity = false ;
+				
 		ThermostatTemperatureSet= (float)atof(SetPoint);
 		ThermostatId = atoi(idxThermostat);	 ;
 
@@ -228,12 +237,20 @@ try
 				{
 					SwitchSubType    = atoi(resSw[0][2].c_str());
 					lastSwitchValue	 = atoi(resSw[0][0].c_str() );
-					bool SwitchStateAsChanged = (lastSwitchValue!=SwitchValue) ;
+					//if inverted polarity
+					if (CommandePolarity) {
+						//inverse switch command
+						if (SwitchValue) SwitchCommand = 0; else SwitchCommand = 1;
+					}
+					else
+						SwitchCommand = SwitchValue;
+
+					bool SwitchStateAsChanged = (lastSwitchValue!= SwitchCommand) ;
 
 
 					if ( (Minute % 10 )==0 || (SwitchStateAsChanged))
 					{
-						if (SwitchValue==1)
+						if (SwitchCommand ==1)
 							m_mainworker.SwitchLight( SwitchIdx, "On" , 15 , 0 , false, 0, !SwitchStateAsChanged);
 	//						m_mainworker.SwitchLight( SwitchIdx, "On" , 15 , 0 , !SwitchStateAsChanged); //ancien prototype sans OOC
 						else

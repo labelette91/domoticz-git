@@ -272,7 +272,7 @@ http://labelette91:catheri@192.168.1.17:8080/json.htm?type=command&param=thermos
 
 
 
-
+***************************************************************************************
 Configure Network Settings on Raspberry Pi Hardware
 
 Display the contents of the /etc/network/interfaces file. Enter:
@@ -339,3 +339,7 @@ Test the IP settings by logging in to the board over a telnet session.
 sudo /etc/init.d/networking restart
  ifdown eth0
   ifup eth0
+
+***************************************************************
+force fsck a charque demarage
+sudo tune2fs -c 1 /dev/sda2

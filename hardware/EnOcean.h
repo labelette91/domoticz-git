@@ -70,7 +70,7 @@ public:
 
 	bool getProfile(unsigned int DeviceID , int &Manufacturer, int &Rorg, int &Profile, int &Type);
 
-protected:
+public:
 
 	unsigned long m_id_base;
 };

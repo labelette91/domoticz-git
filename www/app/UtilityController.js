@@ -1779,7 +1779,6 @@ define(['app'], function (app) {
 						$("#utilitycontent .span4").droppable({
 							drop: function () {
 								var myid = $(this).attr("id");
-								$.devIdx.split(' ');
 								var roomid = $("#utilitycontent #comboroom option:selected").val();
 								if (typeof roomid == 'undefined') {
 									roomid = 0;

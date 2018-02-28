@@ -30,6 +30,8 @@
 #include "../hardware/SysfsGpio.h"
 #include "../hardware/HEOS.h"
 #include "../hardware/eHouseTCP.h"
+#include "../hardware/USBtin.h"
+#include "../hardware/USBtin_MultiblocV8.h"
 #ifdef WITH_GPIO
 #include "../hardware/Gpio.h"
 #include "../hardware/GpioPin.h"
@@ -3743,7 +3745,8 @@ namespace http {
 							(Type == HTYPE_ZIBLUETCP) ||
 							(Type == HTYPE_OpenWebNetTCP) ||
 							(Type == HTYPE_OpenWebNetUSB) ||
-							(Type == HTYPE_SysfsGpio)
+							(Type == HTYPE_SysfsGpio) ||
+							(Type == HTYPE_USBtinGateway)
 							)
 						{
 							root["result"][ii]["idx"] = ID;
@@ -4223,18 +4226,36 @@ namespace http {
 						)
 						return;
 					sunitcode = sgroupcode;//Button A or B
-					CEnOcean *pEnoceanHardware = reinterpret_cast<CEnOcean*>(m_mainworker.GetHardware(atoi(hwdid.c_str())));
-					if (pEnoceanHardware == NULL)
+					CDomoticzHardwareBase *pBaseHardware = reinterpret_cast<CDomoticzHardwareBase*>(m_mainworker.GetHardware(atoi(hwdid.c_str())));
+					if (pBaseHardware == NULL)
 						return;
-					if (!pEnoceanHardware->IsRunning())
+					if ((pBaseHardware->HwdType != HTYPE_EnOceanESP2) && (pBaseHardware->HwdType != HTYPE_EnOceanESP3) 
+						&& (pBaseHardware->HwdType != HTYPE_USBtinGateway) )
+						return;
+					unsigned long rID = 0;
+					if (pBaseHardware->HwdType == HTYPE_EnOceanESP2)
 					{
-						root["status"] = "ERROR";
-						root["message"] = "BaseID not found, is the hardware running?";
-						return;
+						CEnOceanESP2 *pEnoceanHardware = reinterpret_cast<CEnOceanESP2 *>(pBaseHardware);
+						rID = pEnoceanHardware->m_id_base + iUnitTest;
+					}
+					else if (pBaseHardware->HwdType == HTYPE_EnOceanESP3)
+					{
+						CEnOceanESP3 *pEnoceanHardware = reinterpret_cast<CEnOceanESP3 *>(pBaseHardware);
+						rID = pEnoceanHardware->m_id_base + iUnitTest;
+					}
+					else if (pBaseHardware->HwdType == HTYPE_USBtinGateway) //Like EnOcean (Lighting2 with Base_ID offset)
+					{
+						USBtin *pUSBtinHardware = reinterpret_cast<USBtin *>(pBaseHardware);
+						//base ID calculate in the USBtinharwade dependant of the CAN Layer !
+						//for exemple see MultiblocV8 layer...
+						rID = pUSBtinHardware->switch_id_base;
+						std::stringstream ssunitcode;
+						ssunitcode << iUnitTest;
+						sunitcode = ssunitcode.str();
 					}
 					//convert to hex, and we have our ID
 					std::stringstream s_strid;
-					s_strid << std::hex << std::uppercase << (pEnoceanHardware->GetAdress(iUnitTest));
+					s_strid << std::hex << std::uppercase << rID;
 					devid = s_strid.str();
 				}
 				else if (lighttype == 68)
@@ -4761,22 +4782,50 @@ namespace http {
 						)
 						return;
 					sunitcode = sgroupcode;//Button A/B
-					CEnOcean *pEnoceanHardware = reinterpret_cast<CEnOcean*>(m_mainworker.GetHardware(atoi(hwdid.c_str())));
-					if (pEnoceanHardware == NULL)
+					CDomoticzHardwareBase *pBaseHardware = reinterpret_cast<CDomoticzHardwareBase*>(m_mainworker.GetHardware(atoi(hwdid.c_str())));
+					if (pBaseHardware == NULL)
 						return;
-					if (!pEnoceanHardware->IsRunning())
+					if ((pBaseHardware->HwdType != HTYPE_EnOceanESP2) && (pBaseHardware->HwdType != HTYPE_EnOceanESP3) 
+						&& (pBaseHardware->HwdType != HTYPE_USBtinGateway) )
+						return;
+					unsigned long rID = 0;
+					if (pBaseHardware->HwdType == HTYPE_EnOceanESP2)
 					{
-						root["status"] = "ERROR";
-						root["message"] = "BaseID not found, is the hardware running?";
-						return;
+						CEnOceanESP2 *pEnoceanHardware = reinterpret_cast<CEnOceanESP2*>(pBaseHardware);
+						if (pEnoceanHardware->m_id_base == 0)
+						{
+							root["message"] = "BaseID not found, is the hardware running?";
+							return;
+						}
+						rID = pEnoceanHardware->m_id_base + iUnitTest;
+					}
+					else if (pBaseHardware->HwdType == HTYPE_EnOceanESP3)
+					{
+						CEnOceanESP3 *pEnoceanHardware = reinterpret_cast<CEnOceanESP3*>(pBaseHardware);
+						if (pEnoceanHardware->m_id_base == 0)
+						{
+							root["message"] = "BaseID not found, is the hardware running?";
+							return;
+						}
+						rID = pEnoceanHardware->m_id_base + iUnitTest;
+
+						//add to enOcean table device
+						pEnoceanHardware->AddSensors(pEnoceanHardware->GetAdress(iUnitTest), 0, 0xD2, 01, iUnitTest);
+
+					}
+					else if (pBaseHardware->HwdType == HTYPE_USBtinGateway)
+					{
+						USBtin *pUSBtinHardware = reinterpret_cast<USBtin *>(pBaseHardware);
+						rID = pUSBtinHardware->switch_id_base;
+						std::stringstream ssunitcode;
+						ssunitcode << iUnitTest;
+						sunitcode = ssunitcode.str();
 					}
 					//convert to hex, and we have our ID
 					std::stringstream s_strid;
-					s_strid << std::hex << std::uppercase << (pEnoceanHardware->GetAdress(iUnitTest));
+					s_strid << std::hex << std::uppercase << rID;
 					devid = s_strid.str();
 
-					//add to enOcean table device
-					pEnoceanHardware->AddSensors(pEnoceanHardware->GetAdress(iUnitTest), 0, 0xD2, 01 , iUnitTest );
 				}
 				else if (lighttype == 68)
 				{

@@ -21,6 +21,9 @@
 #include <boost/lexical_cast.hpp>
 #include "../notifications/NotificationHelper.h"
 #include "IFTTT.h"
+#ifdef ENABLE_PYTHON
+#include "../hardware/plugins/Plugins.h"
+#endif
 
 #ifndef WIN32
 	#include <sys/stat.h>
@@ -3440,6 +3443,24 @@ uint64_t CSQLHelper::CreateDevice(const int HardwareID, const int SensorType, co
 	char ID[20];
 	sprintf(ID, "%lu", nid);
 
+#ifdef ENABLE_PYTHON
+	{
+		std::vector<std::vector<std::string> > result;
+		result = m_sql.safe_query("SELECT Type FROM Hardware WHERE (ID == %d)", HardwareID);
+		if (result.size() > 0)
+		{
+			std::vector<std::string> sd = result[0];
+			_eHardwareTypes Type = (_eHardwareTypes)atoi(sd[0].c_str());
+			if (Type == HTYPE_PythonPlugin)
+			{
+				// Not allowed to add device to plugin HW (plugin framework does not use key column "ID" but instead uses column "unit" as key)
+				_log.Log(LOG_ERROR, "CSQLHelper::CreateDevice: Not allowed to add device owned by plugin %u!", HardwareID);
+				return DeviceRowIdx;
+			}
+		}
+	}
+#endif
+
 	switch (SensorType)
 	{
 
@@ -3845,6 +3866,7 @@ uint64_t CSQLHelper::UpdateValue(const int HardwareID, const char* ID, const uns
 						);
 				}
 			}
+			// TODO: Should plugin be notified?
 		}
 	}
 
@@ -3929,11 +3951,13 @@ uint64_t CSQLHelper::UpdateValue(const int HardwareID, const char* ID, const uns
 				sd[0].c_str()
 				);
 		}
+		// TODO: Should plugin be notified?
 	}
 	return devRowID;
 }
 
 uint64_t CSQLHelper::UpdateValueInt(const int HardwareID, const char* ID, const unsigned char unit, const unsigned char devType, const unsigned char subType, const unsigned char signallevel, const unsigned char batterylevel, const int nValue, const char* sValue, std::string &devname, const bool bUseOnOffAction)
+		//TODO: 'unsigned char unit' only allows 256 devices / plugin
 {
 	if (!m_dbase)
 		return -1;
@@ -3977,6 +4001,16 @@ uint64_t CSQLHelper::UpdateValueInt(const int HardwareID, const char* ID, const 
 			_log.Log(LOG_ERROR,"Serious database error, problem getting ID from DeviceStatus!");
 			return -1;
 		}
+#ifdef ENABLE_PYTHON
+		//TODO: Plugins should perhaps be blocked from implicitly adding a device by update? It's most likely a bug due to updating a removed device..
+		CDomoticzHardwareBase *pHardware = m_mainworker.GetHardware(HardwareID);
+		if (pHardware != NULL && pHardware->HwdType == HTYPE_PythonPlugin)
+		{
+			_log.Log(LOG_TRACE, "CSQLHelper::UpdateValueInt: Notifying plugin %u about creation of device %u", HardwareID, unit);
+			Plugins::CPlugin *pPlugin = (Plugins::CPlugin*)pHardware;
+			pPlugin->DeviceAdded(unit);
+		}
+#endif
 		std::stringstream s_str( result[0][0] );
 		s_str >> ulID;
 	}
@@ -6465,21 +6499,44 @@ void CSQLHelper::DeleteDevices(const std::string &idx)
 	if (!_idx.empty())
 	{
 
+		std::set<std::pair<std::string, std::string> > removeddevices;
 		std::vector<std::string>::const_iterator itt;
+#ifdef ENABLE_PYTHON
+		for (itt = _idx.begin(); itt != _idx.end(); ++itt)
+		{
+			_log.Log(LOG_TRACE, "CSQLHelper::DeleteDevices: Delete %s", (*itt).c_str());
+			std::vector<std::vector<std::string> > result;
+			result = safe_query("SELECT HardwareID, Unit FROM DeviceStatus WHERE (ID == '%q')", (*itt).c_str());
+			if (result.size() > 0)
+			{
+				std::vector<std::string> sd = result[0];
+				std::string HwID = sd[0];
+				std::string Unit = sd[1];
+				CDomoticzHardwareBase *pHardware = m_mainworker.GetHardwareByIDType(HwID, HTYPE_PythonPlugin);
+				if (pHardware != NULL)
+				{
+					std::pair<std::string, std::string> p = std::make_pair(HwID,Unit);
+					removeddevices.insert(std::make_pair(HwID,Unit));
+				}
+			}
+		}
+#endif
 
 		char* errorMessage;
 
 		for (itt = _idx.begin(); itt != _idx.end(); ++itt)
 		{
 			std::vector<std::vector<std::string> > result;
-//			result = m_sql.safe_query("SELECT a.DeviceID , b.Type FROM DeviceStatus a,  Hardware b WHERE (a.ID==%s) AND (b.ID == a.HardwareID)", (*itt).c_str());
+			// search deviceID of sensor for enocean
 			result = m_sql.safe_query("SELECT DeviceID  FROM DeviceStatus   WHERE (ID==%s) ", (*itt).c_str());
 			if (result.size()>0)
 			{
 				DeviceID = result[0][0];
 			}
+			//count the number of device enocean for with the same DeviceId ( case of multi switch
 			result = m_sql.safe_query("SELECT DeviceID FROM DeviceStatus  WHERE (DeviceID=='%s') ", DeviceID.c_str());
 			NbDeviceId = result.size();
+			//device id are code on .08X in EnoceanSensors table
 			while (DeviceID.size() != 8)
 				DeviceID = "0" + DeviceID;
 
@@ -6510,6 +6567,7 @@ void CSQLHelper::DeleteDevices(const std::string &idx)
 			safe_exec_no_return("DELETE FROM DeviceToPlansMap WHERE (DeviceRowID == '%q')", (*itt).c_str());
 			safe_exec_no_return("DELETE FROM CamerasActiveDevices WHERE (DevSceneType==0) AND (DevSceneRowID == '%q')", (*itt).c_str());
 			safe_exec_no_return("DELETE FROM SharedDevices WHERE (DeviceRowID== '%q')", (*itt).c_str());
+			//if last enocean device , delete from EnoceanSensors table
 			if (NbDeviceId==1)
 				safe_exec_no_return("DELETE FROM EnoceanSensors WHERE (DeviceID == '%q')", DeviceID.c_str() );
 			//notify eventsystem device is no longer present
@@ -6521,6 +6579,24 @@ void CSQLHelper::DeleteDevices(const std::string &idx)
 			safe_exec_no_return("DELETE FROM DeviceStatus WHERE (ID == '%q')", (*itt).c_str());
 			sqlite3_exec(m_dbase, "COMMIT TRANSACTION", NULL, NULL, &errorMessage);
 		}
+#ifdef ENABLE_PYTHON
+		std::set<std::pair<std::string, std::string> >::iterator it;
+		for (it = removeddevices.begin(); it != removeddevices.end(); ++it)
+		{
+			int HwID = atoi((*it).first.c_str());
+			int Unit = atoi((*it).second.c_str());
+			// Notify plugin to sync plugins' device list
+			CDomoticzHardwareBase *pHardware = m_mainworker.GetHardware(HwID);
+			if (pHardware != NULL && pHardware->HwdType == HTYPE_PythonPlugin)
+			{
+				_log.Log(LOG_TRACE, "CSQLHelper::DeleteDevices: Notifying plugin %u about deletion of device %u", HwID, Unit);
+				Plugins::CPlugin *pPlugin = (Plugins::CPlugin*)pHardware;
+				pPlugin->DeviceRemoved(Unit);
+			}
+
+		}
+#endif
+		
 	}
 	else
 		return;

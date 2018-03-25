@@ -1816,8 +1816,8 @@ bool MainWorker::WriteToHardware(const int HwdID, const char *pdata, const unsig
 	if (hindex == -1)
 		return false;
 
-	return m_hardwaredevices[hindex]->WriteToHardware(pdata, length);
 	if (_log.isTraceEnabled()) _log.Log(LOG_TRACE, "MAIN WriteToHardware %s", m_hardwaredevices[hindex]->Name.c_str());
+	return m_hardwaredevices[hindex]->WriteToHardware(pdata, length);
 
 }
 

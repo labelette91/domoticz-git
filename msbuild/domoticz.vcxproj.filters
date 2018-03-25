@@ -2037,6 +2037,10 @@
     <ClInclude Include="..\hardware\eHouse\globals.h" />
     <ClInclude Include="..\hardware\eHouse\status.h" />
     <ClInclude Include="..\hardware\eHouseTCP.h" />
+    <ClInclude Include="..\hardware\Comm5SMTCP.h" />
+    <ClInclude Include="..\hardware\EcoCompteur.h" />
+    <ClInclude Include="..\hardware\Honeywell.h" />
+    <ClInclude Include="..\hardware\NestOAuthAPI.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\webserver\Base64.cpp">
@@ -2794,6 +2798,21 @@
     </ClCompile>
     <ClCompile Include="..\hardware\eHouseTCP.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\Comm5SMTCP.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\EcoCompteur.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\Honeywell.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\NestOAuthAPI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\RfTxRx\HomeEasyTransmitter.cpp">
+      <Filter>Devices\HomeEasy</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

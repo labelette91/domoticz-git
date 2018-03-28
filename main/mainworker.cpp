@@ -5772,6 +5772,7 @@ void MainWorker::decode_UNDECODED(const int HwdID, const _eHardwareTypes HwdType
 {
 	char szTmp[100];
 
+	WriteMessageStart();
 	WriteMessage("UNDECODED ", false);
 
 	switch (pResponse->UNDECODED.subtype)

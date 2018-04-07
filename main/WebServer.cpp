@@ -1030,7 +1030,7 @@ namespace http {
 			for (itt = _htypes.begin(); itt != _htypes.end(); ++itt)
 			{
 				root["result"][ii]["idx"] = itt->second;
-				root["result"][ii]["name"] = SafeHtml(itt->first);
+				root["result"][ii]["name"] = itt->first;
 				ii++;
 			}
 
@@ -1048,7 +1048,7 @@ namespace http {
 				return; //Only admin user allowed
 			}
 
-			std::string name = SafeHtml(CURLEncode::URLDecode(request::findValue(&req, "name")));
+			std::string name = CURLEncode::URLDecode(request::findValue(&req, "name"));
 			std::string senabled = request::findValue(&req, "enabled");
 			std::string shtype = request::findValue(&req, "htype");
 			std::string address = request::findValue(&req, "address");
@@ -1454,7 +1454,7 @@ namespace http {
 			std::string idx = request::findValue(&req, "idx");
 			if (idx.empty())
 				return;
-			std::string name = SafeHtml(CURLEncode::URLDecode(request::findValue(&req, "name")));
+			std::string name = CURLEncode::URLDecode(request::findValue(&req, "name"));
 			std::string senabled = request::findValue(&req, "enabled");
 			std::string shtype = request::findValue(&req, "htype");
 			std::string address = request::findValue(&req, "address");
@@ -1897,7 +1897,7 @@ namespace http {
 				return; //Only admin user allowed
 			}
 			std::string idx = request::findValue(&req, "idx");
-			std::string variablename = SafeHtml(request::findValue(&req, "vname"));
+			std::string variablename = request::findValue(&req, "vname");
 			std::string variablevalue = request::findValue(&req, "vvalue");
 			std::string variabletype = request::findValue(&req, "vtype");
 
@@ -1939,7 +1939,7 @@ namespace http {
 				{
 					std::vector<std::string> sd = *itt;
 					root["result"][ii]["idx"] = sd[0];
-					root["result"][ii]["Name"] = SafeHtml(sd[1]);
+					root["result"][ii]["Name"] = sd[1];
 					root["result"][ii]["Type"] = sd[2];
 					root["result"][ii]["Value"] = sd[3];
 					root["result"][ii]["LastUpdate"] = sd[4];
@@ -1969,7 +1969,7 @@ namespace http {
 				{
 					std::vector<std::string> sd = *itt;
 					root["result"][ii]["idx"] = sd[0];
-					root["result"][ii]["Name"] = SafeHtml(sd[1]);
+					root["result"][ii]["Name"] = sd[1];
 					root["result"][ii]["Type"] = sd[2];
 					root["result"][ii]["Value"] = sd[3];
 					root["result"][ii]["LastUpdate"] = sd[4];
@@ -2077,7 +2077,7 @@ namespace http {
 				return; //Only admin user allowed
 			}
 
-			std::string name = SafeHtml(request::findValue(&req, "name"));
+			std::string name = request::findValue(&req, "name");
 			root["status"] = "OK";
 			root["title"] = "AddPlan";
 			m_sql.safe_query(
@@ -2097,7 +2097,7 @@ namespace http {
 			std::string idx = request::findValue(&req, "idx");
 			if (idx.empty())
 				return;
-			std::string name = SafeHtml(request::findValue(&req, "name"));
+			std::string name = request::findValue(&req, "name");
 			if (
 				(name.empty())
 				)
@@ -2169,7 +2169,7 @@ namespace http {
 						std::string Name = "[" + sd[4] + "] " + sd[1] + " (" + RFX_Type_Desc(_dtype, 1) + "/" + RFX_Type_SubType_Desc(_dtype, atoi(sd[3].c_str())) + ")";
 						root["result"][ii]["type"] = 0;
 						root["result"][ii]["idx"] = sd[0];
-						root["result"][ii]["Name"] = SafeHtml(Name);
+						root["result"][ii]["Name"] = Name;
 						ii++;
 					}
 				}
@@ -2195,7 +2195,7 @@ namespace http {
 						root["result"][ii]["type"] = 1;
 						root["result"][ii]["idx"] = sd[0];
 						std::string sname = "[Scene] " + sd[1];
-						root["result"][ii]["Name"] = SafeHtml(sname);
+						root["result"][ii]["Name"] = sname;
 						ii++;
 					}
 				}
@@ -2290,7 +2290,7 @@ namespace http {
 						root["result"][ii]["type"] = DevSceneType;
 						root["result"][ii]["DevSceneRowID"] = DevSceneRowID;
 						root["result"][ii]["order"] = sd[3];
-						root["result"][ii]["Name"] = SafeHtml(Name);
+						root["result"][ii]["Name"] = Name;
 						ii++;
 					}
 				}
@@ -2464,7 +2464,7 @@ namespace http {
 				{
 					std::vector<std::string> sd = *itt;
 					root["result"][ii]["idx"] = sd[0];
-					root["result"][ii]["Name"] = SafeHtml(sd[1]);
+					root["result"][ii]["Name"] = sd[1];
 					ii++;
 				}
 			}
@@ -2495,7 +2495,7 @@ namespace http {
 			std::string idx = request::findValue(&req, "idx");
 			if (idx.empty())
 				return;
-			std::string name = SafeHtml(request::findValue(&req, "name"));
+			std::string name = request::findValue(&req, "name");
 			if (
 				(name.empty())
 				)
@@ -3576,7 +3576,7 @@ namespace http {
 						std::vector<std::string> sd = *itt;
 
 						root["result"][ii]["ID"] = sd[0];
-						root["result"][ii]["Name"] = SafeHtml(sd[1]);
+						root["result"][ii]["Name"] = sd[1];
 						ii++;
 					}
 				}
@@ -3607,7 +3607,7 @@ namespace http {
 						std::vector<std::string> sd = *itt;
 
 						root["result"][ii]["ID"] = sd[0];
-						root["result"][ii]["Name"] = SafeHtml(sd[1]);
+						root["result"][ii]["Name"] = sd[1];
 						root["result"][ii]["DevID"] = sd[2];
 						root["result"][ii]["DevRealIdx"] = sd[9];
 						root["result"][ii]["Order"] = atoi(sd[10].c_str());
@@ -3757,7 +3757,7 @@ namespace http {
 							)
 						{
 							root["result"][ii]["idx"] = ID;
-							root["result"][ii]["Name"] = SafeHtml(Name);
+							root["result"][ii]["Name"] = Name;
 							ii++;
 						}
 					}
@@ -3883,7 +3883,7 @@ namespace http {
 								if (!IsIdxForUser(&session, idx))
 									continue;
 								root["result"][ii]["idx"] = ID;
-								root["result"][ii]["Name"] = SafeHtml(Name);
+								root["result"][ii]["Name"] = Name;
 								root["result"][ii]["Type"] = RFX_Type_Desc(Type, 1);
 								root["result"][ii]["SubType"] = RFX_Type_SubType_Desc(Type, SubType);
 								bool bIsDimmer = (
@@ -3962,7 +3962,7 @@ namespace http {
 						std::vector<std::string> sd = *itt;
 
 						std::string ID = sd[0];
-						std::string Name = SafeHtml(sd[1]);
+						std::string Name = sd[1];
 						int Type = atoi(sd[2].c_str());
 						int SubType = atoi(sd[3].c_str());
 						int used = atoi(sd[4].c_str());
@@ -4021,7 +4021,7 @@ namespace http {
 						std::vector<std::string> sd = *itt;
 
 						std::string ID = sd[0];
-						std::string Name = SafeHtml(sd[1]);
+						std::string Name = sd[1];
 
 						root["result"][ii]["type"] = 1;
 						root["result"][ii]["idx"] = ID;
@@ -4083,7 +4083,7 @@ namespace http {
 							root["result"][ii]["DevSceneRowID"] = DevSceneRowID;
 							root["result"][ii]["when"] = DevSceneWhen;
 							root["result"][ii]["delay"] = DevSceneDelay;
-							root["result"][ii]["Name"] = SafeHtml(Name);
+							root["result"][ii]["Name"] = Name;
 							ii++;
 						}
 					}
@@ -4754,7 +4754,7 @@ namespace http {
 				}
 
 				std::string hwdid = request::findValue(&req, "hwdid");
-				std::string name = SafeHtml(request::findValue(&req, "name"));
+				std::string name = request::findValue(&req, "name");
 				std::string sswitchtype = request::findValue(&req, "switchtype");
 				std::string slighttype = request::findValue(&req, "lighttype");
 				std::string maindeviceidx = request::findValue(&req, "maindeviceidx");
@@ -6166,7 +6166,7 @@ namespace http {
 				}
 
 				std::string senabled = request::findValue(&req, "enabled");
-				std::string username = SafeHtml(request::findValue(&req, "username"));
+				std::string username = request::findValue(&req, "username");
 				std::string password = request::findValue(&req, "password");
 				std::string srights = request::findValue(&req, "rights");
 				std::string sRemoteSharing = request::findValue(&req, "RemoteSharing");
@@ -6214,7 +6214,7 @@ namespace http {
 				if (idx.empty())
 					return;
 				std::string senabled = request::findValue(&req, "enabled");
-				std::string username = SafeHtml(request::findValue(&req, "username"));
+				std::string username = request::findValue(&req, "username");
 				std::string password = request::findValue(&req, "password");
 				std::string srights = request::findValue(&req, "rights");
 				std::string sRemoteSharing = request::findValue(&req, "RemoteSharing");
@@ -6404,7 +6404,7 @@ namespace http {
 						root["title"] = "LearnSW";
 						root["ID"] = m_sql.m_LastSwitchID;
 						root["idx"] = m_sql.m_LastSwitchRowID;
-						root["Name"] = SafeHtml(result[0][0]);
+						root["Name"] = result[0][0];
 						root["Used"] = atoi(result[0][1].c_str());
 						root["Cmd"] = atoi(result[0][2].c_str());
 					}
@@ -7193,7 +7193,7 @@ namespace http {
 					return; //Only admin user allowed
 				}
 
-				std::string name = SafeHtml(request::findValue(&req, "name"));
+				std::string name = request::findValue(&req, "name");
 				std::string imagefile = request::findValue(&req, "image");
 				std::string scalefactor = request::findValue(&req, "scalefactor");
 				if (
@@ -7224,7 +7224,7 @@ namespace http {
 				std::string idx = request::findValue(&req, "idx");
 				if (idx.empty())
 					return;
-				std::string name = SafeHtml(request::findValue(&req, "name"));
+				std::string name = request::findValue(&req, "name");
 				std::string imagefile = request::findValue(&req, "image");
 				std::string scalefactor = request::findValue(&req, "scalefactor");
 				if (
@@ -7350,7 +7350,7 @@ namespace http {
 
 						root["result"][ii]["type"] = 0;
 						root["result"][ii]["idx"] = sd[0];
-						root["result"][ii]["Name"] = SafeHtml(sd[1]);
+						root["result"][ii]["Name"] = sd[1];
 						ii++;
 					}
 				}
@@ -7374,7 +7374,7 @@ namespace http {
 						std::vector<std::string> sd = *itt;
 
 						root["result"][ii]["idx"] = sd[0];
-						root["result"][ii]["Name"] = SafeHtml(sd[1]);
+						root["result"][ii]["Name"] = sd[1];
 						root["result"][ii]["Area"] = sd[2];
 						ii++;
 					}
@@ -8265,7 +8265,7 @@ namespace http {
 							}
 
 							root["result"][ii]["idx"] = sd[0];
-							root["result"][ii]["Name"] = SafeHtml(sSceneName);
+							root["result"][ii]["Name"] = sSceneName;
 							root["result"][ii]["Description"] = sd[10];
 							root["result"][ii]["Favorite"] = favorite;
 							root["result"][ii]["Protected"] = (iProtected != 0);
@@ -8781,7 +8781,7 @@ namespace http {
 					}
 					else
 					{
-						root["result"][ii]["HardwareName"] = SafeHtml(_hardwareNames[hardwareID].Name);
+						root["result"][ii]["HardwareName"] = _hardwareNames[hardwareID].Name;
 						root["result"][ii]["HardwareTypeVal"] = _hardwareNames[hardwareID].HardwareTypeVal;
 						root["result"][ii]["HardwareType"] = _hardwareNames[hardwareID].HardwareType;
 					}
@@ -8879,7 +8879,7 @@ namespace http {
 					root["result"][ii]["Type"] = RFX_Type_Desc(dType, 1);
 					root["result"][ii]["SubType"] = RFX_Type_SubType_Desc(dType, dSubType);
 					root["result"][ii]["TypeImg"] = RFX_Type_Desc(dType, 2);
-					root["result"][ii]["Name"] = SafeHtml(sDeviceName);
+					root["result"][ii]["Name"] = sDeviceName;
 					root["result"][ii]["Description"] = Description;
 					root["result"][ii]["Used"] = used;
 					root["result"][ii]["Favorite"] = favorite;
@@ -10938,7 +10938,7 @@ namespace http {
 			}
 
 			std::string idx = request::findValue(&req, "idx");
-			std::string name = SafeHtml(request::findValue(&req, "name"));
+			std::string name = request::findValue(&req, "name");
 			std::string description = request::findValue(&req, "description");
 			if ((idx.empty()) || (name.empty()))
 				return;
@@ -11022,7 +11022,7 @@ namespace http {
 					if ((bDisplayHidden) || (!bIsHidden))
 					{
 						root["result"][ii]["idx"] = sd[0];
-						root["result"][ii]["Name"] = SafeHtml(Name);
+						root["result"][ii]["Name"] = Name;
 						root["result"][ii]["Order"] = sd[2];
 
 						unsigned int totDevices = 0;
@@ -11108,7 +11108,7 @@ namespace http {
 					std::vector<std::string> sd = *itt;
 
 					root["result"][ii]["idx"] = sd[0];
-					root["result"][ii]["Name"] = SafeHtml(sd[1]);
+					root["result"][ii]["Name"] = sd[1];
 					root["result"][ii]["Image"] = sd[2];
 					root["result"][ii]["ScaleFactor"] = sd[3];
 					root["result"][ii]["Order"] = sd[4];
@@ -11186,7 +11186,7 @@ namespace http {
 					std::string offaction = base64_encode((const unsigned char*)sd[9].c_str(), sd[9].size());
 
 					root["result"][ii]["idx"] = sd[0];
-					root["result"][ii]["Name"] = SafeHtml(sName);
+					root["result"][ii]["Name"] = sName;
 					root["result"][ii]["Description"] = sd[10];
 					root["result"][ii]["Favorite"] = atoi(sd[3].c_str());
 					root["result"][ii]["Protected"] = (iProtected != 0);
@@ -11268,7 +11268,7 @@ namespace http {
 					if (hType == HTYPE_DomoticzInternal)
 						continue;
 					root["result"][ii]["idx"] = sd[0];
-					root["result"][ii]["Name"] = SafeHtml(sd[1]);
+					root["result"][ii]["Name"] = sd[1];
 					root["result"][ii]["Enabled"] = (sd[2] == "1") ? "true" : "false";
 					root["result"][ii]["Type"] = hType;
 					root["result"][ii]["Address"] = sd[4];
@@ -11449,7 +11449,7 @@ namespace http {
 
 					root["result"][ii]["idx"] = sd[0];
 					root["result"][ii]["Enabled"] = (sd[1] == "1") ? "true" : "false";
-					root["result"][ii]["Name"] = SafeHtml(sd[2]);
+					root["result"][ii]["Name"] = sd[2];
 					root["result"][ii]["UUID"] = sd[3];
 					root["result"][ii]["LastUpdate"] = sd[4];
 					root["result"][ii]["DeviceType"] = sd[5];
@@ -11556,7 +11556,7 @@ namespace http {
 						sstr << sID;
 						sstr >> dID;
 						root["result"][ii]["idx"] = dID;
-						root["result"][ii]["name"] = SafeHtml(sd[0]);
+						root["result"][ii]["name"] = sd[0];
 						root["result"][ii]["code"] = sCode;
 						root["result"][ii]["codestr"] = lstatus;
 						ii++;
@@ -11756,7 +11756,7 @@ namespace http {
 				for (itt = result.begin(); itt != result.end(); ++itt)
 				{
 					std::vector<std::string> sd = *itt;
-					root["result"][ii]["name"] = SafeHtml(sd[1]);
+					root["result"][ii]["name"] = sd[1];
 					root["result"][ii]["value"] = sd[0];
 					ii++;
 				}
@@ -11867,7 +11867,7 @@ namespace http {
 			}
 
 			std::string sidx = request::findValue(&req, "idx");
-			std::string sname = SafeHtml(request::findValue(&req, "name"));
+			std::string sname = request::findValue(&req, "name");
 			std::string sdescription = request::findValue(&req, "description");
 			if (
 				(sidx.empty()) ||
@@ -11893,7 +11893,7 @@ namespace http {
 			}
 
 			std::string sidx = request::findValue(&req, "idx");
-			std::string sname = SafeHtml(request::findValue(&req, "name"));
+			std::string sname = request::findValue(&req, "name");
 			if (
 				(sidx.empty()) ||
 				(sname.empty())
@@ -11924,7 +11924,7 @@ namespace http {
 			}
 
 			std::string sidx = request::findValue(&req, "idx");
-			std::string sname = SafeHtml(request::findValue(&req, "name"));
+			std::string sname = request::findValue(&req, "name");
 			if (
 				(sidx.empty()) ||
 				(sname.empty())
@@ -12010,7 +12010,7 @@ namespace http {
 		{
 			std::string suuid = request::findValue(&req, "uuid");
 			std::string ssenderid = request::findValue(&req, "senderid");
-			std::string sname = SafeHtml(request::findValue(&req, "name"));
+			std::string sname = request::findValue(&req, "name");
 			std::string sdevtype = request::findValue(&req, "devicetype");
 			std::string sactive = request::findValue(&req, "active");
 			if (
@@ -12071,7 +12071,7 @@ namespace http {
 			}
 			std::string sidx = request::findValue(&req, "idx");
 			std::string enabled = request::findValue(&req, "enabled");
-			std::string name = SafeHtml(request::findValue(&req, "name"));
+			std::string name = request::findValue(&req, "name");
 
 			if (
 				(sidx.empty()) ||
@@ -12151,7 +12151,7 @@ namespace http {
 					std::vector<std::string> sd = *itt;
 
 					root["result"][ii]["idx"] = sd[0];
-					root["result"][ii]["Name"] = SafeHtml(sd[1]);
+					root["result"][ii]["Name"] = sd[1];
 					ii++;
 				}
 			}
@@ -12408,7 +12408,7 @@ szQuery << "UPDATE DeviceStatus SET "
 				CustomImage = atoi(sCustomImage.c_str());
 
 			//Strip trailing spaces in 'name'
-			name = SafeHtml(stdstring_trim(name));
+			name = stdstring_trim(name);
 
 			//Strip trailing spaces in 'description'
 			description = stdstring_trim(description);

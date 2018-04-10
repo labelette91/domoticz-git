@@ -140,7 +140,6 @@ public:
 	bool m_bHaveDownloadedDomoticzUpdateSuccessFull;
 	std::string m_UpdateStatusMessage;
 
-	bool SwitchLight(unsigned long long idx, const std::string &switchcmd, int level, int hue, bool ooc , const int ExtraDelay,bool IsTesting);
 	void GetAvailableWebThemes();
 
 	tcp::server::CTCPServer m_sharedserver;

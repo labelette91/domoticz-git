@@ -11856,7 +11856,7 @@ bool MainWorker::SwitchLight(const std::string &idx, const std::string &switchcm
 	return SwitchLight(ID, switchcmd, ilevel, atoi(hue.c_str()), atoi(ooc.c_str()) != 0, ExtraDelay);
 }
 
-bool MainWorker::SwitchLight(const uint64_t idx, const std::string &switchcmd, const int level, const int hue, const bool ooc, const int ExtraDelay,bool IsTesting)
+bool MainWorker::SwitchLight(const uint64_t idx, const std::string &switchcmd, const int level, const int hue, const bool ooc, const int ExtraDelay)
 {
 	//Get Device details
 	if (_log.isTraceEnabled()) _log.Log(LOG_TRACE, "MAIN SwitchLight idx:%" PRId64 " cmd:%s lvl:%d ", idx, switchcmd.c_str(), level);
@@ -11900,11 +11900,7 @@ bool MainWorker::SwitchLight(const uint64_t idx, const std::string &switchcmd, c
 		return true;
 	}
 	else
-		return SwitchLightInt(sd,switchcmd,level,hue,IsTesting);
-}
-bool MainWorker::SwitchLight(unsigned long long idx, const std::string &switchcmd, int level, int hue, bool ooc, const int ExtraDelay)
-{
-	return SwitchLight(   idx,  switchcmd, level, hue, ooc,ExtraDelay, false );
+		return SwitchLightInt(sd, switchcmd, level, hue, false);
 }
 
 bool MainWorker::SetSetPoint(const std::string &idx, const float TempValue, const std::string &newMode, const std::string &until)

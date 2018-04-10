@@ -9,6 +9,8 @@ enum _eTimeFormat
 };
 
 void StringSplit(std::string str, const std::string &delim, std::vector<std::string> &results);
+uint64_t strtoui64(std::string str);
+uint64_t hexstrtoui64(std::string str);
 void stdreplace(
 	std::string &inoutstring,
 	const std::string& replaceWhat,
@@ -77,7 +79,7 @@ public:
 std::string TimeToString(const time_t *ltime, const _eTimeFormat format);
 std::string GenerateMD5Hash(const std::string &InputString, const std::string &Salt="");
 
-void hue2rgb(const float hue, int &outR, int &outG, int &outB, const double maxValue = 100.0);
+void hsb2rgb(const float hue, const float saturation, const float vlue, int &outR, int &outG, int &outB, const double maxValue = 100.0);
 void rgb2hsb(const int r, const int g, const int b, float hsbvals[3]);
 
 bool is_number(const std::string& s);

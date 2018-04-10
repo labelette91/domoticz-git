@@ -659,7 +659,7 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
         case pTypeLighting4         :
         case pTypeLighting5         :
         case pTypeLighting6         :
-        case pTypeLimitlessLights   :
+//        case pTypeLimitlessLights   :
         case pTypeSecurity1         :
         case pTypeCurtain           :
         case pTypeBlinds            :

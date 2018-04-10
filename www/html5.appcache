@@ -1,6 +1,6 @@
 CACHE MANIFEST
 
-# ref 1490
+# ref 1491
 
 CACHE:
 # CSS
@@ -456,11 +456,14 @@ i18n/domoticz-uk.json
 i18n/domoticz-zh.json
 
 # Scripts
+app/device-log/LightLog.js
+app/device-log/TemperatureLog.js
+app/device-log/TemperatureReport.js
 app/AboutController.js
 app/app.js
 app/CamController.js
 app/CustomIconsController.js
-##app/DashboardController.js
+app/DashboardController.js
 app/DevicesController.js
 app/DeviceTimers.js
 app/DPFibaroController.js
@@ -475,7 +478,7 @@ app/ForecastController.js
 app/FrontpageController.js
 app/HardwareController.js
 app/HistoryController.js
-###app/LightsController.js
+app/LightsController.js
 app/LogController.js
 app/LoginController.js
 app/LogoutController.js
@@ -485,14 +488,14 @@ app/OfflineController.js
 app/RestoreDatabaseController.js
 app/RoomplanController.js
 app/ScenesController.js
-###app/SetupController.js
+app/SetupController.js
 app/TemperatureController.js
 app/TemperatureCustomLogController.js
 app/TimerplanController.js
 app/UpdateController.js
 app/UsersController.js
 app/UserVariablesController.js
-###app/UtilityController.js
+app/UtilityController.js
 app/WeatherController.js
 app/ZWaveTopologyController.js
 js/angular-animate.min.js
@@ -573,7 +576,10 @@ ozwcp/cp.js
 views/about.html
 views/cam.html
 views/customicons.html
-#####views/dashboard.html
+views/dashboard.html
+views/device_light_log.html
+views/device_temperature_log.html
+views/device_temperature_report.html
 views/devices.html
 views/dpfibaro.html
 views/dphttp.html
@@ -585,7 +591,7 @@ views/floorplanedit.html
 views/floorplans.html
 views/hardware.html
 views/history.html
-####views/lights.html
+views/lights.html
 views/log.html
 views/notification.html
 views/offline.html
@@ -600,7 +606,7 @@ views/timerplan.html
 views/timers.html
 views/update.html
 views/users.html
-###views/utility.html
+views/utility.html
 views/weather.html
 views/weather_widget.html
 eventsframe.html

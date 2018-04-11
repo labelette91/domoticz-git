@@ -113,6 +113,7 @@
     <None Include="..\www\app\CamController.js" />
     <None Include="..\www\app\CustomIconsController.js" />
     <None Include="..\www\app\DashboardController.js" />
+    <None Include="..\www\app\DeviceLightEdit.js" />
     <None Include="..\www\app\DevicesController.js" />
     <None Include="..\www\app\DPFibaroController.js" />
     <None Include="..\www\app\DPGooglePubSubController.js" />
@@ -370,6 +371,7 @@
     <None Include="..\www\views\customicons.html" />
     <None Include="..\www\views\dashboard.html" />
     <None Include="..\www\views\devices.html" />
+    <None Include="..\www\views\device_light_edit.html" />
     <None Include="..\www\views\dpfibaro.html" />
     <None Include="..\www\views\dpgooglepubsub.html" />
     <None Include="..\www\views\dphttp.html" />

@@ -8872,7 +8872,7 @@ namespace http {
 					}
 					root["result"][ii]["idx"] = sd[0];
 					root["result"][ii]["Protected"] = (iProtected != 0);
-					root["result"][ii]["Log"] = sd[INDEX_POWER+4];
+					root["result"][ii]["Log"] = sd[INDEX_POWER+4]=="1";
 					
 
 					CDomoticzHardwareBase *pHardware = m_mainworker.GetHardware(hardwareID);

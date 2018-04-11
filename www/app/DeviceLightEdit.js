@@ -546,6 +546,7 @@ define(['app'], function (app) {
                 strparam1: btoa(vm.device.StrParam1),
                 strparam2: btoa(vm.device.StrParam2),
                 protected: vm.device.Protected,
+                log: vm.device.Log,
                 options: btoa(encodeURIComponent(options.join(';'))),
                 addjvalue: vm.device.AddjValue,
                 addjvalue2: vm.device.AddjValue2,

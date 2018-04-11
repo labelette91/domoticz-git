@@ -476,6 +476,9 @@
     <Filter Include="Devices\eHouse">
       <UniqueIdentifier>{10c77088-04a6-41c1-b9b3-b7c752aa0339}</UniqueIdentifier>
     </Filter>
+    <Filter Include="www\views\temperatures">
+      <UniqueIdentifier>{2e3e6e5c-40c2-4f24-a987-8077910d7945}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\CMakeLists.txt">
@@ -1366,6 +1369,12 @@
     <None Include="..\www\styles\default\show_version_number.css">
       <Filter>www\styles\default</Filter>
     </None>
+    <None Include="..\www\js\angular-websocket.js">
+      <Filter>www\js</Filter>
+    </None>
+    <None Include="..\www\views\temperatures\temperatureWidget.html">
+      <Filter>www\views\temperatures</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\webserver\Base64.h">
@@ -2004,43 +2013,90 @@
     <ClInclude Include="..\hardware\plugins\PythonObjects.h">
       <Filter>Devices\Python Plugins</Filter>
     </ClInclude>
+    <ClInclude Include="..\hardware\SysfsGPIO.h">
+      <Filter>Devices\SysfsGPIO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\Rtl433.h">
+      <Filter>Devices\RTL_433</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\EventsPythonDevice.h">
+      <Filter>EventSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\EventsPythonModule.h">
+      <Filter>EventSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\OnkyoAVTCP.h">
+      <Filter>Devices\OnkyoAVTCP</Filter>
+    </ClInclude>
     <ClInclude Include="..\main\IFTTT.h">
       <Filter>IFTTT</Filter>
     </ClInclude>
-    <ClInclude Include="..\hardware\EvohomeScript.h" />
-    <ClInclude Include="..\hardware\Rtl433.h" />
-    <ClInclude Include="..\hardware\SysfsGpio.h" />
-    <ClInclude Include="..\hardware\OnkyoAVTCP.h" />
-    <ClInclude Include="..\main\appversion.h" />
-    <ClInclude Include="..\main\CmdLine.h" />
-    <ClInclude Include="..\main\concurrent_queue.h" />
-    <ClInclude Include="..\main\localtime_r.h" />
-    <ClInclude Include="..\main\Logger.h" />
-    <ClInclude Include="..\main\LuaCommon.h" />
-    <ClInclude Include="..\main\LuaHandler.h" />
-    <ClInclude Include="..\main\mainstructs.h" />
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="..\main\Scheduler.h" />
-    <ClInclude Include="..\main\SQLHelper.h" />
-    <ClInclude Include="..\main\Helper.h" />
-    <ClInclude Include="..\main\mainworker.h" />
-    <ClInclude Include="..\main\RFXNames.h" />
-    <ClInclude Include="..\main\RFXtrx.h" />
-    <ClInclude Include="Version.h" />
-    <ClInclude Include="..\main\WindCalculation.h" />
-    <ClInclude Include="..\tinyxpath\tinyxml.h" />
-    <ClInclude Include="..\tinyxpath\xpath_processor.h" />
-    <ClInclude Include="..\main\stdafx.h" />
-    <ClInclude Include="..\main\SunRiseSet.h" />
-    <ClInclude Include="..\main\WebServer.h" />
-    <ClInclude Include="..\hardware\eHouse\EventsCodes.h" />
-    <ClInclude Include="..\hardware\eHouse\globals.h" />
-    <ClInclude Include="..\hardware\eHouse\status.h" />
-    <ClInclude Include="..\hardware\eHouseTCP.h" />
-    <ClInclude Include="..\hardware\Comm5SMTCP.h" />
-    <ClInclude Include="..\hardware\EcoCompteur.h" />
-    <ClInclude Include="..\hardware\Honeywell.h" />
-    <ClInclude Include="..\hardware\NestOAuthAPI.h" />
+    <ClInclude Include="..\tinyxpath\xpath_processor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\DenkoviSmartdenIPInOut.h">
+      <Filter>Devices\Denkovi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\USBtin.h">
+      <Filter>Devices\USBtin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\USBtin_MultiblocV8.h">
+      <Filter>Devices\USBtin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\EnphaseAPI.h">
+      <Filter>Devices\Enphase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\webserver\WebsocketHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\push\WebsocketPush.h">
+      <Filter>Pushers\Websocket</Filter>
+    </ClInclude>
+    <ClInclude Include="..\notifications\NotificationBrowser.h">
+      <Filter>Notifications</Filter>
+    </ClInclude>
+    <ClInclude Include="..\webserver\Websockets.hpp">
+      <Filter>Webserver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\eHouseTCP.h">
+      <Filter>Devices\eHouse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\eHouse\EventsCodes.h">
+      <Filter>Devices\eHouse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\eHouse\globals.h">
+      <Filter>Devices\eHouse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\eHouse\status.h">
+      <Filter>Devices\eHouse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\Comm5SMTCP.h">
+      <Filter>Devices\Comm5 MA-5XXX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\NestOAuthAPI.h">
+      <Filter>Devices\NestOAuthAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\EcoCompteur.h">
+      <Filter>Devices\EcoCompteur</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\Honeywell.h">
+      <Filter>Devices\Honeywell</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\dzVents.h">
+      <Filter>EventSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\LuaCommon.h">
+      <Filter>EventSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\LuaHandler.h">
+      <Filter>EventSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hardware\EvohomeScript.h">
+      <Filter>Devices\EvoHome</Filter>
+    </ClInclude>
+    <ClInclude Include="..\tinyxpath\tinyxml.h">
+      <Filter>XML</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\webserver\Base64.cpp">
@@ -2607,9 +2663,6 @@
     <ClCompile Include="..\hardware\Comm5Serial.cpp">
       <Filter>Devices\Comm5 MA-5XXX</Filter>
     </ClCompile>
-    <ClCompile Include="..\main\LuaHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\hardware\HttpPoller.cpp">
       <Filter>Devices\HttpPoller</Filter>
     </ClCompile>
@@ -2739,9 +2792,6 @@
     <ClCompile Include="..\hardware\SysfsGPIO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\hardware\EvohomeScript.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\hardware\Rtl433.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -2753,15 +2803,6 @@
     </ClCompile>
     <ClCompile Include="..\main\IFTTT.cpp">
       <Filter>IFTTT</Filter>
-    </ClCompile>
-    <ClCompile Include="..\hardware\OnkyoAVTCP.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\hardware\EnOcean.cpp">
-      <Filter>Devices\EnOcean</Filter>
-    </ClCompile>
-    <ClCompile Include="..\main\dzVents.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\hardware\DenkoviSmartdenIPInOut.cpp">
       <Filter>Devices</Filter>
@@ -2813,6 +2854,18 @@
     </ClCompile>
     <ClCompile Include="..\hardware\RfTxRx\HomeEasyTransmitter.cpp">
       <Filter>Devices\HomeEasy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\dzVents.cpp">
+      <Filter>EventSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\LuaCommon.cpp">
+      <Filter>EventSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\LuaHandler.cpp">
+      <Filter>EventSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\EvohomeScript.cpp">
+      <Filter>Devices\EvoHome</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

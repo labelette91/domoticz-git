@@ -318,6 +318,7 @@ hardware/RfTxRx/hager.cpp
 hardware/VirtualThermostat.cpp
 hardware/AtagOne.cpp
 hardware/BleBox.cpp
+hardware/ColorSwitch.cpp
 hardware/Comm5Serial.cpp
 hardware/Comm5SMTCP.cpp
 hardware/Comm5TCP.cpp

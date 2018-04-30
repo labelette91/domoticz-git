@@ -808,7 +808,8 @@ define(['app'], function (app) {
 				(text.indexOf("Nest Th") >= 0 && text.indexOf("OAuth") === -1) ||
 				(text.indexOf("PVOutput") >= 0) ||
 				(text.indexOf("Netatmo") >= 0) ||
-				(text.indexOf("Thermosmart") >= 0)
+				(text.indexOf("Thermosmart") >= 0) || 
+                (text.indexOf("Tado") >= 0)
 			) {
 				var username = $("#hardwarecontent #divlogin #username").val();
 				var password = encodeURIComponent($("#hardwarecontent #divlogin #password").val());
@@ -1929,6 +1930,7 @@ define(['app'], function (app) {
 				(text.indexOf("PVOutput") >= 0) ||
 				(text.indexOf("Netatmo") >= 0) ||
 				(text.indexOf("Thermosmart") >= 0) ||
+                (text.indexOf("Tado") >= 0) ||
 				(text.indexOf("HTTP") >= 0)
 			) {
 				var username = $("#hardwarecontent #divlogin #username").val();
@@ -5526,7 +5528,6 @@ define(['app'], function (app) {
 							$("#hardwarecontent #hardwareparamssolaredgeapi #apikey").val(data["Username"]);
 						}
 						else if (data["Type"].indexOf("Nest Th") >= 0 && data["Type"].indexOf("OAuth") >= 0) {
-						    //console.log(data);
 						    $("#hardwarecontent #hardwareparamsnestoauthapi #apikey").val(data["Username"]);
 
 						    var tmp = data["Extra"];
@@ -5595,6 +5596,7 @@ define(['app'], function (app) {
 							(data["Type"].indexOf("Netatmo") >= 0) ||
 							(data["Type"].indexOf("HTTP") >= 0) ||
 							(data["Type"].indexOf("Thermosmart") >= 0) ||
+                            (data["Type"].indexOf("Tado") >= 0) ||
 							(data["Type"].indexOf("Logitech Media Server") >= 0) ||
 							(data["Type"].indexOf("HEOS by DENON") >= 0) ||
 							(data["Type"].indexOf("Razberry") >= 0) ||
@@ -5973,7 +5975,8 @@ define(['app'], function (app) {
 				(text.indexOf("Nest Th") >= 0 && text.indexOf("OAuth") === -1) ||
 				(text.indexOf("PVOutput") >= 0) ||
 				(text.indexOf("Netatmo") >= 0) ||
-				(text.indexOf("Thermosmart") >= 0)
+				(text.indexOf("Thermosmart") >= 0) || 
+                (text.indexOf("Tado") >= 0)
 			) {
 				$("#hardwarecontent #divserial").hide();
 				$("#hardwarecontent #divremote").hide();

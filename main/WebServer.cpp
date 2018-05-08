@@ -3428,7 +3428,7 @@ namespace http {
 				int level = -1;
 				if (request::hasValue(&req, "level"))
 					level = atoi(request::findValue(&req, "level").c_str());
-				std::string color = _tColor(request::findValue(&req, "color")).toJSON(); //Parse the color to detect incorrectly formatted color data
+				std::string color = _tColor(request::findValue(&req, "color")).toJSONString(); //Parse the color to detect incorrectly formatted color data
 
 				unsigned char command = 0;
 				result = m_sql.safe_query("SELECT HardwareID, DeviceID, Unit, Type, SubType, SwitchType, Options FROM DeviceStatus WHERE (ID=='%q')",
@@ -3550,7 +3550,7 @@ namespace http {
 				int level = -1;
 				if (request::hasValue(&req, "level"))
 					level = atoi(request::findValue(&req, "level").c_str());
-				std::string color = _tColor(request::findValue(&req, "color")).toJSON(); //Parse the color to detect incorrectly formatted color data
+				std::string color = _tColor(request::findValue(&req, "color")).toJSONString(); //Parse the color to detect incorrectly formatted color data
 				root["status"] = "OK";
 				root["title"] = "UpdateSceneDevice";
 				result = m_sql.safe_query(
@@ -3656,7 +3656,7 @@ namespace http {
 						GetLightStatus(devType, subType, switchtype, command, sValue, lstatus, llevel, bHaveDimmer, maxDimLevel, bHaveGroupCmd);
 						root["result"][ii]["Command"] = lstatus;
 						root["result"][ii]["Level"] = level;
-						root["result"][ii]["Color"] = _tColor(sd[11]).toJSON();
+						root["result"][ii]["Color"] = _tColor(sd[11]).toJSONString();
 						root["result"][ii]["Type"] = RFX_Type_Desc(devType, 1);
 						root["result"][ii]["SubType"] = RFX_Type_SubType_Desc(devType, subType);
 						ii++;
@@ -9086,7 +9086,7 @@ namespace http {
 							    (dType == pTypeGeneralSwitch && dSubType == sSwitchTypeTRC02_2))
 							{
 								_tColor color(sColor);
-								std::string jsonColor = color.toJSON();
+								std::string jsonColor = color.toJSONString();
 								root["result"][ii]["Color"] = jsonColor;
 								llevel = LastLevel;
 								if (lstatus == "Set Level" || lstatus == "Set Color")

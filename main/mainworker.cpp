@@ -311,9 +311,21 @@ void MainWorker::StartDomoticzHardware()
 
 void MainWorker::StopDomoticzHardware()
 {
-	boost::lock_guard<boost::mutex> l(m_devicemutex);
+	// Separate the Stop() from the device removal from the vector.
+	// Some actions the hardware might take during stop (e.g updating a device) can cause deadlocks on the m_devicemutex
+	std::vector<CDomoticzHardwareBase*> OrgHardwaredevices;
 	std::vector<CDomoticzHardwareBase*>::iterator itt;
-	for (itt = m_hardwaredevices.begin(); itt != m_hardwaredevices.end(); ++itt)
+
+	{
+		boost::lock_guard<boost::mutex> l(m_devicemutex);
+		for (itt = m_hardwaredevices.begin(); itt != m_hardwaredevices.end(); ++itt)
+		{
+			OrgHardwaredevices.push_back(*itt);
+		}
+		m_hardwaredevices.clear();
+	}
+
+	for (itt = OrgHardwaredevices.begin(); itt != OrgHardwaredevices.end(); ++itt)
 	{
 #ifdef ENABLE_PYTHON
 		m_pluginsystem.DeregisterPlugin((*itt)->m_HwdID);
@@ -321,7 +333,6 @@ void MainWorker::StopDomoticzHardware()
 		(*itt)->Stop();
 		delete (*itt);
 	}
-	m_hardwaredevices.clear();
 }
 
 void MainWorker::GetAvailableWebThemes()
@@ -399,24 +410,24 @@ void MainWorker::RemoveDomoticzHardware(CDomoticzHardwareBase *pHardware)
 {
 	// Separate the Stop() from the device removal from the vector.
 	// Some actions the hardware might take during stop (e.g updating a device) can cause deadlocks on the m_devicemutex
-	CDomoticzHardwareBase *pOrgDevice = NULL;
+	CDomoticzHardwareBase *pOrgHardware = NULL;
 	{
 		boost::lock_guard<boost::mutex> l(m_devicemutex);
 		std::vector<CDomoticzHardwareBase*>::iterator itt;
 		for (itt = m_hardwaredevices.begin(); itt != m_hardwaredevices.end(); ++itt)
 		{
-			pOrgDevice = *itt;
-			if (pOrgDevice == pHardware) {
+			pOrgHardware = *itt;
+			if (pOrgHardware == pHardware) {
 				m_hardwaredevices.erase(itt);
 				break;
 			}
 		}
 	}
 
-	if (pOrgDevice == pHardware)
+	if (pOrgHardware == pHardware)
 	{
-		pOrgDevice->Stop();
-		delete pOrgDevice;
+		pOrgHardware->Stop();
+		delete pOrgHardware;
 	}
 }
 

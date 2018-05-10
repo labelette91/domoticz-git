@@ -4061,7 +4061,9 @@ uint64_t CSQLHelper::InsertDevice(const int HardwareID, const char* ID, const un
 
 	if (!m_bAcceptNewHardware)
 	{
-		_log.Log(LOG_ERROR, "Device creation failed, Domoticz settings prevent accepting new devices.");
+#ifdef _DEBUG
+		_log.Log(LOG_STATUS, "Device creation failed, Domoticz settings prevent accepting new devices.");
+#endif
 		return -1; //We do not allow new devices
 	}
 

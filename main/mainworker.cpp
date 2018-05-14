@@ -11708,6 +11708,16 @@ bool MainWorker::SwitchLightInt(const std::vector<std::string> &sd, std::string 
 		gswitch.id = ID;
 		gswitch.unitcode = Unit;
 
+		if (switchtype == STYPE_Selector)
+		{
+			int plevel = GetSelectorSwitchLevel(options, switchcmd);
+			if (plevel > 0) { // not Off but a level name
+				switchcmd = "Set Level";
+				level = plevel;
+			}
+
+		}
+
 		if (!GetLightCommand(dType, dSubType, switchtype, switchcmd, gswitch.cmnd, options))
 			return false;
 

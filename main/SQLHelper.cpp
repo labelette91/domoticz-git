@@ -36,7 +36,7 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
-#define DB_VERSION 127
+#define DB_VERSION 128
 
 extern http::server::CWebServerHelper m_webservers;
 extern std::string szWWWFolder;
@@ -727,6 +727,15 @@ bool CSQLHelper::OpenDatabase()
 	if (!bNewInstall)
 	{
 		GetPreferencesVar("DB_Version", dbversion);
+		if (dbversion > DB_VERSION)
+		{
+			//User is using a newer database on a old Domoticz version
+			//This is very dangerous and should not be allowed
+			_log.Log(LOG_ERROR, "Database incompatible with this Domoticz version. (You cannot downgrade to an old Domoticz version!)");
+			sqlite3_close(m_dbase);
+			m_dbase = NULL;
+			return false;
+		}
 		//Pre-SQL Patches
 	}
 
@@ -2563,6 +2572,12 @@ bool CSQLHelper::OpenDatabase()
 		if (dbversion < 127)
 		{
 			safe_query("UPDATE Hardware SET Mode2 = 3 WHERE Type = %d", HTYPE_Philips_Hue);
+		}
+		if (dbversion < 128)
+		{
+			//Two more files to remove
+			std::remove(std::string(szWWWFolder + "/js/domoticzblocks.js.gz").c_str());
+			std::remove(std::string(szWWWFolder + "/js/domoticzblocks_messages_en.js.gz").c_str());
 		}
 	}
 	else if (bNewInstall)

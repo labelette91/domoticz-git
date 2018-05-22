@@ -495,20 +495,14 @@ define(['app'], function (app) {
                 vm.device.StrParam1 = atob(vm.device.StrParam1);
                 vm.device.StrParam2 = atob(vm.device.StrParam2);
 
-                var levelNames = device.LevelNames
-                    ? device.LevelNames.split('|')
-                    : ['Off', 'Level1', 'Level2', 'Level3'];
-                var levelActions = device.LevelActions
-                    ? device.LevelActions.split('|')
-                    : [];
+                var levelNames = device.LevelNames ? atob(device.LevelNames).split('|') : ['Off', 'Level1', 'Level2', 'Level3'];
+                var levelActions = device.LevelActions ? atob(device.LevelActions).split('|') : [];
 
                 vm.levels = levelNames.map(function (level, index) {
                     return {
                         level: index,
                         name: level,
-                        action: levelActions[index]
-                            ? unescape(levelActions[index])
-                            : ''
+                        action: levelActions[index] ? levelActions[index] : ''
                     };
                 });
             });
@@ -546,7 +540,7 @@ define(['app'], function (app) {
                 strparam2: btoa(vm.device.StrParam2),
                 protected: vm.device.Protected,
                 log: vm.device.Log,
-                options: btoa(encodeURIComponent(options.join(';'))),
+                options: btoa(options.join(';')),
                 addjvalue: vm.device.AddjValue,
                 addjvalue2: vm.device.AddjValue2,
                 customimage: vm.device.CustomImage,

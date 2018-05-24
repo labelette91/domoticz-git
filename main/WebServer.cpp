@@ -10909,6 +10909,8 @@ namespace http {
 					oname += ".jpg";
 				else if (result[0][0][0] == 'B')
 					oname += ".bmp";
+				else if (result[0][0][0] == 'G')
+					oname += ".gif";
 			}
 			reply::add_header_attachment(&rep, oname);
 		}

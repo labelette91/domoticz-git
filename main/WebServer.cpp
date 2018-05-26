@@ -13240,15 +13240,19 @@ szQuery << "UPDATE DeviceStatus SET "
 						ldata = lstatus;
 
 					}
-					else if ((switchtype == STYPE_Selector) && (selectorStatuses.size() > 0)) {
+					else if (switchtype == STYPE_Selector)
+					{
 						if (ii == 0) {
 							bHaveSelector = true;
 							maxDimLevel = selectorStatuses.size();
 						}
-						ldata = selectorStatuses[sValue];
-						lstatus = "Set Level: " + selectorStatuses[sValue];
-						llevel = atoi(sValue.c_str());
+						if (!selectorStatuses.empty()) {
 
+							std::string sLevel = selectorStatuses[sValue];
+							ldata = sLevel;
+							lstatus = "Set Level: " + sLevel;
+							llevel = atoi(sValue.c_str());
+						}
 					}
 					else {
 						GetLightStatus(dType, dSubType, switchtype, nValue, sValue, lstatus, llevel, bHaveDimmer, maxDimLevel, bHaveGroupCmd);

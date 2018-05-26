@@ -90,7 +90,6 @@ void stdlower(std::string &inoutstring)
 	std::transform(inoutstring.begin(), inoutstring.end(), inoutstring.begin(), ::tolower);
 }
 
-
 std::vector<std::string> GetSerialPorts(bool &bUseDirectPath)
 {
 	bUseDirectPath=false;

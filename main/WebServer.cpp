@@ -90,7 +90,9 @@ struct _tGuiLanguage {
 static const _tGuiLanguage guiLanguage[] =
 {
 	{ "en", "English" },
+	{ "sq", "Albanian" },
 	{ "ar", "Arabic" },
+	{ "bs", "Bosnian" },
 	{ "bg", "Bulgarian" },
 	{ "ca", "Catalan" },
 	{ "zh", "Chinese" },
@@ -3870,6 +3872,7 @@ namespace http {
 						case pTypeRadiator1:
 						case pTypeGeneralSwitch:
 						case pTypeHomeConfort:
+						case pTypeFS20:
 							bdoAdd = true;
 							if (!used)
 							{
@@ -3997,6 +4000,7 @@ namespace http {
 							case pTypeRemote:
 							case pTypeGeneralSwitch:
 							case pTypeHomeConfort:
+							case pTypeFS20:
 								root["result"][ii]["type"] = 0;
 								root["result"][ii]["idx"] = ID;
 								root["result"][ii]["Name"] = "[Light/Switch] " + Name;
@@ -5429,6 +5433,7 @@ namespace http {
 					(dType == pTypeRemote) ||
 					(dType == pTypeGeneralSwitch) ||
 					(dType == pTypeHomeConfort) ||
+					(dType == pTypeFS20) ||
 					((dType == pTypeRadiator1) && (dSubType == sTypeSmartwaresSwitchRadiator))
 					)
 				{
@@ -6338,6 +6343,7 @@ namespace http {
 					(dType != pTypeRemote) &&
 					(dType != pTypeGeneralSwitch) &&
 					(dType != pTypeHomeConfort) &&
+					(dType != pTypeFS20) &&
 					(!((dType == pTypeRadiator1) && (dSubType == sTypeSmartwaresSwitchRadiator))) &&
 					(!((dType == pTypeGeneral) && (dSubType == sTypeTextStatus))) &&
 					(!((dType == pTypeGeneral) && (dSubType == sTypeAlert)))
@@ -8665,6 +8671,7 @@ namespace http {
 								(dType != pTypeGeneralSwitch) &&
 								(dType != pTypeHomeConfort) &&
 								(dType != pTypeChime) &&
+								(dType != pTypeFS20) &&
 								(!((dType == pTypeRego6XXValue) && (dSubType == sTypeRego6XXStatus))) &&
 								(!((dType == pTypeRadiator1) && (dSubType == sTypeSmartwaresSwitchRadiator)))
 								)
@@ -8954,6 +8961,7 @@ namespace http {
 						(dType == pTypeRemote) ||
 						(dType == pTypeGeneralSwitch) ||
 						(dType == pTypeHomeConfort) ||
+						(dType == pTypeFS20) ||
 						((dType == pTypeRadiator1) && (dSubType == sTypeSmartwaresSwitchRadiator)) ||
 						((dType == pTypeRego6XXValue) && (dSubType == sTypeRego6XXStatus))
 						)
@@ -13280,6 +13288,7 @@ szQuery << "UPDATE DeviceStatus SET "
 				(dType != pTypeRemote) &&
 				(dType != pTypeGeneralSwitch) &&
 				(dType != pTypeHomeConfort) &&
+				(dType != pTypeFS20) &&
 				(!((dType == pTypeRadiator1) && (dSubType == sTypeSmartwaresSwitchRadiator)))
 				)
 				return; //no light device! we should not be here!
@@ -15319,7 +15328,7 @@ szQuery << "UPDATE DeviceStatus SET "
 								ii++;
 							}
 						}
-						if (!(dType == pTypeGeneral) && (dSubType == sTypeManagedCounter)) {
+						if (!((dType == pTypeGeneral) && (dSubType == sTypeManagedCounter))) {
 							//add today (have to calculate it)
 							result = m_sql.safe_query("SELECT MIN(Value), MAX(Value) FROM Meter WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q')",
 								idx, szDateEnd);
@@ -16516,7 +16525,7 @@ szQuery << "UPDATE DeviceStatus SET "
 								root["counter"] = szTmp;
 							}
 						}
-						else
+						else if (!((dType == pTypeGeneral) && (dSubType == sTypeManagedCounter)))
 						{
 							//Add last counter value
 							if (sValue.find('.') != std::string::npos)
@@ -16848,7 +16857,7 @@ szQuery << "UPDATE DeviceStatus SET "
 							ii++;
 						}
 					}
-					else
+					else if (!((dType == pTypeGeneral) && (dSubType == sTypeManagedCounter)))
 					{
 						result = m_sql.safe_query(
 							"SELECT MIN(Value), MAX(Value) FROM Meter WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q')",
@@ -17580,7 +17589,7 @@ szQuery << "UPDATE DeviceStatus SET "
 							}
 						}
 					}
-					else
+					else if (!((dType == pTypeGeneral) && (dSubType == sTypeManagedCounter)))
 					{
 						result = m_sql.safe_query(
 							"SELECT MIN(Value), MAX(Value) FROM Meter WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q')",

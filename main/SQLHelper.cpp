@@ -3230,6 +3230,7 @@ void CSQLHelper::Do_Work()
 					case pTypeColorSwitch:
 					case pTypeGeneralSwitch:
 					case pTypeHomeConfort:
+					case pTypeFS20:
 						SwitchLightFromTasker(itt->_idx, "Off", 0, NoColor);
 						break;
 					case pTypeSecurity1:
@@ -3768,7 +3769,7 @@ uint64_t CSQLHelper::CreateDevice(const int HardwareID, const int SensorType, co
 			DeviceRowIdx = UpdateValue(HardwareID, ID, 1, SensorType, SensorSubType, 12, 255, 0, "0", devname);
 			break;
 		case sTypeManagedCounter:
-			DeviceRowIdx = UpdateValue(HardwareID, ID, 1, SensorType, SensorSubType, 12, 255, 0, "-1.0;0.0", devname);
+			DeviceRowIdx = UpdateValue(HardwareID, ID, 1, SensorType, SensorSubType, 12, 255, 0, "-1;0", devname);
 			break;
 		case sTypeVoltage:		//Voltage
 		{
@@ -4076,6 +4077,9 @@ uint64_t CSQLHelper::UpdateValue(const int HardwareID, const char* ID, const uns
 					case pTypeHomeConfort:
 						newnValue = HomeConfort_sOff;
 						break;
+					case pTypeFS20:
+						newnValue = fs20_sOff;
+						break;
 					default:
 						continue;
 					}
@@ -4161,6 +4165,9 @@ uint64_t CSQLHelper::UpdateValue(const int HardwareID, const char* ID, const uns
 				break;
 			case pTypeHomeConfort:
 				newnValue = HomeConfort_sOff;
+				break;
+			case pTypeFS20:
+				newnValue = fs20_sOff;
 				break;
 			default:
 				continue;
@@ -4393,6 +4400,7 @@ uint64_t CSQLHelper::UpdateValueInt(const int HardwareID, const char* ID, const 
 	case pTypeRemote:
 	case pTypeGeneralSwitch:
 	case pTypeHomeConfort:
+	case pTypeFS20:
 	case pTypeRadiator1:
 		if ((devType == pTypeRadiator1) && (subType != sTypeSmartwaresSwitchRadiator))
 			break;
@@ -4603,6 +4611,10 @@ uint64_t CSQLHelper::UpdateValueInt(const int HardwareID, const char* ID, const 
 							break;
 						case pTypeHomeConfort:
 							cmd = HomeConfort_sOff;
+							bAdd2DelayQueue = true;
+							break;
+						case pTypeFS20:
+							cmd = fs20_sOff;
 							bAdd2DelayQueue = true;
 							break;
 						}
@@ -7767,7 +7779,7 @@ void CSQLHelper::CheckDeviceTimeout()
 	result = safe_query(
 		"SELECT ID, Name, LastUpdate FROM DeviceStatus WHERE (Used!=0 AND LastUpdate<='%04d-%02d-%02d %02d:%02d:%02d' "
 		"AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d "
-		"AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d) "
+		"AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d AND Type!=%d) "
 		"ORDER BY Name",
 		ltime.tm_year + 1900, ltime.tm_mon + 1, ltime.tm_mday, ltime.tm_hour, ltime.tm_min, ltime.tm_sec,
 		pTypeLighting1,
@@ -7789,7 +7801,8 @@ void CSQLHelper::CheckDeviceTimeout()
 		pTypeThermostat4,
 		pTypeRemote,
 		pTypeGeneralSwitch,
-		pTypeHomeConfort
+		pTypeHomeConfort,
+		pTypeFS20
 	);
 	if (result.size() < 1)
 		return;

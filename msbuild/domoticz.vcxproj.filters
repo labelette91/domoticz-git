@@ -1372,6 +1372,8 @@
     <None Include="..\www\js\domoticzdevices.js">
       <Filter>www\js</Filter>
     </None>
+    <None Include="..\www\app\DeviceLightEdit.js" />
+    <None Include="..\www\views\device_light_edit.html" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\webserver\Base64.h">
@@ -1625,9 +1627,6 @@
     </ClInclude>
     <ClInclude Include="..\zip\zip.h">
       <Filter>zip\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\unzip.h">
-      <Filter>zip\Main</Filter>
     </ClInclude>
     <ClInclude Include="..\main\unzip_iterator.h">
       <Filter>zip\Main</Filter>
@@ -2069,6 +2068,7 @@
     <ClInclude Include="..\main\stdafx.h" />
     <ClInclude Include="..\main\SunRiseSet.h" />
     <ClInclude Include="..\main\WebServer.h" />
+    <ClInclude Include="..\hardware\Tado.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\webserver\Base64.cpp">
@@ -2850,6 +2850,18 @@
     </ClCompile>
     <ClCompile Include="..\hardware\OnkyoAVTCP.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hardware\Tado.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\zip\unzip.c">
+      <Filter>zip</Filter>
+    </ClCompile>
+    <ClCompile Include="..\zip\iowin32.c">
+      <Filter>zip</Filter>
+    </ClCompile>
+    <ClCompile Include="..\zip\ioapi.c">
+      <Filter>zip</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

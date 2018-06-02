@@ -22,7 +22,7 @@ define(['app', 'timers/factories', 'timers/components'], function (app) {
                 vm.dimmerType = device.DimmerType;
 
                 vm.isDimmer = ['Dimmer', 'Blinds Percentage', 'Blinds Percentage Inverted', 'TPI'].includes(device.SwitchType);
-                vm.isSelector = device.SubType === "Selector Switch";
+                vm.isSelector = (device.SwitchType === "Selector");
                 vm.isLED = (isLED(device.SubType));
                 vm.isCommandSelectionDisabled = vm.isSelector && device.LevelOffHidden;
                 vm.isSetpointTimers = (device.Type === 'Thermostat' && device.SubType == 'SetPoint') || (device.Type === 'Radiator 1');
@@ -34,7 +34,7 @@ define(['app', 'timers/factories', 'timers/components'], function (app) {
                     : deviceRegularTimersApi;
 
                 if (vm.isSelector) {
-                    vm.levelOptions = device.LevelNames
+                    vm.levelOptions = b64DecodeUnicode(device.LevelNames)
                         .split('|')
                         .slice(1)
                         .map(function (levelName, index) {

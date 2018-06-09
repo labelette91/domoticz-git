@@ -203,7 +203,6 @@ MainWorker::MainWorker()
 	m_SecCountdown = -1;
 	m_stoprequested = false;
 	m_stopRxMessageThread = false;
-	m_verboselevel = EVBL_None;
 
 	m_bStartHardware = false;
 	m_hardwareStartCounter = 0;
@@ -363,37 +362,6 @@ void MainWorker::GetAvailableWebThemes()
 	{
 		m_sql.UpdatePreferencesVar("WebTheme", "default");
 	}
-}
-
-void MainWorker::SendResetCommand(CDomoticzHardwareBase *pHardware)
-{
-	pHardware->m_bEnableReceive = false;
-
-	if (
-		(pHardware->HwdType != HTYPE_RFXtrx315) &&
-		(pHardware->HwdType != HTYPE_RFXtrx433) &&
-		(pHardware->HwdType != HTYPE_RFXtrx868) &&
-		(pHardware->HwdType != HTYPE_RFXLAN)
-		)
-	{
-		//clear buffer, and enable receive
-		pHardware->m_rxbufferpos = 0;
-		pHardware->m_bEnableReceive = true;
-		return;
-	}
-	pHardware->m_rxbufferpos = 0;
-	//Send Reset
-	boost::this_thread::sleep(boost::posix_time::millisec(1000));
-	SendCommand(pHardware->m_HwdID, cmdRESET, "Reset");
-	//wait at least 500ms
-	sleep_milliseconds(500);
-	pHardware->m_rxbufferpos = 0;
-	pHardware->m_bEnableReceive = true;
-
-	SendCommand(pHardware->m_HwdID, cmdStartRec, "Start Receiver");
-	sleep_milliseconds(50);
-
-	SendCommand(pHardware->m_HwdID, cmdSTATUS, "Status");
 }
 
 void MainWorker::AddDomoticzHardware(CDomoticzHardwareBase *pHardware)
@@ -651,16 +619,6 @@ bool MainWorker::GetSunSettings()
 		// m_scheduler.ReloadSchedules(); // force reload of all schedules to adjust for changed sunrise/sunset values
 	}
 	return true;
-}
-
-void MainWorker::SetVerboseLevel(eVerboseLevel Level)
-{
-	m_verboselevel = Level;
-}
-
-eVerboseLevel MainWorker::GetVerboseLevel()
-{
-	return m_verboselevel;
 }
 
 void MainWorker::SetWebserverSettings(const server_settings & settings)
@@ -1191,8 +1149,6 @@ bool MainWorker::Start()
 	{
 		return false;
 	}
-	//set the log preference
-	_log.GetLogPreference();
 
 	HTTPClient::SetUserAgent(GenerateUserAgent());
 	m_notifications.Init();
@@ -1807,34 +1763,6 @@ void MainWorker::Do_Work()
 	_log.Log(LOG_STATUS, "Mainworker Stopped...");
 }
 
-void MainWorker::SendCommand(const int HwdID, unsigned char Cmd, const char *szMessage)
-{
-	int hindex = FindDomoticzHardware(HwdID);
-	if (hindex == -1)
-		return;
-
-	if (szMessage != NULL)
-		if (_log.isTraceEnabled()) _log.Log(LOG_TRACE, "MAIN SendCommand: %s", szMessage);
-
-
-	tRBUF cmd;
-	cmd.ICMND.packetlength = 13;
-	cmd.ICMND.packettype = 0;
-	cmd.ICMND.subtype = 0;
-	cmd.ICMND.seqnbr = m_hardwaredevices[hindex]->m_SeqNr++;
-	cmd.ICMND.cmnd = Cmd;
-	cmd.ICMND.freqsel = 0;
-	cmd.ICMND.xmitpwr = 0;
-	cmd.ICMND.msg3 = 0;
-	cmd.ICMND.msg4 = 0;
-	cmd.ICMND.msg5 = 0;
-	cmd.ICMND.msg6 = 0;
-	cmd.ICMND.msg7 = 0;
-	cmd.ICMND.msg8 = 0;
-	cmd.ICMND.msg9 = 0;
-	WriteToHardware(HwdID, (const char*)&cmd, sizeof(cmd.ICMND));
-}
-
 bool MainWorker::WriteToHardware(const int HwdID, const char *pdata, const unsigned char length)
 {
 	int hindex = FindDomoticzHardware(HwdID);
@@ -1842,9 +1770,7 @@ bool MainWorker::WriteToHardware(const int HwdID, const char *pdata, const unsig
 	if (hindex == -1)
 		return false;
 
-	if (_log.isTraceEnabled()) _log.Log(LOG_TRACE, "MAIN WriteToHardware %s", m_hardwaredevices[hindex]->Name.c_str());
 	return m_hardwaredevices[hindex]->WriteToHardware(pdata, length);
-
 }
 
 void MainWorker::WriteMessageStart()
@@ -1872,7 +1798,20 @@ void MainWorker::WriteMessage(const char *szMessage, bool linefeed)
 
 void MainWorker::OnHardwareConnected(CDomoticzHardwareBase *pHardware)
 {
-	SendResetCommand(pHardware);
+	if (
+		(pHardware->HwdType != HTYPE_RFXtrx315) &&
+		(pHardware->HwdType != HTYPE_RFXtrx433) &&
+		(pHardware->HwdType != HTYPE_RFXtrx868) &&
+		(pHardware->HwdType != HTYPE_RFXLAN)
+		)
+	{
+		//clear buffer, and enable receive
+		pHardware->m_rxbufferpos = 0;
+		pHardware->m_bEnableReceive = true;
+		return;
+	}
+	CRFXBase *pRFXBase = (CRFXBase *)pHardware;
+	pRFXBase->SendResetCommand();
 }
 
 uint64_t MainWorker::PerformRealActionFromDomoticzClient(const unsigned char *pRXCommand, CDomoticzHardwareBase **pOriginalHardware)
@@ -2254,7 +2193,7 @@ void MainWorker::ProcessRXMessage(const CDomoticzHardwareBase *pHardware, const 
 	std::string DeviceName = "";
 	tcp::server::CTCPClient *pClient2Ignore = NULL;
 
-	if (_log.isTraceEnabled()) {
+	 {
 		char  mes[sizeof(tRBUF) * 2 + 2];
 		char * ptmes = mes;
 		for (size_t i = 0; i < Len; i++) {
@@ -2262,10 +2201,8 @@ void MainWorker::ProcessRXMessage(const CDomoticzHardwareBase *pHardware, const 
 			ptmes += 2;
 		}
 		*ptmes = 0;
-
-		_log.Log(LOG_TRACE, "MAIN ProcessRX Msg %s", mes);
+		_log.Debug(DEBUG_NORM, "MAIN ProcessRX Msg %s", mes);
 	}
-
 	if (pHardware->HwdType == HTYPE_Domoticz)
 	{
 		if (pHardware->m_HwdID == 8765) //did we receive it from our master?
@@ -3140,7 +3077,7 @@ void MainWorker::decode_Rain(const int HwdID, const _eHardwareTypes HwdType, con
 
 	m_notifications.CheckAndHandleNotification(DevRowIdx, HwdID, ID, procResult.DeviceName, Unit, devType, subType, cmnd, szTmp);
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (subType)
@@ -3357,7 +3294,7 @@ void MainWorker::decode_Wind(const int HwdID, const _eHardwareTypes HwdType, con
 
 	m_notifications.CheckAndHandleNotification(DevRowIdx, HwdID, ID, procResult.DeviceName, Unit, devType, subType, cmnd, szTmp);
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->WIND.subtype)
@@ -3518,7 +3455,7 @@ void MainWorker::decode_Temp(const int HwdID, const _eHardwareTypes HwdType, con
 	if (!bHandledNotification)
 		m_notifications.CheckAndHandleNotification(DevRowIdx, HwdID, ID, procResult.DeviceName, Unit, devType, subType, temp);
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->TEMP.subtype)
@@ -3654,7 +3591,7 @@ void MainWorker::decode_Hum(const int HwdID, const _eHardwareTypes HwdType, cons
 	if (!bHandledNotification)
 		m_notifications.CheckAndHandleNotification(DevRowIdx, HwdID, ID, procResult.DeviceName, Unit, devType, subType, (const int)humidity);
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->HUM.subtype)
@@ -3800,7 +3737,7 @@ void MainWorker::decode_TempHum(const int HwdID, const _eHardwareTypes HwdType, 
 
 	m_notifications.CheckAndHandleNotification(DevRowIdx, HwdID, ID, procResult.DeviceName, Unit, devType, subType, cmnd, szTmp);
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->TEMP_HUM.subtype)
@@ -4011,7 +3948,7 @@ void MainWorker::decode_TempHumBaro(const int HwdID, const _eHardwareTypes HwdTy
 
 	m_notifications.CheckAndHandleNotification(DevRowIdx, HwdID, ID, procResult.DeviceName, Unit, devType, subType, cmnd, szTmp);
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->TEMP_HUM_BARO.subtype)
@@ -4140,7 +4077,7 @@ void MainWorker::decode_TempBaro(const int HwdID, const _eHardwareTypes HwdType,
 
 	m_notifications.CheckAndHandleNotification(DevRowIdx, HwdID, ID, procResult.DeviceName, Unit, devType, subType, cmnd, szTmp);
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->TEMP_HUM_BARO.subtype)
@@ -4247,7 +4184,7 @@ void MainWorker::decode_TempRain(const int HwdID, const _eHardwareTypes HwdType,
 	uint64_t DevRowIdxRain = m_sql.UpdateValue(HwdID, ID.c_str(), Unit, pTypeRAIN, sTypeRAIN3, SignalLevel, BatteryLevel, cmnd, szTmp, procResult.DeviceName);
 	m_notifications.CheckAndHandleNotification(DevRowIdx, HwdID, ID, procResult.DeviceName, Unit, pTypeRAIN, sTypeRAIN3, cmnd, szTmp);
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->TEMP_RAIN.subtype)
@@ -4331,7 +4268,7 @@ void MainWorker::decode_UV(const int HwdID, const _eHardwareTypes HwdType, const
 
 	m_notifications.CheckAndHandleNotification(DevRowIdx, HwdID, ID, procResult.DeviceName, Unit, devType, subType, cmnd, szTmp);
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->UV.subtype)
@@ -4408,7 +4345,7 @@ void MainWorker::decode_FS20(const int HwdID, const _eHardwareTypes HwdType, con
 		return;
 	CheckSceneCode(DevRowIdx, devType, subType, cmnd, "");
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->FS20.subtype)
@@ -4676,7 +4613,7 @@ void MainWorker::decode_Lighting1(const int HwdID, const _eHardwareTypes HwdType
 		return;
 	CheckSceneCode(DevRowIdx, devType, subType, cmnd, "");
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->LIGHTING1.subtype)
@@ -4886,7 +4823,7 @@ void MainWorker::decode_Lighting2(const int HwdID, const _eHardwareTypes HwdType
 	}
 	CheckSceneCode(DevRowIdx, devType, subType, single_cmnd, szTmp);
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->LIGHTING2.subtype)
@@ -5017,7 +4954,7 @@ void MainWorker::decode_Lighting4(const int HwdID, const _eHardwareTypes HwdType
 		return;
 	CheckSceneCode(DevRowIdx, devType, subType, cmnd, szTmp);
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->LIGHTING4.subtype)
@@ -5214,7 +5151,7 @@ void MainWorker::decode_Lighting5(const int HwdID, const _eHardwareTypes HwdType
 		CheckSceneCode(DevRowIdx, devType, subType, cmnd, szTmp);
 	}
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->LIGHTING5.subtype)
@@ -5680,7 +5617,7 @@ void MainWorker::decode_Lighting6(const int HwdID, const _eHardwareTypes HwdType
 		return;
 	CheckSceneCode(DevRowIdx, devType, subType, cmnd, szTmp);
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->LIGHTING6.subtype)
@@ -5747,7 +5684,7 @@ void MainWorker::decode_Fan(const int HwdID, const _eHardwareTypes HwdType, cons
 		return;
 	CheckSceneCode(DevRowIdx, devType, subType, cmnd, szTmp);
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->FAN.subtype)
@@ -5865,7 +5802,7 @@ void MainWorker::decode_HomeConfort(const int HwdID, const _eHardwareTypes HwdTy
 		return;
 	CheckSceneCode(DevRowIdx, devType, subType, cmnd, "");
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->HOMECONFORT.subtype)
@@ -5999,7 +5936,7 @@ void MainWorker::decode_Chime(const int HwdID, const _eHardwareTypes HwdType, co
 		return;
 	CheckSceneCode(DevRowIdx, devType, subType, cmnd, "");
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->CHIME.subtype)
@@ -6252,7 +6189,7 @@ void MainWorker::decode_Curtain(const int HwdID, const _eHardwareTypes HwdType, 
 	if (DevRowIdx == -1)
 		return;
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		char szTmp[100];
@@ -6316,7 +6253,7 @@ void MainWorker::decode_BLINDS1(const int HwdID, const _eHardwareTypes HwdType, 
 		return;
 	CheckSceneCode(DevRowIdx, devType, subType, cmnd, szTmp);
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		char szTmp[100];
@@ -6455,7 +6392,7 @@ void MainWorker::decode_RFY(const int HwdID, const _eHardwareTypes HwdType, cons
 		return;
 	CheckSceneCode(DevRowIdx, devType, subType, cmnd, szTmp);
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		char szTmp[100];
@@ -6777,7 +6714,7 @@ void MainWorker::decode_evohome1(const int HwdID, const _eHardwareTypes HwdType,
 	}
 
 	CheckSceneCode(DevRowIdx, devType, subType, cmnd, "");
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pEvo->EVOHOME1.subtype)
@@ -6930,7 +6867,7 @@ void MainWorker::decode_Security1(const int HwdID, const _eHardwareTypes HwdType
 		return;
 	CheckSceneCode(DevRowIdx, devType, subType, cmnd, "");
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->SECURITY1.subtype)
@@ -7107,7 +7044,7 @@ void MainWorker::decode_Security2(const int HwdID, const _eHardwareTypes HwdType
 		return;
 	CheckSceneCode(DevRowIdx, devType, subType, cmnd, "");
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->SECURITY2.subtype)
@@ -7239,7 +7176,7 @@ void MainWorker::decode_Remote(const int HwdID, const _eHardwareTypes HwdType, c
 		return;
 	CheckSceneCode(DevRowIdx, devType, subType, cmnd, "");
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->REMOTE.subtype)
@@ -8330,7 +8267,7 @@ void MainWorker::decode_Thermostat1(const int HwdID, const _eHardwareTypes HwdTy
 	if (DevRowIdx == -1)
 		return;
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->THERMOSTAT1.subtype)
@@ -8405,7 +8342,7 @@ void MainWorker::decode_Thermostat2(const int HwdID, const _eHardwareTypes HwdTy
 		return;
 	CheckSceneCode(DevRowIdx, devType, subType, cmnd, "");
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->THERMOSTAT2.subtype)
@@ -8466,7 +8403,7 @@ void MainWorker::decode_Thermostat3(const int HwdID, const _eHardwareTypes HwdTy
 		return;
 	CheckSceneCode(DevRowIdx, devType, subType, cmnd, "");
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->THERMOSTAT3.subtype)
@@ -8562,7 +8499,7 @@ void MainWorker::decode_Thermostat4(const int HwdID, const _eHardwareTypes HwdTy
 	if (DevRowIdx == -1)
 		return;
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->THERMOSTAT4.subtype)
@@ -8658,7 +8595,7 @@ void MainWorker::decode_Radiator1(const int HwdID, const _eHardwareTypes HwdType
 	if (DevRowIdx == -1)
 		return;
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->RADIATOR1.subtype)
@@ -8806,7 +8743,7 @@ void MainWorker::decode_Current(const int HwdID, const _eHardwareTypes HwdType, 
 
 	m_notifications.CheckAndHandleNotification(DevRowIdx, HwdID, ID, procResult.DeviceName, Unit, devType, subType, cmnd, szTmp);
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->CURRENT.subtype)
@@ -8956,7 +8893,7 @@ void MainWorker::decode_Power(const int HwdID, const _eHardwareTypes HwdType, co
 		return;
 	m_notifications.CheckAndHandleNotification(DevRowIdx, HwdID, ID, tmpDevName, 3, pTypeGeneral, sTypePercentage, frequency);
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->POWER.subtype)
@@ -9072,7 +9009,7 @@ void MainWorker::decode_Current_Energy(const int HwdID, const _eHardwareTypes Hw
 
 	m_notifications.CheckAndHandleNotification(DevRowIdx, HwdID, ID, procResult.DeviceName, Unit, devType, subType, cmnd, szTmp);
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->CURRENT_ENERGY.subtype)
@@ -9172,7 +9109,7 @@ void MainWorker::decode_Weight(const int HwdID, const _eHardwareTypes HwdType, c
 
 	m_notifications.CheckAndHandleNotification(DevRowIdx, HwdID, ID, procResult.DeviceName, Unit, devType, subType, weight);
 	
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->WEIGHT.subtype)
@@ -9275,7 +9212,7 @@ void MainWorker::decode_RFXSensor(const int HwdID, const _eHardwareTypes HwdType
 	break;
 	}
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->RFXSENSOR.subtype)
@@ -9389,7 +9326,7 @@ void MainWorker::decode_RFXMeter(const int HwdID, const _eHardwareTypes HwdType,
 			return;
 	}
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		unsigned long counter;
@@ -9627,7 +9564,7 @@ void MainWorker::decode_P1MeterPower(const int HwdID, const _eHardwareTypes HwdT
 
 	m_notifications.CheckAndHandleNotification(DevRowIdx, HwdID, ID, procResult.DeviceName, Unit, devType, subType, cmnd, szTmp);
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (p1Power->subtype)
@@ -9682,7 +9619,7 @@ void MainWorker::decode_P1MeterGas(const int HwdID, const _eHardwareTypes HwdTyp
 	if (DevRowIdx == -1)
 		return;
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (p1Gas->subtype)
@@ -9726,7 +9663,7 @@ void MainWorker::decode_YouLessMeter(const int HwdID, const _eHardwareTypes HwdT
 
 	m_notifications.CheckAndHandleNotification(DevRowIdx, HwdID, ID, procResult.DeviceName, Unit, devType, subType, cmnd, szTmp);
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pMeter->subtype)
@@ -9769,7 +9706,7 @@ void MainWorker::decode_Rego6XXTemp(const int HwdID, const _eHardwareTypes HwdTy
 		return;
 	m_notifications.CheckAndHandleNotification(DevRowIdx, HwdID, ID, procResult.DeviceName, Unit, devType, subType, pRego->temperature);
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		WriteMessage("subtype       = Rego6XX Temp");
@@ -9801,7 +9738,7 @@ void MainWorker::decode_Rego6XXValue(const int HwdID, const _eHardwareTypes HwdT
 	if (DevRowIdx == -1)
 		return;
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pRego->subtype)
@@ -9841,7 +9778,7 @@ void MainWorker::decode_AirQuality(const int HwdID, const _eHardwareTypes HwdTyp
 
 	m_notifications.CheckAndHandleNotification(DevRowIdx, HwdID, ID, procResult.DeviceName, Unit, devType, subType, (const int)pMeter->airquality);
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pMeter->subtype)
@@ -9894,7 +9831,7 @@ void MainWorker::decode_Usage(const int HwdID, const _eHardwareTypes HwdType, co
 
 	m_notifications.CheckAndHandleNotification(DevRowIdx, HwdID, ID, procResult.DeviceName, Unit, devType, subType, pMeter->fusage);
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pMeter->subtype)
@@ -9936,7 +9873,7 @@ void MainWorker::decode_Lux(const int HwdID, const _eHardwareTypes HwdType, cons
 
 	m_notifications.CheckAndHandleNotification(DevRowIdx, HwdID, ID, procResult.DeviceName, Unit, devType, subType, pMeter->fLux);
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pMeter->subtype)
@@ -9987,7 +9924,7 @@ void MainWorker::decode_Thermostat(const int HwdID, const _eHardwareTypes HwdTyp
 
 	m_notifications.CheckAndHandleNotification(DevRowIdx, HwdID, ID, procResult.DeviceName, Unit, devType, subType, pMeter->temp);
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		double tvalue = ConvertTemperature(pMeter->temp, m_sql.m_tempsign[0]);
@@ -10192,7 +10129,7 @@ void MainWorker::decode_General(const int HwdID, const _eHardwareTypes HwdType, 
 	}
 	m_notifications.CheckAndHandleNotification(DevRowIdx, HwdID, ID, procResult.DeviceName, Unit, devType, subType, cmnd, szTmp);
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pMeter->subtype)
@@ -10385,7 +10322,7 @@ void MainWorker::decode_BBQ(const int HwdID, const _eHardwareTypes HwdType, cons
 	DevRowIdx = m_sql.UpdateValue(HwdID, ID.c_str(), Unit, devType, subType, SignalLevel, BatteryLevel, cmnd, szTmp, procResult.DeviceName);
 	if (DevRowIdx == -1)
 		return;
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		WriteMessageStart();
 		switch (pResponse->BBQ.subtype)
@@ -10910,35 +10847,6 @@ bool MainWorker::GetSensorData(const uint64_t idx, int &nValue, std::string &sVa
 	return true;
 }
 
-bool MainWorker::SetRFXCOMHardwaremodes(const int HardwareID, const unsigned char Mode1, const unsigned char Mode2, const unsigned char Mode3, const unsigned char Mode4, const unsigned char Mode5, const unsigned char Mode6)
-{
-	int hindex = FindDomoticzHardware(HardwareID);
-	if (hindex == -1)
-		return false;
-	m_hardwaredevices[hindex]->m_rxbufferpos = 0;
-	tRBUF Response;
-	Response.ICMND.packetlength = sizeof(Response.ICMND) - 1;
-	Response.ICMND.packettype = pTypeInterfaceControl;
-	Response.ICMND.subtype = sTypeInterfaceCommand;
-	Response.ICMND.seqnbr = m_hardwaredevices[hindex]->m_SeqNr++;
-	Response.ICMND.cmnd = cmdSETMODE;
-	Response.ICMND.freqsel = Mode1;
-	Response.ICMND.xmitpwr = Mode2;
-	Response.ICMND.msg3 = Mode3;
-	Response.ICMND.msg4 = Mode4;
-	Response.ICMND.msg5 = Mode5;
-	Response.ICMND.msg6 = Mode6;
-	if (!WriteToHardware(HardwareID, (const char*)&Response, sizeof(Response.ICMND)))
-		return false;
-	PushAndWaitRxMessage(m_hardwaredevices[hindex], (const unsigned char *)&Response, NULL, -1);
-	//Save it also
-	SendCommand(HardwareID, cmdSAVE, "Save Settings");
-
-	m_hardwaredevices[hindex]->m_rxbufferpos = 0;
-
-	return true;
-}
-
 bool MainWorker::SwitchLightInt(const std::vector<std::string> &sd, std::string switchcmd, int level, _tColor color, const bool IsTesting)
 {
 	unsigned long ID;
@@ -10952,7 +10860,7 @@ bool MainWorker::SwitchLightInt(const std::vector<std::string> &sd, std::string 
 
 	int HardwareID = atoi(sd[0].c_str());
 
-	if (_log.isTraceEnabled()) _log.Log(LOG_TRACE, "MAIN SwitchLightInt : switchcmd:%s level:%d HWid:%d  sd:%s %s %s %s %s %s", switchcmd.c_str(), level, HardwareID,
+	_log.Debug(DEBUG_NORM, "MAIN SwitchLightInt : switchcmd:%s level:%d HWid:%d  sd:%s %s %s %s %s %s", switchcmd.c_str(), level, HardwareID,
 		sd[0].c_str(), sd[1].c_str(), sd[2].c_str(), sd[3].c_str(), sd[4].c_str(), sd[5].c_str());
 
 	int hindex = FindDomoticzHardware(HardwareID);
@@ -11029,7 +10937,7 @@ bool MainWorker::SwitchLightInt(const std::vector<std::string> &sd, std::string 
 		{
 			level = atoi(result[0][0].c_str());
 		}
-		if (_log.isTraceEnabled()) _log.Log(LOG_TRACE, "MAIN SwitchLightInt : switchcmd==\"On\" || level < 0, new level:%d", level);
+		_log.Debug(DEBUG_NORM, "MAIN SwitchLightInt : switchcmd==\"On\" || level < 0, new level:%d", level);
 	}
 	// TODO: Something smarter if level is not valid?
 	level = max(level,0);
@@ -11989,7 +11897,7 @@ bool MainWorker::SwitchLight(const std::string &idx, const std::string &switchcm
 bool MainWorker::SwitchLight(const uint64_t idx, const std::string &switchcmd, const int level, _tColor color, const bool ooc, const int ExtraDelay)
 {
 	//Get Device details
-	if (_log.isTraceEnabled()) _log.Log(LOG_TRACE, "MAIN SwitchLight idx:%" PRId64 " cmd:%s lvl:%d ", idx, switchcmd.c_str(), level);
+	_log.Debug(DEBUG_NORM, "MAIN SwitchLight idx:%" PRId64 " cmd:%s lvl:%d ", idx, switchcmd.c_str(), level);
 	std::vector<std::vector<std::string> > result;
 	result = m_sql.safe_query(
 		"SELECT HardwareID,DeviceID,Unit,Type,SubType,SwitchType,AddjValue2,nValue,sValue,Name,Options FROM DeviceStatus WHERE (ID == %" PRIu64 ")",
@@ -12062,7 +11970,7 @@ bool MainWorker::SetSetPoint(const std::string &idx, const float TempValue, cons
 	else if (newMode == "TemporaryOverride")
 		nEvoMode = CEvohomeBase::zmTmp;
 
-	//_log.Log(LOG_TRACE, "Set point %s %f '%s' '%s'", idx.c_str(), TempValue, newMode.c_str(), until.c_str());
+	//_log.Log(LOG_DEBUG, "Set point %s %f '%s' '%s'", idx.c_str(), TempValue, newMode.c_str(), until.c_str());
 
 	unsigned long ID;
 	std::stringstream s_strid;
@@ -12290,8 +12198,8 @@ bool MainWorker::SetSetPointInt(const std::vector<std::string> &sd, const float 
 				return false;
 			if (pHardware->HwdType == HTYPE_Dummy)
 			{
-				//Also set it in the database, ad this devices does not send updates
-				_log.Log(LOG_TRACE, "MAIN SetPoint command Idx=%s : Temp=%f", sd[7].c_str(), TempValue);
+				//Also put it in the database, as this devices does not send updates
+				_log.Debug(DEBUG_NORM, "MAIN SetPoint command Idx=%s : Temp=%f", sd[7].c_str(), TempValue);
 				PushAndWaitRxMessage(pHardware, (const unsigned char*)&tmeter, NULL, -1);
 			}
 		}
@@ -12912,7 +12820,7 @@ void MainWorker::SetInternalSecStatus()
 	else
 		tsen.SECURITY1.status = sStatusArmAway;
 
-	if (m_verboselevel >= EVBL_ALL)
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
 	{
 		_log.Log(LOG_NORM, "(System) Domoticz Security Status");
 	}

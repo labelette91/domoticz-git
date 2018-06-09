@@ -560,7 +560,7 @@ void CEnOceanESP3::Do_Work()
 void CEnOceanESP3::Add2SendQueue(const char* pData, const size_t length)
 {
 
-	if (_log.isTraceEnabled()) {
+	{
 
 		std::stringstream sstr;
 
@@ -570,7 +570,7 @@ void CEnOceanESP3::Add2SendQueue(const char* pData, const size_t length)
 			if (idx != length - 1)
 				sstr << " ";
 		}
-		_log.Log(LOG_TRACE, "EnOcean: Send: %s", sstr.str().c_str());
+		_log.Debug(DEBUG_NORM, "EnOcean: Send: %s", sstr.str().c_str());
 	}
 	std::string sBytes;
 	sBytes.insert(0,pData,length);
@@ -967,7 +967,6 @@ float CEnOceanESP3::GetValueRange(const float InValue, const float ScaleMax, con
 
 bool CEnOceanESP3::ParseData()
 {
-	if (_log.isTraceEnabled())
 	{
 		std::stringstream sstr;
 
@@ -991,7 +990,7 @@ bool CEnOceanESP3::ParseData()
 			sprintf(szTmp, "Opt Size: %i", m_OptionalDataSize);
 		}
 
-		_log.Log(LOG_TRACE,"EnOcean: recv %s %s ",sstr.str().c_str() , szTmp );
+		_log.Debug(DEBUG_NORM,"EnOcean: recv %s %s ",sstr.str().c_str() , szTmp );
 
 	}
 
@@ -1645,7 +1644,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 						int NodeID = (ID_BYTE2 << 8) + ID_BYTE1;
 
 						// Report battery level as 9 and RSSI as 12
-						SendTempHumSensor(NodeID, 9, temp, hum, "GasSensor.04", 12);
+						SendTempHumSensor(NodeID, 9, temp, round(hum), "GasSensor.04", 12);
 						SendAirQualitySensor((NodeID & 0xFF00) >> 8, NodeID & 0xFF, 9, co2, "GasSensor.04");
 					}
 				}
@@ -1653,7 +1652,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 			break;
 		case RORG_RPS: // repeated switch communication
 			{				
-				_log.Log(LOG_TRACE, "EnOcean: RPS data: Sender id: 0x%02x%02x%02x%02x Status: %02x Data: %02x T21:%d",
+				_log.Debug(DEBUG_NORM, "EnOcean: RPS data: Sender id: 0x%02x%02x%02x%02x Status: %02x Data: %02x T21:%d",
 					m_buffer[2],m_buffer[3],m_buffer[4],m_buffer[5],m_buffer[6],m_buffer[1], (m_buffer[6] & (1 << 2)));
 				
 				unsigned char STATUS=m_buffer[6];
@@ -1675,7 +1674,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 						 ((iType == 0x0F) || (iType == 0x12))	// type 0F and 12 have external switch/push button control, it means they also act as rocker
 						)
 					{
-						_log.Log(LOG_TRACE ,"EnOcean: %08X, ignore button press", id);
+						_log.Debug(DEBUG_NORM ,"EnOcean: %08X, ignore button press", id);
 						break;
 					}
 				}
@@ -1700,7 +1699,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 					unsigned char SecondUpDown=(DATA_BYTE3 & DB3_RPS_NU_SUD)>>DB3_RPS_NU_SUD_SHIFT;
 					unsigned char SecondAction=(DATA_BYTE3 & DB3_RPS_NU_SA)>>DB3_RPS_NU_SA_SHIFT;
 
-					_log.Log(LOG_TRACE,
+					_log.Debug(DEBUG_NORM,
 						"EnOcean: RPS N-Message message: 0x%02X Node 0x%08x RockerID: %i ButtonID: %i Pressed: %i UD: %i Second Rocker ID: %i SecondButtonID: %i SUD: %i Second Action: %i",
 						DATA_BYTE3,	id,	RockerID,ButtonID,UpDown,Pressed,SecondRockerID,SecondButtonID,	SecondUpDown,SecondAction);
 					
@@ -1752,8 +1751,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 							}
 						}
 
-						if (_log.isTraceEnabled())
-							_log.Log(LOG_TRACE, "EnOcean: message: 0x%02X Node 0x%08x UnitID: %02X cmd: %02X ",
+							_log.Debug(DEBUG_NORM, "EnOcean: message: 0x%02X Node 0x%08x UnitID: %02X cmd: %02X ",
 							DATA_BYTE3,	id,	tsen.LIGHTING2.unitcode,tsen.LIGHTING2.cmnd
 							);
 
@@ -1771,7 +1769,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 						
 						unsigned char UpDown = !((DATA_BYTE3 == 0xD0) || (DATA_BYTE3 == 0xF0));
 
-							_log.Log(LOG_TRACE, "EnOcean: RPS T21-Message message: 0x%02X Node 0x%08x ButtonID: %i Pressed: %i UD: %i",
+							_log.Debug(DEBUG_NORM, "EnOcean: RPS T21-Message message: 0x%02X Node 0x%08x ButtonID: %i Pressed: %i UD: %i",
 							DATA_BYTE3,	id,	ButtonID,Pressed,UpDown);
 
 						RBUF tsen;
@@ -1799,7 +1797,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 							tsen.LIGHTING2.unitcode = 1;
 							tsen.LIGHTING2.cmnd = (UpDown == 1) ? light2_sOn : light2_sOff;
 						}
-							_log.Log(LOG_TRACE, "EnOcean: message: 0x%02X Node 0x%08x UnitID: %02X cmd: %02X ",
+							_log.Debug(DEBUG_NORM, "EnOcean: message: 0x%02X Node 0x%08x UnitID: %02X cmd: %02X ",
 							DATA_BYTE3,	id,	tsen.LIGHTING2.unitcode,tsen.LIGHTING2.cmnd);
 
 
@@ -1859,7 +1857,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 							{
 								for(int nbc = 0; nbc < nb_channel; nbc ++)
 								{
-									_log.Log(LOG_TRACE, "EnOcean: TEACH : 0xD2 Node 0x%08x UnitID: %02X cmd: %02X ", id,	nbc + 1,	light2_sOff	);
+									_log.Debug(DEBUG_NORM, "EnOcean: TEACH : 0xD2 Node 0x%08x UnitID: %02X cmd: %02X ", id,	nbc + 1,	light2_sOff	);
 									SendSwitchUnchecked(id, nbc + 1, -1, light2_sOff, 0, "" );
 								}
 								return;
@@ -1913,7 +1911,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 										int unitcode = channel + 1;
 										int cmnd     = (dim_power>0) ? light2_sOn : light2_sOff;								
 
-										_log.Log(LOG_TRACE, "EnOcean: VLD : 0x%02X Node 0x%08x UnitID: %02X cmd: %02X ",
+										_log.Debug(DEBUG_NORM, "EnOcean: VLD : 0x%02X Node 0x%08x UnitID: %02X cmd: %02X ",
 											DATA_BYTE3, senderId,unitcode,cmnd	);
 
 										SendSwitchUnchecked(senderId, unitcode, -1 , cmnd , 0, "");
@@ -2083,7 +2081,7 @@ void CEnOceanESP3::remoteLearning(unsigned int destID, bool StartLearning, int c
 	//optionnal data
 	setDestination(opt,destID);
 
-	_log.Log(LOG_TRACE, "EnOcean: send remoteLearning");
+	_log.Debug(DEBUG_NORM, "EnOcean: send remoteLearning");
 	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
 }
 
@@ -2106,7 +2104,7 @@ void CEnOceanESP3::unlock(unsigned int destID, unsigned int code )
 	//optionnal data
 	setDestination(opt, destID);
 
-	_log.Log(LOG_TRACE, "EnOcean: send unlock");
+	_log.Debug(DEBUG_NORM, "EnOcean: send unlock");
 	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
 }
 
@@ -2129,7 +2127,7 @@ void CEnOceanESP3::lock(unsigned int destID, unsigned int code)
 	//optionnal data
 	setDestination(opt, destID);
 
-	_log.Log(LOG_TRACE, "EnOcean: send lock");
+	_log.Debug(DEBUG_NORM, "EnOcean: send lock");
 	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
 
 }
@@ -2153,7 +2151,7 @@ void CEnOceanESP3::setcode(unsigned int destID, unsigned int code)
 	//optionnal data
 	setDestination(opt, destID);
 
-	_log.Log(LOG_TRACE, "EnOcean: send setcode");
+	_log.Debug(DEBUG_NORM, "EnOcean: send setcode");
 	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
 
 }
@@ -2175,7 +2173,7 @@ void CEnOceanESP3::ping(unsigned int destID)
 	//optionnal data
 	setDestination(opt, destID);
 
-	_log.Log(LOG_TRACE, "EnOcean: send ping");
+	_log.Debug(DEBUG_NORM, "EnOcean: send ping");
 	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
 
 }
@@ -2198,7 +2196,7 @@ void CEnOceanESP3::action(unsigned int destID)
 	setDestination(opt, destID);
 
 	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
-	_log.Log(LOG_TRACE, "EnOcean: send action");
+	_log.Debug(DEBUG_NORM, "EnOcean: send action");
 
 }
 
@@ -2219,7 +2217,7 @@ void CEnOceanESP3::getProductId()
 							//optionnal data
 	setDestination(opt, 0xFFFFFFFF);
 
-	_log.Log(LOG_TRACE, "EnOcean: send getProductId");
+	_log.Debug(DEBUG_NORM, "EnOcean: send getProductId");
 	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
 
 }
@@ -2251,7 +2249,7 @@ void CEnOceanESP3::getLinkTableMedadata(uint destID)
 					 //optionnal data
 	setDestination(opt, destID);
 
-	_log.Log(LOG_TRACE, "EnOcean: send getLinkTableMedadata");
+	_log.Debug(DEBUG_NORM, "EnOcean: send getLinkTableMedadata");
 	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
 
 }
@@ -2280,7 +2278,7 @@ void CEnOceanESP3::getProductFunction(uint destID)
 					 //optionnal data
 	setDestination(opt, destID);
 
-	_log.Log(LOG_TRACE, "EnOcean: send getProductFunction");
+	_log.Debug(DEBUG_NORM, "EnOcean: send getProductFunction");
 	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
 
 }
@@ -2307,7 +2305,7 @@ void CEnOceanESP3::getallLinkTable(uint SensorId,int begin , int end  )
 					 //optionnal data
 	setDestination(opt, SensorId);
 
-	_log.Log(LOG_TRACE, "EnOcean: send getallLinkTable");
+	_log.Debug(DEBUG_NORM, "EnOcean: send getallLinkTable");
 	sendFrameQueue(PACKET_RADIO, buff, 15, opt, 7);
 
 }

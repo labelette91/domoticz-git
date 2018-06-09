@@ -99,7 +99,7 @@ HomeEasy::HomeEasy(const int ID)
 	{
 		RXPIN = atoi(result[0][0].c_str());
 		TXPIN = atoi(result[0][1].c_str());
-		_log.Log(LOG_TRACE, "HERF: RXPin:%d TXPin:%d",  RXPIN, TXPIN);
+		_log.Debug(DEBUG_NORM, "HERF: RXPin:%d TXPin:%d",  RXPIN, TXPIN);
 
 	}
 #ifdef WITH_GPIO
@@ -125,7 +125,7 @@ HomeEasy::HomeEasy(const int ID)
 
 	radio = new RFM69(0, 0);
 	radio->initialize(RF69_433MHZ, 1, 100);
-	_log.Log(LOG_TRACE, "HERF: RFM69 initialized ", TXPIN, RXPIN);
+	_log.Debug(DEBUG_NORM, "HERF: RFM69 initialized ", TXPIN, RXPIN);
 
 	if (TXPIN != RXPIN)
 		radio->setMode(RF69_MODE_SLEEP);
@@ -184,7 +184,7 @@ std::string CmdStr[] = {
 #ifdef WITH_GPIO
 void hagerSends(byte id4, byte cmnd)
 {
-  _log.Log(LOG_TRACE, "HERF: Send HAGER  Id :%08X Cmd:%s Cmd:%d", id4 , CmdStr[cmnd].c_str() , cmnd );
+  _log.Debug(DEBUG_NORM, "HERF: Send HAGER  Id :%08X Cmd:%s Cmd:%d", id4 , CmdStr[cmnd].c_str() , cmnd );
   HagerSends(id4, cmnd);
 
 }
@@ -246,7 +246,7 @@ bool HomeEasy::WriteToHardware(const char *pdata, const unsigned char length)
 
       if (subType == sTypeHEU) {
         HomeEasyRfTx->setSwitch(cmd != 0, id, unit);
-        _log.Log(LOG_TRACE, "HERF: Send Home Easy Id :%08X Unit:%d Cmd:%d", id, unit, cmd);
+        _log.Debug(DEBUG_NORM, "HERF: Send Home Easy Id :%08X Unit:%d Cmd:%d", id, unit, cmd);
       }
       else 		if (subType == sTypeAC)
       {
@@ -304,7 +304,7 @@ void HomeEasy::Do_Work()
 #ifdef WITH_GPIO
 		//if tace is enable and dump pulse data is enable
 		if ( (!Record.empty()) && (_log.isTraceEnabled()) &&(!_log.TestFilter("RCDATA")) )
-					_log.Log(LOG_TRACE, "RCDATA %s", Record.ToString(1).c_str());
+					_log.Debug(DEBUG_NORM, "RCDATA %s", Record.ToString(1).c_str());
 
 		//while a pulse has been recorded
 		while (!Record.empty())
@@ -349,7 +349,7 @@ void HomeEasy::Do_Work()
         /* if message received */
         if (OokReceivedCode[0])
         {
-          _log.Log(LOG_TRACE, "RCOOK %s", OokReceivedCode );
+          _log.Debug(DEBUG_NORM, "RCOOK %s", OokReceivedCode );
 
           Sensor *s = Sensor::getRightSensor((char*)OokReceivedCode );
           if (s != NULL)
@@ -361,7 +361,7 @@ void HomeEasy::Do_Work()
               Sensor * sensor = FindSensor(s->getSensID());
               if (sensor == 0) {
                 //            Sensors[s->getSensID()] = sensor;
-                _log.Log(LOG_TRACE, "SENSOR: new sensor added %s ID:%08X", s->getSensorName().c_str(), s->getSensID());
+                _log.Debug(DEBUG_NORM, "SENSOR: new sensor added %s ID:%08X", s->getSensorName().c_str(), s->getSensID());
               }
 
               //if sensor value as changed
@@ -372,17 +372,17 @@ void HomeEasy::Do_Work()
                 if (s->available(Sensor::haveTemperature))
                 {
                   SendTempHumSensor(s->getSensID(), !s->isBatteryLow(), (float)s->getTemperature(), (int)s->getHumidity(), "Home TempHum", 12,sTypeTH1);
-                  _log.Log(LOG_TRACE, "RCOOK %s ID Code:%04X  Rolling:%0X Temp : %f Humidity : %f Channel : %d ", s->getSensorName().c_str(), s->getSensType(), s->getSensID(), s->getTemperature(), s->getHumidity(), s->getChannel());
+                  _log.Debug(DEBUG_NORM, "RCOOK %s ID Code:%04X  Rolling:%0X Temp : %f Humidity : %f Channel : %d ", s->getSensorName().c_str(), s->getSensType(), s->getSensID(), s->getTemperature(), s->getHumidity(), s->getChannel());
                 }
                 if (s->available(Sensor::haveOnOff))
                 {
                   SendSwitch(s->getSensID(), s->getChannel(), 0xff, s->getOnOff() != 0, 0, "HomeEasy");
-                  _log.Log(LOG_TRACE, "RCOOK %s ID Code:%04X  Rolling:%08X OnOff : %d Unit : %d ", s->getSensorName().c_str(), s->getSensType(), s->getSensID(), s->getOnOff(), s->getChannel());
+                  _log.Debug(DEBUG_NORM, "RCOOK %s ID Code:%04X  Rolling:%08X OnOff : %d Unit : %d ", s->getSensorName().c_str(), s->getSensType(), s->getSensID(), s->getOnOff(), s->getChannel());
                 }
                 if (s->available(Sensor::havePower))
                 {
                   SendKwhMeter(s->getSensType(), s->getChannel(), 0xff, s->getPower(), s->getTotalPower() / 1000.0 / 223.666, "POWER");
-                  _log.Log(LOG_TRACE, "RCOOK %s Code:%04X  Power : %d Total : %d ", s->getSensorName().c_str(), s->getSensType(), s->getPower(), s->getTotalPower());
+                  _log.Debug(DEBUG_NORM, "RCOOK %s Code:%04X  Power : %d Total : %d ", s->getSensorName().c_str(), s->getSensType(), s->getPower(), s->getTotalPower());
                 }
                 //delete old value
                 if (sensor != 0) delete sensor;
@@ -393,11 +393,11 @@ void HomeEasy::Do_Work()
             else
             {
               delete s;
-              _log.Log(LOG_TRACE, "RCOOK Sensor Id :%04X checksum error", s->getSensType());
+              _log.Debug(DEBUG_NORM, "RCOOK Sensor Id :%04X checksum error", s->getSensType());
             }
           }
           else
-            _log.Log(LOG_TRACE, "RCOOK Sensor unknown");
+            _log.Debug(DEBUG_NORM, "RCOOK Sensor unknown");
 
         }
         OokReceivedCode[0] = 0 ;
@@ -445,7 +445,7 @@ int  SetGpioInterruptMode( int   pin , int mode )
 	int   model, rev, mem, maker, overVolted;
 
 	piBoardId(&model, &rev, &mem, &maker, &overVolted);
-	_log.Log(LOG_TRACE, "PI Board  model:%d   rev:%d mem:%d maker:%d overVolted:%d", model, rev, mem, maker, overVolted);
+	_log.Debug(DEBUG_NORM, "PI Board  model:%d   rev:%d mem:%d maker:%d overVolted:%d", model, rev, mem, maker, overVolted);
 
 	if (model == PI_MODEL_CM)
 		wiringPiMode = WPI_MODE_GPIO;

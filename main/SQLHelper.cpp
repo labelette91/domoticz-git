@@ -3211,9 +3211,7 @@ void CSQLHelper::Do_Work()
 		std::vector<_tTaskItem>::iterator itt = _items2do.begin();
 		while (itt != _items2do.end())
 		{
-			if (_log.isTraceEnabled()) {
-				_log.Log(LOG_TRACE, "SQLH: Do Task ItemType:%d = %s  Cmd:%s Value:%s ", itt->_ItemType, TITEM_name[itt->_ItemType], itt->_command.c_str(), itt->_sValue.c_str());
-			}
+			_log.Debug(DEBUG_NORM, "SQLH: Do Task ItemType:%d = %s  Cmd:%s Value:%s ", itt->_ItemType, TITEM_name[itt->_ItemType], itt->_command.c_str(), itt->_sValue.c_str());
 
 			if (itt->_ItemType == TITEM_SWITCHCMD)
 			{
@@ -3583,12 +3581,11 @@ std::vector<std::vector<std::string> > CSQLHelper::query(const std::string &szQu
 		sqlite3_finalize(statement);
 	}
 
-	if (_log.isTraceEnabled()) {
-		_log.Log(LOG_TRACE, "SQLQ query : %s", szQuery.c_str());
-		if (!_log.TestFilter("SQLR"))
-			LogQueryResult(results);
+	{
+		_log.Debug(DEBUG_NORM, "SQLQ query : %s", szQuery.c_str());
+//		if (!_log.TestFilter("SQLR"))
+//			LogQueryResult(results);
 	}
-
 	std::string error = sqlite3_errmsg(m_dbase);
 	if (error != "not an error")
 		_log.Log(LOG_ERROR, "SQL Query(\"%s\") : %s", szQuery.c_str(), error.c_str());
@@ -4267,7 +4264,7 @@ uint64_t CSQLHelper::UpdateValueInt(const int HardwareID, const char* ID, const 
 		CDomoticzHardwareBase *pHardware = m_mainworker.GetHardware(HardwareID);
 		if (pHardware != NULL && pHardware->HwdType == HTYPE_PythonPlugin)
 		{
-			_log.Log(LOG_TRACE, "CSQLHelper::UpdateValueInt: Notifying plugin %u about creation of device %u", HardwareID, unit);
+			_log.Debug(DEBUG_NORM, "CSQLHelper::UpdateValueInt: Notifying plugin %u about creation of device %u", HardwareID, unit);
 			Plugins::CPlugin *pPlugin = (Plugins::CPlugin*)pHardware;
 			pPlugin->DeviceAdded(unit);
 		}
@@ -4662,7 +4659,7 @@ uint64_t CSQLHelper::UpdateValueInt(const int HardwareID, const char* ID, const 
 		break;
 	}
 
-	if (_log.isTraceEnabled()) _log.Log(LOG_TRACE, "SQLH UpdateValueInt %s HwID:%d  DevID:%s Type:%d  sType:%d nValue:%d sValue:%s ", devname.c_str(), HardwareID, ID, devType, subType, nValue, sValue);
+	_log.Debug(DEBUG_NORM, "SQLH UpdateValueInt %s HwID:%d  DevID:%s Type:%d  sType:%d nValue:%d sValue:%s ", devname.c_str(), HardwareID, ID, devType, subType, nValue, sValue);
 
 	if (bDeviceUsed)
 		m_mainworker.m_eventsystem.ProcessDevice(HardwareID, ulID, unit, devType, subType, signallevel, batterylevel, nValue, sValue, devname, 0);
@@ -6878,7 +6875,7 @@ void CSQLHelper::DeleteDevices(const std::string &idx)
 #ifdef ENABLE_PYTHON
 		for (itt = _idx.begin(); itt != _idx.end(); ++itt)
 		{
-			_log.Log(LOG_TRACE, "CSQLHelper::DeleteDevices: Delete %s", (*itt).c_str());
+			_log.Debug(DEBUG_NORM, "CSQLHelper::DeleteDevices: Delete %s", (*itt).c_str());
 			std::vector<std::vector<std::string> > result;
 			result = safe_query("SELECT HardwareID, Unit FROM DeviceStatus WHERE (ID == '%q')", (*itt).c_str());
 			if (result.size() > 0)
@@ -6963,7 +6960,7 @@ void CSQLHelper::DeleteDevices(const std::string &idx)
 			CDomoticzHardwareBase *pHardware = m_mainworker.GetHardware(HwID);
 			if (pHardware != NULL && pHardware->HwdType == HTYPE_PythonPlugin)
 			{
-				_log.Log(LOG_TRACE, "CSQLHelper::DeleteDevices: Notifying plugin %u about deletion of device %u", HwID, Unit);
+				_log.Debug(DEBUG_NORM, "CSQLHelper::DeleteDevices: Notifying plugin %u about deletion of device %u", HwID, Unit);
 				Plugins::CPlugin *pPlugin = (Plugins::CPlugin*)pHardware;
 				pPlugin->DeviceRemoved(Unit);
 			}
@@ -7309,8 +7306,7 @@ void CSQLHelper::AddTaskItem(const _tTaskItem &tItem, const bool cancelItem)
 	boost::lock_guard<boost::mutex> l(m_background_task_mutex);
 
 	// Check if an event for the same device is already in queue, and if so, replace it
-	if (_log.isTraceEnabled())
-		_log.Log(LOG_TRACE, "SQLH AddTask: Request to add task: idx=%" PRIu64 ", DelayTime=%f, Command='%s', Level=%d, Color='%s', RelatedEvent='%s'", tItem._idx, tItem._DelayTime, tItem._command.c_str(), tItem._level, tItem._Color.toString().c_str(), tItem._relatedEvent.c_str());
+	_log.Debug(DEBUG_NORM, "SQLH AddTask: Request to add task: idx=%" PRIu64 ", DelayTime=%f, Command='%s', Level=%d, Color='%s', RelatedEvent='%s'", tItem._idx, tItem._DelayTime, tItem._command.c_str(), tItem._level, tItem._Color.toString().c_str(), tItem._relatedEvent.c_str());
 	// Remove any previous task linked to the same device
 
 	if (
@@ -7323,15 +7319,13 @@ void CSQLHelper::AddTaskItem(const _tTaskItem &tItem, const bool cancelItem)
 		std::vector<_tTaskItem>::iterator itt = m_background_task_queue.begin();
 		while (itt != m_background_task_queue.end())
 		{
-			if (_log.isTraceEnabled())
-				_log.Log(LOG_TRACE, "SQLH AddTask: Comparing with item in queue: idx=%" PRId64 ", DelayTime=%f, Command='%s', Level=%d, Color='%s', RelatedEvent='%s'", itt->_idx, itt->_DelayTime, itt->_command.c_str(), itt->_level, itt->_Color.toString().c_str(), itt->_relatedEvent.c_str());
+			_log.Debug(DEBUG_NORM, "SQLH AddTask: Comparing with item in queue: idx=%" PRId64 ", DelayTime=%f, Command='%s', Level=%d, Color='%s', RelatedEvent='%s'", itt->_idx, itt->_DelayTime, itt->_command.c_str(), itt->_level, itt->_Color.toString().c_str(), itt->_relatedEvent.c_str());
 			if (itt->_idx == tItem._idx && itt->_ItemType == tItem._ItemType)
 			{
 				float iDelayDiff = tItem._DelayTime - itt->_DelayTime;
 				if (iDelayDiff < (1. / timer_resolution_hz / 2))
 				{
-					if (_log.isTraceEnabled())
-						_log.Log(LOG_TRACE, "SQLH AddTask: => Already present. Cancelling previous task item");
+					_log.Debug(DEBUG_NORM, "SQLH AddTask: => Already present. Cancelling previous task item");
 					itt = m_background_task_queue.erase(itt);
 				}
 				else
@@ -7637,13 +7631,10 @@ void CSQLHelper::SetUnitsAndScale()
 
 bool CSQLHelper::HandleOnOffAction(const bool bIsOn, const std::string &OnAction, const std::string &OffAction)
 {
-	if (_log.isTraceEnabled())
-	{
-		if (bIsOn)
-			_log.Log(LOG_TRACE, "SQLH HandleOnOffAction: OnAction:%s", OnAction.c_str());
-		else
-			_log.Log(LOG_TRACE, "SQLH HandleOnOffAction: OffAction:%s", OffAction.c_str());
-	}
+	if (bIsOn)
+		_log.Debug(DEBUG_NORM, "SQLH HandleOnOffAction: OnAction:%s", OnAction.c_str());
+	else
+		_log.Debug(DEBUG_NORM, "SQLH HandleOnOffAction: OffAction:%s", OffAction.c_str());
 
 	if (bIsOn)
 	{
@@ -8504,7 +8495,7 @@ void LogRow(TSqlRowQuery * row)
 	std::string Row;
 	for (unsigned int j = 0; j < (*row).size(); j++)
 		Row = Row + (*row)[j] + ";";
-	_log.Log(LOG_TRACE, "SQLR result: %s", Row.c_str());
+	_log.Debug(DEBUG_NORM, "SQLR result: %s", Row.c_str());
 }
 void CSQLHelper::LogQueryResult(TSqlQueryResult &result)
 {

@@ -881,7 +881,7 @@ namespace http {
 					goto exitjson;
 
 				}
-				if (_log.isTraceEnabled()) _log.Log(LOG_TRACE, "WEBS GetJSon :%s :%s ", cparam.c_str(), req.uri.c_str());
+				_log.Debug(DEBUG_WEBSERVER, "WEBS GetJSon :%s :%s ", cparam.c_str(), req.uri.c_str());
 				HandleCommand(cparam, session, req, root);
 			} //(rtype=="command")
 			else {
@@ -3009,7 +3009,6 @@ namespace http {
 			std::string sstate = request::findValue(&req, "state");
 			std::string idx = request::findValue(&req, "idx");
 			std::string name = request::findValue(&req, "name");
-			_log.Log(LOG_TRACE, "WEBS SetThermostatState  State cmd Id:%s Name:%s State:%s", idx.c_str(), name.c_str(), sstate.c_str());
 
 			if (
 				(idx.empty()&&name.empty()) ||
@@ -6572,7 +6571,7 @@ namespace http {
 				if (switchcmd == "Set Level")
 					level = request::findValue(&req, "level");
 				std::string onlyonchange = request::findValue(&req, "ooc");//No update unless the value changed (check if updated)
-				if (_log.isTraceEnabled()) _log.Log(LOG_TRACE, "WEBS switchlight idx:%s switchcmd:%s level:%s", idx.c_str(), switchcmd.c_str(), level.c_str());
+				_log.Debug(DEBUG_WEBSERVER, "WEBS switchlight idx:%s switchcmd:%s level:%s", idx.c_str(), switchcmd.c_str(), level.c_str());
 				std::string passcode = request::findValue(&req, "passcode");
 				if ((idx.empty()) || (switchcmd.empty()) || ((switchcmd == "Set Level") && (level.empty())) )
 					return;
@@ -6804,12 +6803,12 @@ namespace http {
 						brightnessAdj = hsb[2];
 					}
 
-					if (_log.isTraceEnabled()) _log.Log(LOG_TRACE, "setcolbrightnessvalue: json: %s, color: '%s', bri: '%s'", json.c_str(), color.toString().c_str(), brightness.c_str());
+					//_log.Debug(DEBUG_WEBSERVER, "setcolbrightnessvalue: json: %s, color: '%s', bri: '%s'", json.c_str(), color.toString().c_str(), brightness.c_str());
 				}
 				else if (!hex.empty())
 				{
 					uint64_t ihex = hexstrtoui64(hex);
-					if (_log.isTraceEnabled()) _log.Log(LOG_TRACE, "setcolbrightnessvalue: hex: '%s', ihex: %" PRIx64 ", bri: '%s', iswhite: '%s'", hex.c_str(), ihex, brightness.c_str(), iswhite.c_str());
+					//_log.Debug(DEBUG_WEBSERVER, "setcolbrightnessvalue: hex: '%s', ihex: %" PRIx64 ", bri: '%s', iswhite: '%s'", hex.c_str(), ihex, brightness.c_str(), iswhite.c_str());
 					uint8_t r = 0;
 					uint8_t g = 0;
 					uint8_t b = 0;
@@ -6851,7 +6850,7 @@ namespace http {
 							break;
 					}
 					if (iswhite == "true") color.mode = ColorModeWhite;
-					if (_log.isTraceEnabled()) _log.Log(LOG_TRACE, "setcolbrightnessvalue: rgbww: %02x%02x%02x%02x%02x, color: '%s'", r, g, b, cw, ww, color.toString().c_str());
+					//_log.Debug(DEBUG_WEBSERVER, "setcolbrightnessvalue: rgbww: %02x%02x%02x%02x%02x, color: '%s'", r, g, b, cw, ww, color.toString().c_str());
 				}
 				else if (!hue.empty())
 				{
@@ -6865,7 +6864,7 @@ namespace http {
 
 					color = _tColor(r, g, b, 0, 0, ColorModeRGB);
 					if (iswhite == "true") color.mode = ColorModeWhite;
-					if (_log.isTraceEnabled()) _log.Log(LOG_TRACE, "setcolbrightnessvalue2: hue: %f, rgb: %02x%02x%02x, color: '%s'", iHue, r, g, b, color.toString().c_str());
+					//_log.Debug(DEBUG_WEBSERVER, "setcolbrightnessvalue2: hue: %f, rgb: %02x%02x%02x, color: '%s'", iHue, r, g, b, color.toString().c_str());
 				}
 
 				if (color.mode == ColorModeNone)
@@ -7655,9 +7654,6 @@ namespace http {
 
 			std::string Latitude = request::findValue(&req, "Latitude");
 			std::string Longitude = request::findValue(&req, "Longitude");
-			_log.SetLogPreference(CURLEncode::URLDecode(request::findValue(&req, "LogFilter")),
-				CURLEncode::URLDecode(request::findValue(&req, "LogFileName")),
-				CURLEncode::URLDecode(request::findValue(&req, "LogLevel")));
 			if ((Latitude != "") && (Longitude != ""))
 			{
 				std::string LatLong = Latitude + ";" + Longitude;
@@ -13229,15 +13225,6 @@ szQuery << "UPDATE DeviceStatus SET "
 				}
 				else if (Key == "SendErrorsAsNotification") {
 					root["SendErrorsAsNotification"] = nValue;
-				}
-				else if (Key == "LogFilter") {
-					root[Key] = sValue;
-				}
-				else if (Key == "LogFileName") {
-					root[Key] = sValue;
-				}
-				else if (Key == "LogLevel") {
-					root[Key] = sValue;
 				}
 				else if (Key == "DeltaTemperatureLog") {
 					root[Key] = sValue;

@@ -112,6 +112,7 @@
 #include "../hardware/RAVEn.h"
 #include "../hardware/DenkoviSmartdenLan.h"
 #include "../hardware/DenkoviSmartdenIPInOut.h"
+#include "../hardware/DenkoviDevices.h"
 #include "../hardware/AccuWeather.h"
 #include "../hardware/BleBox.h"
 #include "../hardware/Ec3kMeterTCP.h"
@@ -916,6 +917,10 @@ bool MainWorker::AddHardwareFromParams(
 	case HTYPE_DenkoviSmartdenIPInOut:
 		//LAN
 		pHardware = new CDenkoviSmartdenIPInOut(ID, Address, Port, Password, Mode1);
+		break;
+	case HTYPE_DenkoviDevices:
+		//LAN
+		pHardware = new CDenkoviDevices(ID, Address, Port, Password, Mode1, Mode2);
 		break;
 	case HTYPE_HEOS:
 		//HEOS by DENON
@@ -8648,12 +8653,11 @@ void MainWorker::decode_Radiator1(const int HwdID, const _eHardwareTypes HwdType
 //not in dbase yet
 void MainWorker::decode_Baro(const int HwdID, const _eHardwareTypes HwdType, const tRBUF *pResponse, _tRxMessageProcessingResult & procResult)
 {
-	WriteMessage("");
-
 	//unsigned char devType=pTypeBARO;
 
+	WriteMessageStart();
 	WriteMessage("Not implemented");
-
+	WriteMessageEnd();
 	procResult.DeviceRowIdx = -1;
 }
 
@@ -11930,9 +11934,9 @@ bool MainWorker::SwitchLight(const uint64_t idx, const std::string &switchcmd, c
 	//Check if we have an On-Delay, if yes, add it to the tasker
 	if (((bIsOn) && (iOnDelay != 0)) || ExtraDelay)
 	{
-		if (ExtraDelay != 0)
+		if (iOnDelay + ExtraDelay != 0)
 		{
-			_log.Log(LOG_NORM, "Delaying switch [%s] action (%s) for %d seconds", devName.c_str(), switchcmd.c_str(), ExtraDelay);
+			_log.Log(LOG_NORM, "Delaying switch [%s] action (%s) for %d seconds", devName.c_str(), switchcmd.c_str(), iOnDelay + ExtraDelay);
 		}
 		m_sql.AddTaskItem(_tTaskItem::SwitchLightEvent(static_cast<float>(iOnDelay + ExtraDelay), idx, switchcmd, level, color, "Switch with Delay"));
 		return true;
@@ -13060,7 +13064,7 @@ int MainWorker::ConvertPercentLevel(int dType,int dSubType,_eSwitchType switchty
   return iLevel ;
 }
 
-bool MainWorker::UpdateDevice(const int HardwareID, const std::string &DeviceID, const int unit, const int devType, const int subType, const int nValue, const std::string &sValue, const int signallevel, const int batterylevel, const bool parseTrigger)
+bool MainWorker::UpdateDevice(const int HardwareID, const std::string &DeviceID, const int unit, const int devType, const int subType, int nValue, std::string &sValue, const int signallevel, const int batterylevel, const bool parseTrigger)
 {
 	CDomoticzHardwareBase *pHardware = GetHardware(HardwareID);
 
@@ -13075,24 +13079,6 @@ bool MainWorker::UpdateDevice(const int HardwareID, const std::string &DeviceID,
 
 	if (pHardware)
 	{
-		std::vector<std::vector<std::string> > result;
-
-		result = m_sql.safe_query(
-			"SELECT ID,Name FROM DeviceStatus WHERE (HardwareID=%d AND DeviceID='%q' AND Unit=%d AND Type=%d AND SubType=%d)",
-			HardwareID, DeviceID.c_str(), unit, devType, subType);
-
-		uint64_t dID = 0;
-		std::string dName = "";
-
-		if (!result.empty())
-		{
-			std::vector<std::string> sd = result[0];
-			std::stringstream s_strid;
-			s_strid << sd[0];
-			s_strid >> dID;
-			dName = sd[1];
-		}
-
 		if (devType == pTypeLighting2)
 		{
 			//Update as Lighting 2
@@ -13121,6 +13107,66 @@ bool MainWorker::UpdateDevice(const int HardwareID, const std::string &DeviceID,
 			lcmd.LIGHTING2.rssi = signallevel;
 			DecodeRXMessage(pHardware, (const unsigned char *)&lcmd.LIGHTING2, NULL, batterylevel);
 			return true;
+		}
+
+		if (
+			(devType == pTypeTEMP)
+			|| (devType == pTypeTEMP_HUM)
+			|| (devType == pTypeTEMP_HUM_BARO)
+			|| (devType == pTypeBARO)
+			)
+		{
+			//Adjustment value
+			float AddjValue = 0.0f;
+			float AddjMulti = 1.0f;
+			m_sql.GetAddjustment(HardwareID, DeviceID.c_str(), unit, devType, subType, AddjValue, AddjMulti);
+
+			char szTmp[100];
+			std::vector<std::string> strarray;
+
+			if (devType == pTypeTEMP)
+			{
+				float temp = static_cast<float>(atof(sValue.c_str()));
+				temp += AddjValue;
+				sprintf(szTmp, "%.1f", temp);
+				sValue = szTmp;
+			}
+			else if (devType == pTypeTEMP_HUM)
+			{
+				StringSplit(sValue, ";", strarray);
+				if (strarray.size() == 3)
+				{
+					float temp = static_cast<float>(atof(strarray[0].c_str()));
+					temp += AddjValue;
+					sprintf(szTmp, "%.1f;%s;%s", temp, strarray[1].c_str(), strarray[2].c_str());
+					sValue = szTmp;
+				}
+			}
+			else if (devType == pTypeTEMP_HUM_BARO)
+			{
+				StringSplit(sValue, ";", strarray);
+				if (strarray.size() == 5)
+				{
+					float temp = static_cast<float>(atof(strarray[0].c_str()));
+					float fbarometer = static_cast<float>(atof(strarray[3].c_str()));
+					temp += AddjValue;
+
+					AddjValue = 0.0f;
+					AddjMulti = 1.0f;
+					m_sql.GetAddjustment2(HardwareID, DeviceID.c_str(), unit, devType, subType, AddjValue, AddjMulti);
+					fbarometer += AddjValue;
+
+					if (subType == sTypeTHBFloat)
+					{
+						sprintf(szTmp, "%.1f;%s;%s;%.1f;%s", temp, strarray[1].c_str(), strarray[2].c_str(), fbarometer, strarray[4].c_str());
+					}
+					else
+					{
+						sprintf(szTmp, "%.1f;%s;%s;%d;%s", temp, strarray[1].c_str(), strarray[2].c_str(), (int)rint(fbarometer), strarray[4].c_str());
+					}
+					sValue = szTmp;
+				}
+			}
 		}
 	}
 

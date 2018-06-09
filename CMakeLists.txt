@@ -64,7 +64,7 @@ ELSE(USE_BUILTIN_LUA)
     IF(NOT LUA_INCLUDE_DIRS)
       find_path(LUA_INC_DIRS NAMES "lua.h" PATH_SUFFIXES "lua5.2")
       set(LUA_INCLUDE_DIRS ${LUA_INC_DIRS})
-    ENDIF(LUA_INCLUDE_DIRS)
+    ENDIF(NOT LUA_INCLUDE_DIRS)
     message(STATUS "Found lua.h at: ${LUA_INCLUDE_DIRS}")
     INCLUDE_DIRECTORIES(${LUA_INCLUDE_DIRS})
     add_definitions(-DWITH_EXTERNAL_LUA)
@@ -355,6 +355,7 @@ hardware/DarkSky.cpp
 hardware/DavisLoggerSerial.cpp
 hardware/DenkoviSmartdenIPInOut.cpp
 hardware/DenkoviSmartdenLan.cpp
+hardware/DenkoviDevices.cpp
 hardware/DomoticzHardware.cpp
 hardware/DomoticzInternal.cpp
 hardware/DomoticzTCP.cpp
@@ -573,7 +574,7 @@ set(Boost_USE_STATIC_LIBS ${USE_STATIC_BOOST})
 set(Boost_USE_MULTITHREADED ON)
 unset(Boost_INCLUDE_DIR CACHE)
 unset(Boost_LIBRARY_DIRS CACHE)
-find_package(Boost REQUIRED COMPONENTS thread chrono system)
+find_package(Boost REQUIRED COMPONENTS thread system)
 
 if(USE_STATIC_BOOST)
    message(STATUS "Linking against boost static libraries")

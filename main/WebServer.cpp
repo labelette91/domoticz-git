@@ -681,6 +681,7 @@ namespace http {
 #endif
 
 			m_pWebEm->RegisterWhitelistURLString("/html5.appcache");
+			m_pWebEm->RegisterWhitelistURLString("/images/floorplans/plan");
 
 			//Start normal worker thread
 			m_bDoStop = false;
@@ -6736,9 +6737,14 @@ namespace http {
 			{
 				root["status"] = "OK";
 				root["title"] = "GetSecStatus";
+				
 				int secstatus = 0;
 				m_sql.GetPreferencesVar("SecStatus", secstatus);
 				root["secstatus"] = secstatus;
+				
+				int secondelay = 30;
+				m_sql.GetPreferencesVar("SecOnDelay", secondelay);
+				root["secondelay"] = secondelay;
 			}
 			else if (cparam == "setsecstatus")
 			{
@@ -8935,10 +8941,10 @@ namespace http {
 					root["result"][ii]["AddjMulti"] = AddjMulti;
 					root["result"][ii]["AddjValue2"] = AddjValue2;
 					root["result"][ii]["AddjMulti2"] = AddjMulti2;
-					if (sValue.size() > sizeof(szData) - 10)
-						continue; //invalid sValue
-					sprintf(szData, "%d, %s", nValue, sValue.c_str());
-					root["result"][ii]["Data"] = szData;
+
+					std::stringstream s_data;
+					s_data << int(nValue) << ", " << sValue;
+					root["result"][ii]["Data"] = s_data.str();
 
 					root["result"][ii]["Notifications"] = (m_notifications.HasNotifications(sd[0]) == true) ? "true" : "false";
 					root["result"][ii]["ShowNotifications"] = true;
@@ -9234,11 +9240,6 @@ namespace http {
 							root["result"][ii]["LevelNames"] = base64_encode((const unsigned char*)levelNames.c_str(), levelNames.size());
 							root["result"][ii]["LevelActions"] = base64_encode((const unsigned char*)levelActions.c_str(), levelActions.size());
 						}
-						//Rob: Dont know who did this, but this should be solved in GetLightCommand
-						//Now we had double Set Level/Level notations
-						//if (llevel != 0)
-							//sprintf(szData, "%s, Level: %d %%", lstatus.c_str(), llevel);
-						//else
 						sprintf(szData, "%s", lstatus.c_str());
 						root["result"][ii]["Data"] = szData;
 					}

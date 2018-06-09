@@ -37,6 +37,11 @@ CDomoticzHardwareBase::~CDomoticzHardwareBase()
 {
 }
 
+bool CDomoticzHardwareBase::CustomCommand(const uint64_t idx, const std::string &sCommand)
+{
+	return false;
+}
+
 bool CDomoticzHardwareBase::Start()
 {
 	m_iHBCounter = 0;

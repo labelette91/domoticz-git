@@ -3587,8 +3587,8 @@ std::vector<std::vector<std::string> > CSQLHelper::query(const std::string &szQu
 
 	{
 		_log.Debug(DEBUG_NORM, "SQLQ query : %s", szQuery.c_str());
-//		if (!_log.TestFilter("SQLR"))
-//			LogQueryResult(results);
+		if (!_log.IsDebugStringFiltered("SQL"))
+			LogQueryResult(results);
 	}
 	std::string error = sqlite3_errmsg(m_dbase);
 	if (error != "not an error")

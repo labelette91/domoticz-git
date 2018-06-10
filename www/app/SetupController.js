@@ -652,6 +652,9 @@ define(['app'], function (app) {
 					if (typeof data.SecOnDelay != 'undefined') {
 						$("#sectable #SecOnDelay").val(data.SecOnDelay);
 					}
+					if (typeof data.LogFilter != 'undefined') {
+						$("#LogFilter").val(data.LogFilter);
+					}
 					if (typeof data.cloudenabled != 'undefined') {
 						if (!data.cloudenabled) {
 							$("#MyDomoticzTab").css("display", "none");

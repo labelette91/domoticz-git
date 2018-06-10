@@ -3010,6 +3010,7 @@ namespace http {
 			std::string sstate = request::findValue(&req, "state");
 			std::string idx = request::findValue(&req, "idx");
 			std::string name = request::findValue(&req, "name");
+			_log.Debug(DEBUG_WEBSERVER, "WEBS SetThermostatState  State cmd Id:%s Name:%s State:%s", idx.c_str(), name.c_str(), sstate.c_str());
 
 			if (
 				(idx.empty()&&name.empty()) ||
@@ -7660,6 +7661,7 @@ namespace http {
 
 			std::string Latitude = request::findValue(&req, "Latitude");
 			std::string Longitude = request::findValue(&req, "Longitude");
+			_log.SetLogPreference(CURLEncode::URLDecode(request::findValue(&req, "LogFilter"))  );
 			if ((Latitude != "") && (Longitude != ""))
 			{
 				std::string LatLong = Latitude + ";" + Longitude;
@@ -13226,6 +13228,9 @@ szQuery << "UPDATE DeviceStatus SET "
 				}
 				else if (Key == "SendErrorsAsNotification") {
 					root["SendErrorsAsNotification"] = nValue;
+				}
+				else if (Key == "LogFilter") {
+					root[Key] = sValue;
 				}
 				else if (Key == "DeltaTemperatureLog") {
 					root[Key] = sValue;

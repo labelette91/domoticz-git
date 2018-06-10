@@ -1712,7 +1712,7 @@ bool  ImperiHomeRequest( std::string &request_path , std::string &rep_content)
   bool ret = m_ImperiHome.Request( request_path , rep_content);
   if (ret)
 	
-//		if (!_log.TestFilter("IMPA"))
+		if (!_log.IsDebugStringFiltered("IMPA"))
 			if (rep_content.length())
 				_log.Debug(DEBUG_NORM, "IMPA: IIS Answer %s", rep_content.c_str());
 

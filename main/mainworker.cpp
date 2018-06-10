@@ -2197,8 +2197,9 @@ void MainWorker::ProcessRXMessage(const CDomoticzHardwareBase *pHardware, const 
 	uint64_t DeviceRowIdx = -1;
 	std::string DeviceName = "";
 	tcp::server::CTCPClient *pClient2Ignore = NULL;
-
-	 {
+	//dump received message in HEXA
+	if (_log.IsDebugLevelEnabled(DEBUG_RECEIVED))
+	{
 		char  mes[sizeof(tRBUF) * 2 + 2];
 		char * ptmes = mes;
 		for (size_t i = 0; i < Len; i++) {

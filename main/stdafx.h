@@ -44,6 +44,8 @@ typedef unsigned char       BYTE;
 	#include <boost/cstdint.hpp>
 	using boost::uint32_t;
 	using boost::uint8_t;
+  using boost::uint64_t
+
 #endif
 
 #endif

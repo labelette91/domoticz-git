@@ -52,12 +52,14 @@ public:
 
 	T_Map_LastRoomTemp Map_LastRoomTemp ;
 	T_Map_CircularBuffer DeltaTemps;
-  char *          GetModeStr( VirtualThermostatMode mode );
-  VirtualThermostatMode  GetModeInt( const char * mode );
-  bool SetMode ( const std::string &idx,VirtualThermostatMode mode );
-  bool SetMode ( const std::string &idx,const char * mode );
+
+  std::string ThermostatModeIntToString(  mode );
+  int  ThermostatModeStringToInt ( const std::string & mode );
   std::string GetAvailableMode() ;
   bool SetThermostatState(const std::string &idx, const int newState);
+
+
+
 
   bool StartHardware();
   bool StopHardware();

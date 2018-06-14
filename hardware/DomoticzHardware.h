@@ -107,6 +107,23 @@ protected:
 	void SendCustomSensor(const int NodeID, const int ChildID, const int BatteryLevel, const float Dust, const std::string &defaultname, const std::string &defaultLabel);
 	void SendZWaveAlarmSensor(const int NodeID, const int InstanceID, const int BatteryLevel, const int aType, const int aValue, const std::string &defaultname);
 
+
+  //thermostat function
+  //return the thermostat available mode in string "OFF;ECO;CONFOR;AUTO;"
+  virtual std::string GetAvailableMode() {return "" ;};
+  //return the thermostat mode 
+  virtual std::string GetCurrentMode(TSqlRowQuery * row) {return "" ; };
+  //return the thermostat room temperature 
+  virtual std::string GetRoomTemperature(TSqlRowQuery * row) {return "";} ;
+  //return the thermostat setpoint 
+  virtual std::string GetSetPoint(TSqlRowQuery * row) {return "" } ;
+  //set the thermostat mode 
+  virtual bool SetThermostatState(const std::string &deviceIdx, const int newState) ;
+  //convert interger state to string state : 0--> OFF 1-->ECO
+  virtual std::string ThermostatModeIntToString(int newState) ;
+  //convert string state to int state : OFF-->0  ECO-->1
+  virtual int ThermostatModeStringToInt(std::string &state ) ;
+
 	int m_iHBCounter;
 	boost::mutex readQueueMutex;
 	unsigned char m_rxbuffer[RX_BUFFER_SIZE];

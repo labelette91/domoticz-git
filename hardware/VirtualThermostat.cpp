@@ -376,39 +376,39 @@ void VirtualThermostat::ThermostatToggleEcoConfort (const char * devID , char * 
 }
 
 //return true if in confor mode
+virtual std::string GetCurrentMode(TSqlRowQuery * row) 
+{
+ 	std::vector<std::string> sValueGlb;
+  StringSplit((*row)[sValue], ";", sValueGlb);
+  return GetMode ( (float)atof(sValueGlb[0].c_str())  , (float)atof((*row)[AddjValue].c_str()),  (float)atof((*row)[AddjValue2].c_str()) )  );
+};
+
 std::string VirtualThermostat::GetMode ( float curTemp , float EcoTemp, float ConfTemp )
 {
   float  moy=(EcoTemp+ConfTemp)/2;
-  if (curTemp<=moy)  return GetModeStr(Eco) ;
-  else               return GetModeStr(Confor)  ;
+  if (curTemp<=moy)  return ThermostatModeIntToString(Eco) ;
+  else               return ThermostatModeIntToString(Confor)  ;
 }
 
-/*
-*/
-bool VirtualThermostat::SetThermostatState(const std::string &idx, const int newState)
-{
-	return SetMode (idx, (VirtualThermostatMode) newState );
-}
-
-
-char *   VirtualThermostat::GetModeStr( VirtualThermostatMode Mode )
+std::string   VirtualThermostat::ThermostatModeIntToString( int Mode )
 {
   if (Mode>EndMode)
     Mode=EndMode;
     return ModeStr[Mode];
 }
 
-VirtualThermostatMode  VirtualThermostat::GetModeInt( const char * mode )
+int  VirtualThermostat::ThermostatModeStringToInt( std::string & mode )
 {
 
   for (int i=0;i<EndMode;i++)
     if (strcmp(mode,ModeStr[i])==0)
-      return (VirtualThermostatMode)i;
+      return  i;
   return EndMode;
 
 }
-bool VirtualThermostat::SetMode ( const std::string &idx,VirtualThermostatMode mode )
+bool VirtualThermostat::SetThermostatState(const std::string &idx, const int newState)
 {
+  VirtualThermostatMode mode = newState;
   if (mode>=EndMode)
     return false;
   if (mode==Confor)
@@ -421,11 +421,7 @@ bool VirtualThermostat::SetMode ( const std::string &idx,VirtualThermostatMode m
 	  m_mainworker.SetSetPoint(idx, m_sql.ConvertTemperatureUnit((float)TEMPERATURE_OFF));
   return true;
 }
-bool VirtualThermostat::SetMode ( const std::string &idx,const char * strMode )
-{
-  VirtualThermostatMode mode = GetModeInt(strMode);
-  return SetMode(idx,mode);
-}
+
 std::string VirtualThermostat:: GetAvailableMode() 
 {
   std::string AvailableMode;
@@ -436,4 +432,15 @@ std::string VirtualThermostat:: GetAvailableMode()
   return AvailableMode ;
 
 }
+
+//return the thermostat room temperature 
+std::string GetRoomTemperature(TSqlRowQuery * row) 
+{
+  return (*row)[RoomTemp] ;
+} ;
+//return the thermostat setpoint 
+virtual std::string GetSetPoint(TSqlRowQuery * row) 
+{
+  return (*row)[sValue] ;
+} ;
 

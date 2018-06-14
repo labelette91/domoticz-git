@@ -53,12 +53,21 @@ public:
 	T_Map_LastRoomTemp Map_LastRoomTemp ;
 	T_Map_CircularBuffer DeltaTemps;
 
-  std::string ThermostatModeIntToString(  mode );
-  int  ThermostatModeStringToInt ( const std::string & mode );
-  std::string GetAvailableMode() ;
-  bool SetThermostatState(const std::string &idx, const int newState);
-
-
+	//thermostat function
+	//return the thermostat available mode in string "OFF;ECO;CONFOR;AUTO;"
+	virtual std::string GetAvailableMode();
+	//return the thermostat mode 
+	virtual std::string GetCurrentMode(TSqlRowQuery * row);
+	//return the thermostat room temperature 
+	virtual std::string GetRoomTemperature(TSqlRowQuery * row);
+	//return the thermostat setpoint 
+	virtual std::string GetSetPoint(TSqlRowQuery * row);
+	//set the thermostat mode 
+	virtual bool SetThermostatState(const std::string &deviceIdx, const int newState);
+	//convert interger state to string state : 0--> OFF 1-->ECO
+	virtual std::string ThermostatModeIntToString(int newState);
+	//convert string state to int state : OFF-->0  ECO-->1
+	virtual int ThermostatModeStringToInt(std::string &state);
 
 
   bool StartHardware();

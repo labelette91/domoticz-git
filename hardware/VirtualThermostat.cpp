@@ -8,6 +8,7 @@
 
 #include "../main/localtime_r.h"
 #include "../main/mainworker.h"
+#include "../main/ImperiHome.h"
 
 VirtualThermostat * m_VirtualThermostat;
 
@@ -376,11 +377,11 @@ void VirtualThermostat::ThermostatToggleEcoConfort (const char * devID , char * 
 }
 
 //return true if in confor mode
-virtual std::string GetCurrentMode(TSqlRowQuery * row) 
+std::string VirtualThermostat::GetCurrentMode(TSqlRowQuery * row)
 {
  	std::vector<std::string> sValueGlb;
   StringSplit((*row)[sValue], ";", sValueGlb);
-  return GetMode ( (float)atof(sValueGlb[0].c_str())  , (float)atof((*row)[AddjValue].c_str()),  (float)atof((*row)[AddjValue2].c_str()) )  );
+  return GetMode ( (float)atof(sValueGlb[0].c_str())  , (float)atof((*row)[AddjValue].c_str()),  (float)atof((*row)[AddjValue2].c_str()) )  ;
 };
 
 std::string VirtualThermostat::GetMode ( float curTemp , float EcoTemp, float ConfTemp )
@@ -401,14 +402,14 @@ int  VirtualThermostat::ThermostatModeStringToInt( std::string & mode )
 {
 
   for (int i=0;i<EndMode;i++)
-    if (strcmp(mode,ModeStr[i])==0)
+    if (strcmp(mode.c_str(),ModeStr[i])==0)
       return  i;
   return EndMode;
 
 }
 bool VirtualThermostat::SetThermostatState(const std::string &idx, const int newState)
 {
-  VirtualThermostatMode mode = newState;
+  VirtualThermostatMode mode = (VirtualThermostatMode)newState;
   if (mode>=EndMode)
     return false;
   if (mode==Confor)
@@ -434,12 +435,12 @@ std::string VirtualThermostat:: GetAvailableMode()
 }
 
 //return the thermostat room temperature 
-std::string GetRoomTemperature(TSqlRowQuery * row) 
+std::string VirtualThermostat::GetRoomTemperature(TSqlRowQuery * row)
 {
   return (*row)[RoomTemp] ;
 } ;
 //return the thermostat setpoint 
-virtual std::string GetSetPoint(TSqlRowQuery * row) 
+std::string VirtualThermostat::GetSetPoint(TSqlRowQuery * row)
 {
   return (*row)[sValue] ;
 } ;

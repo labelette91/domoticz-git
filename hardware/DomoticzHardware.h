@@ -37,7 +37,7 @@ public:
 	void SetHeartbeatReceived();
 
 	//thermostat function
-	//return the thermostat available mode in string "OFF;ECO;CONFOR;AUTO;"
+	//return the thermostat available mode in string "OFF,ECO,CONFOR,AUTO," separated by comma , and 0=OFF 1=ECO, 2=CONFOR 3=AUTO
 	virtual std::string GetAvailableMode() { return ""; };
 	//return the thermostat mode 
 	virtual std::string GetCurrentMode( std::vector<std::string> * row) { return ""; };
@@ -47,12 +47,6 @@ public:
 	virtual std::string GetSetPoint(std::vector<std::string> * row) { return ""; };
 	//set the thermostat mode 
 	virtual bool SetThermostatState(const std::string &deviceIdx, const int newState) { return true; };
-	//convert interger state to string state : 0--> OFF 1-->ECO
-	virtual std::string ThermostatModeIntToString(int newState) { return std::to_string(newState); };
-	//convert string state to int state : OFF-->0  ECO-->1
-	virtual int ThermostatModeStringToInt(std::string &state) { return std::stoi(state, 0, 0); };
-
-
 
 	time_t m_LastHeartbeat;
 	time_t m_LastHeartbeatReceive;

@@ -72,14 +72,8 @@ bool VirtualThermostat::WriteToHardware(const char *pdata, const unsigned char l
 {
 	return true;
 }
-  //therlostat mode string
-  char * ModeStr[]={
-    "Eco",
-    "Conf",
-    "Frost",
-    "Off",
-    "Unkn"
-  };
+  //thermostat mode string
+char AvailableMode[] = "Eco,Conf,Frost,Off";
 
 //time for the power time modulation in minute
 #define MODULATION_DURATION 10
@@ -387,26 +381,10 @@ std::string VirtualThermostat::GetCurrentMode(TSqlRowQuery * row)
 std::string VirtualThermostat::GetMode ( float curTemp , float EcoTemp, float ConfTemp )
 {
   float  moy=(EcoTemp+ConfTemp)/2;
-  if (curTemp<=moy)  return ThermostatModeIntToString(Eco) ;
-  else               return ThermostatModeIntToString(Confor)  ;
+  if (curTemp<=moy)  return "Eco" ;
+  else               return "Conf"  ;
 }
 
-std::string   VirtualThermostat::ThermostatModeIntToString( int Mode )
-{
-  if (Mode>EndMode)
-    Mode=EndMode;
-    return ModeStr[Mode];
-}
-
-int  VirtualThermostat::ThermostatModeStringToInt( std::string & mode )
-{
-
-  for (int i=0;i<EndMode;i++)
-    if (strcmp(mode.c_str(),ModeStr[i])==0)
-      return  i;
-  return EndMode;
-
-}
 bool VirtualThermostat::SetThermostatState(const std::string &idx, const int newState)
 {
   VirtualThermostatMode mode = (VirtualThermostatMode)newState;
@@ -425,13 +403,7 @@ bool VirtualThermostat::SetThermostatState(const std::string &idx, const int new
 
 std::string VirtualThermostat:: GetAvailableMode() 
 {
-  std::string AvailableMode;
-  for (int i=0;i<EndMode;i++){
-    AvailableMode += ModeStr[i] ;
-    AvailableMode += ",";
-  }
   return AvailableMode ;
-
 }
 
 //return the thermostat room temperature 

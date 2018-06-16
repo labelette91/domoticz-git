@@ -65,9 +65,6 @@ public:
 	//set the thermostat mode 
 	virtual bool SetThermostatState(const std::string &deviceIdx, const int newState);
 	//convert interger state to string state : 0--> OFF 1-->ECO
-	virtual std::string ThermostatModeIntToString(int newState);
-	//convert string state to int state : OFF-->0  ECO-->1
-	virtual int ThermostatModeStringToInt(std::string &state);
 
 
   bool StartHardware();

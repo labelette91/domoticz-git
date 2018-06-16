@@ -283,6 +283,32 @@ void ImperiHome::ManageHisto (std::string &device , std::string &value	 , std::s
     }
 
 }
+
+//convert thermostat string state to int state : OFF-->0  ECO-->1
+int  ThermostatModeStringToInt(std::string & mode , std::string & AvailableMode)
+{
+	std::vector<std::string> ModeStr;
+	StringSplit(AvailableMode, ",", ModeStr);
+
+	for (int i = 0; i<ModeStr.size(); i++)
+		if (strcmp(mode.c_str(), ModeStr[i].c_str()) == 0)
+			return  i;
+	return 0;
+
+}
+//convert interger thermostat state to string state : 0--> OFF 1-->ECO
+std::string   ThermostatModeIntToString(int Mode, std::string & AvailableMode )
+{
+	std::vector<std::string> ModeStr;
+	StringSplit(AvailableMode, ",", ModeStr);
+	if(Mode<ModeStr.size())
+		return ModeStr[Mode];
+	else
+		return "UNKNOWN";
+
+}
+
+
 void ImperiHome::ManageAction (std::string &device , std::string &action	 , std::string &actionType	 , std::string actionValue	 )
 {
       //the dev Id is DEVnnn_zzz : nnn is the ID 
@@ -332,7 +358,7 @@ void ImperiHome::ManageAction (std::string &device , std::string &action	 , std:
 				if (actionValue==OffMode){
 				}*/
         CDomoticzHardwareBase* pHardware  = m_mainworker.GetDeviceHardware(ID);
-        m_mainworker.SetThermostatState (ID, pHardware->ThermostatModeStringToInt(action) );
+        m_mainworker.SetThermostatState (ID, ThermostatModeStringToInt( actionValue, pHardware->GetAvailableMode()) );
 
 
 			}

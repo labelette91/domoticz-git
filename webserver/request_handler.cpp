@@ -24,8 +24,6 @@
 #include "reply.hpp"
 #include "request.hpp"
 #include "cWebem.h"
-#include "../main/Logger.h"
-extern bool  ImperiHomeRequest( std::string &request_path , std::string &rep_content);
 #include "GZipHelper.h"
 
 // remove
@@ -259,12 +257,6 @@ void request_handler::handle_request(const request &req, reply &rep, modify_info
   if (!m_bIsZIP)
 #endif
   {
-		//system command 
-		if (   ImperiHomeRequest(request_path,rep.content) ){
-			  rep.status = reply::ok;
-				extension="html";
-		}
-		else 
 	  if (extension == "php")
 	  {
 		  if (!myWebem->m_settings.is_php_enabled())

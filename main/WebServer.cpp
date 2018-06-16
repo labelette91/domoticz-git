@@ -364,6 +364,9 @@ namespace http {
 			m_pWebEm->RegisterPageCode("/raspberry.cgi", boost::bind(&CWebServer::GetInternalCameraSnapshot, this, _1, _2, _3));
 			m_pWebEm->RegisterPageCode("/uvccapture.cgi", boost::bind(&CWebServer::GetInternalCameraSnapshot, this, _1, _2, _3));
 			m_pWebEm->RegisterPageCode("/images/floorplans/plan", boost::bind(&CWebServer::GetFloorplanImage, this, _1, _2, _3));
+			m_pWebEm->RegisterPageCode("/rooms", boost::bind(&CWebServer::ImperihomeServices, this, _1, _2, _3));
+			m_pWebEm->RegisterPageCode("/devices", boost::bind(&CWebServer::ImperihomeServices, this, _1, _2, _3));
+			m_pWebEm->RegisterPageCode("/system", boost::bind(&CWebServer::ImperihomeServices, this, _1, _2, _3));
 
 			m_pWebEm->RegisterActionCode("storesettings", boost::bind(&CWebServer::PostSettings, this, _1, _2, _3));
 			m_pWebEm->RegisterActionCode("setrfxcommode", boost::bind(&CWebServer::SetRFXCOMMode, this, _1, _2, _3));

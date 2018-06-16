@@ -376,6 +376,10 @@ private:
 #ifdef WITH_TELLDUSCORE
     void Cmd_TellstickApplySettings(WebEmSession &session, const request &req, Json::Value &root);
 #endif
+
+		void ImperihomeServices(WebEmSession & session, const request& req, reply & rep);
+
+
 	boost::shared_ptr<boost::thread> m_thread;
 
 	std::map < std::string, webserver_response_function > m_webcommands;

@@ -1789,4 +1789,9 @@ _log.Log(LOG_STATUS,"IMPE: Graphic Id:%s from:%lu=%s to:%lu=%s Points:%d", idx.c
 
 
 
-  
+void http::server::CWebServer::ImperihomeServices(WebEmSession & session, const request& req, reply & rep)
+{
+	ImperiHomeRequest((const std::string)req.uri, rep.content) ;
+	rep.status = reply::ok;
+	//extension = "html";
+}

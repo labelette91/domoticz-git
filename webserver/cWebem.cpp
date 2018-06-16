@@ -522,6 +522,17 @@ bool cWebem::IsPageOverride(const request& req, reply& rep)
 	return false;
 }
 
+std::string getRootDir(std::string &request_path)
+{
+	std::string rootDir = "";
+	std::vector<std::string> results;
+	StringSplit(request_path.substr(1), "/", results);
+	if (results.size() !=0 )
+	{
+		rootDir = "/" + results[0];
+	}
+	return rootDir;
+}
 bool cWebem::CheckForPageOverride(WebEmSession & session, request& req, reply& rep)
 {
 	// Decode url to path.
@@ -669,6 +680,11 @@ bool cWebem::CheckForPageOverride(WebEmSession & session, request& req, reply& r
 
 	std::map < std::string, webem_page_function >::iterator
 		pfun = myPages.find(  request_path );
+
+	//if not found,search roodir
+	if (pfun == myPages.end())
+		pfun = myPages.find(getRootDir(request_path));
+	
 
 	if (pfun!=myPages.end())
 	{

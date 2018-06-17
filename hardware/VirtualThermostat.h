@@ -54,8 +54,7 @@ public:
 	T_Map_CircularBuffer DeltaTemps;
 
 	//thermostat function
-	//return the thermostat available mode in string "OFF;ECO;CONFOR;AUTO;"
-	virtual std::string GetAvailableMode();
+
 	//return the thermostat mode 
 	virtual std::string GetCurrentMode(TSqlRowQuery * row);
 	//return the thermostat room temperature 

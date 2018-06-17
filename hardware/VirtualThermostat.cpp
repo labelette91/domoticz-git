@@ -16,6 +16,8 @@ VirtualThermostat::VirtualThermostat(const int ID)
 {
 	m_HwdID = ID;
 	m_VirtualThermostat = this;
+	//thermostat mode string
+	SetAvailableMode("Eco,Conf,Frost,Off");
 
 }
 
@@ -72,8 +74,6 @@ bool VirtualThermostat::WriteToHardware(const char *pdata, const unsigned char l
 {
 	return true;
 }
-  //thermostat mode string
-char AvailableMode[] = "Eco,Conf,Frost,Off";
 
 //time for the power time modulation in minute
 #define MODULATION_DURATION 10
@@ -399,11 +399,6 @@ bool VirtualThermostat::SetThermostatState(const std::string &idx, const int new
   else   if (mode == Off)
 	  m_mainworker.SetSetPoint(idx, m_sql.ConvertTemperatureUnit((float)TEMPERATURE_OFF));
   return true;
-}
-
-std::string VirtualThermostat:: GetAvailableMode() 
-{
-  return AvailableMode ;
 }
 
 //return the thermostat room temperature 

@@ -36,18 +36,6 @@ public:
 
 	void SetHeartbeatReceived();
 
-	//thermostat function
-	//return the thermostat available mode in string "OFF,ECO,CONFOR,AUTO," separated by comma , and 0=OFF 1=ECO, 2=CONFOR 3=AUTO
-	virtual std::string GetAvailableMode() { return ""; };
-	//return the thermostat mode 
-	virtual std::string GetCurrentMode( std::vector<std::string> * row) { return ""; };
-	//return the thermostat room temperature 
-	virtual std::string GetRoomTemperature(std::vector<std::string> * row) { return ""; };
-	//return the thermostat setpoint 
-	virtual std::string GetSetPoint(std::vector<std::string> * row) { return ""; };
-	//set the thermostat mode 
-	virtual bool SetThermostatState(const std::string &deviceIdx, const int newState) { return true; };
-
 	time_t m_LastHeartbeat;
 	time_t m_LastHeartbeatReceive;
 	bool m_bSkipReceiveCheck;
@@ -118,8 +106,6 @@ protected:
 	bool CheckPercentageSensorExists(const int NodeID, const int ChildID);
 	void SendCustomSensor(const int NodeID, const int ChildID, const int BatteryLevel, const float Dust, const std::string &defaultname, const std::string &defaultLabel);
 	void SendZWaveAlarmSensor(const int NodeID, const int InstanceID, const int BatteryLevel, const int aType, const int aValue, const std::string &defaultname);
-
-
 
 	int m_iHBCounter;
 	boost::mutex readQueueMutex;

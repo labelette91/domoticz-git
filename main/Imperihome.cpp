@@ -13,6 +13,7 @@
 #include "../webserver/Base64.h"
 
 #include "../main/ImperiHome.h"
+#include "../hardware/ThermostatHardware.h"
 
 //#define __PI__
 
@@ -357,8 +358,9 @@ void ImperiHome::ManageAction (std::string &device , std::string &action	 , std:
 				}
 				if (actionValue==OffMode){
 				}*/
-        CDomoticzHardwareBase* pHardware  = m_mainworker.GetDeviceHardware(ID);
-        m_mainworker.SetThermostatState (ID, ThermostatModeStringToInt( actionValue, pHardware->GetAvailableMode()) );
+				CThermostatHardware *pThermostatHardware = reinterpret_cast<CThermostatHardware*>(m_mainworker.GetDeviceHardware(ID));
+				if (pThermostatHardware!=0)
+					m_mainworker.SetThermostatState (ID, ThermostatModeStringToInt( actionValue, pThermostatHardware->GetAvailableMode()) );
 
 
 			}
@@ -782,23 +784,27 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
           {
 //            DevThermostat :
           CDomoticzHardwareBase* pHardware  = m_mainworker.GetDeviceHardware((*row)[ID].c_str());
+					CThermostatHardware *pThermostatHardware = reinterpret_cast<CThermostatHardware*>(pHardware);
+					if (pThermostatHardware != 0)
+					{
+						//temperature
+						SetKey(0,"curmode"     , pThermostatHardware->GetCurrentMode ( row )  );
 
-          //temperature
-          SetKey(0,"curmode"     ,pHardware->GetCurrentMode ( row )  );
+	/*					int idx = atoi ((*row)[SwitchIdx].c_str()) ;//virtual thermostat
 
-/*					int idx = atoi ((*row)[SwitchIdx].c_str()) ;//virtual thermostat
+						if (idx>0) //virtual thermostat
+							SetKey(1,"curtemp"     ,(*row)[RoomTemp] ,"°C" ,false );
+						else
+							SetKey(1,"curtemp"     ,(*row)[sValue] ,"°C" ,false );
+	*/
+						SetKey(1,"curtemp"     , pThermostatHardware->GetRoomTemperature(row) ,"°C" ,false );
 
-          if (idx>0) //virtual thermostat
-	          SetKey(1,"curtemp"     ,(*row)[RoomTemp] ,"°C" ,false );
-					else
-	          SetKey(1,"curtemp"     ,(*row)[sValue] ,"°C" ,false );
-*/
-          SetKey(1,"curtemp"     ,pHardware->GetRoomTemperature(row) ,"°C" ,false );
+						SetKey(2,"cursetpoint" ,(*row)[sValue] );
+						SetKey(3,"step"        ,"0.5" );
+						SetKey(4,"availablemodes" , pThermostatHardware->GetAvailableMode() );
+						updateRoot( iroot++ , row , DevThermostat );
 
-          SetKey(2,"cursetpoint" ,(*row)[sValue] );
-          SetKey(3,"step"        ,"0.5" );
-          SetKey(4,"availablemodes" , pHardware->GetAvailableMode() );
-          updateRoot( iroot++ , row , DevThermostat );
+					}
 
           }
           break;

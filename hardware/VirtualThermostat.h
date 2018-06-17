@@ -1,7 +1,7 @@
 #pragma once
 
 #include <map>
-#include "DomoticzHardware.h"
+#include "ThermostatHardware.h"
 
 typedef std::map<int,  float  > T_Map_LastRoomTemp ;
 
@@ -24,7 +24,7 @@ enum VirtualThermostatMode {
   typedef std::map<int,  CircularBuffer* > T_Map_CircularBuffer;
 
 
-class VirtualThermostat : public CDomoticzHardwareBase
+class VirtualThermostat : public CThermostatHardware
 {
 public:
 

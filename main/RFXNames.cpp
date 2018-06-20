@@ -1002,7 +1002,7 @@ const char *ZWave_Thermostat_Fan_Modes[] =
 int Lookup_ZWave_Thermostat_Modes(const std::vector<std::string> &Modes, const std::string &sMode)
 {
 	int ii = 0;
-	for (auto itt : Modes)
+	for (const auto & itt : Modes)
 	{
 		if (itt == sMode)
 			return ii;
@@ -2101,7 +2101,7 @@ void GetSelectorSwitchStatuses(const std::map<std::string, std::string> & option
 		boost::split(strarray, sOptions, boost::is_any_of("|"), boost::token_compress_off);
 		int i = 0;
 		std::stringstream ss;
-		for (auto itt : strarray)
+		for (const auto & itt : strarray)
 		{
 			ss.clear();
 			ss.str("");
@@ -2127,7 +2127,7 @@ int GetSelectorSwitchLevel(const std::map<std::string, std::string> & options, c
 		std::vector<std::string> strarray;
 		boost::split(strarray, sOptions, boost::is_any_of("|"), boost::token_compress_off);
 		int i = 0;
-		for (auto itt : strarray)
+		for (const auto & itt : strarray)
 		{
 			if (itt == levelName)
 			{
@@ -2151,7 +2151,7 @@ std::string GetSelectorSwitchLevelAction(const std::map<std::string, std::string
 		std::vector<std::string> strarray;
 		boost::split(strarray, sOptions, boost::is_any_of("|"), boost::token_compress_off);
 		int i = 0;
-		for (auto itt : strarray)
+		for (const auto & itt : strarray)
 		{
 			if (i == level)
 			{

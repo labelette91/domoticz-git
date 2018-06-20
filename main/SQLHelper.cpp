@@ -904,7 +904,7 @@ bool CSQLHelper::OpenDatabase()
 			result = safe_query("SELECT ID FROM DeviceStatus WHERE (Type=%d)", pTypeP1Power);
 			if (!result.empty())
 			{
-				for (auto itt : result)
+				for (const auto & itt : result)
 				{
 					std::vector<std::string> sd = itt;
 					std::string idx = sd[0];
@@ -919,7 +919,7 @@ bool CSQLHelper::OpenDatabase()
 			result = safe_query("SELECT ID, Username, Password FROM Cameras ORDER BY ID");
 			if (!result.empty())
 			{
-				for (auto itt : result)
+				for (const auto & itt : result)
 				{
 					std::vector<std::string> sd = itt;
 					std::string camuser = base64_encode((const unsigned char*)sd[1].c_str(), sd[1].size());
@@ -1014,7 +1014,7 @@ bool CSQLHelper::OpenDatabase()
 			if (!result.empty())
 			{
 				sqlite3_exec(m_dbase, "BEGIN TRANSACTION;", NULL, NULL, NULL);
-				for (auto itt : result)
+				for (const auto & itt : result)
 				{
 					std::vector<std::string> sd = itt;
 					safe_query("UPDATE Temperature_Calendar SET Temp_Avg=%.1f WHERE RowID='%q'", atof(sd[1].c_str()), sd[0].c_str());
@@ -1081,7 +1081,7 @@ bool CSQLHelper::OpenDatabase()
 			result = query("SELECT ID FROM DeviceStatus WHERE (DeviceID LIKE 'WMI%')");
 			if (!result.empty())
 			{
-				for (auto itt : result)
+				for (const auto & itt : result)
 				{
 					std::vector<std::string> sd = itt;
 					std::string idx = sd[0];
@@ -1177,7 +1177,7 @@ bool CSQLHelper::OpenDatabase()
 			result = safe_query("SELECT ID FROM DeviceStatus WHERE (Type=%d)", pTypeUsage);
 			if (!result.empty())
 			{
-				for (auto itt : result)
+				for (const auto & itt : result)
 				{
 					std::vector<std::string> sd = itt;
 					std::string idx = sd[0];
@@ -1305,7 +1305,7 @@ bool CSQLHelper::OpenDatabase()
 			szQuery2.str("");
 			szQuery2 << "SELECT ID, Password FROM Users";
 			result2 = query(szQuery2.str());
-			for (auto itt : result2)
+			for (const auto & itt : result2)
 			{
 				std::vector<std::string> sd = itt;
 				std::string pwd = sd[1];
@@ -1323,7 +1323,7 @@ bool CSQLHelper::OpenDatabase()
 			szQuery2.str("");
 			szQuery2 << "SELECT ID, Password FROM Hardware WHERE ([Type]==" << HTYPE_Domoticz << ")";
 			result2 = query(szQuery2.str());
-			for (auto itt : result2)
+			for (const auto & itt : result2)
 			{
 				std::vector<std::string> sd = itt;
 				std::string pwd = sd[1];
@@ -1346,7 +1346,7 @@ bool CSQLHelper::OpenDatabase()
 			result = query(szQuery2.str());
 			if (!result.empty())
 			{
-				for (auto itt : result)
+				for (const auto & itt : result)
 				{
 					std::vector<std::string> sd = itt;
 					std::stringstream szAddress;
@@ -1371,7 +1371,7 @@ bool CSQLHelper::OpenDatabase()
 			result = query("SELECT ID FROM Hardware WHERE ([Type] = 9) OR ([Type] = 21)");
 			if (!result.empty())
 			{
-				for (auto itt : result)
+				for (const auto & itt : result)
 				{
 					std::vector<std::string> sd = itt;
 
@@ -1422,7 +1422,7 @@ bool CSQLHelper::OpenDatabase()
 			std::vector<std::vector<std::string> > result3;
 			szQuery << "SELECT ID FROM HARDWARE WHERE([Type]==" << HTYPE_TOONTHERMOSTAT << ")";
 			result = query(szQuery.str());
-			for (auto itt : result)
+			for (const auto & itt : result)
 			{
 				std::vector<std::string> sd = itt;
 				int hwid = atoi(sd[0].c_str());
@@ -1431,7 +1431,7 @@ bool CSQLHelper::OpenDatabase()
 				szQuery.str("");
 				szQuery << "SELECT ID FROM DeviceStatus WHERE (Type=" << pTypeP1Power << ") AND (HardwareID=" << hwid << ")";
 				result2 = query(szQuery.str());
-				for (auto itt2 : result2)
+				for (const auto & itt2 : result2)
 				{
 					std::vector<std::string> sd = itt2;
 
@@ -1440,7 +1440,7 @@ bool CSQLHelper::OpenDatabase()
 					szQuery.str("");
 					szQuery << "SELECT ROWID, Value1, Value2, Value3, Value4, Value5, Value6 FROM MultiMeter WHERE (DeviceRowID==" << sd[0] << ")";
 					result3 = query(szQuery.str());
-					for (auto itt3 : result3)
+					for (const auto & itt3 : result3)
 					{
 						std::vector<std::string> sd = itt3;
 						//value1 = powerusage1;
@@ -1459,7 +1459,7 @@ bool CSQLHelper::OpenDatabase()
 					szQuery.str("");
 					szQuery << "SELECT ROWID, Value1, Value2, Value3, Value4, Value5, Value6, Counter1, Counter2, Counter3, Counter4 FROM MultiMeter_Calendar WHERE (DeviceRowID==" << sd[0] << ")";
 					result3 = query(szQuery.str());
-					for (auto itt3 : result3)
+					for (const auto & itt3 : result3)
 					{
 						std::vector<std::string> sd = itt3;
 						szQuery.clear();
@@ -1500,7 +1500,7 @@ bool CSQLHelper::OpenDatabase()
 			result = query(szQuery.str());
 			if (!result.empty())
 			{
-				for (auto itt : result)
+				for (const auto & itt : result)
 				{
 					std::vector<std::string> sd = itt;
 					int hwId = atoi(sd[0].c_str());
@@ -1598,7 +1598,7 @@ bool CSQLHelper::OpenDatabase()
 			result = safe_query("SELECT ID, HardwareID, DeviceID, Unit, [Type], SubType, SceneType, ListenCmd FROM Scenes");
 			if (!result.empty())
 			{
-				for (auto itt : result)
+				for (const auto & itt : result)
 				{
 					std::vector<std::string> sd = itt;
 					std::string Activator("");
@@ -1631,7 +1631,7 @@ bool CSQLHelper::OpenDatabase()
 			result = safe_query("SELECT ID, DeviceID FROM DeviceStatus WHERE (Type=%d) AND (SubType=%d)", pTypeGeneral, sTypeSoilMoisture);
 			if (!result.empty())
 			{
-				for (auto itt : result)
+				for (const auto & itt : result)
 				{
 					std::vector<std::string> sd = itt;
 					std::string idx = sd[0];
@@ -1659,7 +1659,7 @@ bool CSQLHelper::OpenDatabase()
 			//pTypeEngery sensor to new kWh sensor
 			std::vector<std::vector<std::string> > result2;
 			result2 = safe_query("SELECT ID, DeviceID FROM DeviceStatus WHERE ([Type] = %d)", pTypeENERGY);
-			for (auto itt2 : result2)
+			for (const auto & itt2 : result2)
 			{
 				std::vector<std::string> sd2 = itt2;
 
@@ -1703,7 +1703,7 @@ bool CSQLHelper::OpenDatabase()
 			std::vector<std::vector<std::string> > result;
 			szQuery << "SELECT HardwareID,NodeID,ChildID FROM MySensorsChilds WHERE ([Type]==" << 21 << ")";
 			result = query(szQuery.str());
-			for (auto itt : result)
+			for (const auto & itt : result)
 			{
 				std::vector<std::string> sd = itt;
 				int hwid = atoi(sd[0].c_str());
@@ -1873,7 +1873,7 @@ bool CSQLHelper::OpenDatabase()
 			result = query("SELECT ID FROM Hardware WHERE ([Type] = 9) OR ([Type] = 21)");
 			if (!result.empty())
 			{
-				for (auto itt : result)
+				for (const auto & itt : result)
 				{
 					sd = itt;
 					szQuery.clear();
@@ -1882,7 +1882,7 @@ bool CSQLHelper::OpenDatabase()
 					result2 = query(szQuery.str());
 					if (!result2.empty())
 					{
-						for (auto itt2 : result2)
+						for (const auto & itt2 : result2)
 						{
 							sd = itt2;
 							std::string ndeviceid = "0" + sd[1];
@@ -1916,7 +1916,7 @@ bool CSQLHelper::OpenDatabase()
 			result = query(szQuery.str());
 			if (!result.empty())
 			{
-				for (auto itt : result)
+				for (const auto & itt : result)
 				{
 					sd = itt;
 					szQuery1.clear();
@@ -1930,7 +1930,7 @@ bool CSQLHelper::OpenDatabase()
 					result1 = query(szQuery1.str());
 					if (result1.size() > 0)
 					{
-						for (auto itt2 : result1)
+						for (const auto & itt2 : result1)
 						{
 							sd = itt2;
 							uint64_t devidx = atoi(sd[0].c_str());
@@ -1992,7 +1992,7 @@ bool CSQLHelper::OpenDatabase()
 			result = query(szQuery.str());
 			if (!result.empty())
 			{
-				for (auto itt : result)
+				for (const auto & itt : result)
 				{
 					sd = itt;
 					szQuery2.clear();
@@ -2016,7 +2016,7 @@ bool CSQLHelper::OpenDatabase()
 			result = query(szQuery.str());
 			if (!result.empty())
 			{
-				for (auto itt : result)
+				for (const auto & itt : result)
 				{
 					sd = itt;
 					szQuery2.clear();
@@ -2099,7 +2099,7 @@ bool CSQLHelper::OpenDatabase()
 			result = query(szQuery2.str());
 			if (!result.empty())
 			{
-				for (auto itt : result)
+				for (const auto & itt : result)
 				{
 					std::vector<std::string> sd = itt;
 					szQuery2.clear();
@@ -2125,7 +2125,7 @@ bool CSQLHelper::OpenDatabase()
 			result = query(szQuery2.str());
 			if (!result.empty())
 			{
-				for (auto itt : result)
+				for (const auto & itt : result)
 				{
 					std::vector<std::string> sd = itt;
 					szQuery2.clear();
@@ -2180,7 +2180,7 @@ bool CSQLHelper::OpenDatabase()
 			if (!result.empty())
 			{
 				std::stringstream szQuery2;
-				for (auto itt : result)
+				for (const auto & itt : result)
 				{
 					std::vector<std::string> sd = itt;
 					std::string id = sd[0];
@@ -2202,7 +2202,7 @@ bool CSQLHelper::OpenDatabase()
 			result = query(szQuery2.str());
 			if (!result.empty())
 			{
-				for (auto itt : result)
+				for (const auto & itt : result)
 				{
 					std::vector<std::string> sd = itt;
 					safe_query("UPDATE Hardware SET Username='%q', Password='' WHERE (ID=%s)", sd[1].c_str(), sd[0].c_str());
@@ -2218,7 +2218,7 @@ bool CSQLHelper::OpenDatabase()
 			result = query(szQuery2.str());
 			if (!result.empty())
 			{
-				for (auto itt : result)
+				for (const auto & itt : result)
 				{
 					std::vector<std::string> sd = itt;
 					szQuery2.clear();
@@ -2237,7 +2237,7 @@ bool CSQLHelper::OpenDatabase()
 			result = query(szQuery2.str());
 			if (!result.empty())
 			{
-				for (auto itt : result)
+				for (const auto & itt : result)
 				{
 					std::vector<std::string> sd = itt;
 					safe_query("UPDATE DeviceStatus SET SubType='%d' WHERE ([Type]==%d) AND (SubType==%d) AND (HardwareID=%s)",
@@ -2266,7 +2266,7 @@ bool CSQLHelper::OpenDatabase()
 			result = query(szQuery2.str());
 			if (!result.empty())
 			{
-				for (auto itt : result)
+				for (const auto & itt : result)
 				{
 					std::vector<std::string> sd = itt;
 					std::string lowerName = "fitbit";
@@ -2358,7 +2358,7 @@ bool CSQLHelper::OpenDatabase()
 			result = query(szQuery2.str());
 			if (!result.empty())
 			{
-				for (auto itt : result)
+				for (const auto & itt : result)
 				{
 					std::vector<std::string> sd = itt;
 					safe_query("UPDATE Hardware SET Mode3='%q', Mode5='' WHERE (ID=%s)", sd[1].c_str(), sd[0].c_str());
@@ -2376,7 +2376,7 @@ bool CSQLHelper::OpenDatabase()
 			result = query(szQuery2.str());
 			if (!result.empty())
 			{
-				for (auto itt : result)
+				for (const auto & itt : result)
 				{
 					std::vector<std::string> sd = itt;
 					szQuery2.clear();
@@ -2384,7 +2384,7 @@ bool CSQLHelper::OpenDatabase()
 					szQuery2 << "SELECT ID FROM DeviceStatus WHERE ([Type]=" << (int)pTypeGeneral << ") AND (SubType=" << (int)sTypeSolarRadiation << ") AND (HardwareID=" << sd[0] << ")";
 					result2 = query(szQuery2.str());
 
-					for (auto itt2 : result2)
+					for (const auto & itt2 : result2)
 					{
 						sd = itt2;
 
@@ -2400,7 +2400,7 @@ bool CSQLHelper::OpenDatabase()
 						szQuery2 << "SELECT Value, Date FROM Meter WHERE ([DeviceRowID]=" << sd[0] << ")";
 						result3 = query(szQuery2.str());
 
-						for (auto itt3 : result3)
+						for (const auto & itt3 : result3)
 						{
 							std::vector<std::string> sd3 = itt3;
 							szQuery2.clear();
@@ -2418,7 +2418,7 @@ bool CSQLHelper::OpenDatabase()
 						szQuery2 << "SELECT Value1, Value2, Value3, Date FROM MultiMeter_Calendar WHERE ([DeviceRowID]=" << sd[0] << ")";
 						result3 = query(szQuery2.str());
 
-						for (auto itt3 :result3)
+						for (const auto & itt3 :result3)
 						{
 							std::vector<std::string> sd3 = itt3;
 							szQuery2.clear();
@@ -2456,7 +2456,7 @@ bool CSQLHelper::OpenDatabase()
 			result = query("SELECT ID, Hue FROM Timers WHERE(Hue!=0)");
 			if (!result.empty())
 			{
-				for (auto itt : result)
+				for (const auto & itt : result)
 				{
 					std::vector<std::string> sd = itt;
 
@@ -2478,7 +2478,7 @@ bool CSQLHelper::OpenDatabase()
 			result = query("SELECT ID, Hue FROM SceneDevices WHERE(Hue!=0)");
 			if (!result.empty())
 			{
-				for (auto itt : result)
+				for (const auto & itt : result)
 				{
 					std::vector<std::string> sd = itt;
 
@@ -2503,7 +2503,7 @@ bool CSQLHelper::OpenDatabase()
 			result = query(szQuery2.str());
 			if (!result.empty())
 			{
-				for (auto itt : result)
+				for (const auto & itt : result)
 				{
 					std::vector<std::string> sd = itt;
 					szQuery2.clear();
@@ -2511,7 +2511,7 @@ bool CSQLHelper::OpenDatabase()
 					szQuery2 << "SELECT ID FROM DeviceStatus WHERE ([Type]=" << (int)pTypeColorSwitch << ") AND (SubType=" << (int)sTypeColor_RGB_W << ") AND (HardwareID=" << sd[0] << ")";
 					result2 = query(szQuery2.str());
 
-					for (auto itt2 : result2)
+					for (const auto & itt2 : result2)
 					{
 						sd = itt2;
 
@@ -2557,7 +2557,7 @@ bool CSQLHelper::OpenDatabase()
 			std::map<std::string, int> _FloorplanFiles;
 			GetDirFilesRecursive(szWWWFolder + "/images/floorplans/", _FloorplanFiles);
 
-			for (auto itt : _FloorplanFiles)
+			for (const auto & itt : _FloorplanFiles)
 			{
 				std::string tname(itt.first);
 				stdlower(tname);
@@ -3944,7 +3944,7 @@ uint64_t CSQLHelper::UpdateValue(const int HardwareID, const char* ID, const uns
 	{
 		//This is a sub/slave device for another main device
 		//Set the Main Device state to the same state as this device
-		for (auto itt : result)
+		for (const auto & itt : result)
 		{
 			std::vector<std::string> sd = itt;
 			safe_query(
@@ -3973,7 +3973,7 @@ uint64_t CSQLHelper::UpdateValue(const int HardwareID, const char* ID, const uns
 			);
 			if (!result2.empty())
 			{
-				for (auto itt2 : result2)
+				for (const auto & itt2 : result2)
 				{
 					std::vector<std::string> sd = itt2;
 					int oDevType = atoi(sd[1].c_str());
@@ -4062,7 +4062,7 @@ uint64_t CSQLHelper::UpdateValue(const int HardwareID, const char* ID, const uns
 	if (!result.empty())
 	{
 		//set the status to off
-		for (auto itt : result)
+		for (const auto & itt : result)
 		{
 			std::vector<std::string> sd = itt;
 			int oDevType = atoi(sd[1].c_str());
@@ -4455,7 +4455,7 @@ uint64_t CSQLHelper::UpdateValueInt(const int HardwareID, const char* ID, const 
 					);
 					if (!result.empty())
 					{
-						for (auto ittCam : result)
+						for (const auto & ittCam : result)
 						{
 							std::vector<std::string> sd = ittCam;
 							std::string camidx = sd[0];
@@ -5009,7 +5009,7 @@ void CSQLHelper::UpdateTemperatureLog()
 	);
 	if (!result.empty())
 	{
-		for (auto itt : result)
+		for (const auto & itt : result)
 		{
 			std::vector<std::string> sd = itt;
 
@@ -5193,7 +5193,7 @@ void CSQLHelper::UpdateRainLog()
 	result = safe_query("SELECT ID,Type,SubType,nValue,sValue,LastUpdate FROM DeviceStatus WHERE (Type=%d)", pTypeRAIN);
 	if (!result.empty())
 	{
-		for (auto itt : result)
+		for (const auto & itt : result)
 		{
 			std::vector<std::string> sd = itt;
 
@@ -5249,7 +5249,7 @@ void CSQLHelper::UpdateWindLog()
 	result = safe_query("SELECT ID,DeviceID, Type,SubType,nValue,sValue,LastUpdate FROM DeviceStatus WHERE (Type=%d)", pTypeWIND);
 	if (!result.empty())
 	{
-		for (auto itt : result)
+		for (const auto & itt : result)
 		{
 			std::vector<std::string> sd = itt;
 
@@ -5328,7 +5328,7 @@ void CSQLHelper::UpdateUVLog()
 	);
 	if (!result.empty())
 	{
-		for (auto itt : result)
+		for (const auto & itt : result)
 		{
 			std::vector<std::string> sd = itt;
 
@@ -5523,7 +5523,7 @@ void CSQLHelper::UpdateMeter()
 	);
 	if (!result.empty())
 	{
-		for (auto itt : result)
+		for (const auto & itt : result)
 		{
 			char szTmp[200];
 			std::vector<std::string> sd = itt;
@@ -5732,7 +5732,7 @@ void CSQLHelper::UpdateMultiMeter()
 	);
 	if (!result.empty())
 	{
-		for (auto itt : result)
+		for (const auto & itt : result)
 		{
 			std::vector<std::string> sd = itt;
 
@@ -5851,7 +5851,7 @@ void CSQLHelper::UpdatePercentageLog()
 	);
 	if (!result.empty())
 	{
-		for (auto itt : result)
+		for (const auto & itt : result)
 		{
 			std::vector<std::string> sd = itt;
 
@@ -5908,7 +5908,7 @@ void CSQLHelper::UpdateFanLog()
 	);
 	if (!result.empty())
 	{
-		for (auto itt : result)
+		for (const auto & itt : result)
 		{
 			std::vector<std::string> sd = itt;
 
@@ -5972,7 +5972,7 @@ void CSQLHelper::AddCalendarTemperature()
 
 	std::vector<std::vector<std::string> > result;
 
-	for (auto itt : resultdevices)
+	for (const auto & itt : resultdevices)
 	{
 		std::vector<std::string> sddev = itt;
 		uint64_t ID;
@@ -6044,7 +6044,7 @@ void CSQLHelper::AddCalendarUpdateRain()
 
 	std::vector<std::vector<std::string> > result;
 
-	for (auto itt : resultdevices)
+	for (const auto & itt : resultdevices)
 	{
 		std::vector<std::string> sddev = itt;
 		uint64_t ID;
@@ -6152,7 +6152,7 @@ void CSQLHelper::AddCalendarUpdateMeter()
 
 	std::vector<std::vector<std::string> > result;
 
-	for (auto itt : resultdevices)
+	for (const auto & itt : resultdevices)
 	{
 		std::vector<std::string> sddev = itt;
 		uint64_t ID;
@@ -6351,7 +6351,7 @@ void CSQLHelper::AddCalendarUpdateMultiMeter()
 
 	std::vector<std::vector<std::string> > result;
 
-	for (auto itt : resultdevices)
+	for (const auto & itt : resultdevices)
 	{
 		std::vector<std::string> sddev = itt;
 		uint64_t ID;
@@ -6478,7 +6478,7 @@ void CSQLHelper::AddCalendarUpdateWind()
 
 	std::vector<std::vector<std::string> > result;
 
-	for (auto itt : resultdevices)
+	for (const auto & itt : resultdevices)
 	{
 		std::vector<std::string> sddev = itt;
 		uint64_t ID;
@@ -6539,7 +6539,7 @@ void CSQLHelper::AddCalendarUpdateUV()
 
 	std::vector<std::vector<std::string> > result;
 
-	for (auto itt : resultdevices)
+	for (const auto & itt : resultdevices)
 	{
 		std::vector<std::string> sddev = itt;
 		uint64_t ID;
@@ -6592,7 +6592,7 @@ void CSQLHelper::AddCalendarUpdatePercentage()
 
 	std::vector<std::vector<std::string> > result;
 
-	for (auto itt : resultdevices)
+	for (const auto & itt : resultdevices)
 	{
 		std::vector<std::string> sddev = itt;
 		uint64_t ID;
@@ -6649,7 +6649,7 @@ void CSQLHelper::AddCalendarUpdateFan()
 
 	std::vector<std::vector<std::string> > result;
 
-	for (auto itt : resultdevices)
+	for (const auto & itt : resultdevices)
 	{
 		std::vector<std::string> sddev = itt;
 		uint64_t ID;
@@ -6766,7 +6766,7 @@ void CSQLHelper::DeleteHardware(const std::string &idx)
 	if (!result.empty())
 	{
 		std::string devs2delete = "";
-		for (auto itt : result)
+		for (const auto & itt : result)
 		{
 			std::vector<std::string> sd = itt;
 			if (!devs2delete.empty())
@@ -6813,7 +6813,7 @@ void CSQLHelper::DeleteDevices(const std::string &idx)
 
 		std::set<std::pair<std::string, std::string> > removeddevices;
 #ifdef ENABLE_PYTHON
-		for (auto itt : _idx)
+		for (const auto & itt : _idx)
 		{
 			_log.Debug(DEBUG_NORM, "CSQLHelper::DeleteDevices: ID: %s", itt.c_str());
 			std::vector<std::vector<std::string> > result;
@@ -6834,7 +6834,7 @@ void CSQLHelper::DeleteDevices(const std::string &idx)
 
 		char* errorMessage;
 
-			for (auto itt : _idx)
+		for (const auto & itt : _idx)
 		{
 			std::vector<std::vector<std::string> > result;
 			// search deviceID of sensor for enocean
@@ -6890,7 +6890,7 @@ void CSQLHelper::DeleteDevices(const std::string &idx)
 			sqlite3_exec(m_dbase, "COMMIT TRANSACTION", NULL, NULL, &errorMessage);
 		}
 #ifdef ENABLE_PYTHON
-		for (auto it : removeddevices)
+		for (const auto & it : removeddevices)
 		{
 			int HwID = atoi(it.first.c_str());
 			int Unit = atoi(it.second.c_str());
@@ -7026,7 +7026,7 @@ void CSQLHelper::CheckAndUpdateDeviceOrder()
 	result = safe_query("SELECT ROWID FROM DeviceStatus WHERE ([Order]==0)");
 	if (!result.empty())
 	{
-		for (auto itt : result)
+		for (const auto & itt : result)
 		{
 			std::vector<std::string> sd = itt;
 			safe_query("UPDATE DeviceStatus SET [Order] = (SELECT MAX([Order]) FROM DeviceStatus)+1 WHERE (ROWID == '%q')", sd[0].c_str());
@@ -7042,7 +7042,7 @@ void CSQLHelper::CheckAndUpdateSceneDeviceOrder()
 	result = safe_query("SELECT ROWID FROM SceneDevices WHERE ([Order]==0)");
 	if (!result.empty())
 	{
-		for (auto itt : result)
+		for (const auto & itt : result)
 		{
 			std::vector<std::string> sd = itt;
 			safe_query("UPDATE SceneDevices SET [Order] = (SELECT MAX([Order]) FROM SceneDevices)+1 WHERE (ROWID == '%q')", sd[0].c_str());
@@ -7093,7 +7093,7 @@ void CSQLHelper::CheckSceneStatusWithDevice(const uint64_t DevIdx)
 	std::vector<std::vector<std::string> > result;
 
 	result = safe_query("SELECT SceneRowID FROM SceneDevices WHERE (DeviceRowID == %" PRIu64 ")", DevIdx);
-	for (auto itt : result)
+	for (const auto & itt : result)
 	{
 		std::vector<std::string> sd = itt;
 		CheckSceneStatus(sd[0]);
@@ -7126,7 +7126,7 @@ void CSQLHelper::CheckSceneStatus(const uint64_t Idx)
 
 	std::vector<bool> _DeviceStatusResults;
 
-	for (auto itt : result)
+	for (const auto & itt : result)
 	{
 		std::vector<std::string> sd = itt;
 		int nValue = atoi(sd[6].c_str());
@@ -7150,7 +7150,7 @@ void CSQLHelper::CheckSceneStatus(const uint64_t Idx)
 	int totOn = 0;
 	int totOff = 0;
 
-	for (auto itt2 : _DeviceStatusResults)
+	for (const auto & itt2 : _DeviceStatusResults)
 	{
 		if (itt2 == true)
 			totOn++;
@@ -7271,7 +7271,7 @@ void CSQLHelper::EventsGetTaskItems(std::vector<_tTaskItem> &currentTasks)
 
 	currentTasks.clear();
 
-	for (auto it : m_background_task_queue)
+	for (const auto & it : m_background_task_queue)
 		currentTasks.push_back(it);
 }
 
@@ -7657,7 +7657,7 @@ void CSQLHelper::CheckBatteryLow()
 	uint64_t ulID;
 
 	//check if last batterylow_notification is not sent today and if true, send notification
-	for (auto itt : result)
+	for (const auto & itt : result)
 	{
 		std::vector<std::string> sd = itt;
 		std::stringstream s_str(sd[0]);
@@ -7740,7 +7740,7 @@ void CSQLHelper::CheckDeviceTimeout()
 	uint64_t ulID;
 
 	//check if last timeout_notification is not sent today and if true, send notification
-	for (auto itt : result)
+	for (const auto & itt : result)
 	{
 		std::vector<std::string> sd = itt;
 		std::stringstream s_str(sd[0]);
@@ -7774,7 +7774,7 @@ void CSQLHelper::FixDaylightSavingTableSimple(const std::string &TableName)
 		std::stringstream sstr;
 		unsigned long ID1;
 		unsigned long ID2;
-		for (auto itt : result)
+		for (const auto & itt : result)
 		{
 			std::vector<std::string> sd = itt;
 			sstr.clear();
@@ -7834,7 +7834,7 @@ void CSQLHelper::FixDaylightSaving()
 		unsigned long long Value1;
 		unsigned long long Value2;
 		unsigned long long ValueDest;
-		for (auto itt : result)
+		for (const auto & itt : result)
 		{
 			std::vector<std::string> sd1 = itt;
 
@@ -7910,7 +7910,7 @@ void CSQLHelper::FixDaylightSaving()
 		unsigned long long ValueDest4;
 		unsigned long long ValueDest5;
 		unsigned long long ValueDest6;
-		for (auto itt : result)
+		for (const auto & itt : result)
 		{
 			std::vector<std::string> sd1 = itt;
 
@@ -8484,7 +8484,7 @@ bool CSQLHelper::InsertCustomIconFromZipFile(const std::string &szZipFile, std::
 
 			std::vector<std::string> _Lines;
 			StringSplit(_defFile, "\n", _Lines);
-			for (auto itt : _Lines)
+			for (const auto & itt : _Lines)
 			{
 				std::string sLine = itt;
 				sLine.erase(std::remove(sLine.begin(), sLine.end(), '\r'), sLine.end());
@@ -8517,7 +8517,7 @@ bool CSQLHelper::InsertCustomIconFromZipFile(const std::string &szZipFile, std::
 					_dbImageFiles["IconOff"] = IconFile48Off;
 
 					//Check if all icons are there
-					for (auto iItt : _dbImageFiles)
+					for (const auto & iItt : _dbImageFiles)
 					{
 						//std::string TableField = iItt.first;
 						std::string IconFile = rpath + iItt.second;
@@ -8568,7 +8568,7 @@ bool CSQLHelper::InsertCustomIconFromZipFile(const std::string &szZipFile, std::
 
 					//Insert the Icons
 
-					for (auto iItt : _dbImageFiles)
+					for (const auto & iItt : _dbImageFiles)
 					{
 						std::string TableField = iItt.first;
 						std::string IconFile = rpath + iItt.second;
@@ -8652,7 +8652,7 @@ std::map<std::string, std::string> CSQLHelper::BuildDeviceOptions(const std::str
 		//_log.Log(LOG_STATUS, "DEBUG : Build device options from '%s'...", options.c_str());
 		std::vector<std::string> optionsArray;
 		StringSplit(options, ";", optionsArray);
-		for (auto itt : optionsArray)
+		for (const auto & itt : optionsArray)
 		{
 			std::string oValue = itt;
 			if (oValue.empty())
@@ -8698,7 +8698,7 @@ std::string CSQLHelper::FormatDeviceOptions(const std::map<std::string, std::str
 	if (count > 0) {
 		int i = 0;
 		std::stringstream ssoptions;
-		for (auto itt : optionsMap)
+		for (const auto & itt : optionsMap)
 		{
 			i++;
 			//_log.Log(LOG_STATUS, "DEBUG : Reading device option ['%s', '%s']", itt->first.c_str(), itt->second.c_str());

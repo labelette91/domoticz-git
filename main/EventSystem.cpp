@@ -1952,7 +1952,7 @@ void CEventSystem::EvaluateDatabaseEvents(const _tEventQueue &item)
 			{
 				if (it->Interpreter == "Blockly")
 				{
-					std::size_t found;
+					std::size_t found = std::string::npos;
 					if ((item.reason == REASON_DEVICE) && (item.id > 0))
 					{
 						std::stringstream sstr;
@@ -1979,6 +1979,7 @@ void CEventSystem::EvaluateDatabaseEvents(const _tEventQueue &item)
 						sstr << "variable[" << item.id << "]";
 						found = it->Conditions.find(sstr.str());
 					}
+
 					if (found != std::string::npos)
 						lua_state = ParseBlocklyLua(lua_state, *it);
 				}

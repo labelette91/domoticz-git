@@ -609,6 +609,7 @@ const char *RFX_Type_SubType_Desc(const unsigned char dType, const unsigned char
 		{ pTypeLighting1, sTypeEnergenie5, "Energenie 5-gang" },
 		{ pTypeLighting1, sTypeGDR2, "COCO GDR2" },
 		{ pTypeLighting1, sTypeHQ, "HQ COCO-20" },
+		{ pTypeLighting1, sTypeOase, "Oase Inscenio" },
 
 		{ pTypeLighting2, sTypeAC, "AC" },
 		{ pTypeLighting2, sTypeHEU, "HomeEasy EU" },
@@ -657,6 +658,7 @@ const char *RFX_Type_SubType_Desc(const unsigned char dType, const unsigned char
 		{ pTypeBlinds, sTypeBlindsT11, "ASP" },
 		{ pTypeBlinds, sTypeBlindsT12, "Confexx" },
 		{ pTypeBlinds, sTypeBlindsT13, "Screenline" },
+		{ pTypeBlinds, sTypeBlindsT14, "Hualite" },
 
 		{ pTypeSecurity1, sTypeSecX10, "X10 security" },
 		{ pTypeSecurity1, sTypeSecX10M, "X10 security motion" },
@@ -773,6 +775,11 @@ const char *RFX_Type_SubType_Desc(const unsigned char dType, const unsigned char
 		{ pTypeFan, sTypeSiemensSF01 , "Siemens SF01" },
 		{ pTypeFan, sTypeItho , "Itho CVE RFT" },
 		{ pTypeFan, sTypeLucciAir, "Lucci Air" },
+		{ pTypeFan, sTypeSeavTXS4, "SEAV TXS4" },
+		{ pTypeFan, sTypeWestinghouse, "Westinghouse" },
+		{ pTypeFan, sTypeLucciAirDC, "Lucci Air DC" },
+		{ pTypeFan, sTypeCasafan, "Casafan" },
+		{ pTypeFan, sTypeFT1211R, "FT1211R" },
 
 		{ pTypeTEMP_RAIN, sTypeTR1, "Alecto WS1200" },
 
@@ -1073,6 +1080,7 @@ void GetLightStatus(
 		case sTypeEnergenie5:
 		case sTypeGDR2:
 		case sTypeHQ:
+		case sTypeOase:
 			bHaveGroupCmd = true;
 			switch (nValue)
 			{
@@ -2046,6 +2054,31 @@ void GetLightStatus(
 				break;
 			case fan_LucciLight:
 				lstatus = "light";
+				break;
+			}
+		}
+		break;
+		case sTypeLucciAirDC:
+		{
+			switch (nValue)
+			{
+			case fan_LucciDCPower:
+				lstatus = "pow";
+				break;
+			case fan_LucciDCPlus:
+				lstatus = "plus";
+				break;
+			case fan_LucciDCMin:
+				lstatus = "min";
+				break;
+			case fan_LucciDCLight:
+				lstatus = "light";
+				break;
+			case fan_LucciDCReverse:
+				lstatus = "rev";
+				break;
+			case fan_LucciDCNaturalflow:
+				lstatus = "nat";
 				break;
 			}
 		}
@@ -3429,6 +3462,22 @@ bool GetLightCommand(
 			{
 				cmd = fan_LucciLight;
 			}
+		}
+		break;
+		case sTypeLucciAirDC:
+		{
+			if (switchcmd == "pow")
+				cmd = fan_LucciDCPower;
+			else if (switchcmd == "plus")
+				cmd = fan_LucciDCPlus;
+			else if (switchcmd == "min")
+				cmd = fan_LucciDCMin;
+			else if (switchcmd == "light")
+				cmd = fan_LucciDCLight;
+			else if (switchcmd == "rev")
+				cmd = fan_LucciDCReverse;
+			else if (switchcmd == "nat")
+				cmd = fan_LucciDCNaturalflow;
 		}
 		break;
 		}

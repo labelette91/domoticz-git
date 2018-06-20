@@ -3,7 +3,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LocalDebuggerWorkingDirectory>$(ProjectDir)\..\..\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>-debug -loglevel debug -dbase domoticz.db</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-debug -loglevel  normal,status,error,debug -dbase domoticz.db  -debuglevel  normal,hardware,received,webserver,eventsystem,python,thread_id</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup>
     <ShowAllFiles>false</ShowAllFiles>

@@ -214,7 +214,7 @@ namespace http {
 			//Now get them from the database (idx 100+)
 			std::vector<std::vector<std::string> > result;
 			result = m_sql.safe_query("SELECT ID,Base,Name,Description FROM CustomImages");
-			if (result.size() > 0)
+			if (!result.empty())
 			{
 				std::vector<std::vector<std::string> >::const_iterator itt;
 				int ii = 0;
@@ -252,7 +252,7 @@ namespace http {
 							//Does not exists, extract it from the database and add it
 							std::vector<std::vector<std::string> > result2;
 							result2 = m_sql.safe_queryBlob("SELECT %s FROM CustomImages WHERE ID=%d", TableField.c_str(), ID);
-							if (result2.size() > 0)
+							if (!result2.empty())
 							{
 								std::ofstream file;
 								file.open(IconFile.c_str(), std::ios::out | std::ios::binary);
@@ -788,7 +788,7 @@ namespace http {
 			std::map<std::string, int> _FloorplanFiles;
 			std::vector<std::vector<std::string> > result;
 			result = m_sql.safe_query("SELECT ID FROM Floorplans ORDER BY [Order]");
-			if (result.size() > 0)
+			if (!result.empty())
 			{
 				std::vector<std::vector<std::string> >::const_iterator itt;
 				for (itt = result.begin(); itt != result.end(); ++itt)
@@ -1452,7 +1452,7 @@ namespace http {
 
 			//add the device for real in our system
 			result = m_sql.safe_query("SELECT MAX(ID) FROM Hardware");
-			if (result.size() > 0)
+			if (!result.empty())
 			{
 				std::vector<std::string> sd = result[0];
 				int ID = atoi(sd[0].c_str());
@@ -1952,7 +1952,7 @@ namespace http {
 			std::vector<std::vector<std::string> > result;
 			szQuery << "SELECT ID,Name,ValueType,Value,LastUpdate FROM UserVariables";
 			result = m_sql.GetUserVariables();
-			if (result.size() > 0)
+			if (!result.empty())
 			{
 				std::vector<std::vector<std::string> >::const_iterator itt;
 				int ii = 0;
@@ -1982,7 +1982,7 @@ namespace http {
 			std::vector<std::vector<std::string> > result;
 			result = m_sql.safe_query("SELECT ID,Name,ValueType,Value,LastUpdate FROM UserVariables WHERE (ID==%d)",
 				iVarID);
-			if (result.size() > 0)
+			if (!result.empty())
 			{
 				std::vector<std::vector<std::string> >::const_iterator itt;
 				int ii = 0;
@@ -2170,7 +2170,7 @@ namespace http {
 			std::vector<std::vector<std::string> > result;
 			std::vector<std::vector<std::string> > result2;
 			result = m_sql.safe_query("SELECT T1.[ID], T1.[Name], T1.[Type], T1.[SubType], T2.[Name] AS HardwareName FROM DeviceStatus as T1, Hardware as T2 WHERE (T1.[Used]==1) AND (T2.[ID]==T1.[HardwareID]) ORDER BY T2.[Name], T1.[Name]");
-			if (result.size() > 0)
+			if (!result.empty())
 			{
 				std::vector<std::vector<std::string> >::const_iterator itt;
 				for (itt = result.begin(); itt != result.end(); ++itt)
@@ -2197,7 +2197,7 @@ namespace http {
 			}
 			//Add Scenes
 			result = m_sql.safe_query("SELECT ID, Name FROM Scenes ORDER BY Name");
-			if (result.size() > 0)
+			if (!result.empty())
 			{
 				std::vector<std::vector<std::string> >::const_iterator itt;
 				for (itt = result.begin(); itt != result.end(); ++itt)
@@ -2271,7 +2271,7 @@ namespace http {
 			std::vector<std::vector<std::string> > result;
 			result = m_sql.safe_query("SELECT ID, DevSceneType, DeviceRowID, [Order] FROM DeviceToPlansMap WHERE (PlanID=='%q') ORDER BY [Order]",
 				idx.c_str());
-			if (result.size() > 0)
+			if (!result.empty())
 			{
 				std::vector<std::vector<std::string> >::const_iterator itt;
 				int ii = 0;
@@ -2289,7 +2289,7 @@ namespace http {
 						std::vector<std::vector<std::string> > result2;
 						result2 = m_sql.safe_query("SELECT Name FROM DeviceStatus WHERE (ID=='%q')",
 							DevSceneRowID.c_str());
-						if (result2.size() > 0)
+						if (!result2.empty())
 						{
 							Name = result2[0][0];
 						}
@@ -2299,7 +2299,7 @@ namespace http {
 						std::vector<std::vector<std::string> > result2;
 						result2 = m_sql.safe_query("SELECT Name FROM Scenes WHERE (ID=='%q')",
 							DevSceneRowID.c_str());
-						if (result2.size() > 0)
+						if (!result2.empty())
 						{
 							Name = "[Scene] " + result2[0][0];
 						}
@@ -2477,7 +2477,7 @@ namespace http {
 			root["title"] = "GetTimerPlans";
 			std::vector<std::vector<std::string> > result;
 			result = m_sql.safe_query("SELECT ID, Name FROM TimerPlans ORDER BY Name COLLATE NOCASE ASC");
-			if (result.size() > 0)
+			if (!result.empty())
 			{
 				std::vector<std::vector<std::string> >::const_iterator itt;
 				int ii = 0;
@@ -2793,7 +2793,7 @@ namespace http {
 			{
 				result = m_sql.safe_query("SELECT TabsEnabled FROM Users WHERE (ID==%lu)",
 					UserID);
-				if (result.size() > 0)
+				if (!result.empty())
 				{
 					int TabsEnabled = atoi(result[0][0].c_str());
 					bEnableTabLight = (TabsEnabled&(1 << 0));
@@ -3156,7 +3156,7 @@ namespace http {
 			std::vector<std::vector<std::string> > result;
 			result = m_sql.safe_query("SELECT Type, SubType, nValue, sValue FROM DeviceStatus WHERE (ID=='%q')",
 				idx.c_str());
-			if (result.size() > 0)
+			if (!result.empty())
 			{
 				std::vector<std::string> sd = result[0];
 
@@ -3437,7 +3437,7 @@ namespace http {
 				unsigned char command = 0;
 				result = m_sql.safe_query("SELECT HardwareID, DeviceID, Unit, Type, SubType, SwitchType, Options FROM DeviceStatus WHERE (ID=='%q')",
 					devidx.c_str());
-				if (result.size() > 0)
+				if (!result.empty())
 				{
 					int dType = atoi(result[0][3].c_str());
 					int sType = atoi(result[0][4].c_str());
@@ -3448,7 +3448,7 @@ namespace http {
 
 				//first check if this device is not the scene code!
 				result = m_sql.safe_query("SELECT Activators, SceneType FROM Scenes WHERE (ID=='%q')", idx.c_str());
-				if (result.size() > 0)
+				if (!result.empty())
 				{
 					int SceneType = atoi(result[0][1].c_str());
 
@@ -3542,8 +3542,8 @@ namespace http {
 
 				//first check if this device is not the scene code!
 				result = m_sql.safe_query("SELECT HardwareID, DeviceID, Unit, Type, SubType, SwitchType, Options FROM DeviceStatus WHERE (ID=='%q')",
-				devidx.c_str());
-				if (result.size() > 0)
+					devidx.c_str());
+				if (!result.empty())
 				{
 					int dType = atoi(result[0][3].c_str());
 					int sType = atoi(result[0][4].c_str());
@@ -3589,7 +3589,7 @@ namespace http {
 				root["title"] = "GetSubDevices";
 				result = m_sql.safe_query("SELECT a.ID, b.Name FROM LightSubDevices a, DeviceStatus b WHERE (a.ParentID=='%q') AND (b.ID == a.DeviceRowID)",
 					idx.c_str());
-				if (result.size() > 0)
+				if (!result.empty())
 				{
 					std::vector<std::vector<std::string> >::const_iterator itt;
 					int ii = 0;
@@ -3619,7 +3619,7 @@ namespace http {
 
 				result = m_sql.safe_query("SELECT a.ID, b.Name, a.DeviceRowID, b.Type, b.SubType, b.nValue, b.sValue, a.Cmd, a.Level, b.ID, a.[Order], a.Color, a.OnDelay, a.OffDelay, b.SwitchType FROM SceneDevices a, DeviceStatus b WHERE (a.SceneRowID=='%q') AND (b.ID == a.DeviceRowID) ORDER BY a.[Order]",
 					idx.c_str());
-				if (result.size() > 0)
+				if (!result.empty())
 				{
 					std::vector<std::vector<std::string> >::const_iterator itt;
 					int ii = 0;
@@ -3741,7 +3741,7 @@ namespace http {
 				root["status"] = "OK";
 				root["title"] = "GetHardware";
 				result = m_sql.safe_query("SELECT ID, Name, Type FROM Hardware ORDER BY ID ASC");
-				if (result.size() > 0)
+				if (!result.empty())
 				{
 					std::vector<std::vector<std::string> >::const_iterator itt;
 					int ii = 0;
@@ -3842,7 +3842,7 @@ namespace http {
 				root["status"] = "OK";
 				root["title"] = "GetLightSwitches";
 				result = m_sql.safe_query("SELECT ID, Name, Type, SubType, Used, SwitchType, Options FROM DeviceStatus ORDER BY Name");
-				if (result.size() > 0)
+				if (!result.empty())
 				{
 					std::vector<std::vector<std::string> >::const_iterator itt;
 					int ii = 0;
@@ -3973,7 +3973,7 @@ namespace http {
 
 				//First List/Switch Devices
 				result = m_sql.safe_query("SELECT ID, Name, Type, SubType, Used FROM DeviceStatus ORDER BY Name");
-				if (result.size() > 0)
+				if (!result.empty())
 				{
 					std::vector<std::vector<std::string> >::const_iterator itt;
 					for (itt = result.begin(); itt != result.end(); ++itt)
@@ -4033,7 +4033,7 @@ namespace http {
 
 				//Add Scenes
 				result = m_sql.safe_query("SELECT ID, Name FROM Scenes ORDER BY Name");
-				if (result.size() > 0)
+				if (!result.empty())
 				{
 					std::vector<std::vector<std::string> >::const_iterator itt;
 					for (itt = result.begin(); itt != result.end(); ++itt)
@@ -4060,7 +4060,7 @@ namespace http {
 				//First List/Switch Devices
 				result = m_sql.safe_query("SELECT ID, DevSceneType, DevSceneRowID, DevSceneWhen, DevSceneDelay FROM CamerasActiveDevices WHERE (CameraRowID=='%q') ORDER BY ID",
 					idx.c_str());
-				if (result.size() > 0)
+				if (!result.empty())
 				{
 					std::vector<std::vector<std::string> >::const_iterator itt;
 					int ii = 0;
@@ -4080,7 +4080,7 @@ namespace http {
 							std::vector<std::vector<std::string> > result2;
 							result2 = m_sql.safe_query("SELECT Name FROM DeviceStatus WHERE (ID=='%q')",
 								DevSceneRowID.c_str());
-							if (result2.size() > 0)
+							if (!result2.empty())
 							{
 								Name = "[Light/Switches] " + result2[0][0];
 							}
@@ -4090,7 +4090,7 @@ namespace http {
 							std::vector<std::vector<std::string> > result2;
 							result2 = m_sql.safe_query("SELECT Name FROM Scenes WHERE (ID=='%q')",
 								DevSceneRowID.c_str());
-							if (result2.size() > 0)
+							if (!result2.empty())
 							{
 								Name = "[Scene] " + result2[0][0];
 							}
@@ -4297,7 +4297,7 @@ namespace http {
 						root["message"] = "No GPIO number given";
 						return;
 					}
-					CGpio *pGpio = (CGpio *)m_mainworker.GetHardware(atoi(hwdid.c_str()));
+					CGpio *pGpio = reinterpret_cast<CGpio *>(m_mainworker.GetHardware(atoi(hwdid.c_str())));
 					if (pGpio == NULL) {
 						root["status"] = "ERROR";
 						root["message"] = "Could not retrieve GPIO hardware pointer";
@@ -4350,7 +4350,7 @@ namespace http {
 						return;
 					}
 
-					CSysfsGpio *pSysfsGpio = (CSysfsGpio *)m_mainworker.GetHardware(atoi(hwdid.c_str()));
+					CSysfsGpio *pSysfsGpio = reinterpret_cast<CSysfsGpio *>(m_mainworker.GetHardware(atoi(hwdid.c_str())));
 
 					if (pSysfsGpio == NULL) {
 						root["status"] = "ERROR";
@@ -4797,7 +4797,7 @@ namespace http {
 				//check if HW is plugin
 				{
 					result = m_sql.safe_query("SELECT Type FROM Hardware WHERE (ID == '%q')", hwdid.c_str());
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::string> sd = result[0];
 						_eHardwareTypes Type = (_eHardwareTypes)atoi(sd[0].c_str());
@@ -4883,7 +4883,7 @@ namespace http {
 					if (sunitcode.empty()) {
 						return;
 					}
-					CGpio *pGpio = (CGpio *)m_mainworker.GetHardware(atoi(hwdid.c_str()));
+					CGpio *pGpio = reinterpret_cast<CGpio *>(m_mainworker.GetHardware(atoi(hwdid.c_str())));
 					if (pGpio == NULL) {
 						return;
 					}
@@ -4917,7 +4917,7 @@ namespace http {
 					}
 					devid = id;
 
-					CSysfsGpio *pSysfsGpio = (CSysfsGpio *)m_mainworker.GetHardware(atoi(hwdid.c_str()));
+					CSysfsGpio *pSysfsGpio = reinterpret_cast<CSysfsGpio *>(m_mainworker.GetHardware(atoi(hwdid.c_str())));
 
 					if ((pSysfsGpio == NULL) || (pSysfsGpio->HwdType != HTYPE_SysfsGpio))
 					{
@@ -5155,7 +5155,7 @@ namespace http {
 						result = m_sql.safe_query(
 							"SELECT Name FROM DeviceStatus WHERE (HardwareID=='%q' AND DeviceID=='%q' AND Unit=='%q' AND Type==%d AND SubType==%d)",
 							hwdid.c_str(), devid.c_str(), sunitcode.c_str(), dtype, subtype);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							root["message"] = "Switch already exists!";
 							return;
@@ -5333,7 +5333,7 @@ namespace http {
 				result = m_sql.safe_query(
 					"SELECT Name FROM DeviceStatus WHERE (HardwareID=='%q' AND DeviceID=='%q' AND Unit=='%q' AND Type==%d AND SubType==%d)",
 					hwdid.c_str(), devid.c_str(), sunitcode.c_str(), dtype, subtype);
-				if (result.size() > 0)
+				if (!result.empty())
 				{
 					root["message"] = "Switch already exists!";
 					return;
@@ -6413,7 +6413,7 @@ namespace http {
 					//check if used
 					result = m_sql.safe_query("SELECT Name, Used, nValue FROM DeviceStatus WHERE (ID==%" PRIu64 ")",
 						m_sql.m_LastSwitchRowID);
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						root["status"] = "OK";
 						root["title"] = "LearnSW";
@@ -7241,7 +7241,7 @@ namespace http {
 					result = m_sql.safe_query("SELECT ID, Name, ScaleFactor FROM Floorplans ORDER BY [Name]");
 				else
 					result = m_sql.safe_query("SELECT ID, Name, ScaleFactor FROM Floorplans WHERE ID NOT IN(SELECT FloorplanID FROM Plans)");
-				if (result.size() > 0)
+				if (!result.empty())
 				{
 					std::vector<std::vector<std::string> >::const_iterator itt;
 					int ii = 0;
@@ -7368,7 +7368,7 @@ namespace http {
 				int ii = 0;
 
 				result = m_sql.safe_query("SELECT ID, Name FROM Plans WHERE (FloorplanID==0) ORDER BY Name");
-				if (result.size() > 0)
+				if (!result.empty())
 				{
 					std::vector<std::vector<std::string> >::const_iterator itt;
 					for (itt = result.begin(); itt != result.end(); ++itt)
@@ -7392,7 +7392,7 @@ namespace http {
 				int ii = 0;
 				result = m_sql.safe_query("SELECT ID, Name, Area FROM Plans WHERE (FloorplanID=='%q') ORDER BY Name",
 					idx.c_str());
-				if (result.size() > 0)
+				if (!result.empty())
 				{
 					std::vector<std::vector<std::string> >::const_iterator itt;
 					for (itt = result.begin(); itt != result.end(); ++itt)
@@ -7575,7 +7575,7 @@ namespace http {
 
 						std::vector<std::vector<std::string> > result;
 						result = m_sql.safe_query("SELECT ID, Active, Username, Password, Rights, TabsEnabled FROM Users");
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::vector<std::string> >::const_iterator itt;
 							int ii = 0;
@@ -8108,7 +8108,7 @@ namespace http {
 			//Get All Hardware ID's/Names, need them later
 			std::map<int, _tHardwareListInt> _hardwareNames;
 			result = m_sql.safe_query("SELECT ID, Name, Enabled, Type, Mode1, Mode2 FROM Hardware");
-			if (result.size() > 0)
+			if (!result.empty())
 			{
 				std::vector<std::vector<std::string> >::const_iterator itt;
 				int ii = 0;
@@ -8247,7 +8247,7 @@ namespace http {
                                                 result = m_sql.safe_query(szQuery.c_str(), order.c_str());
 					}
 
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::vector<std::string> >::const_iterator itt;
 						for (itt = result.begin(); itt != result.end(); ++itt)
@@ -8398,12 +8398,12 @@ namespace http {
 					{
 						//Build a list of Hidden Devices
 						result = m_sql.safe_query("SELECT ID FROM Plans WHERE (Name=='$Hidden Devices')");
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::string pID = result[0][0];
 							result = m_sql.safe_query("SELECT DeviceRowID FROM DeviceToPlansMap WHERE (PlanID=='%q') AND (DevSceneType==0)",
 								pID.c_str());
-							if (result.size() > 0)
+							if (!result.empty())
 							{
 								std::vector<std::vector<std::string> >::const_iterator ittP;
 								for (ittP = result.begin(); ittP != result.end(); ++ittP)
@@ -8523,12 +8523,12 @@ namespace http {
 					{
 						//Build a list of Hidden Devices
 						result = m_sql.safe_query("SELECT ID FROM Plans WHERE (Name=='$Hidden Devices')");
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::string pID = result[0][0];
 							result = m_sql.safe_query("SELECT DeviceRowID FROM DeviceToPlansMap WHERE (PlanID=='%q')  AND (DevSceneType==0)",
 								pID.c_str());
-							if (result.size() > 0)
+							if (!result.empty())
 							{
 								std::vector<std::vector<std::string> >::const_iterator ittP;
 								for (ittP = result.begin(); ittP != result.end(); ++ittP)
@@ -8569,7 +8569,7 @@ namespace http {
 				}
 			}
 
-			if (result.size() > 0)
+			if (!result.empty())
 			{
 				std::vector<std::vector<std::string> >::const_iterator itt;
 				for (itt = result.begin(); itt != result.end(); ++itt)
@@ -8989,7 +8989,7 @@ namespace http {
 						{
 							if (pHardware->HwdType == HTYPE_OpenZWave)
 							{
-								COpenZWave *pZWave = (COpenZWave*)pHardware;
+								COpenZWave *pZWave = reinterpret_cast<COpenZWave*>(pHardware);
 								unsigned long ID;
 								std::stringstream s_strid;
 								s_strid << std::hex << sd[1];
@@ -9623,7 +9623,7 @@ namespace http {
 								result2 = m_sql.safe_query(
 									"SELECT Total, Total FROM Rain WHERE (DeviceRowID='%q' AND Date>='%q') ORDER BY ROWID DESC LIMIT 1", sd[0].c_str(), szDate);
 							}
-							if (result2.size() > 0)
+							if (!result2.empty())
 							{
 								double total_real = 0;
 								float rate = 0;
@@ -9694,7 +9694,7 @@ namespace http {
 						std::vector<std::vector<std::string> > result2;
 						strcpy(szTmp, "0");
 						result2 = m_sql.safe_query("SELECT MIN(Value) FROM Meter WHERE (DeviceRowID='%q' AND Date>='%q')", sd[0].c_str(), szDate);
-						if (result2.size() > 0)
+						if (!result2.empty())
 						{
 							std::vector<std::string> sd2 = result2[0];
 
@@ -9812,7 +9812,7 @@ namespace http {
 						std::vector<std::vector<std::string> > result2;
 						strcpy(szTmp, "0");
 						result2 = m_sql.safe_query("SELECT MIN(Value) FROM Meter WHERE (DeviceRowID='%q' AND Date>='%q')", sd[0].c_str(), szDate);
-						if (result2.size() > 0)
+						if (!result2.empty())
 						{
 							std::vector<std::string> sd2 = result2[0];
 
@@ -10013,7 +10013,7 @@ namespace http {
 						std::vector<std::vector<std::string> > result2;
 						strcpy(szTmp, "0");
 						result2 = m_sql.safe_query("SELECT MIN(Value), MAX(Value) FROM Meter WHERE (DeviceRowID='%q' AND Date>='%q')", sd[0].c_str(), szDate);
-						if (result2.size() > 0)
+						if (!result2.empty())
 						{
 							std::vector<std::string> sd2 = result2[0];
 
@@ -10226,7 +10226,7 @@ namespace http {
 							strcpy(szTmp, "0");
 							result2 = m_sql.safe_query("SELECT MIN(Value1), MIN(Value2), MIN(Value5), MIN(Value6) FROM MultiMeter WHERE (DeviceRowID='%q' AND Date>='%q')",
 								sd[0].c_str(), szDate);
-							if (result2.size() > 0)
+							if (!result2.empty())
 							{
 								std::vector<std::string> sd2 = result2[0];
 
@@ -10277,7 +10277,7 @@ namespace http {
 						strcpy(szTmp, "0");
 						result2 = m_sql.safe_query("SELECT MIN(Value) FROM Meter WHERE (DeviceRowID='%q' AND Date>='%q')",
 							sd[0].c_str(), szDate);
-						if (result2.size() > 0)
+						if (!result2.empty())
 						{
 							std::vector<std::string> sd2 = result2[0];
 
@@ -10393,7 +10393,7 @@ namespace http {
 							strcpy(szTmp, "0");
 							result2 = m_sql.safe_query("SELECT MIN(Value) FROM Meter WHERE (DeviceRowID='%q' AND Date>='%q')",
 								sd[0].c_str(), szDate);
-							if (result2.size() > 0)
+							if (!result2.empty())
 							{
 								float EnergyDivider = 1000.0f;
 								int tValue;
@@ -10747,7 +10747,7 @@ namespace http {
 							{
 								if (pHardware->HwdType == HTYPE_OpenZWave)
 								{
-									COpenZWave *pZWave = (COpenZWave*)pHardware;
+									COpenZWave *pZWave = reinterpret_cast<COpenZWave*>(pHardware);
 									unsigned long ID;
 									std::stringstream s_strid;
 									s_strid << std::hex << sd[1];
@@ -10793,7 +10793,7 @@ namespace http {
 							{
 								if (pHardware->HwdType == HTYPE_OpenZWave)
 								{
-									COpenZWave *pZWave = (COpenZWave*)pHardware;
+									COpenZWave *pZWave = reinterpret_cast<COpenZWave*>(pHardware);
 									unsigned long ID;
 									std::stringstream s_strid;
 									s_strid << std::hex << sd[1];
@@ -10921,7 +10921,7 @@ namespace http {
 							strcpy(szTmp, "0");
 							result2 = m_sql.safe_query("SELECT MIN(Value), MAX(Value) FROM Meter WHERE (DeviceRowID='%q' AND Date>='%q')",
 								sd[0].c_str(), szDate);
-							if (result2.size() > 0)
+							if (!result2.empty())
 							{
 								std::vector<std::string> sd2 = result2[0];
 
@@ -11199,7 +11199,7 @@ namespace http {
 
 			std::vector<std::vector<std::string> > result, result2;
 			result = m_sql.safe_query("SELECT ID, Name, [Order] FROM Plans ORDER BY [Order]");
-			if (result.size() > 0)
+			if (!result.empty())
 			{
 				std::vector<std::vector<std::string> >::const_iterator itt;
 				int ii = 0;
@@ -11220,7 +11220,7 @@ namespace http {
 
 						result2 = m_sql.safe_query("SELECT COUNT(*) FROM DeviceToPlansMap WHERE (PlanID=='%q')",
 							sd[0].c_str());
-						if (result2.size() > 0)
+						if (!result2.empty())
 						{
 							totDevices = (unsigned int)atoi(result2[0][0].c_str());
 						}
@@ -11290,7 +11290,7 @@ namespace http {
 			}
 
 			result2 = m_sql.safe_query("SELECT ID, Name, ScaleFactor, [Order] FROM Floorplans ORDER BY [Order]");
-			if (result2.size() > 0)
+			if (!result2.empty())
 			{
 				std::vector<std::vector<std::string> >::const_iterator itt;
 				int ii = 0;
@@ -11307,9 +11307,8 @@ namespace http {
 
 					unsigned int totPlans = 0;
 
-					result3 = m_sql.safe_query("SELECT COUNT(*) FROM Plans WHERE (FloorplanID=='%q')",
-						sd[0].c_str());
-					if (result3.size() > 0)
+					result3 = m_sql.safe_query("SELECT COUNT(*) FROM Plans WHERE (FloorplanID=='%q')", sd[0].c_str());
+					if (!result3.empty())
 					{
 						totPlans = (unsigned int)atoi(result3[0][0].c_str());
 					}
@@ -11349,7 +11348,7 @@ namespace http {
 
 			std::vector<std::vector<std::string> > result, result2;
 			result = m_sql.safe_query("SELECT ID, Name, Activators, Favorite, nValue, SceneType, LastUpdate, Protected, OnAction, OffAction, Description FROM Scenes ORDER BY [Order]");
-			if (result.size() > 0)
+			if (!result.empty())
 			{
 				std::vector<std::vector<std::string> >::const_iterator itt;
 				int ii = 0;
@@ -11448,7 +11447,7 @@ namespace http {
 
 			std::vector<std::vector<std::string> > result;
 			result = m_sql.safe_query("SELECT ID, Name, Enabled, Type, Address, Port, SerialPort, Username, Password, Extra, Mode1, Mode2, Mode3, Mode4, Mode5, Mode6, DataTimeout, RestartType FROM Hardware ORDER BY ID ASC");
-			if (result.size() > 0)
+			if (!result.empty())
 			{
 				std::vector<std::vector<std::string> >::const_iterator itt;
 				int ii = 0;
@@ -11593,7 +11592,7 @@ namespace http {
 
 			std::vector<std::vector<std::string> > result;
 			result = m_sql.safe_query("SELECT ID, Active, Username, Password, Rights, RemoteSharing, TabsEnabled FROM USERS ORDER BY ID ASC");
-			if (result.size() > 0)
+			if (!result.empty())
 			{
 				std::vector<std::vector<std::string> >::const_iterator itt;
 				int ii = 0;
@@ -11631,7 +11630,7 @@ namespace http {
 
 			std::vector<std::vector<std::string> > result;
 			result = m_sql.safe_query("SELECT ID, Active, Name, UUID, LastUpdate, DeviceType FROM MobileDevices ORDER BY Name ASC");
-			if (result.size() > 0)
+			if (!result.empty())
 			{
 				std::vector<std::vector<std::string> >::const_iterator itt;
 				int ii = 0;
@@ -11726,7 +11725,7 @@ namespace http {
 
 
 					result2 = m_sql.safe_query("SELECT Name, [Type], SubType, SwitchType FROM DeviceStatus WHERE (ID==%q)", sID.c_str());
-					if (result2.size() > 0)
+					if (!result2.empty())
 					{
 						std::vector<std::string> sd = result2[0];
 						std::string lstatus = "-";
@@ -11942,7 +11941,7 @@ namespace http {
 			int ii = 0;
 			std::vector<std::vector<std::string> > result;
 			result = m_sql.safe_query("SELECT ID, Name FROM DeviceStatus WHERE (Used == 1) ORDER BY Name");
-			if (result.size() > 0)
+			if (!result.empty())
 			{
 				std::vector<std::vector<std::string> >::const_iterator itt;
 				for (itt = result.begin(); itt != result.end(); ++itt)
@@ -12317,7 +12316,7 @@ namespace http {
 			std::vector<std::vector<std::string> > result;
 			result = m_sql.safe_query("SELECT Type, SubType FROM DeviceStatus WHERE (ID==%" PRIu64 ")",
 				idx);
-			if (result.size() > 0)
+			if (!result.empty())
 			{
 				int dType = atoi(result[0][0].c_str());
 				if (
@@ -12479,7 +12478,7 @@ szQuery << "UPDATE DeviceStatus SET "
 
 			std::vector<std::vector<std::string> > result;
 			result = m_sql.safe_query("SELECT DeviceRowID FROM SharedDevices WHERE (SharedUserID == '%q')", idx.c_str());
-			if (result.size() > 0)
+			if (!result.empty())
 			{
 				std::vector<std::vector<std::string> >::const_iterator itt;
 				int ii = 0;
@@ -12749,7 +12748,7 @@ szQuery << "UPDATE DeviceStatus SET "
 				//check if HW is plugin
 				std::vector<std::vector<std::string> > result;
 				result = m_sql.safe_query("SELECT Type FROM Hardware WHERE (ID == %d)", HwdID);
-				if (result.size() > 0)
+				if (!result.empty())
 				{
 					std::vector<std::string> sd = result[0];
 					_eHardwareTypes Type = (_eHardwareTypes)atoi(sd[0].c_str());
@@ -12859,7 +12858,7 @@ szQuery << "UPDATE DeviceStatus SET "
 				m_mainworker.m_pluginsystem.DeviceModified(atoi(idx.c_str()));
 #endif
 			}
-			if (result.size() > 0)
+			if (!result.empty())
 			{
 				root["status"] = "OK";
 				root["title"] = "SetUsed";
@@ -13294,7 +13293,7 @@ szQuery << "UPDATE DeviceStatus SET "
 			root["title"] = "LightLog";
 
 			result = m_sql.safe_query("SELECT ROWID, nValue, sValue, Date FROM LightingLog WHERE (DeviceRowID==%" PRIu64 ") ORDER BY Date DESC", idx);
-			if (result.size() > 0)
+			if (!result.empty())
 			{
 				std::map<std::string, std::string> selectorStatuses;
 				if (switchtype == STYPE_Selector) {
@@ -13381,7 +13380,7 @@ szQuery << "UPDATE DeviceStatus SET "
 
 			result = m_sql.safe_query("SELECT ROWID, sValue, Date FROM LightingLog WHERE (DeviceRowID==%" PRIu64 ") ORDER BY Date DESC",
 				idx);
-			if (result.size() > 0)
+			if (!result.empty())
 			{
 				std::vector<std::vector<std::string> >::const_iterator itt;
 				int ii = 0;
@@ -13411,7 +13410,7 @@ szQuery << "UPDATE DeviceStatus SET "
 			root["title"] = "SceneLog";
 
 			result = m_sql.safe_query("SELECT ROWID, nValue, Date FROM SceneLog WHERE (SceneRowID==%" PRIu64 ") ORDER BY Date DESC", idx);
-			if (result.size() > 0)
+			if (!result.empty())
 			{
 				std::vector<std::vector<std::string> >::const_iterator itt;
 				int ii = 0;
@@ -13561,7 +13560,7 @@ szQuery << "UPDATE DeviceStatus SET "
 					root["title"] = "Graph " + sensor + " " + srange;
 
 					result = m_sql.safe_query("SELECT Temperature, Chill, Humidity, Barometer, Date, SetPoint FROM %s WHERE (DeviceRowID==%" PRIu64 ") ORDER BY Date ASC", dbasetable.c_str(), idx);
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::vector<std::string> >::const_iterator itt;
 						int ii = 0;
@@ -13655,7 +13654,7 @@ szQuery << "UPDATE DeviceStatus SET "
 					root["title"] = "Graph " + sensor + " " + srange;
 
 					result = m_sql.safe_query("SELECT Percentage, Date FROM %s WHERE (DeviceRowID==%" PRIu64 ") ORDER BY Date ASC", dbasetable.c_str(), idx);
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::vector<std::string> >::const_iterator itt;
 						int ii = 0;
@@ -13674,7 +13673,7 @@ szQuery << "UPDATE DeviceStatus SET "
 					root["title"] = "Graph " + sensor + " " + srange;
 
 					result = m_sql.safe_query("SELECT Speed, Date FROM %s WHERE (DeviceRowID==%" PRIu64 ") ORDER BY Date ASC", dbasetable.c_str(), idx);
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::vector<std::string> >::const_iterator itt;
 						int ii = 0;
@@ -13698,7 +13697,7 @@ szQuery << "UPDATE DeviceStatus SET "
 
 						// P1 counter values can only increment, so these are more reliable for sorting than time which can decrement (when DST is turned off)
 						result = m_sql.safe_query("SELECT Value1, Value2, Value3, Value4, Value5, Value6, Date FROM %s WHERE (DeviceRowID==%" PRIu64 ") ORDER BY Value1 ASC, Value5 ASC, Date ASC", dbasetable.c_str(), idx);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::vector<std::string> >::const_iterator itt;
 							int ii = 0;
@@ -13898,7 +13897,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						root["title"] = "Graph " + sensor + " " + srange;
 
 						result = m_sql.safe_query("SELECT Value, Date FROM %s WHERE (DeviceRowID==%" PRIu64 ") ORDER BY Date ASC", dbasetable.c_str(), idx);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::vector<std::string> >::const_iterator itt;
 							int ii = 0;
@@ -13918,7 +13917,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						root["title"] = "Graph " + sensor + " " + srange;
 
 						result = m_sql.safe_query("SELECT Value, Date FROM %s WHERE (DeviceRowID==%" PRIu64 ") ORDER BY Date ASC", dbasetable.c_str(), idx);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::vector<std::string> >::const_iterator itt;
 							int ii = 0;
@@ -13953,7 +13952,7 @@ szQuery << "UPDATE DeviceStatus SET "
 							vdiv = 1000.0f;
 						}
 						result = m_sql.safe_query("SELECT Value, Date FROM %s WHERE (DeviceRowID==%" PRIu64 ") ORDER BY Date ASC", dbasetable.c_str(), idx);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::vector<std::string> >::const_iterator itt;
 							int ii = 0;
@@ -13982,7 +13981,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						root["title"] = "Graph " + sensor + " " + srange;
 
 						result = m_sql.safe_query("SELECT Value, Date FROM %s WHERE (DeviceRowID==%" PRIu64 ") ORDER BY Date ASC", dbasetable.c_str(), idx);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::vector<std::string> >::const_iterator itt;
 							int ii = 0;
@@ -14002,7 +14001,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						root["title"] = "Graph " + sensor + " " + srange;
 
 						result = m_sql.safe_query("SELECT Value, Date FROM %s WHERE (DeviceRowID==%" PRIu64 ") ORDER BY Date ASC", dbasetable.c_str(), idx);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::vector<std::string> >::const_iterator itt;
 							int ii = 0;
@@ -14022,7 +14021,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						root["title"] = "Graph " + sensor + " " + srange;
 
 						result = m_sql.safe_query("SELECT Value, Date FROM %s WHERE (DeviceRowID==%" PRIu64 ") ORDER BY Date ASC", dbasetable.c_str(), idx);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::vector<std::string> >::const_iterator itt;
 							int ii = 0;
@@ -14043,7 +14042,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						root["title"] = "Graph " + sensor + " " + srange;
 
 						result = m_sql.safe_query("SELECT Value, Date FROM %s WHERE (DeviceRowID==%" PRIu64 ") ORDER BY Date ASC", dbasetable.c_str(), idx);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::vector<std::string> >::const_iterator itt;
 							int ii = 0;
@@ -14071,7 +14070,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						root["displaytype"] = displaytype;
 
 						result = m_sql.safe_query("SELECT Value1, Value2, Value3, Date FROM %s WHERE (DeviceRowID==%" PRIu64 ") ORDER BY Date ASC", dbasetable.c_str(), idx);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::vector<std::string> >::const_iterator itt;
 							int ii = 0;
@@ -14146,7 +14145,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						root["displaytype"] = displaytype;
 
 						result = m_sql.safe_query("SELECT Value1, Value2, Value3, Date FROM %s WHERE (DeviceRowID==%" PRIu64 ") ORDER BY Date ASC", dbasetable.c_str(), idx);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::vector<std::string> >::const_iterator itt;
 							int ii = 0;
@@ -14238,7 +14237,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						//First check if we had any usage in the short log, if not, its probably a meter without usage
 						bool bHaveUsage = true;
 						result = m_sql.safe_query("SELECT MIN([Usage]), MAX([Usage]) FROM %s WHERE (DeviceRowID==%" PRIu64 ")", dbasetable.c_str(), idx);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::stringstream s_str1(result[0][0]);
 							long long minValue;
@@ -14281,7 +14280,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						std::string LastDateTime = "";
 						time_t lastTime = 0;
 
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::vector<std::string> >::const_iterator itt;
 							for (itt = result.begin(); itt != result.end(); ++itt)
@@ -14429,7 +14428,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						std::string LastDateTime = "";
 						time_t lastTime = 0;
 
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::vector<std::string> >::const_iterator itt;
 							for (itt = result.begin(); itt != result.end(); ++itt)
@@ -14582,7 +14581,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						std::string LastDateTime = "";
 						time_t lastTime = 0;
 
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::vector<std::string> >::const_iterator itt;
 							for (itt = result.begin(); itt != result.end(); ++itt)
@@ -14753,7 +14752,7 @@ szQuery << "UPDATE DeviceStatus SET "
 					root["title"] = "Graph " + sensor + " " + srange;
 
 					result = m_sql.safe_query("SELECT Level, Date FROM %s WHERE (DeviceRowID==%" PRIu64 ") ORDER BY Date ASC", dbasetable.c_str(), idx);
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::vector<std::string> >::const_iterator itt;
 						int ii = 0;
@@ -14778,7 +14777,7 @@ szQuery << "UPDATE DeviceStatus SET "
 					std::string LastDate = "";
 
 					result = m_sql.safe_query("SELECT Total, Date FROM %s WHERE (DeviceRowID==%" PRIu64 ") ORDER BY Date ASC", dbasetable.c_str(), idx);
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::vector<std::string> >::const_iterator itt;
 						int ii = 0;
@@ -14825,7 +14824,7 @@ szQuery << "UPDATE DeviceStatus SET "
 					root["title"] = "Graph " + sensor + " " + srange;
 
 					result = m_sql.safe_query("SELECT Direction, Speed, Gust, Date FROM %s WHERE (DeviceRowID==%" PRIu64 ") ORDER BY Date ASC", dbasetable.c_str(), idx);
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::vector<std::string> >::const_iterator itt;
 						int ii = 0;
@@ -14863,7 +14862,7 @@ szQuery << "UPDATE DeviceStatus SET "
 					root["title"] = "Graph " + sensor + " " + srange;
 
 					result = m_sql.safe_query("SELECT Direction, Speed, Gust FROM %s WHERE (DeviceRowID==%" PRIu64 ") ORDER BY Date ASC", dbasetable.c_str(), idx);
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::vector<std::string> >::const_iterator itt;
 						std::map<int, int> _directions;
@@ -15086,7 +15085,7 @@ szQuery << "UPDATE DeviceStatus SET "
 
 					result = m_sql.safe_query("SELECT Total, Rate, Date FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q' AND Date<='%q') ORDER BY Date ASC", dbasetable.c_str(), idx, szDateStart, szDateEnd);
 					int ii = 0;
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::vector<std::string> >::const_iterator itt;
 						for (itt = result.begin(); itt != result.end(); ++itt)
@@ -15114,7 +15113,7 @@ szQuery << "UPDATE DeviceStatus SET "
 							"SELECT Total, Total, Rate FROM Rain WHERE (DeviceRowID=%" PRIu64 " AND Date>='%q') ORDER BY ROWID DESC LIMIT 1",
 							idx, szDateEnd);
 					}
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::string> sd = result[0];
 
@@ -15182,7 +15181,7 @@ szQuery << "UPDATE DeviceStatus SET "
 					if (dType == pTypeP1Power)
 					{
 						result = m_sql.safe_query("SELECT Value1,Value2,Value5,Value6,Date FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q' AND Date<='%q') ORDER BY Date ASC", dbasetable.c_str(), idx, szDateStart, szDateEnd);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							bool bHaveDeliverd = false;
 							std::vector<std::vector<std::string> >::const_iterator itt;
@@ -15224,7 +15223,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						result = m_sql.safe_query(
 							"SELECT MIN(Value1), MAX(Value1), MIN(Value2), MAX(Value2),MIN(Value5), MAX(Value5), MIN(Value6), MAX(Value6) FROM MultiMeter WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q')",
 							idx, szDateEnd);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::string> sd = result[0];
 
@@ -15289,7 +15288,7 @@ szQuery << "UPDATE DeviceStatus SET "
 					else
 					{
 						result = m_sql.safe_query("SELECT Value, Date FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q' AND Date<='%q') ORDER BY Date ASC", dbasetable.c_str(), idx, szDateStart, szDateEnd);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::vector<std::string> >::const_iterator itt;
 							for (itt = result.begin(); itt != result.end(); ++itt)
@@ -15329,7 +15328,7 @@ szQuery << "UPDATE DeviceStatus SET "
 							//add today (have to calculate it)
 							result = m_sql.safe_query("SELECT MIN(Value), MAX(Value) FROM Meter WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q')",
 								idx, szDateEnd);
-							if (result.size() > 0)
+							if (!result.empty())
 							{
 								std::vector<std::string> sd = result[0];
 
@@ -15440,7 +15439,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						" AND Date<='%q') ORDER BY Date ASC",
 						dbasetable.c_str(), idx, szDateStart, szDateEnd);
 					int ii = 0;
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::vector<std::string> >::const_iterator itt;
 						for (itt = result.begin(); itt != result.end(); ++itt)
@@ -15536,7 +15535,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						"FROM Temperature WHERE (DeviceRowID==%" PRIu64 ""
 						" AND Date>='%q')",
 						idx, szDateEnd);
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::string> sd = result[0];
 
@@ -15617,7 +15616,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						"FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q'"
 						" AND Date<='%q') ORDER BY Date ASC",
 						dbasetable.c_str(), idx, szDateStartPrev, szDateEndPrev);
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						iPrev = 0;
 						std::vector<std::vector<std::string> >::const_iterator itt;
@@ -15711,7 +15710,7 @@ szQuery << "UPDATE DeviceStatus SET "
 
 					result = m_sql.safe_query("SELECT Percentage_Min, Percentage_Max, Percentage_Avg, Date FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q' AND Date<='%q') ORDER BY Date ASC", dbasetable.c_str(), idx, szDateStart, szDateEnd);
 					int ii = 0;
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::vector<std::string> >::const_iterator itt;
 						for (itt = result.begin(); itt != result.end(); ++itt)
@@ -15729,7 +15728,7 @@ szQuery << "UPDATE DeviceStatus SET "
 					result = m_sql.safe_query(
 						"SELECT MIN(Percentage), MAX(Percentage), AVG(Percentage) FROM Percentage WHERE (DeviceRowID=%" PRIu64 " AND Date>='%q')",
 						idx, szDateEnd);
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::string> sd = result[0];
 						root["result"][ii]["d"] = szDateEnd;
@@ -15746,7 +15745,7 @@ szQuery << "UPDATE DeviceStatus SET "
 
 					result = m_sql.safe_query("SELECT Speed_Min, Speed_Max, Date FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q' AND Date<='%q') ORDER BY Date ASC", dbasetable.c_str(), idx, szDateStart, szDateEnd);
 					int ii = 0;
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::vector<std::string> >::const_iterator itt;
 						for (itt = result.begin(); itt != result.end(); ++itt)
@@ -15762,7 +15761,7 @@ szQuery << "UPDATE DeviceStatus SET "
 					//add today (have to calculate it)
 					result = m_sql.safe_query("SELECT MIN(Speed), MAX(Speed) FROM Fan WHERE (DeviceRowID=%" PRIu64 " AND Date>='%q')",
 						idx, szDateEnd);
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::string> sd = result[0];
 						root["result"][ii]["d"] = szDateEnd;
@@ -15778,7 +15777,7 @@ szQuery << "UPDATE DeviceStatus SET "
 
 					result = m_sql.safe_query("SELECT Level, Date FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q' AND Date<='%q') ORDER BY Date ASC", dbasetable.c_str(), idx, szDateStart, szDateEnd);
 					int ii = 0;
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::vector<std::string> >::const_iterator itt;
 						for (itt = result.begin(); itt != result.end(); ++itt)
@@ -15794,7 +15793,7 @@ szQuery << "UPDATE DeviceStatus SET "
 					result = m_sql.safe_query(
 						"SELECT MAX(Level) FROM UV WHERE (DeviceRowID=%" PRIu64 " AND Date>='%q')",
 						idx, szDateEnd);
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::string> sd = result[0];
 
@@ -15804,7 +15803,7 @@ szQuery << "UPDATE DeviceStatus SET "
 					}
 					//Previous Year
 					result = m_sql.safe_query("SELECT Level, Date FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q' AND Date<='%q') ORDER BY Date ASC", dbasetable.c_str(), idx, szDateStartPrev, szDateEndPrev);
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						iPrev = 0;
 						std::vector<std::vector<std::string> >::const_iterator itt;
@@ -15824,7 +15823,7 @@ szQuery << "UPDATE DeviceStatus SET "
 
 					result = m_sql.safe_query("SELECT Total, Rate, Date FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q' AND Date<='%q') ORDER BY Date ASC", dbasetable.c_str(), idx, szDateStart, szDateEnd);
 					int ii = 0;
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::vector<std::string> >::const_iterator itt;
 						for (itt = result.begin(); itt != result.end(); ++itt)
@@ -15852,7 +15851,7 @@ szQuery << "UPDATE DeviceStatus SET "
 							"SELECT Total, Total, Rate FROM Rain WHERE (DeviceRowID=%" PRIu64 " AND Date>='%q') ORDER BY ROWID DESC LIMIT 1",
 							idx, szDateEnd);
 					}
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::string> sd = result[0];
 
@@ -15878,7 +15877,7 @@ szQuery << "UPDATE DeviceStatus SET "
 					//Previous Year
 					result = m_sql.safe_query(
 						"SELECT Total, Rate, Date FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q' AND Date<='%q') ORDER BY Date ASC", dbasetable.c_str(), idx, szDateStartPrev, szDateEndPrev);
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						iPrev = 0;
 						std::vector<std::vector<std::string> >::const_iterator itt;
@@ -15906,7 +15905,7 @@ szQuery << "UPDATE DeviceStatus SET "
 
 					result = m_sql.safe_query("SELECT nValue, sValue FROM DeviceStatus WHERE (ID==%" PRIu64 ")",
 						idx);
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::string> sd = result[0];
 						nValue = atoi(sd[0].c_str());
@@ -15947,7 +15946,7 @@ szQuery << "UPDATE DeviceStatus SET "
 							"FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q'"
 							" AND Date<='%q') ORDER BY Date ASC",
 							dbasetable.c_str(), idx, szDateStart, szDateEnd);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							bool bHaveDeliverd = false;
 							std::vector<std::vector<std::string> >::const_iterator itt;
@@ -16038,7 +16037,7 @@ szQuery << "UPDATE DeviceStatus SET "
 							"SELECT Value1,Value2,Value5,Value6, Date "
 							"FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q' AND Date<='%q') ORDER BY Date ASC",
 							dbasetable.c_str(), idx, szDateStartPrev, szDateEndPrev);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							bool bHaveDeliverd = false;
 							iPrev = 0;
@@ -16083,7 +16082,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						root["title"] = "Graph " + sensor + " " + srange;
 
 						result = m_sql.safe_query("SELECT Value1,Value2,Value3,Date FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q' AND Date<='%q') ORDER BY Date ASC", dbasetable.c_str(), idx, szDateStart, szDateEnd);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::vector<std::string> >::const_iterator itt;
 							for (itt = result.begin(); itt != result.end(); ++itt)
@@ -16098,7 +16097,7 @@ szQuery << "UPDATE DeviceStatus SET "
 							}
 						}
 						result = m_sql.safe_query("SELECT Value2,Date FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q' AND Date<='%q') ORDER BY Date ASC", dbasetable.c_str(), idx, szDateStartPrev, szDateEndPrev);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							iPrev = 0;
 							std::vector<std::vector<std::string> >::const_iterator itt;
@@ -16121,7 +16120,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						root["title"] = "Graph " + sensor + " " + srange;
 
 						result = m_sql.safe_query("SELECT Value1,Value2, Date FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q' AND Date<='%q') ORDER BY Date ASC", dbasetable.c_str(), idx, szDateStart, szDateEnd);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::vector<std::string> >::const_iterator itt;
 							for (itt = result.begin(); itt != result.end(); ++itt)
@@ -16158,7 +16157,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						}
 
 						result = m_sql.safe_query("SELECT Value1,Value2,Value3,Date FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q' AND Date<='%q') ORDER BY Date ASC", dbasetable.c_str(), idx, szDateStart, szDateEnd);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::vector<std::string> >::const_iterator itt;
 							for (itt = result.begin(); itt != result.end(); ++itt)
@@ -16212,7 +16211,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						root["title"] = "Graph " + sensor + " " + srange;
 
 						result = m_sql.safe_query("SELECT Value1,Value2,Value3, Date FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q' AND Date<='%q') ORDER BY Date ASC", dbasetable.c_str(), idx, szDateStart, szDateEnd);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::vector<std::string> >::const_iterator itt;
 							for (itt = result.begin(); itt != result.end(); ++itt)
@@ -16234,7 +16233,7 @@ szQuery << "UPDATE DeviceStatus SET "
 
 						result = m_sql.safe_query(
 							"SELECT Value1,Value2, Date FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q' AND Date<='%q') ORDER BY Date ASC", dbasetable.c_str(), idx, szDateStart, szDateEnd);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::vector<std::string> >::const_iterator itt;
 							for (itt = result.begin(); itt != result.end(); ++itt)
@@ -16257,7 +16256,7 @@ szQuery << "UPDATE DeviceStatus SET "
 
 						result = m_sql.safe_query(
 							"SELECT Value1,Value2, Date FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q' AND Date<='%q') ORDER BY Date ASC", dbasetable.c_str(), idx, szDateStart, szDateEnd);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::vector<std::string> >::const_iterator itt;
 							for (itt = result.begin(); itt != result.end(); ++itt)
@@ -16274,7 +16273,7 @@ szQuery << "UPDATE DeviceStatus SET "
 					else if (dType == pTypeCURRENT)
 					{
 						result = m_sql.safe_query("SELECT Value1,Value2,Value3,Value4,Value5,Value6, Date FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q' AND Date<='%q') ORDER BY Date ASC", dbasetable.c_str(), idx, szDateStart, szDateEnd);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							//CM113
 							int displaytype = 0;
@@ -16361,7 +16360,7 @@ szQuery << "UPDATE DeviceStatus SET "
 					else if (dType == pTypeCURRENTENERGY)
 					{
 						result = m_sql.safe_query("SELECT Value1,Value2,Value3,Value4,Value5,Value6, Date FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q' AND Date<='%q') ORDER BY Date ASC", dbasetable.c_str(), idx, szDateStart, szDateEnd);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							//CM180i
 							int displaytype = 0;
@@ -16541,7 +16540,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						}
 						//Actual Year
 						result = m_sql.safe_query("SELECT Value, Date, Counter FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q' AND Date<='%q') ORDER BY Date ASC", dbasetable.c_str(), idx, szDateStart, szDateEnd);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::vector<std::string> >::const_iterator itt;
 							for (itt = result.begin(); itt != result.end(); ++itt)
@@ -16599,7 +16598,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						}
 						//Past Year
 						result = m_sql.safe_query("SELECT Value, Date, Counter FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q' AND Date<='%q') ORDER BY Date ASC", dbasetable.c_str(), idx, szDateStartPrev, szDateEndPrev);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							iPrev = 0;
 							std::vector<std::vector<std::string> >::const_iterator itt;
@@ -16670,7 +16669,7 @@ szQuery << "UPDATE DeviceStatus SET "
 							" AND Date>='%q')",
 							idx, szDateEnd);
 						bool bHaveDeliverd = false;
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::string> sd = result[0];
 							unsigned long long total_min_usage_1, total_min_usage_2, total_max_usage_1, total_max_usage_2, total_real_usage_1, total_real_usage_2;
@@ -16737,7 +16736,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						result = m_sql.safe_query(
 							"SELECT MIN(Value), MAX(Value), AVG(Value) FROM Meter WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q')",
 							idx, szDateEnd);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							root["result"][ii]["d"] = szDateEnd;
 							root["result"][ii]["co2_min"] = result[0][0];
@@ -16754,7 +16753,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						result = m_sql.safe_query(
 							"SELECT MIN(Value), MAX(Value) FROM Meter WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q')",
 							idx, szDateEnd);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							root["result"][ii]["d"] = szDateEnd;
 							root["result"][ii]["v_min"] = result[0][0];
@@ -16784,7 +16783,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						result = m_sql.safe_query(
 							"SELECT MIN(Value), MAX(Value) FROM Meter WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q')",
 							idx, szDateEnd);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							root["result"][ii]["d"] = szDateEnd;
 							float fValue1 = float(atof(result[0][0].c_str())) / vdiv;
@@ -16817,7 +16816,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						result = m_sql.safe_query(
 							"SELECT MIN(Value), MAX(Value), AVG(Value) FROM Meter WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q')",
 							idx, szDateEnd);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							root["result"][ii]["d"] = szDateEnd;
 							root["result"][ii]["lux_min"] = result[0][0];
@@ -16831,7 +16830,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						result = m_sql.safe_query(
 							"SELECT MIN(Value), MAX(Value) FROM Meter WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q')",
 							idx, szDateEnd);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							root["result"][ii]["d"] = szDateEnd;
 							sprintf(szTmp, "%.1f", m_sql.m_weightscale* atof(result[0][0].c_str()) / 10.0f);
@@ -16846,7 +16845,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						result = m_sql.safe_query(
 							"SELECT MIN(Value), MAX(Value) FROM Meter WHERE (DeviceRowID=%" PRIu64 " AND Date>='%q')",
 							idx, szDateEnd);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							root["result"][ii]["d"] = szDateEnd;
 							root["result"][ii]["u_min"] = atof(result[0][0].c_str()) / 10.0f;
@@ -16859,7 +16858,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						result = m_sql.safe_query(
 							"SELECT MIN(Value), MAX(Value) FROM Meter WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q')",
 							idx, szDateEnd);
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::string> sd = result[0];
 							unsigned long long total_min, total_max, total_real;
@@ -16930,7 +16929,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						"FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q'"
 						" AND Date<='%q') ORDER BY Date ASC",
 						dbasetable.c_str(), idx, szDateStart, szDateEnd);
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::vector<std::string> >::const_iterator itt;
 						for (itt = result.begin(); itt != result.end(); ++itt)
@@ -16967,7 +16966,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						" MIN(Gust), MAX(Gust) "
 						"FROM Wind WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q') ORDER BY Date ASC",
 						idx, szDateEnd);
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::string> sd = result[0];
 
@@ -17001,7 +17000,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						"FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q'"
 						" AND Date<='%q') ORDER BY Date ASC",
 						dbasetable.c_str(), idx, szDateStartPrev, szDateEndPrev);
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						iPrev = 0;
 						std::vector<std::vector<std::string> >::const_iterator itt;
@@ -17112,7 +17111,7 @@ szQuery << "UPDATE DeviceStatus SET "
 							" AND Date>='%q' AND Date<='%q 23:59:59') ORDER BY Date ASC",
 							idx, szDateStart.c_str(), szDateEnd.c_str());
 						int ii = 0;
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::vector<std::string> >::const_iterator itt;
 							for (itt = result.begin(); itt != result.end(); ++itt)
@@ -17186,7 +17185,7 @@ szQuery << "UPDATE DeviceStatus SET "
 							" AND Date<='%q') ORDER BY Date ASC",
 							idx, szDateStart.c_str(), szDateEnd.c_str());
 						int ii = 0;
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::vector<std::string> >::const_iterator itt;
 							for (itt = result.begin(); itt != result.end(); ++itt)
@@ -17269,7 +17268,7 @@ szQuery << "UPDATE DeviceStatus SET "
 							" MIN(SetPoint), MAX(SetPoint), AVG(SetPoint) "
 							"FROM Temperature WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q')",
 							idx, szDateEnd.c_str());
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::string> sd = result[0];
 
@@ -17346,7 +17345,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						" AND Date>='%q' AND Date<='%q') ORDER BY Date ASC",
 						dbasetable.c_str(), idx, szDateStart.c_str(), szDateEnd.c_str());
 					int ii = 0;
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::vector<std::string> >::const_iterator itt;
 						for (itt = result.begin(); itt != result.end(); ++itt)
@@ -17362,7 +17361,7 @@ szQuery << "UPDATE DeviceStatus SET "
 					result = m_sql.safe_query(
 						"SELECT MAX(Level) FROM UV WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q')",
 						idx, szDateEnd.c_str());
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::string> sd = result[0];
 
@@ -17380,7 +17379,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						"WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q' AND Date<='%q') ORDER BY Date ASC",
 						dbasetable.c_str(), idx, szDateStart.c_str(), szDateEnd.c_str());
 					int ii = 0;
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::vector<std::string> >::const_iterator itt;
 						for (itt = result.begin(); itt != result.end(); ++itt)
@@ -17405,7 +17404,7 @@ szQuery << "UPDATE DeviceStatus SET "
 							"SELECT Total, Total, Rate FROM Rain WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q') ORDER BY ROWID DESC LIMIT 1",
 							idx, szDateEnd.c_str());
 					}
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::string> sd = result[0];
 
@@ -17463,7 +17462,7 @@ szQuery << "UPDATE DeviceStatus SET "
 							"FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q'"
 							" AND Date<='%q') ORDER BY Date ASC",
 							dbasetable.c_str(), idx, szDateStart.c_str(), szDateEnd.c_str());
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							bool bHaveDeliverd = false;
 							std::vector<std::vector<std::string> >::const_iterator itt;
@@ -17498,7 +17497,7 @@ szQuery << "UPDATE DeviceStatus SET "
 					else
 					{
 						result = m_sql.safe_query("SELECT Value, Date FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q' AND Date<='%q') ORDER BY Date ASC", dbasetable.c_str(), idx, szDateStart.c_str(), szDateEnd.c_str());
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::vector<std::string> >::const_iterator itt;
 							for (itt = result.begin(); itt != result.end(); ++itt)
@@ -17538,7 +17537,7 @@ szQuery << "UPDATE DeviceStatus SET "
 							"FROM MultiMeter WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q')",
 							idx, szDateEnd.c_str());
 						bool bHaveDeliverd = false;
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::string> sd = result[0];
 							unsigned long long total_min_usage_1, total_min_usage_2, total_max_usage_1, total_max_usage_2, total_real_usage;
@@ -17591,7 +17590,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						result = m_sql.safe_query(
 							"SELECT MIN(Value), MAX(Value) FROM Meter WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q')",
 							idx, szDateEnd.c_str());
-						if (result.size() > 0)
+						if (!result.empty())
 						{
 							std::vector<std::string> sd = result[0];
 							unsigned long long total_min, total_max, total_real;
@@ -17639,7 +17638,7 @@ szQuery << "UPDATE DeviceStatus SET "
 						"FROM %s WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q'"
 						" AND Date<='%q') ORDER BY Date ASC",
 						dbasetable.c_str(), idx, szDateStart.c_str(), szDateEnd.c_str());
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::vector<std::string> >::const_iterator itt;
 						for (itt = result.begin(); itt != result.end(); ++itt)
@@ -17674,7 +17673,7 @@ szQuery << "UPDATE DeviceStatus SET "
 					result = m_sql.safe_query(
 						"SELECT AVG(Direction), MIN(Speed), MAX(Speed), MIN(Gust), MAX(Gust) FROM Wind WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q') ORDER BY Date ASC",
 						idx, szDateEnd.c_str());
-					if (result.size() > 0)
+					if (!result.empty())
 					{
 						std::vector<std::string> sd = result[0];
 
@@ -17719,7 +17718,7 @@ szQuery << "UPDATE DeviceStatus SET "
 				std::vector<std::vector<std::string> > result;
 				result = m_sql.safe_query("SELECT SessionID, Username, AuthToken, ExpirationDate FROM UserSessions WHERE SessionID = '%q'",
 					sessionId.c_str());
-				if (result.size() > 0) {
+				if (!result.empty()) {
 					session.id = result[0][0].c_str();
 					session.username = base64_decode(result[0][1]);
 					session.auth_token = result[0][2].c_str();

@@ -922,8 +922,8 @@ bool CSQLHelper::OpenDatabase()
 				for (const auto & itt : result)
 				{
 					std::vector<std::string> sd = itt;
-					std::string camuser = base64_encode((const unsigned char*)sd[1].c_str(), sd[1].size());
-					std::string campwd = base64_encode((const unsigned char*)sd[2].c_str(), sd[2].size());
+					std::string camuser = base64_encode(sd[1]);
+					std::string campwd = base64_encode(sd[2]);
 					safe_query("UPDATE Cameras SET Username='%q', Password='%q' WHERE (ID=='%q')",
 						camuser.c_str(), campwd.c_str(), sd[0].c_str());
 				}
@@ -2164,7 +2164,7 @@ bool CSQLHelper::OpenDatabase()
 			if ((sValue.size() > 100) || (sValue.empty()))
 			{
 				sValue = "application/json";
-				std::string sencoded = base64_encode((const unsigned char*)sValue.c_str(), sValue.size());
+				std::string sencoded = base64_encode(sValue);
 				UpdatePreferencesVar("HTTPPostContentType", sencoded);
 			}
 		}
@@ -2189,7 +2189,7 @@ bool CSQLHelper::OpenDatabase()
 					std::vector<std::string> sd = itt;
 					std::string id = sd[0];
 					std::string extra = sd[1];
-					std::string extraBase64 = base64_encode((const unsigned char *)extra.c_str(), extra.length());
+					std::string extraBase64 = base64_encode(extra);
 					szQuery2.clear();
 					szQuery2.str("");
 					szQuery2 << "UPDATE Hardware SET Mode1=0, Extra='%s' WHERE (ID=" << id << ")";
@@ -3038,13 +3038,13 @@ bool CSQLHelper::OpenDatabase()
 	if ((!GetPreferencesVar("HTTPURL", sValue)) || (sValue.empty()))
 	{
 		sValue = "https://www.somegateway.com/pushurl.php?username=#FIELD1&password=#FIELD2&apikey=#FIELD3&from=#FIELD4&to=#TO&message=#MESSAGE";
-		std::string sencoded = base64_encode((const unsigned char*)sValue.c_str(), sValue.size());
+		std::string sencoded = base64_encode(sValue);
 		UpdatePreferencesVar("HTTPURL", sencoded);
 	}
 	if ((!GetPreferencesVar("HTTPPostContentType", sValue)) || (sValue.empty()))
 	{
 		sValue = "application/json";
-		std::string sencoded = base64_encode((const unsigned char*)sValue.c_str(), sValue.size());
+		std::string sencoded = base64_encode(sValue);
 		UpdatePreferencesVar("HTTPPostContentType", sencoded);
 	}
 	if (!GetPreferencesVar("ShowUpdateEffect", nValue))
@@ -8705,7 +8705,7 @@ std::string CSQLHelper::FormatDeviceOptions(const std::map<std::string, std::str
 			i++;
 			//_log.Log(LOG_STATUS, "DEBUG : Reading device option ['%s', '%s']", itt->first.c_str(), itt->second.c_str());
 			std::string optionName = itt.first.c_str();
-			std::string optionValue = base64_encode((const unsigned char*)itt.second.c_str(), itt.second.size());
+			std::string optionValue = base64_encode(itt.second);
 			ssoptions << optionName << ":" << optionValue;
 			if (i < count) {
 				ssoptions << ";";

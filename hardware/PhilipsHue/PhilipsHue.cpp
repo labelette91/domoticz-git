@@ -282,7 +282,6 @@ bool CPhilipsHue::SwitchLight(const int nodeID, const string &LCmd, const int sv
 	bool setCt = false;
 	bool setMode = false;
 	_eHueColorMode mode;
-	_tHueLightState *pState = NULL;
 
 	if (LCmd=="On")
 	{
@@ -331,6 +330,8 @@ bool CPhilipsHue::SwitchLight(const int nodeID, const string &LCmd, const int sv
 	}
 
 	// Update cached state
+	_tHueLightState *pState = NULL;
+
 	if (nodeID < 1000)
 	{
 		//Light
@@ -826,18 +827,21 @@ bool CPhilipsHue::GetLights(const Json::Value &root)
 
 			_tHueLightState tlight;
 			_eHueLightType LType;
+			bool bDoSend = true;
 			LightStateFromJSON(light["state"], tlight, LType);
 
-			auto && myLight = m_lights.find(lID);
+			auto myLight = m_lights.find(lID);
 			if (myLight != m_lights.end())
 			{
-				if (!StatesSimilar(myLight->second, tlight))
-				{
-					//_log.Log(LOG_STATUS, "HueBridge state change: tbri = %d, level = %d", tbri, tlight.level);
-					myLight->second = tlight;
-					std::string modelid = light["modelid"].asString();
-					InsertUpdateSwitch(lID, LType, tlight, light["name"].asString(), "", modelid, true);
-				}
+				if (StatesSimilar(myLight->second, tlight))
+					bDoSend = false;
+			}
+			if (bDoSend)
+			{
+				//_log.Log(LOG_STATUS, "HueBridge state change: tbri = %d, level = %d", tbri, tlight.level);
+				m_lights[lID] = tlight;
+				std::string modelid = light["modelid"].asString();
+				InsertUpdateSwitch(lID, LType, tlight, light["name"].asString(), "", modelid, true);
 			}
 		}
 	}
@@ -861,17 +865,20 @@ bool CPhilipsHue::GetGroups(const Json::Value &root)
 
 			_tHueLightState tstate;
 			_eHueLightType LType;
+			bool bDoSend = true;
 			LightStateFromJSON(group["action"], tstate, LType); //TODO: Verify there is no crash with "bad" key
 
-			auto && myGroup = m_groups.find(gID);
+			auto myGroup = m_groups.find(gID);
 			if (myGroup != m_groups.end())
 			{
-				if (!StatesSimilar(myGroup->second.gstate, tstate))
-				{
-					myGroup->second.gstate = tstate;
-					string Name = "Group " + group["name"].asString();
-					InsertUpdateSwitch(1000 + gID, LType, tstate, Name, "", "", m_add_groups);
-				}
+				if (StatesSimilar(myGroup->second.gstate, tstate))
+					bDoSend = false;
+			}
+			if (bDoSend)
+			{
+				m_groups[gID].gstate = tstate;
+				string Name = "Group " + group["name"].asString();
+				InsertUpdateSwitch(1000 + gID, LType, tstate, Name, "", "", m_add_groups);
 			}
 		}
 	}
@@ -941,7 +948,7 @@ bool CPhilipsHue::GetGroups(const Json::Value &root)
 	}
 
 	int gID = 0;
-	auto && myGroup = m_groups.find(gID);
+	std::map<int, _tHueGroup>::iterator myGroup = m_groups.find(gID);
 	if (myGroup != m_groups.end())
 	{
 		if (!StatesSimilar(myGroup->second.gstate, tstate))

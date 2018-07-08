@@ -6202,7 +6202,7 @@ namespace http {
 				m_sql.safe_query(
 					"INSERT INTO Users (Active, Username, Password, Rights, RemoteSharing, TabsEnabled) VALUES (%d,'%q','%q','%d','%d','%d')",
 					(senabled == "true") ? 1 : 0,
-					base64_encode((const unsigned char*)username.c_str(), username.size()).c_str(),
+					base64_encode(username).c_str(),
 					password.c_str(),
 					rights,
 					(sRemoteSharing == "true") ? 1 : 0,
@@ -6245,7 +6245,7 @@ namespace http {
 						return;
 					}
 				}
-				std::string sHashedUsername = base64_encode((const unsigned char*)username.c_str(), username.size()).c_str();
+				std::string sHashedUsername = base64_encode(username);
 
 				// Invalid user's sessions if username or password has changed
 				std::string sOldUsername;
@@ -7719,7 +7719,7 @@ namespace http {
 				WebUserName = "";
 				WebPassword = "";
 			}
-			WebUserName = base64_encode((const unsigned char*)WebUserName.c_str(), WebUserName.size());
+			WebUserName = base64_encode(WebUserName);
 			if (WebPassword.size() != 32)
 			{
 				WebPassword = GenerateMD5Hash(WebPassword);
@@ -8000,7 +8000,7 @@ namespace http {
 			if (md_userid != pf_userid || md_password != pf_password || md_subsystems != pf_subsystems) {
 				m_sql.UpdatePreferencesVar("MyDomoticzUserId", md_userid);
 				if (md_password != pf_password) {
-					md_password = base64_encode((unsigned char const*)md_password.c_str(), md_password.size());
+					md_password = base64_encode(md_password);
 					m_sql.UpdatePreferencesVar("MyDomoticzPassword", md_password);
 				}
 				m_sql.UpdatePreferencesVar("MyDomoticzSubsystems", md_subsystems);
@@ -8011,13 +8011,11 @@ namespace http {
 			m_sql.UpdatePreferencesVar("OneWireSensorPollPeriod", atoi(request::findValue(&req, "OneWireSensorPollPeriod").c_str()));
 			m_sql.UpdatePreferencesVar("OneWireSwitchPollPeriod", atoi(request::findValue(&req, "OneWireSwitchPollPeriod").c_str()));
 
-			m_sql.UpdatePreferencesVar("OneWireSwitchPollPeriod", atoi(request::findValue(&req, "OneWireSwitchPollPeriod").c_str()));
-
 			std::string IFTTTEnabled = request::findValue(&req, "IFTTTEnabled");
 			int iIFTTTEnabled = (IFTTTEnabled == "on" ? 1 : 0);
 			m_sql.UpdatePreferencesVar("IFTTTEnabled", iIFTTTEnabled);
 			std::string szKey = request::findValue(&req, "IFTTTAPI");
-			m_sql.UpdatePreferencesVar("IFTTTAPI", base64_encode((unsigned char const*)szKey.c_str(), szKey.size()));
+			m_sql.UpdatePreferencesVar("IFTTTAPI", base64_encode(szKey));
 
 			m_notifications.LoadConfig();
 #ifdef ENABLE_PYTHON
@@ -8607,8 +8605,8 @@ namespace http {
 					double AddjMulti2 = atof(sd[18].c_str());
 					int LastLevel = atoi(sd[19].c_str());
 					int CustomImage = atoi(sd[20].c_str());
-					std::string strParam1 = base64_encode((const unsigned char*)sd[21].c_str(), sd[21].size());
-					std::string strParam2 = base64_encode((const unsigned char*)sd[22].c_str(), sd[22].size());
+					std::string strParam1 = base64_encode(sd[21]);
+					std::string strParam2 = base64_encode(sd[22]);
 					int iProtected = atoi(sd[23].c_str());
 
 					std::string Description = sd[27];
@@ -8821,7 +8819,7 @@ namespace http {
 							std::string forecast_url = pWHardware->GetForecastURL();
 							if (forecast_url != "")
 							{
-								root["result"][ii]["forecast_url"] = base64_encode((const unsigned char*)forecast_url.c_str(), forecast_url.size());
+								root["result"][ii]["forecast_url"] = base64_encode(forecast_url);
 							}
 						}
 						else if (pHardware->HwdType == HTYPE_DarkSky)
@@ -8830,7 +8828,7 @@ namespace http {
 							std::string forecast_url = pWHardware->GetForecastURL();
 							if (forecast_url != "")
 							{
-								root["result"][ii]["forecast_url"] = base64_encode((const unsigned char*)forecast_url.c_str(), forecast_url.size());
+								root["result"][ii]["forecast_url"] = base64_encode(forecast_url);
 							}
 						}
 						else if (pHardware->HwdType == HTYPE_AccuWeather)
@@ -8839,7 +8837,7 @@ namespace http {
 							std::string forecast_url = pWHardware->GetForecastURL();
 							if (forecast_url != "")
 							{
-								root["result"][ii]["forecast_url"] = base64_encode((const unsigned char*)forecast_url.c_str(), forecast_url.size());
+								root["result"][ii]["forecast_url"] = base64_encode(forecast_url);
 							}
 						}
 						else if (pHardware->HwdType == HTYPE_OpenWeatherMap)
@@ -8848,7 +8846,7 @@ namespace http {
 							std::string forecast_url = pWHardware->GetForecastURL();
 							if (forecast_url != "")
 							{
-								root["result"][ii]["forecast_url"] = base64_encode((const unsigned char*)forecast_url.c_str(), forecast_url.size());
+								root["result"][ii]["forecast_url"] = base64_encode(forecast_url);
 							}
 						}
 					}
@@ -9217,8 +9215,8 @@ namespace http {
 							root["result"][ii]["TypeImg"] = "Light";
 							root["result"][ii]["SelectorStyle"] = atoi(selectorStyle.c_str());
 							root["result"][ii]["LevelOffHidden"] = (levelOffHidden == "true");
-							root["result"][ii]["LevelNames"] = base64_encode((const unsigned char*)levelNames.c_str(), levelNames.size());
-							root["result"][ii]["LevelActions"] = base64_encode((const unsigned char*)levelActions.c_str(), levelActions.size());
+							root["result"][ii]["LevelNames"] = base64_encode(levelNames);
+							root["result"][ii]["LevelActions"] = base64_encode(levelActions);
 						}
 						sprintf(szData, "%s", lstatus.c_str());
 						root["result"][ii]["Data"] = szData;
@@ -11342,8 +11340,8 @@ namespace http {
 					unsigned char scenetype = atoi(sd[5].c_str());
 					int iProtected = atoi(sd[7].c_str());
 
-					std::string onaction = base64_encode((const unsigned char*)sd[8].c_str(), sd[8].size());
-					std::string offaction = base64_encode((const unsigned char*)sd[9].c_str(), sd[9].size());
+					std::string onaction = base64_encode(sd[8]);
+					std::string offaction = base64_encode(sd[9]);
 
 					root["result"][ii]["idx"] = sd[0];
 					root["result"][ii]["Name"] = sName;
@@ -13424,6 +13422,9 @@ szQuery << "UPDATE DeviceStatus SET "
 			else if ((dType == pTypeRego6XXValue) && (dSubType == sTypeRego6XXCounter))
 				metertype = MTYPE_COUNTER;
 
+			// Special case of managed counter: Usage instead of Value in Meter table, and we don't want to calculate last value
+			bool bIsManagedCounter = (dType == pTypeGeneral) && (dSubType == sTypeManagedCounter);
+
 			double AddjValue = atof(result[0][3].c_str());
 			double AddjMulti = atof(result[0][4].c_str());
 			std::string sOptions = result[0][5].c_str();
@@ -14318,12 +14319,6 @@ szQuery << "UPDATE DeviceStatus SET "
 							EnergyDivider *= 100.0f;
 
 						int ii = 0;
-						result = m_sql.safe_query("SELECT Value, Date FROM %s WHERE (DeviceRowID==%" PRIu64 ") ORDER BY Date ASC", dbasetable.c_str(), idx);
-
-						int method = 0;
-						std::string sMethod = request::findValue(&req, "method");
-						if (sMethod.size() > 0)
-							method = atoi(sMethod.c_str());
 
 						bool bHaveFirstValue = false;
 						bool bHaveFirstRealValue = false;
@@ -14334,6 +14329,20 @@ szQuery << "UPDATE DeviceStatus SET "
 
 						std::string LastDateTime = "";
 						time_t lastTime = 0;
+
+						if (bIsManagedCounter) {
+							result = m_sql.safe_query("SELECT Usage, Date FROM %s WHERE (DeviceRowID==%" PRIu64 ") ORDER BY Date ASC", dbasetable.c_str(), idx);
+							bHaveFirstValue = true;
+							bHaveFirstRealValue = true;
+						}
+						else {
+							result = m_sql.safe_query("SELECT Value, Date FROM %s WHERE (DeviceRowID==%" PRIu64 ") ORDER BY Date ASC", dbasetable.c_str(), idx);
+						}
+
+						int method = 0;
+						std::string sMethod = request::findValue(&req, "method");
+						if (sMethod.size() > 0)
+							method = atoi(sMethod.c_str());
 
 						if (!result.empty())
 						{
@@ -14396,7 +14405,9 @@ szQuery << "UPDATE DeviceStatus SET "
 												ii++;
 											}
 										}
-										ulFirstValue = actValue;
+										if (!bIsManagedCounter) {
+											ulFirstValue = actValue;
+										}
 										LastDateTime = actDateTimeHour;
 									}
 
@@ -14459,12 +14470,14 @@ szQuery << "UPDATE DeviceStatus SET "
 									}
 									else
 										bHaveFirstRealValue = true;
-									ulLastValue = actValue;
+									if (!bIsManagedCounter) {
+										ulLastValue = actValue;
+									}
 									lastTime = atime;
 								}
 							}
 						}
-						if ((bHaveFirstValue) && (method == 0))
+						if ((!bIsManagedCounter) && (bHaveFirstValue) && (method == 0))
 						{
 							//add last value
 							root["result"][ii]["d"] = LastDateTime + ":00";
@@ -15070,7 +15083,7 @@ szQuery << "UPDATE DeviceStatus SET "
 							}
 						}
 					}
-					else
+					else if (!bIsManagedCounter)
 					{
 						result = m_sql.safe_query("SELECT MIN(Value), MAX(Value) FROM Meter WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q')",
 							idx, szDateEnd);
@@ -16247,7 +16260,7 @@ szQuery << "UPDATE DeviceStatus SET "
 								root["counter"] = szTmp;
 							}
 						}
-						else
+						else if (!bIsManagedCounter)
 						{
 							//Add last counter value
 							sprintf(szTmp, "%d", atoi(sValue.c_str()));
@@ -16566,7 +16579,7 @@ szQuery << "UPDATE DeviceStatus SET "
 							ii++;
 						}
 					}
-					else
+					else if (!bIsManagedCounter)
 					{
 						result = m_sql.safe_query(
 							"SELECT MIN(Value), MAX(Value) FROM Meter WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q')",
@@ -17290,7 +17303,7 @@ szQuery << "UPDATE DeviceStatus SET "
 							}
 						}
 					}
-					else
+					else if (!bIsManagedCounter)
 					{
 						result = m_sql.safe_query(
 							"SELECT MIN(Value), MAX(Value) FROM Meter WHERE (DeviceRowID==%" PRIu64 " AND Date>='%q')",
@@ -17462,7 +17475,7 @@ szQuery << "UPDATE DeviceStatus SET "
 				m_sql.safe_query(
 					"INSERT INTO UserSessions (SessionID, Username, AuthToken, ExpirationDate, RemoteHost) VALUES ('%q', '%q', '%q', '%q', '%q')",
 					session.id.c_str(),
-					base64_encode((const unsigned char*)session.username.c_str(), session.username.size()).c_str(),
+					base64_encode(session.username).c_str(),
 					session.auth_token.c_str(),
 					szExpires,
 					remote_host.c_str());

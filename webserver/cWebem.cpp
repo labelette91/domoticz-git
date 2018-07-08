@@ -1352,7 +1352,7 @@ std::string getRootDir(std::string &request_path)
 			ss << u;
 			randomValue = ss.str();
 
-			std::string sessionId = GenerateMD5Hash(base64_encode((const unsigned char*)randomValue.c_str(), randomValue.size()));
+			std::string sessionId = GenerateMD5Hash(base64_encode(randomValue));
 
 			_log.Debug(DEBUG_WEBSERVER, "[web:%s] generate new session id token %s", myWebem->GetPort().c_str(), sessionId.c_str());
 
@@ -1370,7 +1370,7 @@ std::string getRootDir(std::string &request_path)
 			ss << u;
 			randomValue = ss.str();
 
-			std::string authToken = base64_encode((const unsigned char*)randomValue.c_str(), randomValue.size());
+			std::string authToken = base64_encode(randomValue);
 
 			_log.Debug(DEBUG_WEBSERVER, "[web:%s] generate new authentication token %s", myWebem->GetPort().c_str(), authToken.c_str());
 

@@ -41,21 +41,9 @@ class CEnOceanESP3: public CEnOcean
 		ERS_CHECKSUM
 	};
 public:
-    /**
-    * Opens a serial device.
-    * \param devname serial device name, example "/dev/ttyS0" or "COM1"
-    * \param baud_rate serial baud rate
-    * \param opt_parity serial parity, default even
-    * \param opt_csize serial character size, default 7bit
-    * \param opt_flow serial flow control, default none
-    * \param opt_stop serial stop bits, default 1
-    * \throws boost::system::system_error if cannot open the
-    * serial device
-    */
 	CEnOceanESP3(const int ID, const std::string& devname, const int type);
-
     ~CEnOceanESP3();
-	bool WriteToHardware(const char *pdata, const unsigned char length);
+	bool WriteToHardware(const char *pdata, const unsigned char length) override;
 	void SendDimmerTeachIn(const char *pdata, const unsigned char length);
 	void TeachIn(std::string& idx, std::string& hardwareid);
 
@@ -73,7 +61,8 @@ private:
 	bool sendFrameQueue(unsigned char frametype, unsigned char *databuf, unsigned short datalen, unsigned char *optdata, unsigned char optdatalen);
 
 	void ParseRadioDatagram();
-
+	void readCallback(const char *data, size_t len);
+private:
 	_eEnOcean_Receive_State m_receivestate;
 	int m_wantedlength;
 
@@ -98,10 +87,6 @@ private:
 	T_SENSOR_MAP m_sensors ;
 
 
-	/**
-     * Read callback, stores data in the buffer
-     */
-    void readCallback(const char *data, size_t len);
 	void sendVld(unsigned int sID, int channel, int value);
 	void SendRpsTeachIn(unsigned int sID);
 	void Send1BSTeachIn(unsigned int sID);

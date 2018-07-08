@@ -638,7 +638,7 @@ bool MainWorker::RestartHardware(const std::string &idx)
 	result = m_sql.safe_query(
 		"SELECT Name, Enabled, Type, Address, Port, SerialPort, Username, Password, Extra, Mode1, Mode2, Mode3, Mode4, Mode5, Mode6, DataTimeout , RestartType FROM Hardware WHERE (ID=='%q')",
 		idx.c_str());
-	if (result.size() < 1)
+	if (result.empty())
 		return false;
 	std::vector<std::string> sd = result[0];
 	std::string Name = sd[0];
@@ -9645,7 +9645,7 @@ void MainWorker::decode_P1MeterGas(const int HwdID, const _eHardwareTypes HwdTyp
 void MainWorker::decode_YouLessMeter(const int HwdID, const _eHardwareTypes HwdType, const tRBUF *pResponse, _tRxMessageProcessingResult & procResult)
 {
 	char szTmp[200];
-	const _tYouLessMeter *pMeter = reinterpret_cast<const _tYouLessMeter*>(pResponse);
+	const CYouLess::YouLessMeter *pMeter = reinterpret_cast<const CYouLess::YouLessMeter*>(pResponse);
 	unsigned char devType = pMeter->type;
 	unsigned char subType = pMeter->subtype;
 	sprintf(szTmp, "%d", pMeter->ID1);
@@ -11827,7 +11827,7 @@ bool MainWorker::SwitchModal(const std::string &idx, const std::string &status, 
 	result = m_sql.safe_query(
 		"SELECT HardwareID, DeviceID,Unit,Type,SubType,SwitchType,StrParam1,nValue FROM DeviceStatus WHERE (ID == '%q')",
 		idx.c_str());
-	if (result.size() < 1)
+	if (result.empty())
 		return false;
 	std::vector<std::string> sd = result[0];
 
@@ -11912,7 +11912,7 @@ bool MainWorker::SwitchLight(const uint64_t idx, const std::string &switchcmd, c
 	result = m_sql.safe_query(
 		"SELECT HardwareID,DeviceID,Unit,Type,SubType,SwitchType,AddjValue2,nValue,sValue,Name,Options FROM DeviceStatus WHERE (ID == %" PRIu64 ")",
 		idx);
-	if (result.size() < 1)
+	if (result.empty())
 		return false;
 
 	std::vector<std::string> sd = result[0];
@@ -11958,7 +11958,7 @@ bool MainWorker::SetSetPoint(const std::string &idx, const float TempValue, cons
 	result = m_sql.safe_query(
 		"SELECT HardwareID, DeviceID,Unit,Type,SubType,SwitchType,StrParam1,ID FROM DeviceStatus WHERE (ID == '%q')",
 		idx.c_str());
-	if (result.size() < 1)
+	if (result.empty())
 		return false;
 
 	std::vector<std::string> sd = result[0];
@@ -12231,7 +12231,7 @@ bool MainWorker::SetSetPoint(const std::string &idx, const float TempValue)
 	result = m_sql.safe_query(
 		"SELECT HardwareID, DeviceID,Unit,Type,SubType,SwitchType,StrParam1,ID FROM DeviceStatus WHERE (ID == '%q')",
 		idx.c_str());
-	if (result.size() < 1)
+	if (result.empty())
 		return false;
 
 	std::vector<std::string> sd = result[0];
@@ -12281,7 +12281,7 @@ bool MainWorker::SetClock(const std::string &idx, const std::string &clockstr)
 	result = m_sql.safe_query(
 		"SELECT HardwareID, DeviceID,Unit,Type,SubType,SwitchType FROM DeviceStatus WHERE (ID == '%q')",
 		idx.c_str());
-	if (result.size() < 1)
+	if (result.empty())
 		return false;
 
 	std::vector<std::string> sd = result[0];
@@ -12351,7 +12351,7 @@ bool MainWorker::SetZWaveThermostatMode(const std::string &idx, const int tMode)
 	result = m_sql.safe_query(
 		"SELECT HardwareID, DeviceID,Unit,Type,SubType,SwitchType FROM DeviceStatus WHERE (ID == '%q')",
 		idx.c_str());
-	if (result.size() < 1)
+	if (result.empty())
 		return false;
 
 	std::vector<std::string> sd = result[0];
@@ -12365,7 +12365,7 @@ bool MainWorker::SetZWaveThermostatFanMode(const std::string &idx, const int fMo
 	result = m_sql.safe_query(
 		"SELECT HardwareID, DeviceID,Unit,Type,SubType,SwitchType FROM DeviceStatus WHERE (ID == '%q')",
 		idx.c_str());
-	if (result.size() < 1)
+	if (result.empty())
 		return false;
 
 	std::vector<std::string> sd = result[0];
@@ -12379,7 +12379,7 @@ bool MainWorker::SetThermostatState(const std::string &idx, const int newState)
 	result = m_sql.safe_query(
 		"SELECT HardwareID, DeviceID,Unit,Type,SubType,SwitchType FROM DeviceStatus WHERE (ID == '%q')",
 		idx.c_str());
-	if (result.size() < 1)
+	if (result.empty())
 		return false;
 	int HardwareID = atoi(result[0][0].c_str());
 	int hindex = FindDomoticzHardware(HardwareID);
@@ -12589,7 +12589,7 @@ bool MainWorker::SwitchScene(const uint64_t idx, std::string switchcmd)
 	//now switch all attached devices, and only the onces that do not trigger a scene
 	result = m_sql.safe_query(
 		"SELECT DeviceRowID, Cmd, Level, Color, OnDelay, OffDelay FROM SceneDevices WHERE (SceneRowID == %" PRIu64 ") ORDER BY [Order] ASC", idx);
-	if (result.size() < 1)
+	if (result.empty())
 		return true; //no devices in the scene
 
 	for (const auto & itt : result)

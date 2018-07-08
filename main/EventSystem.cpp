@@ -1017,7 +1017,7 @@ void CEventSystem::GetCurrentMeasurementStates()
 						"SELECT Total, Total FROM Rain WHERE (DeviceRowID=%" PRIu64 " AND Date>='%q') ORDER BY ROWID DESC LIMIT 1",
 						sitem.ID, szDate.c_str());
 				}
-				if (result2.size() > 0)
+				if (!result2.empty())
 				{
 					double total_real = 0;
 					std::vector<std::string> sd2 = result2[0];
@@ -1043,7 +1043,7 @@ void CEventSystem::GetCurrentMeasurementStates()
 			std::vector<std::vector<std::string> > result2;
 			result2 = m_sql.safe_query("SELECT MIN(Value) FROM Meter WHERE (DeviceRowID=%" PRIu64 " AND Date>='%q')",
 				sitem.ID, szDate.c_str());
-			if (result2.size() > 0)
+			if (!result2.empty())
 			{
 				std::vector<std::string> sd2 = result2[0];
 
@@ -1068,7 +1068,7 @@ void CEventSystem::GetCurrentMeasurementStates()
 				std::vector<std::vector<std::string> > result2;
 				result2 = m_sql.safe_query("SELECT MIN(Value), MAX(Value) FROM Meter WHERE (DeviceRowID=%" PRIu64 " AND Date>='%q')",
 					sitem.ID, szDate.c_str());
-				if (result2.size() > 0)
+				if (!result2.empty())
 				{
 					std::vector<std::string> sd2 = result2[0];
 
@@ -4027,7 +4027,8 @@ bool CEventSystem::ScheduleEvent(int deviceID, const std::string &Action, bool i
 		// Get Device details, check for switch global OnDelay/OffDelay (stored in AddjValue2/AddjValue).
 		std::vector<std::vector<std::string> > result;
 		result = m_sql.safe_query("SELECT SwitchType, AddjValue2 FROM DeviceStatus WHERE (ID == %d)", deviceID);
-		if (result.size() < 1) {
+		if (result.empty())
+		{
 			return false;
 		}
 

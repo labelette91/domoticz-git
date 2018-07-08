@@ -1680,7 +1680,7 @@ bool CSQLHelper::OpenDatabase()
 			//Add hardware monitor as normal hardware class (if not already added)
 			std::vector<std::vector<std::string> > result;
 			result = safe_query("SELECT ID FROM Hardware WHERE (Type==%d)", HTYPE_System);
-			if (result.size() < 1)
+			if (result.empty())
 			{
 				m_sql.safe_query("INSERT INTO Hardware (Name, Enabled, Type, Address, Port, Username, Password, Mode1, Mode2, Mode3, Mode4, Mode5, Mode6) VALUES ('Motherboard',1, %d,'',1,'','',0,0,0,0,0,0)", HTYPE_System);
 			}
@@ -1748,14 +1748,17 @@ bool CSQLHelper::OpenDatabase()
 			std::string securityPanelDeviceID = "148702"; // 0x00148702
 			std::vector<std::vector<std::string> > result;
 			result = safe_query("SELECT ID FROM Hardware WHERE (Type==%d)", HTYPE_DomoticzInternal);
-			if (result.size() < 1) {
+			if (result.empty())
+			{
 				m_sql.safe_query("INSERT INTO Hardware (Name, Enabled, Type, Address, Port, Username, Password, Mode1, Mode2, Mode3, Mode4, Mode5, Mode6) VALUES ('Domoticz Internal',1, %d,'',1,'','',0,0,0,0,0,0)", HTYPE_DomoticzInternal);
 				result = safe_query("SELECT ID FROM Hardware WHERE (Type==%d)", HTYPE_DomoticzInternal);
 			}
-			if (!result.empty()) {
+			if (!result.empty())
+			{
 				hwdID = atoi(result[0][0].c_str());
 			}
-			if (hwdID > 0) {
+			if (hwdID > 0)
+			{
 				// Update HardwareID for Security Panel device
 				int oldHwdID = 1000;
 				result = safe_query("SELECT ID FROM DeviceStatus WHERE (HardwareID==%d) AND (DeviceID='%q') AND (Type=%d) AND (SubType=%d)", oldHwdID, securityPanelDeviceID.c_str(), pTypeSecurity1, sTypeDomoticzSecurity);
@@ -1771,7 +1774,8 @@ bool CSQLHelper::OpenDatabase()
 				}
 			}
 		}
-		if (dbversion < 92) {
+		if (dbversion < 92)
+		{
 			// Change DeviceStatus.Options datatype from VARCHAR(1024) to TEXT
 			std::string tableName = "DeviceStatus";
 			std::string fieldList = "[ID],[HardwareID],[DeviceID],[Unit],[Name],[Used],[Type],[SubType],[SwitchType],[Favorite],[SignalLevel],[BatteryLevel],[nValue],[sValue],[LastUpdate],[Order],[AddjValue],[AddjMulti],[AddjValue2],[AddjMulti2],[StrParam1],[StrParam2],[LastLevel],[Protected],[CustomImage],[Description],[Options]";
@@ -1928,7 +1932,7 @@ bool CSQLHelper::OpenDatabase()
 						" AND ((SwitchType=" << MTYPE_COUNTER << ") OR (SwitchType=" << MTYPE_TIME << "))"
 						" AND (HardwareID=" << sd[0] << ")";
 					result1 = query(szQuery1.str());
-					if (result1.size() > 0)
+					if (!result1.empty())
 					{
 						for (const auto & itt2 : result1)
 						{
@@ -3096,7 +3100,7 @@ bool CSQLHelper::SwitchLightFromTasker(uint64_t idx, const std::string &switchcm
 	//Get Device details
 	std::vector<std::vector<std::string> > result;
 	result = safe_query("SELECT HardwareID, DeviceID,Unit,Type,SubType,SwitchType,AddjValue2,nValue,sValue,Name,Options FROM DeviceStatus WHERE (ID == %" PRIu64 ")", idx);
-	if (result.size() < 1)
+	if (result.empty())
 		return false;
 
 	std::vector<std::string> sd = result[0];
@@ -4741,7 +4745,7 @@ bool CSQLHelper::GetPreferencesVar(const std::string &Key, std::string &sValue)
 	std::vector<std::vector<std::string> > result;
 	result = safe_query("SELECT sValue FROM Preferences WHERE (Key='%q')",
 		Key.c_str());
-	if (result.size() < 1)
+	if (result.empty())
 		return false;
 	std::vector<std::string> sd = result[0];
 	sValue = sd[0];
@@ -4768,7 +4772,7 @@ bool CSQLHelper::GetPreferencesVar(const std::string &Key, int &nValue, std::str
 	std::vector<std::vector<std::string> > result;
 	result = safe_query("SELECT nValue, sValue FROM Preferences WHERE (Key='%q')",
 		Key.c_str());
-	if (result.size() < 1)
+	if (result.empty())
 		return false;
 	std::vector<std::string> sd = result[0];
 	nValue = atoi(sd[0].c_str());
@@ -4803,7 +4807,7 @@ int CSQLHelper::GetLastBackupNo(const char *Key, int &nValue)
 
 	std::vector<std::vector<std::string> > result;
 	result = safe_query("SELECT nValue FROM BackupLog WHERE (Key='%q')", Key);
-	if (result.size() < 1)
+	if (result.empty())
 		return -1;
 	std::vector<std::string> sd = result[0];
 	nValue = atoi(sd[0].c_str());
@@ -6053,7 +6057,7 @@ void CSQLHelper::AddCalendarUpdateRain()
 
 		//Get Device Information
 		result = safe_query("SELECT SubType FROM DeviceStatus WHERE (ID='%" PRIu64 "')", ID);
-		if (result.size() < 1)
+		if (result.empty())
 			continue;
 		std::vector<std::string> sd = result[0];
 
@@ -6161,7 +6165,7 @@ void CSQLHelper::AddCalendarUpdateMeter()
 
 		//Get Device Information
 		result = safe_query("SELECT Name, HardwareID, DeviceID, Unit, Type, SubType, SwitchType FROM DeviceStatus WHERE (ID='%" PRIu64 "')", ID);
-		if (result.size() < 1)
+		if (result.empty())
 			continue;
 		std::vector<std::string> sd = result[0];
 		std::string devname = sd[0];
@@ -6360,7 +6364,7 @@ void CSQLHelper::AddCalendarUpdateMultiMeter()
 
 		//Get Device Information
 		result = safe_query("SELECT Name, HardwareID, DeviceID, Unit, Type, SubType, SwitchType FROM DeviceStatus WHERE (ID='%" PRIu64 "')", ID);
-		if (result.size() < 1)
+		if (result.empty())
 			continue;
 		std::vector<std::string> sd = result[0];
 
@@ -7113,7 +7117,7 @@ void CSQLHelper::CheckSceneStatus(const uint64_t Idx)
 	std::vector<std::vector<std::string> > result;
 
 	result = safe_query("SELECT nValue FROM Scenes WHERE (ID == %" PRIu64 ")", Idx);
-	if (result.size() < 1)
+	if (result.empty())
 		return; //not found
 
 	unsigned char orgValue = (unsigned char)atoi(result[0][0].c_str());
@@ -7121,7 +7125,7 @@ void CSQLHelper::CheckSceneStatus(const uint64_t Idx)
 
 	result = safe_query("SELECT a.ID, a.DeviceID, a.Unit, a.Type, a.SubType, a.SwitchType, a.nValue, a.sValue FROM DeviceStatus AS a, SceneDevices as b WHERE (a.ID == b.DeviceRowID) AND (b.SceneRowID == %" PRIu64 ")",
 		Idx);
-	if (result.size() < 1)
+	if (result.empty())
 		return; //no devices in scene
 
 	std::vector<bool> _DeviceStatusResults;
@@ -7184,11 +7188,8 @@ void CSQLHelper::DeleteDataPoint(const char *ID, const std::string &Date)
 {
 	std::vector<std::vector<std::string> > result;
 	result = safe_query("SELECT Type,SubType FROM DeviceStatus WHERE (ID==%q)", ID);
-	if (result.size() < 1)
+	if (result.empty())
 		return;
-	//std::vector<std::string> sd=result[0];
-	//unsigned char dType=atoi(sd[0].c_str());
-	//unsigned char dSubType=atoi(sd[1].c_str());
 
 	if (Date.find(':') != std::string::npos)
 	{
@@ -7198,10 +7199,11 @@ void CSQLHelper::DeleteDataPoint(const char *ID, const std::string &Date)
 		struct tm tLastUpdate;
 		localtime_r(&now, &tLastUpdate);
 
-		//GB3:	ToDo: Database should know the difference between Summer and Winter time,
-		//	or we'll be deleting both entries if the DataPoint is inside a DST jump
-
+		time_t cEndTime;
+		ParseSQLdatetime(cEndTime, tLastUpdate, Date, tLastUpdate.tm_isdst);
+		tLastUpdate.tm_min += 2;
 		sprintf(szDateEnd, "%04d-%02d-%02d %02d:%02d:%02d", tLastUpdate.tm_year + 1900, tLastUpdate.tm_mon + 1, tLastUpdate.tm_mday, tLastUpdate.tm_hour, tLastUpdate.tm_min, tLastUpdate.tm_sec);
+
 		//Short log
 		safe_query("DELETE FROM Rain WHERE (DeviceRowID=='%q') AND (Date>='%q') AND (Date<='%q')", ID, Date.c_str(), szDateEnd);
 		safe_query("DELETE FROM Wind WHERE (DeviceRowID=='%q') AND (Date>='%q') AND (Date<='%q')", ID, Date.c_str(), szDateEnd);
@@ -7647,7 +7649,7 @@ void CSQLHelper::CheckBatteryLow()
 
 	std::vector<std::vector<std::string> > result;
 	result = safe_query("SELECT ID,Name, BatteryLevel FROM DeviceStatus WHERE (Used!=0 AND BatteryLevel<%d AND BatteryLevel!=255)", iBatteryLowLevel);
-	if (result.size() < 1)
+	if (result.empty())
 		return;
 
 	time_t now = mytime(NULL);
@@ -7734,7 +7736,7 @@ void CSQLHelper::CheckDeviceTimeout()
 		pTypeHomeConfort,
 		pTypeFS20
 	);
-	if (result.size() < 1)
+	if (result.empty())
 		return;
 
 	uint64_t ulID;

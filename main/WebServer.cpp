@@ -1024,6 +1024,8 @@ namespace http {
 #endif
 				if (ii == HTYPE_PythonPlugin)
 					bDoAdd = false;
+				else if (ii == HTYPE_FreeToUse) //Safe to remove when you changed this type for a new hardware class!
+					bDoAdd = false;
 				if (bDoAdd)
 					_htypes[Hardware_Type_Desc(ii)] = ii;
 	}
@@ -1504,7 +1506,7 @@ namespace http {
 			}
 			else if (
 				(htype == HTYPE_RFXLAN) || (htype == HTYPE_P1SmartMeterLAN) ||
-				(htype == HTYPE_YouLess) || (htype == HTYPE_RazberryZWave) || (htype == HTYPE_OpenThermGatewayTCP) || (htype == HTYPE_LimitlessLights) ||
+				(htype == HTYPE_YouLess) || (htype == HTYPE_OpenThermGatewayTCP) || (htype == HTYPE_LimitlessLights) ||
 				(htype == HTYPE_SolarEdgeTCP) || (htype == HTYPE_WOL) || (htype == HTYPE_S0SmartMeterTCP) || (htype == HTYPE_ECODEVICES) || (htype == HTYPE_Mochad) ||
 				(htype == HTYPE_MySensorsTCP) || (htype == HTYPE_MySensorsMQTT) || (htype == HTYPE_MQTT) || (htype == HTYPE_FRITZBOX) || (htype == HTYPE_ETH8020) || (htype == HTYPE_Sterbox) ||
 				(htype == HTYPE_KMTronicTCP) || (htype == HTYPE_KMTronicUDP) || (htype == HTYPE_SOLARMAXTCP) || (htype == HTYPE_RelayNet) || (htype == HTYPE_SatelIntegra) || (htype == HTYPE_eHouseTCP) || (htype == HTYPE_RFLINKTCP) ||
@@ -2226,7 +2228,7 @@ namespace http {
 			std::vector<std::vector<std::string> > result;
 			result = m_sql.safe_query("SELECT ID FROM DeviceToPlansMap WHERE (DeviceRowID=='%q') AND (DevSceneType==%d) AND (PlanID=='%q')",
 				activeidx.c_str(), activetype, idx.c_str());
-			if (result.size() == 0)
+			if (result.empty())
 			{
 				m_sql.safe_query(
 					"INSERT INTO DeviceToPlansMap (DevSceneType,DeviceRowID, PlanID) VALUES (%d,'%q','%q')",
@@ -3371,7 +3373,7 @@ namespace http {
 				//first check if it is not already a sub device
 				result = m_sql.safe_query("SELECT ID FROM LightSubDevices WHERE (DeviceRowID=='%q') AND (ParentID =='%q')",
 					subidx.c_str(), idx.c_str());
-				if (result.size() == 0)
+				if (result.empty())
 				{
 					root["status"] = "OK";
 					root["title"] = "AddSubDevice";
@@ -3458,7 +3460,7 @@ namespace http {
 				result = m_sql.safe_query("SELECT ID FROM SceneDevices WHERE (DeviceRowID=='%q') AND (SceneRowID =='%q') AND (OnDelay == %d)",
 					devidx.c_str(), idx.c_str(), ondelay);
 				}
-				if (result.size() == 0)
+				if (result.empty())
 				{
 					root["status"] = "OK";
 					root["title"] = "AddSceneDevice";
@@ -4111,7 +4113,7 @@ namespace http {
 					" AND (DevSceneType==%d) AND (DevSceneRowID=='%q')"
 					" AND (DevSceneWhen==%d)",
 					idx.c_str(), activetype, activeidx.c_str(), activewhen);
-				if (result.size() == 0)
+				if (result.empty())
 				{
 					root["status"] = "OK";
 					root["title"] = "AddCameraActiveDevice";
@@ -5373,7 +5375,7 @@ namespace http {
 						result = m_sql.safe_query(
 							"SELECT ID FROM LightSubDevices WHERE (DeviceRowID=='%q') AND (ParentID =='%q')",
 							ID.c_str(), maindeviceidx.c_str());
-						if (result.size() == 0)
+						if (result.empty())
 						{
 							//no it is not, add it
 							result = m_sql.safe_query(
@@ -12788,7 +12790,7 @@ szQuery << "UPDATE DeviceStatus SET "
 					//first check if it is not already a sub device
 					result = m_sql.safe_query("SELECT ID FROM LightSubDevices WHERE (DeviceRowID=='%q') AND (ParentID =='%q')",
 						idx.c_str(), maindeviceidx.c_str());
-					if (result.size() == 0)
+					if (result.empty())
 					{
 						//no it is not, add it
 						m_sql.safe_query(

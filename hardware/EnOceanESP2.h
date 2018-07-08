@@ -24,8 +24,8 @@ public:
 	void SendDimmerTeachIn(const char *pdata, const unsigned char length);
 private:
 	void Init();
-	bool StartHardware();
-	bool StopHardware();
+	bool StartHardware() override;
+	bool StopHardware() override;
 	bool OpenSerialDevice();
 	void Do_Work();
 	bool ParseData();

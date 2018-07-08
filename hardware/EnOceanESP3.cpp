@@ -12,6 +12,8 @@
 #include "hardwaretypes.h"
 #include "../main/localtime_r.h"
 
+#include <boost/exception/diagnostic_information.hpp>
+#include <cmath>
 #include <ctime>
 
 #if _DEBUG
@@ -436,7 +438,7 @@ bool CEnOceanESP3::StartHardware()
 	m_retrycntr=ENOCEAN_RETRY_DELAY*5; //will force reconnect first thing
 
 	//Start worker thread
-	m_thread = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&CEnOceanESP3::Do_Work, this)));
+	m_thread = std::make_shared<std::thread>(std::bind(&CEnOceanESP3::Do_Work, this));
 
 	return (m_thread!=NULL);
 }
@@ -542,7 +544,7 @@ void CEnOceanESP3::Do_Work()
 		}
 		if (m_sendqueue.size()>0)
 		{
-			boost::lock_guard<boost::mutex> l(m_sendMutex);
+			std::lock_guard<std::mutex> l(m_sendMutex);
 
 			std::vector<std::string>::iterator itt=m_sendqueue.begin();
 			if (itt!=m_sendqueue.end())
@@ -574,7 +576,7 @@ void CEnOceanESP3::Add2SendQueue(const char* pData, const size_t length)
 	}
 	std::string sBytes;
 	sBytes.insert(0,pData,length);
-	boost::lock_guard<boost::mutex> l(m_sendMutex);
+	std::lock_guard<std::mutex> l(m_sendMutex);
 	m_sendqueue.push_back(sBytes);
 }
 
@@ -624,7 +626,7 @@ bool CEnOceanESP3::OpenSerialDevice()
 
 void CEnOceanESP3::readCallback(const char *data, size_t len)
 {
-	boost::lock_guard<boost::mutex> l(readQueueMutex);
+	std::lock_guard<std::mutex> l(readQueueMutex);
 	size_t ii=0;
 
 	while (ii<len)

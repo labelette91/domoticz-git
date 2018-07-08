@@ -31,7 +31,7 @@ bool VirtualThermostat::StartHardware()
 
 
 	//Start worker thread
-	m_thread = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&VirtualThermostat::Do_Work, this)));
+	m_thread = std::shared_ptr<std::thread>(new std::thread(std::bind(&VirtualThermostat::Do_Work, this)));
 	sOnConnected(this);
 	m_bIsStarted = true;
 	return (m_thread != NULL);

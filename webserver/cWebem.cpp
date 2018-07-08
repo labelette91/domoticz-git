@@ -867,7 +867,7 @@ std::string getRootDir(std::string &request_path)
 		{
 			m_userpasswords.clear();
 
-			boost::mutex::scoped_lock lock(m_sessionsMutex);
+			std::unique_lock<std::mutex> lock(m_sessionsMutex);
 			m_sessions.clear(); //TODO : check if it is really necessary
 		}
 
@@ -1013,7 +1013,7 @@ std::string getRootDir(std::string &request_path)
 
 		WebEmSession * cWebem::GetSession(const std::string & ssid)
 		{
-			boost::mutex::scoped_lock lock(m_sessionsMutex);
+			std::unique_lock<std::mutex> lock(m_sessionsMutex);
 			std::map<std::string, WebEmSession>::iterator itt = m_sessions.find(ssid);
 			if (itt != m_sessions.end())
 			{
@@ -1024,7 +1024,7 @@ std::string getRootDir(std::string &request_path)
 
 		void cWebem::AddSession(const WebEmSession & session)
 		{
-			boost::mutex::scoped_lock lock(m_sessionsMutex);
+			std::unique_lock<std::mutex> lock(m_sessionsMutex);
 			m_sessions[session.id] = session;
 		}
 
@@ -1035,7 +1035,7 @@ std::string getRootDir(std::string &request_path)
 
 		void cWebem::RemoveSession(const std::string & ssid)
 		{
-			boost::mutex::scoped_lock lock(m_sessionsMutex);
+			std::unique_lock<std::mutex> lock(m_sessionsMutex);
 			std::map<std::string, WebEmSession>::iterator itt = m_sessions.find(ssid);
 			if (itt != m_sessions.end())
 			{
@@ -1045,7 +1045,7 @@ std::string getRootDir(std::string &request_path)
 
 		int cWebem::CountSessions()
 		{
-			boost::mutex::scoped_lock lock(m_sessionsMutex);
+			std::unique_lock<std::mutex> lock(m_sessionsMutex);
 			return (int)m_sessions.size();
 		}
 
@@ -1057,7 +1057,7 @@ std::string getRootDir(std::string &request_path)
 			// Clean up timed out sessions from memory
 			std::vector<std::string> ssids;
 			{
-				boost::mutex::scoped_lock lock(m_sessionsMutex);
+				std::unique_lock<std::mutex> lock(m_sessionsMutex);
 				time_t now = mytime(NULL);
 				std::map<std::string, WebEmSession>::iterator itt;
 				for (itt = m_sessions.begin(); itt != m_sessions.end(); ++itt)
@@ -1077,7 +1077,7 @@ std::string getRootDir(std::string &request_path)
 			int after = CountSessions();
 			std::stringstream ss;
 			{
-				boost::mutex::scoped_lock lock(m_sessionsMutex);
+				std::unique_lock<std::mutex> lock(m_sessionsMutex);
 				std::map<std::string, WebEmSession>::iterator itt;
 				int i = 0;
 				for (itt = m_sessions.begin(); itt != m_sessions.end(); ++itt)

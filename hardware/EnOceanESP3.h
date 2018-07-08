@@ -66,7 +66,7 @@ private:
 	_eEnOcean_Receive_State m_receivestate;
 	int m_wantedlength;
 
-	boost::shared_ptr<boost::thread> m_thread;
+	std::shared_ptr<std::thread> m_thread;
 	volatile bool m_stoprequested;
     int m_Type;
 	std::string m_szSerialPort;
@@ -80,9 +80,11 @@ private:
     unsigned char m_buffer[ENOCEAN3_READ_BUFFER_SIZE];
 	int m_bufferpos;
 	int m_retrycntr;
-	int m_Seq;
-	boost::mutex m_sendMutex;
+
+	std::mutex m_sendMutex;
 	std::vector<std::string> m_sendqueue;
+
+	int m_Seq;
 
 	T_SENSOR_MAP m_sensors ;
 

@@ -204,7 +204,7 @@ void CRFXBase::SendResetCommand()
 	m_bEnableReceive = false;
 	m_rxbufferpos = 0;
 	//Send Reset
-	boost::this_thread::sleep(boost::posix_time::millisec(1000));
+	sleep_milliseconds(1000);
 	SendCommand(cmdRESET);
 	//wait at least 500ms
 	sleep_milliseconds(500);

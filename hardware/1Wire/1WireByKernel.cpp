@@ -27,8 +27,8 @@
 C1WireByKernel::C1WireByKernel() :
    m_stoprequested(false)
 {
-   m_thread = std::shared_ptr<std::thread>(new std::thread(std::bind(&C1WireByKernel::ThreadFunction, this)));
-   _log.Log(LOG_STATUS,"Using 1-Wire support (kernel W1 module)...");
+   m_thread = std::make_shared<std::thread>(&C1WireByKernel::ThreadFunction, this);
+   _log.Log(LOG_STATUS, "Using 1-Wire support (kernel W1 module)...");
 }
 
 C1WireByKernel::~C1WireByKernel()
@@ -37,7 +37,11 @@ C1WireByKernel::~C1WireByKernel()
    _t1WireDevice device;
    DeviceState deviceState(device);
    m_PendingChanges.push_back(deviceState); // wake up thread with dummy item
-   m_thread->join();
+   if (m_thread)
+   {
+	   m_thread->join();
+	   m_thread.reset();
+   }
 }
 
 bool C1WireByKernel::IsAvailable()

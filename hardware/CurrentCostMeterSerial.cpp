@@ -33,7 +33,7 @@ CurrentCostMeterSerial::~CurrentCostMeterSerial()
 bool CurrentCostMeterSerial::StartHardware()
 {
 	m_stoprequested = false;
-	m_thread = std::shared_ptr<std::thread>(new std::thread(std::bind(&CurrentCostMeterSerial::Do_Work, this)));
+	m_thread = std::make_shared<std::thread>(&CurrentCostMeterSerial::Do_Work, this);
 
 	//Try to open the Serial Port
 	try
@@ -77,6 +77,7 @@ bool CurrentCostMeterSerial::StopHardware()
 		m_thread->join();
 		// Wait a while. The read thread might be reading. Adding this prevents a pointer error in the async serial class.
 		sleep_milliseconds(10);
+		m_thread.reset();
 	}
 	m_bIsStarted = false;
 	return true;

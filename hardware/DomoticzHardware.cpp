@@ -13,24 +13,11 @@
 
 CDomoticzHardwareBase::CDomoticzHardwareBase()
 {
-	m_HwdID=0; //should be uniquely assigned
-	m_bEnableReceive=false;
-	m_rxbufferpos=0;
-	m_SeqNr=0;
-	m_pUserData=NULL;
-	m_bIsStarted=false;
-	m_stopHeartbeatrequested = false;
 	mytime(&m_LastHeartbeat);
 	mytime(&m_LastHeartbeatReceive);
-	m_DataTimeout = 0;
-	m_RestartType = RestartDeviceHardware;
-	m_bSkipReceiveCheck = false;
-	m_bOutputLog = true;
-	m_iHBCounter = 0;
-
-	m_baro_minuteCount = 0;
-	m_last_forecast = wsbaroforcast_unknown;
 	mytime(&m_BaroCalcLastTime);
+
+	m_RestartType = RestartDeviceHardware;
 };
 
 CDomoticzHardwareBase::~CDomoticzHardwareBase()
@@ -95,7 +82,7 @@ bool CDomoticzHardwareBase::onRFXMessage(const unsigned char *pBuffer, const siz
 void CDomoticzHardwareBase::StartHeartbeatThread()
 {
 	m_stopHeartbeatrequested = false;
-	m_Heartbeatthread = std::shared_ptr<std::thread>(new std::thread(std::bind(&CDomoticzHardwareBase::Do_Heartbeat_Work, this)));
+	m_Heartbeatthread = std::make_shared<std::thread>(&CDomoticzHardwareBase::Do_Heartbeat_Work, this);
 }
 
 void CDomoticzHardwareBase::StopHeartbeatThread()
@@ -106,6 +93,7 @@ void CDomoticzHardwareBase::StopHeartbeatThread()
 		m_Heartbeatthread->join();
 		// Wait a while. The read thread might be reading. Adding this prevents a pointer error in the async serial class.
 		sleep_milliseconds(10);
+		m_Heartbeatthread.reset();
 	}
 }
 

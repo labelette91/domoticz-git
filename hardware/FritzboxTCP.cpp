@@ -60,8 +60,8 @@ bool FritzboxTCP::StartHardware()
 	m_bIsStarted=true;
 
 	//Start worker thread
-	m_thread = std::shared_ptr<std::thread>(new std::thread(std::bind(&FritzboxTCP::Do_Work, this)));
-	return (m_thread != NULL);
+	m_thread = std::make_shared<std::thread>(&FritzboxTCP::Do_Work, this);
+	return (m_thread != nullptr);
 }
 
 bool FritzboxTCP::StopHardware()
@@ -71,6 +71,7 @@ bool FritzboxTCP::StopHardware()
 		if (m_thread)
 		{
 			m_thread->join();
+			m_thread.reset();
 		}
 	}
 	catch (...)

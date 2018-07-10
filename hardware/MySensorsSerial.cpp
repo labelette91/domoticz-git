@@ -51,17 +51,20 @@ bool MySensorsSerial::StartHardware()
 	m_retrycntr = RETRY_DELAY; //will force reconnect first thing
 
 	//Start worker thread
-	m_thread = std::shared_ptr<std::thread>(new std::thread(std::bind(&MySensorsSerial::Do_Work, this)));
+	m_thread = std::make_shared<std::thread>(&MySensorsSerial::Do_Work, this);
 	StartSendQueue();
-	return (m_thread != NULL);
+	return (m_thread != nullptr);
 }
 
 bool MySensorsSerial::StopHardware()
 {
 	StopSendQueue();
 	m_stoprequested = true;
-	if (m_thread != NULL)
+	if (m_thread)
+	{
 		m_thread->join();
+		m_thread.reset();
+	}
 	// Wait a while. The read thread might be reading. Adding this prevents a pointer error in the async serial class.
 	sleep_milliseconds(10);
 	terminate();
@@ -178,7 +181,7 @@ bool MySensorsSerial::OpenSerialDevice()
 		if (results.size() != 6)
 			continue;
 
-		sLine += "\n";
+		sLine += '\n';
 		ParseData((const unsigned char*)sLine.c_str(), sLine.size());
 	}
 	infile.close();

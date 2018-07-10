@@ -23,9 +23,9 @@ bool CRFLinkSerial::StartHardware()
 	m_retrycntr = RFLINK_RETRY_DELAY*5; //will force reconnect first thing
 
 	//Start worker thread
-	m_thread = std::shared_ptr<std::thread>(new std::thread(std::bind(&CRFLinkSerial::Do_Work, this)));
+	m_thread = std::make_shared<std::thread>(&CRFLinkSerial::Do_Work, this);
 
-	return (m_thread != NULL);
+	return (m_thread != nullptr);
 }
 
 bool CRFLinkSerial::StopHardware()
@@ -36,6 +36,7 @@ bool CRFLinkSerial::StopHardware()
 		m_thread->join();
 		// Wait a while. The read thread might be reading. Adding this prevents a pointer error in the async serial class.
 		sleep_milliseconds(10);
+		m_thread.reset();
 	}
 	terminate();
 	m_bIsStarted=false;

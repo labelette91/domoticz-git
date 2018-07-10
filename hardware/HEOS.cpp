@@ -584,8 +584,8 @@ bool CHEOS::StartHardware()
 	m_bIsStarted = true;
 
 	//Start worker thread
-	m_thread = std::shared_ptr<std::thread>(new std::thread(std::bind(&CHEOS::Do_Work, this)));
-	return (m_thread != NULL);
+	m_thread = std::make_shared<std::thread>(&CHEOS::Do_Work, this);
+	return (m_thread != nullptr);
 }
 
 bool CHEOS::StopHardware()
@@ -605,6 +605,7 @@ bool CHEOS::StopHardware()
 		if (m_thread)
 		{
 			m_thread->join();
+			m_thread.reset();
 		}
 	}
 	catch (...)

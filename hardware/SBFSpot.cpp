@@ -103,19 +103,19 @@ bool CSBFSpot::StartHardware()
 {
 	Init();
 	//Start worker thread
-	m_thread = std::shared_ptr<std::thread>(new std::thread(std::bind(&CSBFSpot::Do_Work, this)));
+	m_thread = std::make_shared<std::thread>(&CSBFSpot::Do_Work, this);
 	m_bIsStarted=true;
 	sOnConnected(this);
-	return (m_thread != NULL);
+	return (m_thread != nullptr);
 }
 
 bool CSBFSpot::StopHardware()
 {
-	if (m_thread != NULL)
+	if (m_thread)
 	{
-		assert(m_thread);
 		m_stoprequested = true;
 		m_thread->join();
+		m_thread.reset();
 	}
     m_bIsStarted=false;
     return true;

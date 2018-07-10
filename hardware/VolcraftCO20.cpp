@@ -38,26 +38,20 @@ CVolcraftCO20::~CVolcraftCO20(void)
 bool CVolcraftCO20::StartHardware()
 {
 	//Start worker thread
-	m_thread = std::shared_ptr<std::thread>(new std::thread(std::bind(&CVolcraftCO20::Do_Work, this)));
+	m_thread = std::make_shared<std::thread>(&CVolcraftCO20::Do_Work, this);
 	m_bIsStarted=true;
 	sOnConnected(this);
 
-	return (m_thread != NULL);
+	return (m_thread != nullptr);
 }
 
 bool CVolcraftCO20::StopHardware()
 {
-	/*
-    m_stoprequested=true;
 	if (m_thread)
-		m_thread->join();
-	return true;
-    */
-	if (m_thread != NULL)
 	{
-		assert(m_thread);
 		m_stoprequested = true;
 		m_thread->join();
+		m_thread.reset();
 	}
 	m_bIsStarted=false;
     return true;

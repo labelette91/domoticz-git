@@ -57,19 +57,19 @@ bool CYouLess::StartHardware()
 {
 	Init();
 	//Start worker thread
-	m_thread = std::shared_ptr<std::thread>(new std::thread(std::bind(&CYouLess::Do_Work, this)));
+	m_thread = std::make_shared<std::thread>(&CYouLess::Do_Work, this);
 	m_bIsStarted=true;
 	sOnConnected(this);
-	return (m_thread != NULL);
+	return (m_thread != nullptr);
 }
 
 bool CYouLess::StopHardware()
 {
-	if (m_thread != NULL)
+	if (m_thread)
 	{
-		assert(m_thread);
 		m_stoprequested = true;
 		m_thread->join();
+		m_thread.reset();
 	}
     m_bIsStarted=false;
     return true;

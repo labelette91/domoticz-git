@@ -164,7 +164,7 @@ bool CEvohomeWeb::StartHardware()
 	if (m_username.empty() || m_password.empty())
 		return false;
 	Init();
-	m_thread = std::shared_ptr<std::thread>(new std::thread(std::bind(&CEvohomeWeb::Do_Work, this)));
+	m_thread = std::make_shared<std::thread>(&CEvohomeWeb::Do_Work, this);
 	if (!m_thread)
 		return false;
 	m_stoprequested = false;
@@ -176,11 +176,11 @@ bool CEvohomeWeb::StartHardware()
 
 bool CEvohomeWeb::StopHardware()
 {
-	if (m_thread != NULL)
+	if (m_thread)
 	{
-		assert(m_thread);
 		m_stoprequested = true;
 		m_thread->join();
+		m_thread.reset();
 	}
 	m_bIsStarted = false;
 	return true;

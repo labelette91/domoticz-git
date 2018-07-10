@@ -42,9 +42,9 @@ bool KMTronic433::StartHardware()
 	m_retrycntr = RETRY_DELAY; //will force reconnect first thing
 
 	//Start worker thread
-	m_thread = std::shared_ptr<std::thread>(new std::thread(std::bind(&KMTronic433::Do_Work, this)));
+	m_thread = std::make_shared<std::thread>(&KMTronic433::Do_Work, this);
 
-	return (m_thread != NULL);
+	return (m_thread != nullptr);
 
 	return true;
 }
@@ -52,8 +52,11 @@ bool KMTronic433::StartHardware()
 bool KMTronic433::StopHardware()
 {
 	m_stoprequested = true;
-	if (m_thread != NULL)
+	if (m_thread)
+	{
 		m_thread->join();
+		m_thread.reset();
+	}
 	// Wait a while. The read thread might be reading. Adding this prevents a pointer error in the async serial class.
 	sleep_milliseconds(10);
 	terminate();

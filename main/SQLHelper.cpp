@@ -18,7 +18,6 @@
 #include "WebServerHelper.h"
 #include "../webserver/Base64.h"
 #include "clx_unzip.h"
-#include <boost/lexical_cast.hpp>
 #include "../notifications/NotificationHelper.h"
 #include "IFTTT.h"
 #ifdef ENABLE_PYTHON
@@ -695,6 +694,7 @@ CSQLHelper::~CSQLHelper(void)
 	{
 		m_stoprequested = true;
 		m_background_task_thread->join();
+		m_background_task_thread.reset();
 	}
 	if (m_dbase != NULL)
 	{
@@ -3084,8 +3084,7 @@ bool CSQLHelper::OpenDatabase()
 
 bool CSQLHelper::StartThread()
 {
-	m_background_task_thread = std::shared_ptr<std::thread>(new std::thread(std::bind(&CSQLHelper::Do_Work, this)));
-
+	m_background_task_thread = std::make_shared<std::thread>(&CSQLHelper::Do_Work, this);
 	return (m_background_task_thread != NULL);
 }
 

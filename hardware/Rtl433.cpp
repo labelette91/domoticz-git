@@ -36,7 +36,7 @@ CRtl433::~CRtl433()
 
 bool CRtl433::StartHardware()
 {
-	m_thread = std::shared_ptr<std::thread>(new std::thread(std::bind(&CRtl433::Do_Work, this)));
+	m_thread = std::make_shared<std::thread>(&CRtl433::Do_Work, this);
 	m_bIsStarted = true;
 	sOnConnected(this);
 	StartHeartbeatThread();
@@ -49,6 +49,7 @@ bool CRtl433::StopHardware()
 	{
 		m_stoprequested = true;
 		m_thread->join();
+		m_thread.reset();
 	}
 
 	m_bIsStarted = false;

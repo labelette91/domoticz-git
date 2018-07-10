@@ -34,7 +34,7 @@ CScheduler::~CScheduler(void)
 
 void CScheduler::StartScheduler()
 {
-	m_thread = std::shared_ptr<std::thread>(new std::thread(std::bind(&CScheduler::Do_Work, this)));
+	m_thread = std::make_shared<std::thread>(&CScheduler::Do_Work, this);
 }
 
 void CScheduler::StopScheduler()
@@ -43,6 +43,7 @@ void CScheduler::StopScheduler()
 	{
 		m_stoprequested = true;
 		m_thread->join();
+		m_thread.reset();
 	}
 }
 

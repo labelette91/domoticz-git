@@ -527,10 +527,10 @@ bool eHouseTCP::StartHardware()
 #else
 
 #endif
-	m_thread = std::shared_ptr<std::thread>(new std::thread(std::bind(&eHouseTCP::Do_Work, this)));
+	m_thread = std::make_shared<std::thread>(&eHouseTCP::Do_Work, this);
 	m_bIsStarted = true;
 	sOnConnected(this);
-	return (m_thread != NULL);
+	return (m_thread != nullptr);
 }
 ////////////////////////////////////////////////////////////////////////////////////
 bool eHouseTCP::StopHardware()
@@ -550,6 +550,7 @@ bool eHouseTCP::StopHardware()
 	if (m_thread)
 	{
 		m_thread->join();
+		m_thread.reset();
 	}
 
 	//        DestroySocket();

@@ -677,9 +677,8 @@ namespace http {
 
 			//Start normal worker thread
 			m_bDoStop = false;
-			m_thread = std::shared_ptr<std::thread>(new std::thread(std::bind(&CWebServer::Do_Work, shared_from_this())));
-
-			return (m_thread != NULL);
+			m_thread = std::make_shared<std::thread>(&CWebServer::Do_Work, this);
+			return (m_thread != nullptr);
 		}
 
 		void CWebServer::StopServer()
@@ -690,7 +689,7 @@ namespace http {
 				if (m_pWebEm == NULL)
 					return;
 				m_pWebEm->Stop();
-				if (m_thread != NULL) {
+				if (m_thread) {
 					m_thread->join();
 					m_thread.reset();
 				}
@@ -801,13 +800,13 @@ namespace http {
 						}
 						else if (sLine.find("#ThemeFiles") != std::string::npos)
 						{
-							response += "#Theme=" + sWebTheme + "\n";
+							response += "#Theme=" + sWebTheme + '\n';
 							//Add all theme files
 							for (const auto & itt : _ThemeFiles)
 							{
 								std::string tfname = itt.first.substr(szWWWFolder.size() + 1);
 								stdreplace(tfname, "styles/" + sWebTheme, "acttheme");
-								response += tfname + "\n";
+								response += tfname + '\n';
 							}
 							continue;
 						}
@@ -817,7 +816,7 @@ namespace http {
 							for (const auto & itt : _FloorplanFiles)
 							{
 								std::string tfname = itt.first;
-								response += tfname + "\n";
+								response += tfname + '\n';
 							}
 							continue;
 						}
@@ -832,14 +831,14 @@ namespace http {
 									std::string IconFile48On = itt.RootFile + "48_On.png";
 									std::string IconFile48Off = itt.RootFile + "48_Off.png";
 
-									response += "images/" + CURLEncode::URLEncode(IconFile16) + "\n";
-									response += "images/" + CURLEncode::URLEncode(IconFile48On) + "\n";
-									response += "images/" + CURLEncode::URLEncode(IconFile48Off) + "\n";
+									response += "images/" + CURLEncode::URLEncode(IconFile16) + '\n';
+									response += "images/" + CURLEncode::URLEncode(IconFile48On) + '\n';
+									response += "images/" + CURLEncode::URLEncode(IconFile48Off) + '\n';
 								}
 							}
 						}
 					}
-					response += sLine + "\n";
+					response += sLine + '\n';
 				}
 			}
 			reply::set_content(&rep, response);
@@ -882,7 +881,7 @@ namespace http {
 				reply::set_content(&rep, root.toStyledString());
 				return;
 			}
-			reply::set_content(&rep, "var data=" + root.toStyledString() + "\n" + jcallback + "(data);");
+			reply::set_content(&rep, "var data=" + root.toStyledString() + '\n' + jcallback + "(data);");
 		}
 
 		void CWebServer::Cmd_GetLanguage(WebEmSession & session, const request& req, Json::Value &root)
@@ -11945,7 +11944,7 @@ namespace http {
 				reply::set_content(&rep, root.toStyledString());
 				return;
 			}
-			reply::set_content(&rep, "var data=" + root.toStyledString() + "\n" + jcallback + "(data);");
+			reply::set_content(&rep, "var data=" + root.toStyledString() + '\n' + jcallback + "(data);");
 		}
 
 		void CWebServer::Cmd_GetCustomIconSet(WebEmSession & session, const request& req, Json::Value &root)
@@ -14378,7 +14377,10 @@ szQuery << "UPDATE DeviceStatus SET "
 											sprintf(szTime, "%04d-%02d-%02d %02d:00", ntime.tm_year + 1900, ntime.tm_mon + 1, ntime.tm_mday, ntime.tm_hour);
 											root["result"][ii]["d"] = szTime;
 
-											float TotalValue = float(actValue - ulFirstValue);
+											//float TotalValue = float(actValue - ulFirstValue);
+											
+											//prevents graph from going crazy if the meter counter resets 
+											float TotalValue = (actValue >= ulFirstValue) ? float(actValue - ulFirstValue) : actValue;
 
 											//if (TotalValue != 0)
 											{

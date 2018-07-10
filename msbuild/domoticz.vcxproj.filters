@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
@@ -2060,6 +2060,9 @@
     <ClInclude Include="..\main\SunRiseSet.h" />
     <ClInclude Include="..\main\WebServer.h" />
     <ClInclude Include="..\hardware\Tado.h" />
+    <ClInclude Include="..\main\Noncopyable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\webserver\Base64.cpp">

@@ -253,10 +253,12 @@ bool CGpio::StartHardware()
 			_log.Log(LOG_NORM, "GPIO: Error creating pins in DB, aborting...");
 			m_stoprequested=true;
 		 }*/
-		m_thread_updatestartup = std::shared_ptr<std::thread>(new std::thread(std::bind(&CGpio::UpdateStartup, this)));
+		m_thread_updatestartup = std::make_shared<std::thread>(&CGpio::UpdateStartup, this);
 
 		if (m_pollinterval > 0)
-			m_thread_poller = std::shared_ptr<std::thread>(new std::thread(std::bind(&CGpio::Poller, this)));
+		{
+			m_thread_poller = std::make_shared<std::thread>(&CGpio::Poller, this);
+		}
 	}
 	else
 	{
@@ -266,7 +268,7 @@ bool CGpio::StartHardware()
 	m_bIsStarted = true;
 	sOnConnected(this);
 	StartHeartbeatThread();
-	return (m_thread != NULL);
+	return (m_thread != nullptr);
 }
 
 bool CGpio::StopHardware()
@@ -274,16 +276,25 @@ bool CGpio::StopHardware()
 	m_stoprequested = true;
 
 	if (m_thread_poller != NULL)
+	{
 		m_thread_poller->join();
+		m_thread_poller.reset();
+	}
 
 	if (m_thread_updatestartup != NULL)
+	{
 		m_thread_updatestartup->join();
+		m_thread_updatestartup.reset();
+	}
 
 	std::unique_lock<std::mutex> lock(m_pins_mutex);
 	for (std::vector<CGpioPin>::iterator it = pins.begin(); it != pins.end(); ++it)
 	{
 		if (m_thread_interrupt[it->GetPin()] != NULL)
+		{
 			m_thread_interrupt[it->GetPin()]->join();
+			m_thread_interrupt[it->GetPin()].reset();
+		}
 	}
 
 	for (std::vector<CGpioPin>::iterator it = pins.begin(); it != pins.end(); ++it)
@@ -500,7 +511,7 @@ bool CGpio::InitPins()
 			if (fd != -1)
 			{
 				pinPass = gpio_pin;
-				m_thread_interrupt[gpio_pin] = std::shared_ptr<std::thread>(new std::thread(std::bind(&CGpio::InterruptHandler, this)));
+				m_thread_interrupt[gpio_pin] = std::make_shared<std::thread>(&CGpio::InterruptHandler, this);
 				while (pinPass != -1)
 					sleep_milliseconds(1);
 			}

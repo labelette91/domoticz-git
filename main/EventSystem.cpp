@@ -152,8 +152,8 @@ void CEventSystem::StartEventSystem()
 #endif
 
 	m_stoprequested = false;
-	m_thread = std::shared_ptr<std::thread>(new std::thread(std::bind(&CEventSystem::Do_Work, this)));
-	m_eventqueuethread = std::shared_ptr<std::thread>(new std::thread(std::bind(&CEventSystem::EventQueueThread, this)));
+	m_thread = std::make_shared<std::thread>(&CEventSystem::Do_Work, this);
+	m_eventqueuethread = std::make_shared<std::thread>(&CEventSystem::EventQueueThread, this);
 	m_szStartTime = TimeToString(&m_StartTime, TF_DateTime);
 }
 
@@ -3261,10 +3261,9 @@ void CEventSystem::EvaluateLua(const std::vector<_tEventQueue> &items, const std
 	if (status == 0)
 	{
 		lua_sethook(lua_state, luaStop, LUA_MASKCOUNT, 10000000);
-		//luaThread = boost::thread(&CEventSystem::luaThread, lua_state, filename);
-		//std::shared_ptr<std::thread> luaThread = std::shared_ptr<std::thread>(new std::thread(std::bind(&CEventSystem::luaThread, this, lua_state, filename)));
+
 		boost::thread luaThread(boost::bind(&CEventSystem::luaThread, this, lua_state, filename));
-		//m_thread = std::shared_ptr<std::thread>(new std::thread(std::bind(&CEventSystem::Do_Work, this)));
+
 		if (!luaThread.timed_join(boost::posix_time::seconds(10)))
 		{
 			_log.Log(LOG_ERROR, "EventSystem: Warning!, lua script %s has been running for more than 10 seconds", filename.c_str());

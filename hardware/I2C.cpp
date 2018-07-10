@@ -184,17 +184,20 @@ bool I2C::StartHardware()
 		MCP23017_Init();
 
 	//Start worker thread
-	m_thread = std::shared_ptr<std::thread>(new std::thread(std::bind(&I2C::Do_Work, this)));
+	m_thread = std::make_shared<std::thread>(&I2C::Do_Work, this);
 	sOnConnected(this);
 	m_bIsStarted = true;
-	return (m_thread != NULL);
+	return (m_thread != nullptr);
 }
 
 bool I2C::StopHardware()
 {
 	m_stoprequested = true;
-	if (m_thread != NULL)
+	if (m_thread)
+	{
 		m_thread->join();
+		m_thread.reset();
+	}
 	m_bIsStarted = false;
 	return true;
 }

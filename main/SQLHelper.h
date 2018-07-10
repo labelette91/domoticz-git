@@ -280,6 +280,8 @@ typedef   std::vector<std::string> TSqlRowQuery;
 // result for an sql query : Vector of TSqlRowQuery
 typedef   std::vector<TSqlRowQuery> TSqlQueryResult;
 
+typedef   std::map<std::string, std::string> TOptionMap;
+
 class CSQLHelper
 {
 public:
@@ -407,7 +409,7 @@ public:
 
 	std::map<std::string, std::string> BuildDeviceOptions(const std::string & options, const bool decode = true);
 	std::map<std::string, std::string> GetDeviceOptions(const std::string & idx);
-	std::string FormatDeviceOptions(const std::map<std::string, std::string> & optionsMap);
+	std::string FormatDeviceOptions(const std::map<std::string, std::string> & optionsMap, const bool decode = true );
 	bool SetDeviceOptions(const uint64_t idx, const std::map<std::string, std::string> & options);
 public:
 	std::string m_LastSwitchID;	//for learning command

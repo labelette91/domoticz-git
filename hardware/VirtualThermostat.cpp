@@ -10,6 +10,8 @@
 #include "../main/mainworker.h"
 #include "../main/ImperiHome.h"
 
+#include <map>
+
 VirtualThermostat * m_VirtualThermostat;
 
 VirtualThermostat::VirtualThermostat(const int ID)
@@ -412,3 +414,85 @@ std::string VirtualThermostat::GetSetPoint(TSqlRowQuery * row)
   return (*row)[sValue] ;
 } ;
 
+
+//convert thermostat option values to map option
+TOptionMap VirtualThermostatOptionToOptionMap(
+	float Power,
+	float RoomTemp,
+	float TempIdx,
+	float SwitchIdx,
+	float EcoTemp,
+	float CoefProp,
+	float ConforTemp,
+	float CoefInteg,
+	std::string &OnCmd,
+	std::string &OffCmd
+	)
+{
+	TOptionMap Option;
+
+	Option["Power"] = std::to_string(Power);
+	Option["RoomTemp"] = std::to_string(RoomTemp);
+	Option["TempIdx"] = std::to_string(TempIdx);
+	Option["SwitchIdx"] = std::to_string(SwitchIdx);
+	Option["EcoTemp"] = std::to_string(EcoTemp);
+	Option["CoefProp"] = std::to_string(CoefProp);
+	Option["ConforTemp"] = std::to_string(ConforTemp);
+	Option["CoefInteg"] = std::to_string(CoefInteg);
+	Option["OnCmd"] = OnCmd;
+	Option["OffCmd"] = OffCmd;
+
+	return Option;
+}
+
+
+//get  thermostat option values from  db
+void VirtualThermostatOptionMaptoOptions(TOptionMap &Option,
+			float &Power,
+			float &RoomTemp,
+			float &TempIdx,
+			float &SwitchIdx,
+			float &EcoTemp,
+			float &CoefProp,
+			float &ConforTemp,
+			float &CoefInteg,
+			std::string &OnCmd,
+			std::string &OffCmd
+			)
+	{
+
+		Power = std::stof(Option["Power"]);
+		RoomTemp = std::stof(Option["RoomTemp"]);
+		TempIdx = std::stof(Option["TempIdx"]);
+		SwitchIdx = std::stof(Option["SwitchIdx"]);
+		EcoTemp = std::stof(Option["EcoTemp"]);
+		CoefProp = std::stof(Option["CoefProp"]);
+		ConforTemp = std::stof(Option["ConforTemp"]);
+		CoefInteg = std::stof(Option["CoefInteg"]);
+		OnCmd = Option["OnCmd"];
+		OffCmd = Option["OffCmd"];
+
+
+	}
+
+
+void UpdateVirtualThermostatOption(	const uint64_t uidstr,float Power,float RoomTemp,float TempIdx,float SwitchIdx,float EcoTemp,float CoefProp,float ConforTemp,float CoefInteg,std::string &OnCmd,	std::string &OffCmd	)
+{
+
+
+	TOptionMap Option = VirtualThermostatOptionToOptionMap(
+		Power,
+		RoomTemp,
+		TempIdx,
+		SwitchIdx,
+		EcoTemp,
+		CoefProp,
+		ConforTemp,
+		CoefInteg,
+		OnCmd,
+		OffCmd
+		);
+
+	std::string option = m_sql.FormatDeviceOptions(Option, false);
+	m_sql.UpdateDeviceValue("Options", option , std::to_string(uidstr) );
+}

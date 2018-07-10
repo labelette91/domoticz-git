@@ -24,6 +24,8 @@
 #include "../hardware/plugins/Plugins.h"
 #endif
 
+#include "../hardware/VirtualThermostat.h"
+
 #ifndef WIN32
 #include <sys/stat.h>
 #include <unistd.h>
@@ -3703,12 +3705,9 @@ uint64_t CSQLHelper::CreateDevice(const int HardwareID, const int SensorType, co
 
 		//set coefficient for PID for virtual Thermostat
 		std::string uidstr = boost::to_string(DeviceRowIdx);
-		m_sql.UpdateDeviceValue("AddjMulti", (float)100.0, uidstr);  //coef Kp proportionnal
-		m_sql.UpdateDeviceValue("AddjMulti2", (float)0.0, uidstr);    //coef Ki integral
-		m_sql.UpdateDeviceValue("TempIdx", (int)-1, uidstr);
-		m_sql.UpdateDeviceValue("SwitchIdx", (int)-1, uidstr);
-		m_sql.UpdateDeviceValue("AddjValue", (float)16.0, uidstr);  //eco temp
-		m_sql.UpdateDeviceValue("AddjValue2", (float)20.0, uidstr);  //eco temp
+
+		UpdateVirtualThermostatOption(DeviceRowIdx, 0, 20, -1, -1, 16.0, 100, 20.0, 1.0, std::string("On"), std::string("Off"));
+
 
 		break;
 	}
@@ -8695,7 +8694,7 @@ std::map<std::string, std::string> CSQLHelper::GetDeviceOptions(const std::strin
 	return optionsMap;
 }
 
-std::string CSQLHelper::FormatDeviceOptions(const std::map<std::string, std::string> & optionsMap) {
+std::string CSQLHelper::FormatDeviceOptions(const std::map<std::string, std::string> & optionsMap, const bool decode) {
 	std::string options;
 	int count = optionsMap.size();
 	if (count > 0) {
@@ -8706,7 +8705,7 @@ std::string CSQLHelper::FormatDeviceOptions(const std::map<std::string, std::str
 			i++;
 			//_log.Log(LOG_STATUS, "DEBUG : Reading device option ['%s', '%s']", itt->first.c_str(), itt->second.c_str());
 			std::string optionName = itt.first.c_str();
-			std::string optionValue = base64_encode(itt.second);
+			std::string optionValue = decode ? base64_decode(itt.second) : itt.second;  
 			ssoptions << optionName << ":" << optionValue;
 			if (i < count) {
 				ssoptions << ";";

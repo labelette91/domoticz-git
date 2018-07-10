@@ -200,7 +200,7 @@ define(['app'], function (app) {
 			$("#dialog-editenergydevice").dialog("open");
 		}
 
-		EditSetPoint = function(idx,name,description,setpoint,isprotected,TempIdx,SwitchIdx,isVirtual,CoefProp,Eco,Confor,CoefInteg) {
+		EditSetPoint = function (idx, name, description, setpoint, isprotected) {
 			if (typeof $scope.mytimer != 'undefined') {
 				$interval.cancel($scope.mytimer);
 				$scope.mytimer = undefined;
@@ -212,21 +212,36 @@ define(['app'], function (app) {
 				$('#dialog-editsetpointdevice #protected').prop('checked', (isprotected == true));
 				$("#dialog-editsetpointdevice #setpoint").val(setpoint);
 				$("#dialog-editsetpointdevice #tempunit").html($scope.config.TempSign);
-			if (isVirtual)
+
+				var Item;
+				$.ajax({
+				    url: "json.htm?type=devices&filter=utility&used=true&rid=" + idx ,
+				    async: false,
+				    dataType: 'json',
+				    success: function (data) {
+				        if (typeof data.result != 'undefined') {
+				            $.each(data.result, function (i, item) {
+				                Item = item;
+				            });
+				        }
+				    }
+				});
+
+				if (isVirtualThermostat(Item))
 			{
 				RefreshTemperatureComboArray("#dialog-editsetpointdevice");
-				$("#dialog-editsetpointdevice  #comboTemperature").val(TempIdx);
+				$("#dialog-editsetpointdevice  #comboTemperature").val(Item.TempIdx);
 				$("#dialog-editsetpointdevice  #TemperatureDiv").show();
 				RefreshSwitchesComboArray("#dialog-editsetpointdevice");
-				$("#dialog-editsetpointdevice  #combosubdevice").val(SwitchIdx);
+				$("#dialog-editsetpointdevice  #combosubdevice").val(Item.SwitchIdx);
 				$("#dialog-editsetpointdevice  #SwitchDiv").show();
-				$("#dialog-editsetpointdevice  #CoefProp").val(CoefProp);
+				$("#dialog-editsetpointdevice  #CoefProp").val(Item.CoefProp);
 				$("#dialog-editsetpointdevice  #CoefPropDiv").show();
-				$("#dialog-editsetpointdevice  #CoefInteg").val(CoefInteg);
+				$("#dialog-editsetpointdevice  #CoefInteg").val(Item.CoefInteg);
 				$("#dialog-editsetpointdevice  #CoefIntegDiv").show();
-				$("#dialog-editsetpointdevice  #Eco").val(Eco);
+				$("#dialog-editsetpointdevice  #Eco").val(Item.EcoTemp);
 				$("#dialog-editsetpointdevice  #EcoDiv").show();
-				$("#dialog-editsetpointdevice  #Confor").val(Confor);
+				$("#dialog-editsetpointdevice  #Confor").val(Item.ConforTemp);
 				$("#dialog-editsetpointdevice  #ConforDiv").show();
 			}
 			else
@@ -1015,7 +1030,7 @@ define(['app'], function (app) {
 									var logLink = '#/Devices/'+item.idx+'/TemperatureLog';
 
 									xhtm += '<a class="btnsmall" href="' + logLink +'" data-i18n="Log">Log</a> ';
-									xhtm += '<a class="btnsmall" onclick="EditSetPoint(' + item.idx + ',\'' + escape(item.Name) + '\',\'' + escape(item.Description) + '\', ' + item.SetPoint + ',' + item.Protected + ',' + item.TempIdx + ',' + item.SwitchIdx + ',' + isVirtualThermostat(item) + ',' + item.CoefProp + ',' + item.EcoTemp + ',' + item.ConforTemp + ',' + item.CoefInteg + ');" data-i18n="Edit">Edit</a> ';
+									xhtm += '<a class="btnsmall" onclick="EditSetPoint(' + item.idx + ',\'' + escape(item.Name) + '\',\'' + escape(item.Description) + '\', ' + item.SetPoint + ',' + item.Protected + ');" data-i18n="Edit">Edit</a> ';
 									if (item.Timers == "true") {
 										xhtm += '<a class="btnsmall-sel" href="' + timerLink + '" data-i18n="Timers">Timers</a> ';
 										xhtm+='<a class="btnsmall-sel" onclick="ShowSetpointWeeklyTimers(' + item.idx + ',\'' + escape(item.Name) + '\'' + ',' + item.EcoTemp + ',' + item.ConforTemp +');" data-i18n="Prog">Prog</a> ';

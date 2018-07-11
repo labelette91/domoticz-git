@@ -6,8 +6,8 @@ define(['app'], function (app) {
 	        GetThermostatBigTest = function(item){
 	            var bigtext;
 	            bigtext = item.Data + '\u00B0';
-	            if (typeof item.Temp != 'undefined') {
-	                bigtext += '/' + item.Temp + '\u00B0 ';
+	            if (typeof item.RoomTemp != 'undefined') {
+	                bigtext += '/' + item.RoomTemp + '\u00B0 ';
 	            }
 	            bigtext += $scope.config.TempSign;
 	            return bigtext;
@@ -540,7 +540,7 @@ define(['app'], function (app) {
 										img = GetThermostatImg(item,"RefreshUtilities",48);
 										setHtmlValue(id + " #img", img );
 										RefreshTargetTemp ( id , item.SetPoint);
-										RefreshRoomTemp   ( id , item.Temp);
+										RefreshRoomTemp   ( id , item.RoomTemp);
 										RefreshThSlider(item.idx, "#utilitycontent #", item.SetPoint);
 										status = getTextStatus(item);
 										bigtext= $(id + " #bigtext").html();
@@ -761,7 +761,7 @@ define(['app'], function (app) {
 								xhtm += item.Data;
 							}
 							else if (isVirtualThermostat(item)){
-									xhtm+= ShowTargetRoomTemp(item.SetPoint, item.Temp) ; 
+							    xhtm += ShowTargetRoomTemp(item.SetPoint, item.RoomTemp);
 							}
 							else if (item.Type == "Thermostat") {
 				                        	xhtm += GetThermostatBigTest(item);
@@ -1221,9 +1221,10 @@ define(['app'], function (app) {
 		init();
 
 		function init() {
-			//global var
+		    //global var
+		    $.Item   = [];
 			$.devIdx = 0;
-			var $.Item   ;
+			
 			$.LastUpdateTime = parseInt(0);
 
 			$.myglobals = {
@@ -1577,7 +1578,7 @@ define(['app'], function (app) {
 				if (bValid) {
 					$(this).dialog("close");
 					
-		            var options = [];
+		            var option = [];
        				if (isVirtualThermostat($.Item))
        				{
 
@@ -1598,7 +1599,7 @@ define(['app'], function (app) {
 						'&description=' + encodeURIComponent($("#dialog-editsetpointdevice #devicedescription").val()) +
 						'&setpoint=' + $("#dialog-editsetpointdevice #setpoint").val() +
 						'&protected=' + $('#dialog-editsetpointdevice #protected').is(":checked") +
-						'&options='   + b64EncodeUnicode(options.join(';') ) +
+						'&devoptions='   + (option.join(';') ) +
 						 
 						'&used=true',
 						async: false,

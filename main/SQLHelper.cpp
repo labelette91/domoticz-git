@@ -4366,7 +4366,6 @@ uint64_t CSQLHelper::UpdateValueInt(const int HardwareID, const char* ID, const 
 		//Add Lighting log
 		m_LastSwitchID = ID;
 		m_LastSwitchRowID = ulID;
-    bLogDevice = ( (old_nValue != nValue ) || (old_sValue != sValue) ) ;
 		if (bLogDevice)
 		result = safe_query(
 			"INSERT INTO LightingLog (DeviceRowID, nValue, sValue) "
@@ -4992,7 +4991,7 @@ void CSQLHelper::UpdateTemperatureLog()
 	GetPreferencesVar("DeltaTemperatureLog", DELTA_TEMP);
 
 	std::vector<std::vector<std::string> > result;
-	result = safe_query("SELECT ID,Type,SubType,nValue,sValue,LastUpdate,Option FROM DeviceStatus WHERE (Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR (Type=%d AND SubType=%d) OR (Type=%d AND SubType=%d) OR (Type=%d AND SubType=%d))",
+	result = safe_query("SELECT ID,Type,SubType,nValue,sValue,LastUpdate,Options FROM DeviceStatus WHERE (Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR (Type=%d AND SubType=%d) OR (Type=%d AND SubType=%d) OR (Type=%d AND SubType=%d))",
 		pTypeTEMP,
 		pTypeHUM,
 		pTypeTEMP_HUM,
@@ -5061,9 +5060,9 @@ void CSQLHelper::UpdateTemperatureLog()
 				//set point temperature record as chill
 				chill = static_cast<float>(atof(splitresults[0].c_str()));
 				//record power % as humidity
-				humidity = atoi(VirtualThermostatGetOption("Power",sd[6] ) ); 
+				humidity = atoi(VirtualThermostatGetOption("Power",sd[6] ).c_str() ); 
 				//record room temp 
-				temp = (float)atof(VirtualThermostatGetOption("RoomTemp",sd[6] ) ;);
+				temp = (float)atof(VirtualThermostatGetOption("RoomTemp",sd[6] ).c_str());
 				ToRecord = TempLog.AsChanged((int)ID, temp,0.2); //record if room temperature change 
 				break;
 			case pTypeThermostat1:
@@ -8744,7 +8743,7 @@ bool CSQLHelper::SetDeviceOptions(const uint64_t idx, const std::map<std::string
 bool CSQLHelper::UpdateDeviceOptions(const uint64_t idx, std::string options , const bool decode ) {
 
     //get current option values
-    TOptionMap dbOptionMap = GetDeviceOptions( idx, decode ) ;
+    TOptionMap dbOptionMap = GetDeviceOptions( std::to_string(idx), decode ) ;
 
 		TOptionMap optionsMap  = BuildDeviceOptions(options);
 

@@ -159,7 +159,7 @@ void VirtualThermostat::ScheduleThermostat(int Minute )
     struct tm LastUpdateTime ;
     std::string sValue,Options;
     float RoomTemperature=0;
-	char * idxThermostat ;
+		std::string idxThermostat ;
   int ThermostatId ;
 	std::string ParentID ;
 	int PowerModulation = 0;
@@ -179,35 +179,32 @@ try
 //select all the Virtuan device
   TSqlQueryResult result=m_sql.safe_query("SELECT A.Name,A.ID,A.Type,A.SubType,A.nValue,A.sValue, A.Options, B.Name , B.Type     FROM DeviceStatus as A LEFT OUTER JOIN Hardware as B ON (B.ID==A.HardwareID) where (B.type == %d )",HTYPE_VirtualThermostat );
 
-  TSqlQueryResult result=m_sql.safe_query("SELECT Name,nValue,ID,Power,RoomTemp,TempIdx,Type,SubType,sValue,SwitchIdx,AddjMulti,AddjMulti2  FROM DeviceStatus where TempIdx > 0 "  ) ;
-
-
 	//for all the thermostat switch
 	for (unsigned int i=0;i<result.size();i++)
 	{
 		TSqlRowQuery * row = &result[i] ;
 		ThermostatSwitchName		=             (*row)[0].c_str() ;
-		idxThermostat				    =     (char *)(*row)[1].c_str() ;
+		idxThermostat				    =             (*row)[1].c_str() ;
 		SwitchType					    =        atoi((*row)[2].c_str() );
 		SwitchSubType				    =        atoi((*row)[3].c_str() );
 		lastSwitchValue				  =        atoi((*row)[4].c_str() );
 		SetPoint					      =            ((*row)[5].c_str() );
 		Options					        =            ((*row)[6].c_str() );
 
-    TOptionMap Option   = BuildDeviceOptions( options, false ) ;
+    TOptionMap Option   = m_sql.BuildDeviceOptions(Options, false ) ;
 
-    lastPowerModulation =        atoi(Option["Power"     ]);
-    lastTemp            = (float)atof(Option["RoomTemp"  ]);
-    TemperatureId       =             Option["TempIdx"   ] ;
-    SwitchIdx           =        atol(Option["SwitchIdx" ] );
-    SwitchIdxStr        =             Option["SwitchIdx" ] ;
-    CoefProportional    = (float)atof(Option["CoefProp"  ]  ); //coef for propotianal command PID
-    CoefIntegral        = (float)atof(Option["CoefInteg" ] ); //coef for propotianal command PID
-    OnCmd               =             Option["OnCmd" ] ;      //switch command for power On the radiator
-    OffCmd              =             Option["OffCmd" ] ;     //switch command for power Off the radiator
+    lastPowerModulation =        atoi(Option["Power"     ].c_str());
+    lastTemp            = (float)atof(Option["RoomTemp"  ].c_str());
+    TemperatureId       =             Option["TempIdx"   ]         ;
+    SwitchIdx           =        atol(Option["SwitchIdx" ].c_str());
+    SwitchIdxStr        =             Option["SwitchIdx" ]         ;
+    CoefProportional    = (float)atof(Option["CoefProp"  ].c_str()); //coef for propotianal command PID
+    CoefIntegral        = (float)atof(Option["CoefInteg" ].c_str());        //coef for propotianal command PID
+    OnCmd               =             Option["OnCmd"     ]         ;      //switch command for power On the radiator
+    OffCmd              =             Option["OffCmd"    ]         ;     //switch command for power Off the radiator
 
 		ThermostatTemperatureSet= (float)atof(SetPoint);
-		ThermostatId = atoi(idxThermostat);	 ;
+		ThermostatId = atoi(idxThermostat.c_str());	 ;
 
 		if (SwitchIdx<=0){
  				_log.Log(LOG_ERROR,"No Switch device associted to Thermostat  name =%s", ThermostatSwitchName);
@@ -215,7 +212,7 @@ try
 		else if (ThermostatTemperatureSet == 0)
 		{
 			if ((Minute % 10) == 0 )
-					_log.Debug(DEBUG_NORM, "VTHER: Mn:%02d  Therm:%-10s(%2s) SetPoint:%4.1f POWER OFF LightId(%2ld):%d ", Minute, ThermostatSwitchName, idxThermostat, ThermostatTemperatureSet, SwitchIdx, SwitchValue);
+					_log.Debug(DEBUG_NORM, "VTHER: Mn:%02d  Therm:%-10s(%2s) SetPoint:%4.1f POWER OFF LightId(%2ld):%d ", Minute, ThermostatSwitchName, idxThermostat.c_str(), ThermostatTemperatureSet, SwitchIdx, SwitchValue);
 
 		}
 		//retrieve corresponding Temperature device name    
@@ -250,15 +247,15 @@ try
 						else
 							m_mainworker.SwitchLight( SwitchIdx, OffCmd, -1  , _tColor(),  false,0 /*, !SwitchStateAsChanged */);
 						sleep_milliseconds(1000);
-						_log.Debug(DEBUG_NORM,"VTHER: Mn:%02d  Therm:%-10s(%2s) Room:%4.1f SetPoint:%4.1f Power:%3d LightId(%2ld):%d Kp:%3.f Ki:%3.f Integr:%3.1f",Minute,ThermostatSwitchName, idxThermostat , RoomTemperature,ThermostatTemperatureSet,PowerModulation,SwitchIdx,SwitchValue,CoefProportional,CoefIntegral, DeltaTemps[ThermostatId]->GetSum() /INTEGRAL_DURATION);
+						_log.Debug(DEBUG_NORM,"VTHER: Mn:%02d  Therm:%-10s(%2s) Room:%4.1f SetPoint:%4.1f Power:%3d LightId(%2ld):%d Kp:%3.f Ki:%3.f Integr:%3.1f",Minute,ThermostatSwitchName, idxThermostat.c_str() , RoomTemperature,ThermostatTemperatureSet,PowerModulation,SwitchIdx,SwitchValue,CoefProportional,CoefIntegral, DeltaTemps[ThermostatId]->GetSum() /INTEGRAL_DURATION);
 
 					}
 					if (( lastPowerModulation != PowerModulation) || (lastTemp != RoomTemperature ) || (SwitchStateAsChanged) )
           {
 
-            Option["Power"     ] = std::to_string(lastPowerModulation);
-            Option["RoomTemp"  ] = ToString(lastTemp,"%4.1f");
-            m_sql.UpdateDeviceValue("Option",m_sql.FormatDeviceOptions(Option,false),idxThermostat)
+            Option["Power"     ] = std::to_string(PowerModulation);
+            Option["RoomTemp"  ] = ToString(RoomTemperature,"%4.1f");
+						m_sql.UpdateDeviceValue("Options", m_sql.FormatDeviceOptions(Option, false), idxThermostat);
           }
 				if ((Minute % 10 )==0)
 				{
@@ -505,7 +502,7 @@ std::string VirtualThermostatGetOption (const std::string optionName , const std
   //if option present
     if (strstr(options.c_str(),optionName.c_str() ) != 0)
     {
-      TOptionMap Option   = BuildDeviceOptions( options, false ) ;
+      TOptionMap Option   = m_sql.BuildDeviceOptions( options, false ) ;
       return (Option[optionName] );
     }
     else

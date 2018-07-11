@@ -78,5 +78,6 @@ public:
 };
 
 void UpdateVirtualThermostatOption(const uint64_t uidstr, float Power, float RoomTemp, float TempIdx, float SwitchIdx, float EcoTemp, float CoefProp, float ConforTemp, float CoefInteg, std::string &OnCmd, std::string &OffCmd);
+std::string VirtualThermostatGetOption (const std::string optionName , const std::string &options );
 
 extern VirtualThermostat * m_VirtualThermostat;

@@ -10454,18 +10454,22 @@ namespace http {
 							//if virtual Thermostat
 							if (_hardwareNames[hardwareID].HardwareTypeVal == HTYPE_VirtualThermostat)
 							{
+
+                TOptionMap optionsMap   = BuildDeviceOptions( sOptions, false ) ;
+
 								root["result"][ii]["isVirtualThermostat"] = "yes";
-								root["result"][ii]["Power"]		  = sd[INDEX_POWER];
-								root["result"][ii]["Temp"]	    = sd[INDEX_POWER+1];
-								root["result"][ii]["TempIdx"]	  = sd[INDEX_POWER+2];
+
+                //build option values
+		            for (const auto & itt : optionsMap)
+		            {
+			            std::string optionName  = itt.first.c_str();
+			            std::string optionValue = itt.second;  
+                  root["result"][ii][optionName.c_str()]  = optionValue.c_str() ;
+		            }
+
+
 								root["result"][ii]["nValue"]	  = nValue;
-								root["result"][ii]["SwitchIdx"]	= sd[INDEX_POWER+3];
-  							
-								root["result"][ii]["EcoTemp"]	  = AddjValue;	//EcoTemp
-								root["result"][ii]["CoefProp"]	= AddjMulti;	//CoefProp
-								root["result"][ii]["ConforTemp"]= AddjValue2;	//ConforTemp
-								root["result"][ii]["CoefInteg"]	= AddjMulti2;	//CoefInteg
-							}
+              }
 
 
 						}

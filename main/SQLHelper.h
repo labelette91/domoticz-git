@@ -408,9 +408,11 @@ public:
 	bool InsertCustomIconFromZipFile(const std::string & szZipFile, std::string & ErrorMessage);
 
 	std::map<std::string, std::string> BuildDeviceOptions(const std::string & options, const bool decode = true);
-	std::map<std::string, std::string> GetDeviceOptions(const std::string & idx);
+	std::map<std::string, std::string> GetDeviceOptions(const std::string & idx, const bool decode = true);
 	std::string FormatDeviceOptions(const std::map<std::string, std::string> & optionsMap, const bool decode = true );
-	bool SetDeviceOptions(const uint64_t idx, const std::map<std::string, std::string> & options);
+	bool SetDeviceOptions(const uint64_t idx, const std::map<std::string, std::string> & options, const bool decode = true);
+  bool UpdateDeviceOptions(const uint64_t idx, std::string options , const bool decode ) ;
+
 public:
 	std::string m_LastSwitchID;	//for learning command
 	uint64_t m_LastSwitchRowID;

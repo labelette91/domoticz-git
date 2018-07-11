@@ -142,16 +142,22 @@ int VirtualThermostat::ComputeThermostatPower ( int index , float RoomTemp , flo
   return PowerModulation;
 }                    
 
+std::string ToString(float value , char * format)
+{
+  char buf[1024];
+  sprintf(buf,format,value ) ;
+  return buf ;
+}
 
 void VirtualThermostat::ScheduleThermostat(int Minute )
 {
 
-    int SwitchValue,nValue,lastSwitchValue, SwitchCommand;
+    int SwitchValue,nValue,lastSwitchValue;
     std::string RoomTemperatureName ;
     float ThermostatTemperatureSet=0 ;
     const char *ThermostatSwitchName  ;
     struct tm LastUpdateTime ;
-    std::string sValue;
+    std::string sValue,Options;
     float RoomTemperature=0;
 	char * idxThermostat ;
   int ThermostatId ;
@@ -165,12 +171,14 @@ void VirtualThermostat::ScheduleThermostat(int Minute )
 	std::string SwitchIdxStr;
 	const char * SetPoint ;
 	float CoefProportional , CoefIntegral;
-	bool CommandePolarity ;  // if true the Output switch shall be inverse for power ON 
+  std::string TemperatureId ;
+  std::string OnCmd ;
+  std::string OffCmd;
 try
 {	
-	//AddjMulti  : value of coef for proportinnal command (PID)
-	//AddjValue  ; eco temperature value
-	//AddjValue2 ; confor temperature value
+//select all the Virtuan device
+  TSqlQueryResult result=m_sql.safe_query("SELECT A.Name,A.ID,A.Type,A.SubType,A.nValue,A.sValue, A.Options, B.Name , B.Type     FROM DeviceStatus as A LEFT OUTER JOIN Hardware as B ON (B.ID==A.HardwareID) where (B.type == %d )",HTYPE_VirtualThermostat );
+
   TSqlQueryResult result=m_sql.safe_query("SELECT Name,nValue,ID,Power,RoomTemp,TempIdx,Type,SubType,sValue,SwitchIdx,AddjMulti,AddjMulti2  FROM DeviceStatus where TempIdx > 0 "  ) ;
 
 
@@ -179,27 +187,25 @@ try
 	{
 		TSqlRowQuery * row = &result[i] ;
 		ThermostatSwitchName		=             (*row)[0].c_str() ;
-		lastSwitchValue				=        atoi((*row)[1].c_str() );
-		idxThermostat				=     (char *)(*row)[2].c_str() ;
-		lastPowerModulation			=        atoi((*row)[3].c_str() );
-		lastTemp					= (float)atof((*row)[4].c_str() );
-		std::string TemperatureId	=             (*row)[5] ;
-		SwitchType					=        atoi((*row)[6].c_str() );
-//		SwitchSubType				=        atoi((*row)[7].c_str() );
-		SetPoint					=            ((*row)[8].c_str() );
-		SwitchIdx					=        atol((*row)[9].c_str() );
-		SwitchIdxStr			=        (*row)[9].c_str() ;
-		CoefProportional	= (float)atof((*row)[10].c_str() ); //coef for propotianal command PID
-		CoefIntegral  		= (float)atof((*row)[11].c_str() ); //coef for propotianal command PID
+		idxThermostat				    =     (char *)(*row)[1].c_str() ;
+		SwitchType					    =        atoi((*row)[2].c_str() );
+		SwitchSubType				    =        atoi((*row)[3].c_str() );
+		lastSwitchValue				  =        atoi((*row)[4].c_str() );
+		SetPoint					      =            ((*row)[5].c_str() );
+		Options					        =            ((*row)[6].c_str() );
 
-		//test if command shall be inversed
-		if (CoefProportional<0){
-			CommandePolarity = true ;
-			CoefProportional = - CoefProportional;
-		}
-		else
-			CommandePolarity = false ;
-				
+    TOptionMap Option   = BuildDeviceOptions( options, false ) ;
+
+    lastPowerModulation =        atoi(Option["Power"     ]);
+    lastTemp            = (float)atof(Option["RoomTemp"  ]);
+    TemperatureId       =             Option["TempIdx"   ] ;
+    SwitchIdx           =        atol(Option["SwitchIdx" ] );
+    SwitchIdxStr        =             Option["SwitchIdx" ] ;
+    CoefProportional    = (float)atof(Option["CoefProp"  ]  ); //coef for propotianal command PID
+    CoefIntegral        = (float)atof(Option["CoefInteg" ] ); //coef for propotianal command PID
+    OnCmd               =             Option["OnCmd" ] ;      //switch command for power On the radiator
+    OffCmd              =             Option["OffCmd" ] ;     //switch command for power Off the radiator
+
 		ThermostatTemperatureSet= (float)atof(SetPoint);
 		ThermostatId = atoi(idxThermostat);	 ;
 
@@ -233,30 +239,28 @@ try
 				{
 					SwitchSubType    = atoi(resSw[0][2].c_str());
 					lastSwitchValue	 = atoi(resSw[0][0].c_str() );
-					//if inverted polarity
-					if (CommandePolarity) {
-						//inverse switch command
-						if (SwitchValue) SwitchCommand = 0; else SwitchCommand = 1;
-					}
-					else
-						SwitchCommand = SwitchValue;
 
-					bool SwitchStateAsChanged = (lastSwitchValue!= SwitchCommand) ;
+					bool SwitchStateAsChanged = (lastSwitchValue!= SwitchValue) ;
 
 
 					if ( (Minute % 10 )==0 || (SwitchStateAsChanged))
 					{
-						if (SwitchCommand ==1)
-							m_mainworker.SwitchLight( SwitchIdx, "On" , 15 , _tColor(), false, 0 /* , !SwitchStateAsChanged */);
+						if (SwitchValue ==1)
+							m_mainworker.SwitchLight( SwitchIdx, OnCmd , -1 , _tColor(), false, 0 /* , !SwitchStateAsChanged */);
 						else
-							m_mainworker.SwitchLight( SwitchIdx, "Off", 0  , _tColor(),  false,0 /*, !SwitchStateAsChanged */);
+							m_mainworker.SwitchLight( SwitchIdx, OffCmd, -1  , _tColor(),  false,0 /*, !SwitchStateAsChanged */);
 						sleep_milliseconds(1000);
 						_log.Debug(DEBUG_NORM,"VTHER: Mn:%02d  Therm:%-10s(%2s) Room:%4.1f SetPoint:%4.1f Power:%3d LightId(%2ld):%d Kp:%3.f Ki:%3.f Integr:%3.1f",Minute,ThermostatSwitchName, idxThermostat , RoomTemperature,ThermostatTemperatureSet,PowerModulation,SwitchIdx,SwitchValue,CoefProportional,CoefIntegral, DeltaTemps[ThermostatId]->GetSum() /INTEGRAL_DURATION);
 
 					}
 					if (( lastPowerModulation != PowerModulation) || (lastTemp != RoomTemperature ) || (SwitchStateAsChanged) )
-						m_sql.safe_query("UPDATE DeviceStatus SET RoomTemp='%4.1f',Power=%d,nValue=%d, LastUpdate='%s' WHERE (ID = %s )", RoomTemperature , PowerModulation ,SwitchValue, TimeToString(NULL, TF_DateTime).c_str(), idxThermostat  	);
-													if ((Minute % 10 )==0)
+          {
+
+            Option["Power"     ] = std::to_string(lastPowerModulation);
+            Option["RoomTemp"  ] = ToString(lastTemp,"%4.1f");
+            m_sql.UpdateDeviceValue("Option",m_sql.FormatDeviceOptions(Option,false),idxThermostat)
+          }
+				if ((Minute % 10 )==0)
 				{
 					//compute delta room temperature
 					float DeltaTemp = RoomTemperature - Map_LastRoomTemp[ThermostatId] ;
@@ -495,4 +499,17 @@ void UpdateVirtualThermostatOption(	const uint64_t uidstr,float Power,float Room
 
 	std::string option = m_sql.FormatDeviceOptions(Option, false);
 	m_sql.UpdateDeviceValue("Options", option , std::to_string(uidstr) );
+}
+std::string VirtualThermostatGetOption (const std::string optionName , const std::string &options )
+{
+  //if option present
+    if (strstr(options.c_str(),optionName.c_str() ) != 0)
+    {
+      TOptionMap Option   = BuildDeviceOptions( options, false ) ;
+      return (Option[optionName] );
+    }
+    else
+    {
+      return "";
+    }
 }

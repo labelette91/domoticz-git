@@ -222,6 +222,7 @@ define(['app'], function (app) {
 				        if (typeof data.result != 'undefined') {
 				            $.each(data.result, function (i, item) {
 				                Item = item;
+				                $.Item = item;
 				            });
 				        }
 				    }
@@ -1222,6 +1223,7 @@ define(['app'], function (app) {
 		function init() {
 			//global var
 			$.devIdx = 0;
+			var $.Item   ;
 			$.LastUpdateTime = parseInt(0);
 
 			$.myglobals = {
@@ -1574,18 +1576,30 @@ define(['app'], function (app) {
 				bValid = bValid && checkLength($("#dialog-editsetpointdevice #devicename"), 2, 100);
 				if (bValid) {
 					$(this).dialog("close");
+					
+		            var options = [];
+       				if (isVirtualThermostat($.Item))
+       				{
+
+                    option.push("Power"     + ':' +  $.Item.Power                                              );
+                    option.push("RoomTemp"  + ':' +  $.Item.RoomTemp                                           );
+                    option.push("TempIdx"   + ':' +  $("#dialog-editsetpointdevice #comboTemperature").val()   );
+                    option.push("SwitchIdx" + ':' +  $("#dialog-editsetpointdevice #combosubdevice").val()     );
+                    option.push("EcoTemp"   + ':' +  $("#dialog-editsetpointdevice  #Eco").val()               );
+                    option.push("CoefProp"  + ':' +  $("#dialog-editsetpointdevice  #CoefProp").val()          );
+                    option.push("ConforTemp"+ ':' +  $("#dialog-editsetpointdevice  #Confor").val()            );
+                    option.push("CoefInteg" + ':' +  $("#dialog-editsetpointdevice  #CoefInteg").val()         );
+//                    option.push("OnCmd"     + ':' +  $("#dialog-editsetpointdevice  #OnCmd").val()             );
+//                    option.push("OffCmd"    + ':' +  $("#dialog-editsetpointdevice  #OffCmd").val()            );
+					}
 					$.ajax({
 						url: "json.htm?type=setused&idx=" + $.devIdx +
 						'&name=' + encodeURIComponent($("#dialog-editsetpointdevice #devicename").val()) +
 						'&description=' + encodeURIComponent($("#dialog-editsetpointdevice #devicedescription").val()) +
 						'&setpoint=' + $("#dialog-editsetpointdevice #setpoint").val() +
 						'&protected=' + $('#dialog-editsetpointdevice #protected').is(":checked") +
-						'&TempIdx='   + $("#dialog-editsetpointdevice #comboTemperature").val() + 
-						'&SwitchIdx=' + $("#dialog-editsetpointdevice #combosubdevice").val() + 
-						'&addjmulti=' + $("#dialog-editsetpointdevice  #CoefProp").val() +
-						'&addjvalue=' + $("#dialog-editsetpointdevice  #Eco").val() +
-						'&addjvalue2='+ $("#dialog-editsetpointdevice  #Confor").val() +
-						'&addjmulti2='+ $("#dialog-editsetpointdevice  #CoefInteg").val() +
+						'&options='   + b64EncodeUnicode(options.join(';') ) +
+						 
 						'&used=true',
 						async: false,
 						dataType: 'json',

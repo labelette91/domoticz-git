@@ -135,6 +135,13 @@
 			<td align="right"><span data-i18n="Protected">Protected</span>:</td>
 			<td><input type="checkbox" id="protected"><label for="protected"/></td>
 		</tr>
+        <tr>
+          <td align="right"><label><span data-i18n="Value">Value</span>: </label></td>
+          <td><input type="text" id="setpoint" style="width: 50px; padding: .4em;" class="text ui-widget-content ui-corner-all" /> &deg; <span id="tempunit">C</span></td>
+		</tr>
+		</table>
+
+        <table class="display" id="virtualThermostat" border="0" cellpadding="0" cellspacing="0">
 		<tr id="TemperatureDiv" style="display:none;">
 			<td align="right"><label for="comboTemperature"><span data-i18n="Temperature">Temperature</span>: </label></td>
 			<td><select id="comboTemperature" style="width:150px" class="combobox ui-corner-all">
@@ -164,17 +171,14 @@
         </tr>
         <tr id="OnCmdDiv" style="display:none;">
           <td align="right" style="width:60px"><label>On Command: </label></td>
-          <td><input type="text" id="OnCmd" style="width: 50px; padding: .4em;" class="text ui-widget-content ui-corner-all" />On</td>
+          <td><input type="text" id="OnCmd" style="width: 50px; padding: .4em;" class="text ui-widget-content ui-corner-all" /></td>
         </tr>
         <tr id="OffCmdDiv" style="display:none;">
           <td align="right" style="width:60px"><label>Off Command: </label></td>
-          <td><input type="text" id="OffCmd" style="width: 50px; padding: .4em;" class="text ui-widget-content ui-corner-all" />Off</td>
+          <td><input type="text" id="OffCmd" style="width: 50px; padding: .4em;" class="text ui-widget-content ui-corner-all" /></td>
         </tr>
-        <tr>
-          <td align="right"><label><span data-i18n="Value">Value</span>: </label></td>
-          <td><input type="text" id="setpoint" style="width: 50px; padding: .4em;" class="text ui-widget-content ui-corner-all" /> &deg; <span id="tempunit">C</span></td>
-		</tr>
 		</table>
+
     </form>
 </div>
 <div id="dialog-editthermostatclockdevice" title="Edit Device">

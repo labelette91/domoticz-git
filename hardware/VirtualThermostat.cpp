@@ -243,9 +243,9 @@ try
 					if ( (Minute % 10 )==0 || (SwitchStateAsChanged))
 					{
 						if (SwitchValue ==1)
-							m_mainworker.SwitchLight( SwitchIdx, OnCmd , -1 , _tColor(), false, 0 /* , !SwitchStateAsChanged */);
+							m_mainworker.SwitchLight( SwitchIdx, OnCmd , 0 , _tColor(), false, 0 /* , !SwitchStateAsChanged */);
 						else
-							m_mainworker.SwitchLight( SwitchIdx, OffCmd, -1  , _tColor(),  false,0 /*, !SwitchStateAsChanged */);
+							m_mainworker.SwitchLight( SwitchIdx, OffCmd, 0  , _tColor(),  false,0 /*, !SwitchStateAsChanged */);
 						sleep_milliseconds(1000);
 						_log.Debug(DEBUG_NORM,"VTHER: Mn:%02d  Therm:%-10s(%2s) Room:%4.1f SetPoint:%4.1f Power:%3d LightId(%2ld):%d Kp:%3.f Ki:%3.f Integr:%3.1f",Minute,ThermostatSwitchName, idxThermostat.c_str() , RoomTemperature,ThermostatTemperatureSet,PowerModulation,SwitchIdx,SwitchValue,CoefProportional,CoefIntegral, DeltaTemps[ThermostatId]->GetSum() /INTEGRAL_DURATION);
 
@@ -255,7 +255,8 @@ try
 
             Option["Power"     ] = std::to_string(PowerModulation);
             Option["RoomTemp"  ] = ToString(RoomTemperature,"%4.1f");
-						m_sql.UpdateDeviceValue("Options", m_sql.FormatDeviceOptions(Option, false), idxThermostat);
+						std::string options = m_sql.FormatDeviceOptions(Option, false);
+						m_sql.safe_query("UPDATE DeviceStatus SET nValue=%d,Options='%s',LastUpdate='%s' WHERE (ID = %s )", SwitchValue, options.c_str(),TimeToString(NULL, TF_DateTime).c_str(), idxThermostat.c_str());
           }
 				if ((Minute % 10 )==0)
 				{

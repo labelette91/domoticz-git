@@ -4209,6 +4209,8 @@ uint64_t CSQLHelper::UpdateValueInt(const int HardwareID, const char* ID, const 
 	uint64_t ulID = 0;
 	bool bDeviceUsed = false;
 	bool bLogDevice  = true;
+	int old_nValue;
+	std::string old_sValue;
 
 	bool bSameDeviceStatusValue = false;
 	std::vector<std::vector<std::string> > result;
@@ -4242,8 +4244,8 @@ uint64_t CSQLHelper::UpdateValueInt(const int HardwareID, const char* ID, const 
 		bDeviceUsed = atoi(result[0][2].c_str()) != 0;
 		bLogDevice = atoi(result[0][8].c_str()) != 0;
 		_eSwitchType stype = (_eSwitchType)atoi(result[0][3].c_str());
-		int old_nValue = atoi(result[0][4].c_str());
-		std::string old_sValue = result[0][5];
+		old_nValue = atoi(result[0][4].c_str());
+		old_sValue = result[0][5];
 		time_t now = time(0);
 		struct tm ltime;
 		localtime_r(&now, &ltime);
@@ -4366,7 +4368,8 @@ uint64_t CSQLHelper::UpdateValueInt(const int HardwareID, const char* ID, const 
 		//Add Lighting log
 		m_LastSwitchID = ID;
 		m_LastSwitchRowID = ulID;
-		if (bLogDevice)
+		bSameDeviceStatusValue = ((nValue == old_nValue) &&	(sValue == old_sValue)		);
+		if (!bSameDeviceStatusValue)
 		result = safe_query(
 			"INSERT INTO LightingLog (DeviceRowID, nValue, sValue) "
 			"VALUES ('%" PRIu64 "', '%d', '%q')",

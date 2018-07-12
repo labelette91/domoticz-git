@@ -230,9 +230,10 @@ define(['app'], function (app) {
 
 				if (isVirtualThermostat(Item))
 			{
-				RefreshTemperatureComboArray("#dialog-editsetpointdevice #comboTemperature");
+			    RefreshDeviceCombo("#dialog-editsetpointdevice #comboTemperature", 'temp',true);
+				    
 				$("#dialog-editsetpointdevice  #comboTemperature").val(Item.TempIdx);
-				RefreshSwitchesComboArray("#dialog-editsetpointdevice #combosubdevice");
+				RefreshDeviceCombo("#dialog-editsetpointdevice #combosubdevice", 'light', true);
 				$("#dialog-editsetpointdevice  #combosubdevice").val(Item.SwitchIdx);
 				$("#dialog-editsetpointdevice  #CoefProp").val(Item.CoefProp);
 				$("#dialog-editsetpointdevice  #CoefInteg").val(Item.CoefInteg);

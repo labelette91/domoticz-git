@@ -232,37 +232,19 @@ define(['app'], function (app) {
 			{
 				RefreshTemperatureComboArray("#dialog-editsetpointdevice #comboTemperature");
 				$("#dialog-editsetpointdevice  #comboTemperature").val(Item.TempIdx);
-				$("#dialog-editsetpointdevice  #TemperatureDiv").show();
 				RefreshSwitchesComboArray("#dialog-editsetpointdevice #combosubdevice");
 				$("#dialog-editsetpointdevice  #combosubdevice").val(Item.SwitchIdx);
-				$("#dialog-editsetpointdevice  #SwitchDiv").show();
 				$("#dialog-editsetpointdevice  #CoefProp").val(Item.CoefProp);
-				$("#dialog-editsetpointdevice  #CoefPropDiv").show();
 				$("#dialog-editsetpointdevice  #CoefInteg").val(Item.CoefInteg);
-				$("#dialog-editsetpointdevice  #CoefIntegDiv").show();
 				$("#dialog-editsetpointdevice  #Eco").val(Item.EcoTemp);
-				$("#dialog-editsetpointdevice  #EcoDiv").show();
 				$("#dialog-editsetpointdevice  #Confor").val(Item.ConforTemp);
-				$("#dialog-editsetpointdevice  #ConforDiv").show();
 				$("#dialog-editsetpointdevice  #OnCmd").val(Item.OnCmd);
-				$("#dialog-editsetpointdevice  #OnCmdDiv").show();
 				$("#dialog-editsetpointdevice  #OffCmd").val(Item.OffCmd);
-				$("#dialog-editsetpointdevice  #OffCmdDiv").show();
+				$("#dialog-editsetpointdevice  #virtualThermostat").show();
 			}
 			else
 			{
-				$("#dialog-editsetpointdevice  #comboTemperature").val("");
-				$("#dialog-editsetpointdevice  #combosubdevice").val("");
-				$("#dialog-editsetpointdevice  #CoefProp").val("");
-				$("#dialog-editsetpointdevice  #TemperatureDiv").hide();
-				$("#dialog-editsetpointdevice  #SwitchDiv").hide();
-				$("#dialog-editsetpointdevice  #CoefPropDiv").hide();
-				$("#dialog-editsetpointdevice  #Eco").val("");
-				$("#dialog-editsetpointdevice  #EcoDiv").hide();
-				$("#dialog-editsetpointdevice  #Confor").val("");
-				$("#dialog-editsetpointdevice  #ConforDiv").hide();
-				$("#dialog-editsetpointdevice  #CoefInteg").val("");
-				$("#dialog-editsetpointdevice  #CoefIntegDiv").hide();
+			    $("#dialog-editsetpointdevice  #virtualThermostat").hide();
 			}
 				$("#dialog-editsetpointdevice").i18n();
 				$("#dialog-editsetpointdevice").dialog("open");

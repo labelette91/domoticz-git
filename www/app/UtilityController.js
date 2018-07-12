@@ -230,10 +230,10 @@ define(['app'], function (app) {
 
 				if (isVirtualThermostat(Item))
 			{
-				RefreshTemperatureComboArray("#dialog-editsetpointdevice");
+				RefreshTemperatureComboArray("#dialog-editsetpointdevice #comboTemperature");
 				$("#dialog-editsetpointdevice  #comboTemperature").val(Item.TempIdx);
 				$("#dialog-editsetpointdevice  #TemperatureDiv").show();
-				RefreshSwitchesComboArray("#dialog-editsetpointdevice");
+				RefreshSwitchesComboArray("#dialog-editsetpointdevice #combosubdevice");
 				$("#dialog-editsetpointdevice  #combosubdevice").val(Item.SwitchIdx);
 				$("#dialog-editsetpointdevice  #SwitchDiv").show();
 				$("#dialog-editsetpointdevice  #CoefProp").val(Item.CoefProp);
@@ -244,6 +244,10 @@ define(['app'], function (app) {
 				$("#dialog-editsetpointdevice  #EcoDiv").show();
 				$("#dialog-editsetpointdevice  #Confor").val(Item.ConforTemp);
 				$("#dialog-editsetpointdevice  #ConforDiv").show();
+				$("#dialog-editsetpointdevice  #OnCmd").val(Item.OnCmd);
+				$("#dialog-editsetpointdevice  #OnCmdDiv").show();
+				$("#dialog-editsetpointdevice  #OffCmd").val(Item.OffCmd);
+				$("#dialog-editsetpointdevice  #OffCmdDiv").show();
 			}
 			else
 			{
@@ -1590,8 +1594,8 @@ define(['app'], function (app) {
                     option.push("CoefProp"  + ':' +  $("#dialog-editsetpointdevice  #CoefProp").val()          );
                     option.push("ConforTemp"+ ':' +  $("#dialog-editsetpointdevice  #Confor").val()            );
                     option.push("CoefInteg" + ':' +  $("#dialog-editsetpointdevice  #CoefInteg").val()         );
-//                    option.push("OnCmd"     + ':' +  $("#dialog-editsetpointdevice  #OnCmd").val()             );
-//                    option.push("OffCmd"    + ':' +  $("#dialog-editsetpointdevice  #OffCmd").val()            );
+                    option.push("OnCmd"     + ':' +  $("#dialog-editsetpointdevice  #OnCmd").val()             );
+                    option.push("OffCmd"    + ':' +  $("#dialog-editsetpointdevice  #OffCmd").val()            );
 					}
 					$.ajax({
 						url: "json.htm?type=setused&idx=" + $.devIdx +

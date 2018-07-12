@@ -432,16 +432,16 @@ TOptionMap VirtualThermostatOptionToOptionMap(
 {
 	TOptionMap Option;
 
-	Option["Power"] = std::to_string(Power);
-	Option["RoomTemp"] = std::to_string(RoomTemp);
-	Option["TempIdx"] = std::to_string(TempIdx);
-	Option["SwitchIdx"] = std::to_string(SwitchIdx);
-	Option["EcoTemp"] = std::to_string(EcoTemp);
-	Option["CoefProp"] = std::to_string(CoefProp);
-	Option["ConforTemp"] = std::to_string(ConforTemp);
-	Option["CoefInteg"] = std::to_string(CoefInteg);
-	Option["OnCmd"] = OnCmd;
-	Option["OffCmd"] = OffCmd;
+	Option["Power"]      = ToString (Power       , "4.1f" );
+	Option["RoomTemp"]   = ToString (RoomTemp    , "4.1f" );
+	Option["TempIdx"]    = ToString (TempIdx     , "4.1f" );
+	Option["SwitchIdx"]  = ToString (SwitchIdx   , "4.1f" );
+	Option["EcoTemp"]    = ToString (EcoTemp     , "4.1f" );
+	Option["CoefProp"]   = ToString (CoefProp    , "4.1f" );
+	Option["ConforTemp"] = ToString (ConforTemp  , "4.1f" );
+	Option["CoefInteg"]  = ToString (CoefInteg   , "4.1f" );
+	Option["OnCmd"]      = OnCmd;
+	Option["OffCmd"]     = OffCmd;
 
 	return Option;
 }

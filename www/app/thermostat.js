@@ -257,7 +257,7 @@ function RefreshTemperatureComboArray(tabName) {
     });
 
 
-    id = tabName + " #comboTemperature";
+    id = tabName ;
     var Combo = $(id);
     Combo.find('option').remove().end();
 
@@ -299,7 +299,7 @@ debug("RefreshLightSwitchesComboArray");
 //			var option = $('<option />');
 //			option.attr('value', '');
 			
-    var id = tabName + " #combosubdevice";
+    var id = tabName ;
     var Combo = $(id);
 //	$("#dialog-edittempdevice #combosubdevice")
 	$(id)
@@ -598,5 +598,47 @@ function RefreshDeviceCombo(ComboName,filter,clear) {
     var option = $('<option />');
     option.attr('value', '0').text('');
 //    Combo.append(option);
+
+}
+
+//display list of  in a combo box : name / idx 
+//jsonRequest = "json.htm?type=command&param=getlightswitches"
+function RefreshComboArrayNameIdx(ComboName, jsonRequest )
+{
+
+	$.LightsAndSwitches = [];
+	$.ajax({
+		url: jsonRequest , 
+		async: false, 
+		dataType: 'json',
+		success: function(data) {
+			if (typeof data.result != 'undefined') {
+				$.each(data.result, function(i,item) {
+					$.LightsAndSwitches.push({
+						idx: item.idx,
+						name: item.Name
+					});
+				});
+			}
+		}
+	});
+
+//add list of switch in the option list
+//			var option = $('<option />');
+//			option.attr('value', '');
+			
+    var id = ComboName ;
+    var Combo = $(id);
+	$(id)
+    .find('option')
+    .remove()
+    .end()
+//	.append(('<option value=""></option>'));
+	
+	$.each($.LightsAndSwitches, function(i,item){
+		var option = $('<option />');
+		option.attr('value', item.idx).text(item.name);
+		$(id).append(option);
+	});
 
 }

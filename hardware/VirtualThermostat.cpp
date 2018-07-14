@@ -154,8 +154,10 @@ void getCommand(std::string &Cmd, std::string &OutCmd, int &level)
 	OutCmd = Cmd; level = 0;
 
 	if (Cmd == "Off"){
+		level = 0;
 	}
 	else if (Cmd == "On") {
+		level = 100;
 	}
 	else {
 		std::vector<std::string> results;
@@ -252,7 +254,7 @@ try
 				if (resSw.size())
 				{
 					SwitchSubType    = atoi(resSw[0][2].c_str());
-					lastSwitchValue	 = atoi(resSw[0][0].c_str() );
+					lastSwitchValue	 = atoi(resSw[0][0].c_str() ) != 0 ;
 
 					bool SwitchStateAsChanged = (lastSwitchValue!= SwitchValue) ;
 
@@ -269,7 +271,7 @@ try
   						m_mainworker.SwitchLight( SwitchIdx, OutCmd, level, _tColor(),  false,0 /*, !SwitchStateAsChanged */);
 
 						sleep_milliseconds(1000);
-						_log.Debug(DEBUG_NORM,"VTHER: Mn:%02d  Therm:%-10s(%2s) Room:%4.1f SetPoint:%4.1f Power:%3d LightId(%2ld):%d Kp:%3.f Ki:%3.f Integr:%3.1f",Minute,ThermostatSwitchName, idxThermostat.c_str() , RoomTemperature,ThermostatTemperatureSet,PowerModulation,SwitchIdx,SwitchValue,CoefProportional,CoefIntegral, DeltaTemps[ThermostatId]->GetSum() /INTEGRAL_DURATION);
+						_log.Debug(DEBUG_NORM,"VTHER: Mn:%02d  Therm:%-10s(%2s) Room:%4.1f SetPoint:%4.1f Power:%3d LightId(%2ld):%d Kp:%3.f Ki:%3.f Integr:%3.1f Cmd:%s",Minute,ThermostatSwitchName, idxThermostat.c_str() , RoomTemperature,ThermostatTemperatureSet,PowerModulation,SwitchIdx,SwitchValue,CoefProportional,CoefIntegral, DeltaTemps[ThermostatId]->GetSum() /INTEGRAL_DURATION, OutCmd.c_str());
 
 					}
 					if (( lastPowerModulation != PowerModulation) || (lastTemp != RoomTemperature ) || (SwitchStateAsChanged) )
@@ -455,14 +457,14 @@ TOptionMap VirtualThermostatOptionToOptionMap(
 {
 	TOptionMap Option;
 
-	Option["Power"]      = ToString (Power       , "4.1f" );
-	Option["RoomTemp"]   = ToString (RoomTemp    , "4.1f" );
-	Option["TempIdx"]    = ToString (TempIdx     , "4.1f" );
-	Option["SwitchIdx"]  = ToString (SwitchIdx   , "4.1f" );
-	Option["EcoTemp"]    = ToString (EcoTemp     , "4.1f" );
-	Option["CoefProp"]   = ToString (CoefProp    , "4.1f" );
-	Option["ConforTemp"] = ToString (ConforTemp  , "4.1f" );
-	Option["CoefInteg"]  = ToString (CoefInteg   , "4.1f" );
+	Option["Power"]      = ToString (Power       , "%4.1f" );
+	Option["RoomTemp"]   = ToString (RoomTemp    , "%4.1f" );
+	Option["TempIdx"]    = ToString (TempIdx     , "%4.1f" );
+	Option["SwitchIdx"]  = ToString (SwitchIdx   , "%4.1f" );
+	Option["EcoTemp"]    = ToString (EcoTemp     , "%4.1f" );
+	Option["CoefProp"]   = ToString (CoefProp    , "%4.1f" );
+	Option["ConforTemp"] = ToString (ConforTemp  , "%4.1f" );
+	Option["CoefInteg"]  = ToString (CoefInteg   , "%4.1f" );
 	Option["OnCmd"]      = OnCmd;
 	Option["OffCmd"]     = OffCmd;
 

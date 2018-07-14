@@ -4209,8 +4209,8 @@ uint64_t CSQLHelper::UpdateValueInt(const int HardwareID, const char* ID, const 
 	uint64_t ulID = 0;
 	bool bDeviceUsed = false;
 	bool bLogDevice  = true;
-	int old_nValue;
-	std::string old_sValue;
+	int old_nValue=0;
+	std::string old_sValue="";
 
 	bool bSameDeviceStatusValue = false;
 	std::vector<std::vector<std::string> > result;

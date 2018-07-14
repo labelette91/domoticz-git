@@ -1568,6 +1568,8 @@ define(['app'], function (app) {
 		            var option = [];
        				if (isVirtualThermostat($.Item))
        				{
+       				    var OnCmd = $("#dialog-editsetpointdevice  #OnCmd").val();
+       				    var OffCmd = $("#dialog-editsetpointdevice  #OffCmd").val();
 
                     option.push("Power"     + ':' +  $.Item.Power                                              );
                     option.push("RoomTemp"  + ':' +  $.Item.RoomTemp                                           );

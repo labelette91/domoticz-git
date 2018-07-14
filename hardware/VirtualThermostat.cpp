@@ -149,6 +149,23 @@ std::string ToString(float value , char * format)
   return buf ;
 }
 
+void getCommand(std::string &Cmd, std::string &OutCmd, int &level)
+{
+	OutCmd = Cmd; level = 0;
+
+	if (Cmd == "Off"){
+	}
+	else if (Cmd == "On") {
+	}
+	else {
+		std::vector<std::string> results;
+		StringSplit(Cmd, " ", results);
+		if (results[0] == "Set") {
+			OutCmd = "Set Level"; level = atoi(results[2].c_str()) ;
+		}
+	}
+
+}
 void VirtualThermostat::ScheduleThermostat(int Minute )
 {
 
@@ -242,10 +259,15 @@ try
 
 					if ( (Minute % 10 )==0 || (SwitchStateAsChanged))
 					{
+						std::string  Cmd;	std::string OutCmd; int level;
 						if (SwitchValue ==1)
-							m_mainworker.SwitchLight( SwitchIdx, OnCmd , 0 , _tColor(), false, 0 /* , !SwitchStateAsChanged */);
+							getCommand(OnCmd , OutCmd, level);
+//							m_mainworker.SwitchLight( SwitchIdx, OnCmd , 0 , _tColor(), false, 0 /* , !SwitchStateAsChanged */);
 						else
-							m_mainworker.SwitchLight( SwitchIdx, OffCmd, 0  , _tColor(),  false,0 /*, !SwitchStateAsChanged */);
+							getCommand(OffCmd, OutCmd, level);
+//						m_mainworker.SwitchLight( SwitchIdx, OffCmd, 0  , _tColor(),  false,0 /*, !SwitchStateAsChanged */);
+  						m_mainworker.SwitchLight( SwitchIdx, OutCmd, level, _tColor(),  false,0 /*, !SwitchStateAsChanged */);
+
 						sleep_milliseconds(1000);
 						_log.Debug(DEBUG_NORM,"VTHER: Mn:%02d  Therm:%-10s(%2s) Room:%4.1f SetPoint:%4.1f Power:%3d LightId(%2ld):%d Kp:%3.f Ki:%3.f Integr:%3.1f",Minute,ThermostatSwitchName, idxThermostat.c_str() , RoomTemperature,ThermostatTemperatureSet,PowerModulation,SwitchIdx,SwitchValue,CoefProportional,CoefIntegral, DeltaTemps[ThermostatId]->GetSum() /INTEGRAL_DURATION);
 

@@ -696,7 +696,7 @@ void CEnOceanESP3::readCallback(const char *data, size_t len)
 
 }
 
-bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length)
+bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char /*length*/)
 {
 	int unitCode = 0;
 	unsigned int unitBaseAddr = 0;
@@ -753,7 +753,7 @@ bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length
 	//First we need to find out if this is a Dimmer switch,
 	//because they are threaded differently
 	bool bIsDimmer=false;
-	int LastLevel=0;
+	uint8_t LastLevel=0;
 	std::vector<std::vector<std::string> > result;
 	char szDeviceID[20];
 	sprintf(szDeviceID,"%08X",(unsigned int)sID);
@@ -763,10 +763,10 @@ bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length
 		_eSwitchType switchtype=(_eSwitchType)atoi(result[0][0].c_str());
 		if (switchtype==STYPE_Dimmer)
 			bIsDimmer=true;
-		LastLevel=atoi(result[0][1].c_str());
+		LastLevel=(uint8_t)atoi(result[0][1].c_str());
 	}
 
-	int iLevel=tsen->LIGHTING2.level;
+	uint8_t iLevel=tsen->LIGHTING2.level;
 	int cmnd=tsen->LIGHTING2.cmnd;
 	int orgcmd=cmnd;
 	if ((tsen->LIGHTING2.level==0)&&(!bIsDimmer))
@@ -786,7 +786,7 @@ bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length
 			float fLevel=(100.0f/15.0f)*float(iLevel);
 			if (fLevel>99.0f)
 				fLevel=100.0f;
-			iLevel=int(fLevel);
+			iLevel=(uint8_t)(fLevel);
 		}
 		cmnd=light2_sSetLevel;
 	}
@@ -912,7 +912,7 @@ bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length
 	return true;
 }
 
-void CEnOceanESP3::SendDimmerTeachIn(const char *pdata, const unsigned char length)
+void CEnOceanESP3::SendDimmerTeachIn(const char *pdata, const unsigned char /*length*/)
 {
 	if (m_id_base==0)
 		return;
@@ -1026,7 +1026,7 @@ bool CEnOceanESP3::ParseData()
 		{
 			m_bBaseIDRequested=false;
 			m_id_base = (m_buffer[1] << 24) + (m_buffer[2] << 16) + (m_buffer[3] << 8) + m_buffer[4];
-			unsigned char changes_left=m_buffer[5];
+			//unsigned char changes_left=m_buffer[5];
 			_log.Log(LOG_STATUS,"EnOcean: Transceiver ID_Base: 0x%08lx",m_id_base);
 		}
 		if (m_bufferpos==33)
@@ -1331,7 +1331,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 									nightReduction = 4;
 								else if (DATA_BYTE3 == 0x1F)
 									nightReduction = 5;
-								float setpointTemp=GetValueRange(DATA_BYTE2,40);
+								//float setpointTemp=GetValueRange(DATA_BYTE2,40);
 							}
 							else 
 							{
@@ -1344,7 +1344,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 									fspeed = 0;
 								else if (DATA_BYTE3 >= 210)
 									fspeed = -1; //auto
-								int iswitch = DATA_BYTE0 & 1;
+								//int iswitch = DATA_BYTE0 & 1;
 							}
 							RBUF tsen;
 							memset(&tsen,0,sizeof(RBUF));

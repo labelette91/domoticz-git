@@ -68,12 +68,6 @@ const char *sqlCreateDeviceStatus =
 "[StrParam2] VARCHAR(200) DEFAULT '', "
 "[LastLevel] INTEGER DEFAULT 0, "
 "[Protected] INTEGER DEFAULT 0, "
-"[Power] INTEGER DEFAULT 0, "
-"[RoomTemp] VARCHAR(4) DEFAULT 0, "
-"[TempIdx] BIGINT DEFAULT 0 , "
-"[SwitchIdx] INTEGER DEFAULT 0 , "
-"[DeltaTemp] float DEFAULT 0, "
-"[Log] INTEGER DEFAULT 1 , "
 "[CustomImage] INTEGER DEFAULT 0, "
 "[Description] VARCHAR(200) DEFAULT '', "
 "[Options] TEXT DEFAULT null, "
@@ -1214,12 +1208,6 @@ bool CSQLHelper::OpenDatabase()
     /* Room temperature  */
 		if (dbversion<96)
 		{
-			query("ALTER TABLE DeviceStatus ADD COLUMN [Power]      INTEGER    default 0");
-			query("ALTER TABLE DeviceStatus ADD COLUMN [RoomTemp]   VARCHAR(4) default 0");
-			query("ALTER TABLE DeviceStatus ADD COLUMN [TempIdx]    BIGINT     DEFAULT 0");
-			query("ALTER TABLE DeviceStatus ADD COLUMN [SwitchIdx]  INTEGER    DEFAULT 0");
-			query("ALTER TABLE DeviceStatus ADD COLUMN [DeltaTemp]  float      DEFAULT 0");
-			query("ALTER TABLE DeviceStatus ADD COLUMN [Log]        INTEGER    DEFAULT 1");
 			query("ALTER TABLE Hardware ADD COLUMN [RestartType] INTEGER default 0");
 
 		}
@@ -4208,13 +4196,12 @@ uint64_t CSQLHelper::UpdateValueInt(const int HardwareID, const char* ID, const 
 
 	uint64_t ulID = 0;
 	bool bDeviceUsed = false;
-	bool bLogDevice  = true;
 	int old_nValue=0;
 	std::string old_sValue="";
 
 	bool bSameDeviceStatusValue = false;
 	std::vector<std::vector<std::string> > result;
-	result = safe_query("SELECT ID,Name, Used, SwitchType, nValue, sValue, LastUpdate, Options, Log FROM DeviceStatus WHERE (HardwareID=%d AND DeviceID='%q' AND Unit=%d AND Type=%d AND SubType=%d)",HardwareID, ID, unit, devType, subType);
+	result = safe_query("SELECT ID,Name, Used, SwitchType, nValue, sValue, LastUpdate, Options FROM DeviceStatus WHERE (HardwareID=%d AND DeviceID='%q' AND Unit=%d AND Type=%d AND SubType=%d)", HardwareID, ID, unit, devType, subType);
 	if (result.empty())
 	{
 		//Insert
@@ -4242,7 +4229,6 @@ uint64_t CSQLHelper::UpdateValueInt(const int HardwareID, const char* ID, const 
 		std::string sOption = result[0][7];
 		devname = result[0][1];
 		bDeviceUsed = atoi(result[0][2].c_str()) != 0;
-		bLogDevice = atoi(result[0][8].c_str()) != 0;
 		_eSwitchType stype = (_eSwitchType)atoi(result[0][3].c_str());
 		old_nValue = atoi(result[0][4].c_str());
 		old_sValue = result[0][5];

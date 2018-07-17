@@ -8327,7 +8327,6 @@ namespace http {
 						" A.LastLevel, A.CustomImage, A.StrParam1, A.StrParam2,"
 						" A.Protected, IFNULL(B.XOffset,0), IFNULL(B.YOffset,0), IFNULL(B.PlanID,0), A.Description,"
 						" A.Options, A.Color "
-						" ,A.Power,  A.RoomTemp,  A.TempIdx,A.SwitchIdx ,A.Log "
 						"FROM DeviceStatus A LEFT OUTER JOIN DeviceToPlansMap as B ON (B.DeviceRowID==a.ID) "
 						"WHERE (A.ID=='%q')",
 						rowid.c_str());
@@ -8343,7 +8342,6 @@ namespace http {
 						" A.StrParam2, A.Protected, B.XOffset, B.YOffset,"
 						" B.PlanID, A.Description,"
 						" A.Options, A.Color "
-						" ,A.Power,  A.RoomTemp,  A.TempIdx,A.SwitchIdx ,A.Log "
 						"FROM DeviceStatus as A, DeviceToPlansMap as B "
 						"WHERE (B.PlanID=='%q') AND (B.DeviceRowID==a.ID)"
 						" AND (B.DevSceneType==0) ORDER BY B.[Order]",
@@ -8359,7 +8357,6 @@ namespace http {
 						" A.StrParam2, A.Protected, B.XOffset, B.YOffset,"
 						" B.PlanID, A.Description,"
 						" A.Options, A.Color "
-						" ,A.Power,  A.RoomTemp,  A.TempIdx,A.SwitchIdx ,A.Log "
 						"FROM DeviceStatus as A, DeviceToPlansMap as B,"
 						" Plans as C "
 						"WHERE (C.FloorplanID=='%q') AND (C.ID==B.PlanID)"
@@ -8404,7 +8401,6 @@ namespace http {
 							" A.LastLevel, A.CustomImage, A.StrParam1, A.StrParam2,"
 							" A.Protected, IFNULL(B.XOffset,0), IFNULL(B.YOffset,0), IFNULL(B.PlanID,0), A.Description,"
 							" A.Options, A.Color "
-						  " ,A.Power,  A.RoomTemp,  A.TempIdx,A.SwitchIdx ,A.Log "
 							"FROM DeviceStatus as A LEFT OUTER JOIN DeviceToPlansMap as B "
 							"ON (B.DeviceRowID==a.ID) AND (B.DevSceneType==0) "
 							"WHERE (A.HardwareID == %q) "
@@ -8421,7 +8417,6 @@ namespace http {
 							" A.LastLevel, A.CustomImage, A.StrParam1, A.StrParam2,"
 							" A.Protected, IFNULL(B.XOffset,0), IFNULL(B.YOffset,0), IFNULL(B.PlanID,0), A.Description,"
 							" A.Options, A.Color "
-						  " ,A.Power,  A.RoomTemp,  A.TempIdx,A.SwitchIdx ,A.Log "
 							"FROM DeviceStatus as A LEFT OUTER JOIN DeviceToPlansMap as B "
 							"ON (B.DeviceRowID==a.ID) AND (B.DevSceneType==0) "
 							"ORDER BY ");
@@ -8449,7 +8444,6 @@ namespace http {
 						" A.StrParam2, A.Protected, 0 as XOffset,"
 						" 0 as YOffset, 0 as PlanID, A.Description,"
 						" A.Options, A.Color "
-						" ,A.Power,  A.RoomTemp,  A.TempIdx,A.SwitchIdx ,A.Log "
 						"FROM DeviceStatus as A, SharedDevices as B "
 						"WHERE (B.DeviceRowID==a.ID)"
 						" AND (B.SharedUserID==%lu) AND (A.ID=='%q')",
@@ -8466,7 +8460,6 @@ namespace http {
 						" A.StrParam2, A.Protected, C.XOffset,"
 						" C.YOffset, C.PlanID, A.Description,"
 						" A.Options, A.Color "
-						" ,A.Power,  A.RoomTemp,  A.TempIdx,A.SwitchIdx ,A.Log "
 						"FROM DeviceStatus as A, SharedDevices as B,"
 						" DeviceToPlansMap as C "
 						"WHERE (C.PlanID=='%q') AND (C.DeviceRowID==a.ID)"
@@ -8484,7 +8477,6 @@ namespace http {
 						" A.StrParam2, A.Protected, C.XOffset, C.YOffset,"
 						" C.PlanID, A.Description,"
 						" A.Options, A.Color "
-						" ,A.Power,  A.RoomTemp,  A.TempIdx,A.SwitchIdx ,A.Log "
 						"FROM DeviceStatus as A, SharedDevices as B,"
 						" DeviceToPlansMap as C, Plans as D "
 						"WHERE (D.FloorplanID=='%q') AND (D.ID==C.PlanID)"
@@ -8532,7 +8524,6 @@ namespace http {
 						" A.StrParam2, A.Protected, IFNULL(C.XOffset,0),"
 						" IFNULL(C.YOffset,0), IFNULL(C.PlanID,0), A.Description,"
 						" A.Options, A.Color "
-						" ,A.Power,  A.RoomTemp,  A.TempIdx,A.SwitchIdx ,A.Log "
 						"FROM DeviceStatus as A, SharedDevices as B "
 						"LEFT OUTER JOIN DeviceToPlansMap as C  ON (C.DeviceRowID==A.ID)"
 						"WHERE (B.DeviceRowID==A.ID)"
@@ -8801,7 +8792,6 @@ namespace http {
 					}
 					root["result"][ii]["idx"] = sd[0];
 					root["result"][ii]["Protected"] = (iProtected != 0);
-					root["result"][ii]["Log"] = sd[INDEX_POWER+4]=="1";
 					
 
 					CDomoticzHardwareBase *pHardware = m_mainworker.GetHardware(hardwareID);
@@ -12512,21 +12502,6 @@ szQuery << "UPDATE DeviceStatus SET "
           idx = result[0][0];
 			}
 			
-			std::string TempIdx=request::findValue(&req,"TempIdx");
-			if ( (TempIdx!="")&&(TempIdx!="null"))
-				m_sql.UpdateDeviceValue("TempIdx",TempIdx,idx);
-
-			std::string LogWrite = request::findValue(&req, "log");
-			if ((LogWrite != "") && (LogWrite != "null"))
-				if (LogWrite=="true")
-					m_sql.UpdateDeviceValue("log", 1, idx);
-				else
-					m_sql.UpdateDeviceValue("log", 0, idx);
-
-
-			std::string SwitchIdx=request::findValue(&req,"SwitchIdx");
-			if ( (SwitchIdx!="")&&(SwitchIdx!="null"))
-				m_sql.UpdateDeviceValue("SwitchIdx",SwitchIdx,idx);
 
 			std::string sOptions = base64_decode(request::findValue(&req, "options"));
 			std::string devoptions = CURLEncode::URLDecode(request::findValue(&req, "devoptions"));

@@ -487,7 +487,6 @@ void CEventSystem::GetCurrentStates()
 
 void CEventSystem::GetCurrentUserVariables()
 {
-	int maxId = 0;
 	boost::unique_lock<boost::shared_mutex> uservariablesMutexLock(m_uservariablesMutex);
 
 	//_log.Log(LOG_STATUS, "EventSystem: reset all user variables...");
@@ -508,17 +507,8 @@ void CEventSystem::GetCurrentUserVariables()
 			uvitem.variableType = atoi(sd[3].c_str());
 			uvitem.lastUpdate = sd[4];
 			m_uservariables[uvitem.ID] = uvitem;
-			if (uvitem.ID > maxId) maxId = uvitem.ID ;
 		}
 	}
-
-	TUserStaticVariableMap::iterator itt ;
-	for (itt = m_userStaticvariables.begin(); itt != m_userStaticvariables.end(); ++itt)
-	{
-		m_uservariables[++maxId] = itt->second ;
-	}
-
-
 }
 
 void CEventSystem::GetCurrentScenesGroups()
@@ -3544,7 +3534,7 @@ bool CEventSystem::processLuaCommand(lua_State *lua_state, const std::string &fi
 			StringSplit(variableValue, " ", cmd);
 			variableValue = cmd[0];
 
-			//create user loca string variable
+			//create user local string variable
 			_tUserVariable uvitem;
 			bool staticVariable = false;
 			int variabletype = 2;
@@ -3562,18 +3552,25 @@ bool CEventSystem::processLuaCommand(lua_State *lua_state, const std::string &fi
 			uvitem.variableType = variabletype ;
 			uvitem.lastUpdate = "";
 			//if static Variable create only in RAM
-			if (staticVariable)
+			if (staticVariable) {
+				uvitem.ID = m_userStaticvariables.size()+0x80000 ;
+
 				m_userStaticvariables[variableName] = uvitem;
+				m_uservariables[uvitem.ID] = uvitem;
+
+			}
 			else {
 				//create only in Database UserVariable 
 				m_sql.SaveUserVariable(variableName, boost::to_string(variabletype), variableValue);
 			}
+			_log.Debug(DEBUG_NORM, "EventSystem: Create variable %s: %s", variableName.c_str(), variableValue.c_str());
 		}
 		TUserStaticVariableMap::iterator iterator = m_userStaticvariables.find(variableName);
 		//if found , it is user static variable loacal
 		if (iterator != m_userStaticvariables.end())
 		{
 			m_userStaticvariables[variableName].variableValue = variableValue;
+			m_uservariables[m_userStaticvariables[variableName].ID].variableValue = variableValue;  
 			return true;
 		}
 

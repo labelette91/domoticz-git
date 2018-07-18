@@ -6,8 +6,8 @@ define(['app'], function (app) {
 	        GetThermostatBigTest = function(item){
 	            var bigtext;
 	            bigtext = item.Data + '\u00B0';
-	            if (typeof item.Temp != 'undefined') {
-	                bigtext += '/' + item.Temp + '\u00B0 ';
+	            if (typeof item.RoomTemp != 'undefined') {
+	                bigtext += '/' + item.RoomTemp + '\u00B0 ';
 	            }
 	            bigtext += $scope.config.TempSign;
 	            return bigtext;
@@ -222,6 +222,7 @@ define(['app'], function (app) {
 				        if (typeof data.result != 'undefined') {
 				            $.each(data.result, function (i, item) {
 				                Item = item;
+				                $.Item = item;
 				            });
 				        }
 				    }
@@ -229,35 +230,22 @@ define(['app'], function (app) {
 
 				if (isVirtualThermostat(Item))
 			{
-				RefreshTemperatureComboArray("#dialog-editsetpointdevice");
+			    RefreshDeviceCombo("#dialog-editsetpointdevice #comboTemperature", 'temp',true);
+				    
 				$("#dialog-editsetpointdevice  #comboTemperature").val(Item.TempIdx);
-				$("#dialog-editsetpointdevice  #TemperatureDiv").show();
-				RefreshSwitchesComboArray("#dialog-editsetpointdevice");
+				RefreshDeviceCombo("#dialog-editsetpointdevice #combosubdevice", 'light', true);
 				$("#dialog-editsetpointdevice  #combosubdevice").val(Item.SwitchIdx);
-				$("#dialog-editsetpointdevice  #SwitchDiv").show();
 				$("#dialog-editsetpointdevice  #CoefProp").val(Item.CoefProp);
-				$("#dialog-editsetpointdevice  #CoefPropDiv").show();
 				$("#dialog-editsetpointdevice  #CoefInteg").val(Item.CoefInteg);
-				$("#dialog-editsetpointdevice  #CoefIntegDiv").show();
 				$("#dialog-editsetpointdevice  #Eco").val(Item.EcoTemp);
-				$("#dialog-editsetpointdevice  #EcoDiv").show();
 				$("#dialog-editsetpointdevice  #Confor").val(Item.ConforTemp);
-				$("#dialog-editsetpointdevice  #ConforDiv").show();
+				$("#dialog-editsetpointdevice  #OnCmd").val(Item.OnCmd);
+				$("#dialog-editsetpointdevice  #OffCmd").val(Item.OffCmd);
+				$("#dialog-editsetpointdevice  #virtualThermostat").show();
 			}
 			else
 			{
-				$("#dialog-editsetpointdevice  #comboTemperature").val("");
-				$("#dialog-editsetpointdevice  #combosubdevice").val("");
-				$("#dialog-editsetpointdevice  #CoefProp").val("");
-				$("#dialog-editsetpointdevice  #TemperatureDiv").hide();
-				$("#dialog-editsetpointdevice  #SwitchDiv").hide();
-				$("#dialog-editsetpointdevice  #CoefPropDiv").hide();
-				$("#dialog-editsetpointdevice  #Eco").val("");
-				$("#dialog-editsetpointdevice  #EcoDiv").hide();
-				$("#dialog-editsetpointdevice  #Confor").val("");
-				$("#dialog-editsetpointdevice  #ConforDiv").hide();
-				$("#dialog-editsetpointdevice  #CoefInteg").val("");
-				$("#dialog-editsetpointdevice  #CoefIntegDiv").hide();
+			    $("#dialog-editsetpointdevice  #virtualThermostat").hide();
 			}
 				$("#dialog-editsetpointdevice").i18n();
 				$("#dialog-editsetpointdevice").dialog("open");
@@ -539,7 +527,7 @@ define(['app'], function (app) {
 										img = GetThermostatImg(item,"RefreshUtilities",48);
 										setHtmlValue(id + " #img", img );
 										RefreshTargetTemp ( id , item.SetPoint);
-										RefreshRoomTemp   ( id , item.Temp);
+										RefreshRoomTemp   ( id , item.RoomTemp);
 										RefreshThSlider(item.idx, "#utilitycontent #", item.SetPoint);
 										status = getTextStatus(item);
 										bigtext= $(id + " #bigtext").html();
@@ -760,7 +748,7 @@ define(['app'], function (app) {
 								xhtm += item.Data;
 							}
 							else if (isVirtualThermostat(item)){
-									xhtm+= ShowTargetRoomTemp(item.SetPoint, item.Temp) ; 
+							    xhtm += ShowTargetRoomTemp(item.SetPoint, item.RoomTemp);
 							}
 							else if (item.Type == "Thermostat") {
 				                        	xhtm += GetThermostatBigTest(item);
@@ -1220,8 +1208,10 @@ define(['app'], function (app) {
 		init();
 
 		function init() {
-			//global var
+		    //global var
+		    $.Item   = [];
 			$.devIdx = 0;
+			
 			$.LastUpdateTime = parseInt(0);
 
 			$.myglobals = {
@@ -1574,18 +1564,32 @@ define(['app'], function (app) {
 				bValid = bValid && checkLength($("#dialog-editsetpointdevice #devicename"), 2, 100);
 				if (bValid) {
 					$(this).dialog("close");
+					
+		            var option = [];
+       				if (isVirtualThermostat($.Item))
+       				{
+       				    var OnCmd = $("#dialog-editsetpointdevice  #OnCmd").val();
+       				    var OffCmd = $("#dialog-editsetpointdevice  #OffCmd").val();
+
+                    option.push("Power"     + ':' +  $.Item.Power                                              );
+                    option.push("RoomTemp"  + ':' +  $.Item.RoomTemp                                           );
+                    option.push("TempIdx"   + ':' +  $("#dialog-editsetpointdevice #comboTemperature").val()   );
+                    option.push("SwitchIdx" + ':' +  $("#dialog-editsetpointdevice #combosubdevice").val()     );
+                    option.push("EcoTemp"   + ':' +  $("#dialog-editsetpointdevice  #Eco").val()               );
+                    option.push("CoefProp"  + ':' +  $("#dialog-editsetpointdevice  #CoefProp").val()          );
+                    option.push("ConforTemp"+ ':' +  $("#dialog-editsetpointdevice  #Confor").val()            );
+                    option.push("CoefInteg" + ':' +  $("#dialog-editsetpointdevice  #CoefInteg").val()         );
+                    option.push("OnCmd"     + ':' +  $("#dialog-editsetpointdevice  #OnCmd").val()             );
+                    option.push("OffCmd"    + ':' +  $("#dialog-editsetpointdevice  #OffCmd").val()            );
+					}
 					$.ajax({
 						url: "json.htm?type=setused&idx=" + $.devIdx +
 						'&name=' + encodeURIComponent($("#dialog-editsetpointdevice #devicename").val()) +
 						'&description=' + encodeURIComponent($("#dialog-editsetpointdevice #devicedescription").val()) +
 						'&setpoint=' + $("#dialog-editsetpointdevice #setpoint").val() +
 						'&protected=' + $('#dialog-editsetpointdevice #protected').is(":checked") +
-						'&TempIdx='   + $("#dialog-editsetpointdevice #comboTemperature").val() + 
-						'&SwitchIdx=' + $("#dialog-editsetpointdevice #combosubdevice").val() + 
-						'&addjmulti=' + $("#dialog-editsetpointdevice  #CoefProp").val() +
-						'&addjvalue=' + $("#dialog-editsetpointdevice  #Eco").val() +
-						'&addjvalue2='+ $("#dialog-editsetpointdevice  #Confor").val() +
-						'&addjmulti2='+ $("#dialog-editsetpointdevice  #CoefInteg").val() +
+						'&devoptions='   + (option.join(';') ) +
+						 
 						'&used=true',
 						async: false,
 						dataType: 'json',

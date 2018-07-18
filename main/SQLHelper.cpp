@@ -24,6 +24,8 @@
 #include "../hardware/plugins/Plugins.h"
 #endif
 
+#include "../hardware/VirtualThermostat.h"
+
 #ifndef WIN32
 #include <sys/stat.h>
 #include <unistd.h>
@@ -66,12 +68,6 @@ const char *sqlCreateDeviceStatus =
 "[StrParam2] VARCHAR(200) DEFAULT '', "
 "[LastLevel] INTEGER DEFAULT 0, "
 "[Protected] INTEGER DEFAULT 0, "
-"[Power] INTEGER DEFAULT 0, "
-"[RoomTemp] VARCHAR(4) DEFAULT 0, "
-"[TempIdx] BIGINT DEFAULT 0 , "
-"[SwitchIdx] INTEGER DEFAULT 0 , "
-"[DeltaTemp] float DEFAULT 0, "
-"[Log] INTEGER DEFAULT 1 , "
 "[CustomImage] INTEGER DEFAULT 0, "
 "[Description] VARCHAR(200) DEFAULT '', "
 "[Options] TEXT DEFAULT null, "
@@ -1212,12 +1208,6 @@ bool CSQLHelper::OpenDatabase()
     /* Room temperature  */
 		if (dbversion<96)
 		{
-			query("ALTER TABLE DeviceStatus ADD COLUMN [Power]      INTEGER    default 0");
-			query("ALTER TABLE DeviceStatus ADD COLUMN [RoomTemp]   VARCHAR(4) default 0");
-			query("ALTER TABLE DeviceStatus ADD COLUMN [TempIdx]    BIGINT     DEFAULT 0");
-			query("ALTER TABLE DeviceStatus ADD COLUMN [SwitchIdx]  INTEGER    DEFAULT 0");
-			query("ALTER TABLE DeviceStatus ADD COLUMN [DeltaTemp]  float      DEFAULT 0");
-			query("ALTER TABLE DeviceStatus ADD COLUMN [Log]        INTEGER    DEFAULT 1");
 			query("ALTER TABLE Hardware ADD COLUMN [RestartType] INTEGER default 0");
 
 		}
@@ -3703,12 +3693,9 @@ uint64_t CSQLHelper::CreateDevice(const int HardwareID, const int SensorType, co
 
 		//set coefficient for PID for virtual Thermostat
 		std::string uidstr = boost::to_string(DeviceRowIdx);
-		m_sql.UpdateDeviceValue("AddjMulti", (float)100.0, uidstr);  //coef Kp proportionnal
-		m_sql.UpdateDeviceValue("AddjMulti2", (float)0.0, uidstr);    //coef Ki integral
-		m_sql.UpdateDeviceValue("TempIdx", (int)-1, uidstr);
-		m_sql.UpdateDeviceValue("SwitchIdx", (int)-1, uidstr);
-		m_sql.UpdateDeviceValue("AddjValue", (float)16.0, uidstr);  //eco temp
-		m_sql.UpdateDeviceValue("AddjValue2", (float)20.0, uidstr);  //eco temp
+
+		UpdateVirtualThermostatOption(DeviceRowIdx, 0, 20, -1, -1, 16.0, 100, 20.0, 1.0, std::string("On"), std::string("Off"));
+
 
 		break;
 	}
@@ -4209,11 +4196,12 @@ uint64_t CSQLHelper::UpdateValueInt(const int HardwareID, const char* ID, const 
 
 	uint64_t ulID = 0;
 	bool bDeviceUsed = false;
-	bool bLogDevice  = true;
+	int old_nValue=0;
+	std::string old_sValue="";
 
 	bool bSameDeviceStatusValue = false;
 	std::vector<std::vector<std::string> > result;
-	result = safe_query("SELECT ID,Name, Used, SwitchType, nValue, sValue, LastUpdate, Options, Log FROM DeviceStatus WHERE (HardwareID=%d AND DeviceID='%q' AND Unit=%d AND Type=%d AND SubType=%d)",HardwareID, ID, unit, devType, subType);
+	result = safe_query("SELECT ID,Name, Used, SwitchType, nValue, sValue, LastUpdate, Options FROM DeviceStatus WHERE (HardwareID=%d AND DeviceID='%q' AND Unit=%d AND Type=%d AND SubType=%d)", HardwareID, ID, unit, devType, subType);
 	if (result.empty())
 	{
 		//Insert
@@ -4241,10 +4229,9 @@ uint64_t CSQLHelper::UpdateValueInt(const int HardwareID, const char* ID, const 
 		std::string sOption = result[0][7];
 		devname = result[0][1];
 		bDeviceUsed = atoi(result[0][2].c_str()) != 0;
-		bLogDevice = atoi(result[0][8].c_str()) != 0;
 		_eSwitchType stype = (_eSwitchType)atoi(result[0][3].c_str());
-		int old_nValue = atoi(result[0][4].c_str());
-		std::string old_sValue = result[0][5];
+		old_nValue = atoi(result[0][4].c_str());
+		old_sValue = result[0][5];
 		time_t now = time(0);
 		struct tm ltime;
 		localtime_r(&now, &ltime);
@@ -4367,7 +4354,8 @@ uint64_t CSQLHelper::UpdateValueInt(const int HardwareID, const char* ID, const 
 		//Add Lighting log
 		m_LastSwitchID = ID;
 		m_LastSwitchRowID = ulID;
-		if (bLogDevice)
+		bSameDeviceStatusValue = ((nValue == old_nValue) &&	(sValue == old_sValue)		);
+		if (!bSameDeviceStatusValue)
 		result = safe_query(
 			"INSERT INTO LightingLog (DeviceRowID, nValue, sValue) "
 			"VALUES ('%" PRIu64 "', '%d', '%q')",
@@ -4992,7 +4980,7 @@ void CSQLHelper::UpdateTemperatureLog()
 	GetPreferencesVar("DeltaTemperatureLog", DELTA_TEMP);
 
 	std::vector<std::vector<std::string> > result;
-	result = safe_query("SELECT ID,Type,SubType,nValue,sValue,LastUpdate,Power,RoomTemp FROM DeviceStatus WHERE (Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR (Type=%d AND SubType=%d) OR (Type=%d AND SubType=%d) OR (Type=%d AND SubType=%d))",
+	result = safe_query("SELECT ID,Type,SubType,nValue,sValue,LastUpdate,Options FROM DeviceStatus WHERE (Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR Type=%d OR (Type=%d AND SubType=%d) OR (Type=%d AND SubType=%d) OR (Type=%d AND SubType=%d))",
 		pTypeTEMP,
 		pTypeHUM,
 		pTypeTEMP_HUM,
@@ -5061,9 +5049,9 @@ void CSQLHelper::UpdateTemperatureLog()
 				//set point temperature record as chill
 				chill = static_cast<float>(atof(splitresults[0].c_str()));
 				//record power % as humidity
-				humidity = atoi(sd[6].c_str()); 
+				humidity = atoi(VirtualThermostatGetOption("Power",sd[6] ).c_str() ); 
 				//record room temp 
-				temp = (float)atof(sd[7].c_str());
+				temp = (float)atof(VirtualThermostatGetOption("RoomTemp",sd[6] ).c_str());
 				ToRecord = TempLog.AsChanged((int)ID, temp,0.2); //record if room temperature change 
 				break;
 			case pTypeThermostat1:
@@ -8675,7 +8663,7 @@ std::map<std::string, std::string> CSQLHelper::BuildDeviceOptions(const std::str
 	return optionsMap;
 }
 
-std::map<std::string, std::string> CSQLHelper::GetDeviceOptions(const std::string & idx) {
+std::map<std::string, std::string> CSQLHelper::GetDeviceOptions(const std::string & idx, const bool decode ) {
 	std::map<std::string, std::string> optionsMap;
 
 	if (idx.empty()) {
@@ -8690,12 +8678,12 @@ std::map<std::string, std::string> CSQLHelper::GetDeviceOptions(const std::strin
 	result = safe_query("SELECT Options FROM DeviceStatus WHERE (ID==%" PRIu64 ")", ulID);
 	if (!result.empty()) {
 		std::vector<std::string> sd = result[0];
-		optionsMap = BuildDeviceOptions(sd[0].c_str());
+		optionsMap = BuildDeviceOptions(sd[0].c_str(),decode);
 	}
 	return optionsMap;
 }
 
-std::string CSQLHelper::FormatDeviceOptions(const std::map<std::string, std::string> & optionsMap) {
+std::string CSQLHelper::FormatDeviceOptions(const std::map<std::string, std::string> & optionsMap, const bool decode) {
 	std::string options;
 	int count = optionsMap.size();
 	if (count > 0) {
@@ -8706,7 +8694,7 @@ std::string CSQLHelper::FormatDeviceOptions(const std::map<std::string, std::str
 			i++;
 			//_log.Log(LOG_STATUS, "DEBUG : Reading device option ['%s', '%s']", itt->first.c_str(), itt->second.c_str());
 			std::string optionName = itt.first.c_str();
-			std::string optionValue = base64_encode(itt.second);
+			std::string optionValue = decode ? base64_decode(itt.second) : itt.second;  
 			ssoptions << optionName << ":" << optionValue;
 			if (i < count) {
 				ssoptions << ";";
@@ -8718,7 +8706,7 @@ std::string CSQLHelper::FormatDeviceOptions(const std::map<std::string, std::str
 	return options;
 }
 
-bool CSQLHelper::SetDeviceOptions(const uint64_t idx, const std::map<std::string, std::string> & optionsMap) {
+bool CSQLHelper::SetDeviceOptions(const uint64_t idx, const std::map<std::string, std::string> & optionsMap, const bool decode ) {
 	if (idx < 1) {
 		_log.Log(LOG_ERROR, "Cannot set options on device %" PRIu64 "", idx);
 		return false;
@@ -8729,7 +8717,7 @@ bool CSQLHelper::SetDeviceOptions(const uint64_t idx, const std::map<std::string
 		safe_query("UPDATE DeviceStatus SET Options = null WHERE (ID==%" PRIu64 ")", idx);
 	}
 	else {
-		std::string options = FormatDeviceOptions(optionsMap);
+		std::string options = FormatDeviceOptions(optionsMap,decode);
 		if (options.empty()) {
 			_log.Log(LOG_ERROR, "Cannot parse options for device %" PRIu64 "", idx);
 			return false;
@@ -8738,4 +8726,26 @@ bool CSQLHelper::SetDeviceOptions(const uint64_t idx, const std::map<std::string
 		safe_query("UPDATE DeviceStatus SET Options = '%q' WHERE (ID==%" PRIu64 ")", options.c_str(), idx);
 	}
 	return true;
+}
+
+
+bool CSQLHelper::UpdateDeviceOptions(const uint64_t idx, std::string options , const bool decode ) {
+
+    //get current option values
+    TOptionMap dbOptionMap = GetDeviceOptions( std::to_string(idx), decode ) ;
+
+		TOptionMap optionsMap  = BuildDeviceOptions(options);
+
+    //update all  option values
+    for (const auto & itt : optionsMap)
+    {
+      std::string optionName  = itt.first.c_str();
+      std::string optionValue = itt.second;  
+      dbOptionMap[optionName.c_str()]  = optionValue.c_str() ;
+    }
+
+    SetDeviceOptions( idx,dbOptionMap, decode ) ;
+
+
+    return true;
 }

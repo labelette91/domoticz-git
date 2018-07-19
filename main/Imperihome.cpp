@@ -783,12 +783,12 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
           if (dSubType == sTypeThermSetpoint)
           {
 //            DevThermostat :
-          CDomoticzHardwareBase* pHardware  = m_mainworker.GetDeviceHardware((*row)[ID].c_str());
+					CDomoticzHardwareBase* pHardware  = m_mainworker.GetDeviceHardware((*row)[ID].c_str());
 					CThermostatHardware *pThermostatHardware = reinterpret_cast<CThermostatHardware*>(pHardware);
 					if (pThermostatHardware != 0)
 					{
 						//temperature
-						SetKey(0,"curmode"     , pThermostatHardware->GetCurrentMode ( row )  );
+						SetKey(0,"curmode"     , pThermostatHardware->GetCurrentMode ((*row)[ID])  );
 
 	/*					int idx = atoi ((*row)[SwitchIdx].c_str()) ;//virtual thermostat
 
@@ -797,7 +797,7 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
 						else
 							SetKey(1,"curtemp"     ,(*row)[sValue] ,"°C" ,false );
 	*/
-						SetKey(1,"curtemp"     , pThermostatHardware->GetRoomTemperature(row) ,"°C" ,false );
+						SetKey(1,"curtemp"     , pThermostatHardware->GetRoomTemperature((*row)[ID]) ,"°C" ,false );
 
 						SetKey(2,"cursetpoint" ,(*row)[sValue] );
 						SetKey(3,"step"        ,"0.5" );

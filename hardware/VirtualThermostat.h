@@ -56,11 +56,9 @@ public:
 	//thermostat function
 
 	//return the thermostat mode 
-	virtual std::string GetCurrentMode(TSqlRowQuery * row);
+	virtual std::string GetCurrentMode(std::string &devIdx);
 	//return the thermostat room temperature 
-	virtual std::string GetRoomTemperature(TSqlRowQuery * row);
-	//return the thermostat setpoint 
-	virtual std::string GetSetPoint(TSqlRowQuery * row);
+	virtual std::string GetRoomTemperature(std::string &devIdx);
 	//set the thermostat mode 
 	virtual bool SetThermostatState(const std::string &deviceIdx, const int newState);
 	//convert interger state to string state : 0--> OFF 1-->ECO

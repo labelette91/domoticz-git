@@ -16,11 +16,11 @@ public:
 	virtual std::string GetAvailableMode() { return AvailableMode ; };
 	virtual void        SetAvailableMode(std::string  pAvailableMode ) { AvailableMode = pAvailableMode; };
 	//return the thermostat mode 
-	virtual std::string GetCurrentMode( std::vector<std::string> * row) { return ""; };
+	virtual std::string GetCurrentMode( std::string &devIdx) { return ""; };
 	//return the thermostat room temperature 
-	virtual std::string GetRoomTemperature(std::vector<std::string> * row) { return ""; };
+	virtual std::string GetRoomTemperature(std::string &devIdx ) { return ""; };
 	//return the thermostat current setpoint 
-	virtual std::string GetSetPoint(std::vector<std::string> * row) { return ""; };
+	virtual std::string GetSetPoint(std::string &devIdx) { return ""; };
 	//set the thermostat mode : newState = integer thermostat mode , in the order in AvailableMode
 	virtual bool SetThermostatState(const std::string &deviceIdx, const int newState) { return true; };
 

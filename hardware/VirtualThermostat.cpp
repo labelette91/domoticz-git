@@ -335,7 +335,9 @@ return TargetTemp;
 
 float VirtualThermostat::GetEcoTemp (const char * devID )
 {
-	std::string temp = m_sql.GetDeviceValue("AddjValue" , devID  );
+	std::string Options = m_sql.GetDeviceValue("Options" , devID  );
+	std::string temp = VirtualThermostatGetOption("EcoTemp", Options);
+
 	return ((float)atof(temp.c_str()));
 }
 
@@ -351,8 +353,9 @@ int VirtualThermostat::GetEcoTempFromTimers (const char * devID )
 
 float VirtualThermostat::GetConfortTemp (const char * devID )
 {
-	std::string temp = m_sql.GetDeviceValue("AddjValue2" , (devID) );
-	return ((float)atof(temp.c_str()));
+	std::string Options = m_sql.GetDeviceValue("Options", devID);
+	std::string temp = VirtualThermostatGetOption("ConforTemp", Options);
+	return atof(temp.c_str());
 }
 
 int VirtualThermostat::GetConfortTempFromTimers (const char * devID )
@@ -399,11 +402,15 @@ void VirtualThermostat::ThermostatToggleEcoConfort (const char * devID , char * 
 }
 
 //return true if in confor mode
-std::string VirtualThermostat::GetCurrentMode(TSqlRowQuery * row)
+std::string VirtualThermostat::GetCurrentMode(std::string &devIdx)
 {
- 	std::vector<std::string> sValueGlb;
-  StringSplit((*row)[sValue], ";", sValueGlb);
-  return GetMode ( (float)atof(sValueGlb[0].c_str())  , (float)atof((*row)[AddjValue].c_str()),  (float)atof((*row)[AddjValue2].c_str()) )  ;
+
+	float EcoTemp    = GetEcoTemp(devIdx.c_str());
+	float ConforTemp = GetConfortTemp(devIdx.c_str());
+	float RoomTemp	= atof(GetRoomTemperature(devIdx).c_str());
+
+
+	return GetMode(RoomTemp, EcoTemp, RoomTemp);
 };
 
 std::string VirtualThermostat::GetMode ( float curTemp , float EcoTemp, float ConfTemp )
@@ -430,16 +437,14 @@ bool VirtualThermostat::SetThermostatState(const std::string &idx, const int new
 }
 
 //return the thermostat room temperature 
-std::string VirtualThermostat::GetRoomTemperature(TSqlRowQuery * row)
+std::string VirtualThermostat::GetRoomTemperature(std::string &devIdx)
 {
-  return (*row)[RoomTemp] ;
-} ;
-//return the thermostat setpoint 
-std::string VirtualThermostat::GetSetPoint(TSqlRowQuery * row)
-{
-  return (*row)[sValue] ;
-} ;
 
+	std::string Options = m_sql.GetDeviceValue("Options", devIdx.c_str());
+	std::string temp = VirtualThermostatGetOption("RoomTemp", Options);
+	return (temp.c_str());
+
+} ;
 
 //convert thermostat option values to map option
 TOptionMap VirtualThermostatOptionToOptionMap(

@@ -31,9 +31,8 @@ CLogger::_tLogLineStruct::_tLogLineStruct(const _eLogLevel nlevel, const std::st
 
 CLogger::CLogger(void)
 {
-	FilterString = "SQL;IMPE;IMPA;";
+	FilterString = "SQL;";
 	SetFilterString(FilterString);
-
 	m_bInSequenceMode = false;
 	m_bEnableLogThreadIDs = false;
 	m_bEnableLogTimestamps = true;
@@ -274,7 +273,20 @@ void CLogger::Debug(const _eDebugLevel level, const char* logline, ...)
 	//test if debug log contain a string to be filtered from LOG content
 	if (TestFilter(cbuffer))
 		return;
+	if (FilterString == "SQL;")
+	{
+		//get from db
+		//if db initialzed
+		if (m_sql.IsOpened()) {
+			GetLogPreference();
+			if (FilterString.empty())
+				//filter SQL & IMperihome
+				SetLogPreference("SQL;IMPE;IMPA;");
+		}
+	}
+
 	Debug(level, std::string(cbuffer));
+
 }
 
 void CLogger::Debug(const _eDebugLevel level, const std::string& sLogline)
@@ -426,7 +438,7 @@ bool CLogger::TestFilter(const char *cbuffer)
 {
 	bool filtered = false; //default not filtered
 
-												 //search if the log shall be filter
+	//search if the log shall be filter
 	for (size_t i = 0; i < FilterStringList.size(); i++)
 	{
 		if (strstr(cbuffer, FilterStringList[i].c_str()) != 0)

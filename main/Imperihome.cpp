@@ -784,7 +784,7 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
           {
 //            DevThermostat :
 					CDomoticzHardwareBase* pHardware  = m_mainworker.GetDeviceHardware((*row)[ID].c_str());
-					CThermostatHardware *pThermostatHardware = reinterpret_cast<CThermostatHardware*>(pHardware);
+					CThermostatHardware *pThermostatHardware = dynamic_cast<CThermostatHardware*>(pHardware);
 					if (pThermostatHardware != 0)
 					{
 						//temperature

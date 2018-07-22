@@ -10,10 +10,7 @@ Type,
 SubType,
 sValue,
 SwitchType,
-LastLevel,
-RoomTemp,
-SwitchIdx,
-AddjValue,
-AddjValue2
+LastLevel
+
 };
 

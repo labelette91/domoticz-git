@@ -649,7 +649,7 @@ void ImperiHome::DeviceContent3(std::string &rep_content)
   if (!is_Map_Room_DeviceId_built())
 	  build_Map_Room_DeviceId();
 
-  TSqlQueryResult result=m_sql.safe_query("SELECT ID,Name,nValue,Type,SubType,sValue,SwitchType,LastLevel,RoomTemp,SwitchIdx,AddjValue,AddjValue2  FROM DeviceStatus where (used==1)"  ) ;
+  TSqlQueryResult result=m_sql.safe_query("SELECT ID,Name,nValue,Type,SubType,sValue,SwitchType,LastLevel  FROM DeviceStatus where (used==1)"  ) ;
 	
 	for (unsigned int ii=0;ii<result.size();ii++)
 	{

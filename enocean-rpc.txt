@@ -1,0 +1,79 @@
+C5 C0 01 7F F2 20 00 00 00 00        00 00 00 00         8F
+   1  2  3  4  5  6  7  8  9         10
+         7FF 220         
+   
+   
+   08 11 07 FF 00   00 FF 99 DF 01 D5 00 01   00 01 FF 99 DF 02 F6 02 01   00 02 00 00 00 00 FF FF FF 00
+   08 11 07 FF 00   03 00 00 00 00 FF FF FF   00 04 00 00 00 00 FF FF FF   00 05 00 00 00 00 FF FF FF 00
+   
+   
+   //get product id  cmd 227 
+   55 00 0F 07 01 2B         C5 80 00 7F F2 27 00 00 00 00 00 00 00 00 8F        03 FF FF FF FF FF 00             55
+   //reponse  manu 46 procuct ref 00010003
+   55 00 0A 0A 07 10         08 27 07 FF 00 46 00 01 00 03                       FF FF FF FF 01 A6 54 28 2C 00     B3
+   
+   //get link table medatadate cmd 0210 : taille current/ max  table
+   55 00 0F 07 01 2B         C5 40 00 7F F2 10 00 00 00 00 00 00 00 00 8F        03 01 A6 54 28 FF 00  AD
+   //response curren size 03 max x18=24
+   55 00 09 0A 07 AD         08 10 07 FF 50 00 00 03 18                          FF FF FF FF 01 A6 54 28 2D 00 08
+   
+   //get all link table
+   55 00 0F 07 01 2B         C5 40 01 FF F2 11 00 00 17 00 00 00 00 00 8F        03 01 A6 54 28 FF 00 56
+   //response
+   	55 00 20 0A 07 D4         08 11 07 FF  00 00 FF 99 DF 01 D5 00 01  00 01 FF 99 DF 02 F6 02 01   00 02 FF 99 DF 02 F6 02 01 01       FF FF FF FF 01 A6 54 28 2E 00 FB
+   	55 00 20 0A 07 D4         08 11 07 FF  00 03 00 00 00 00 FF FF FF  00 04 00 00 00 00 FF FF FF   00 05 00 00 00 00 FF FF FF 00       FF FF FF FF 01 A6 54 28 2E 00 8F
+   	55 00 20 0A 07 D4         08 11 07 FF  00 06 00 00 00 00 FF FF FF  00 07 00 00 00 00 FF FF FF   00 08 00 00 00 00 FF FF FF 00       FF FF FF FF 01 A6 54 28 2E 00 DE
+   	55 00 20 0A 07 D4         08 11 07 FF  00 09 00 00 00 00 FF FF FF  00 0A 00 00 00 00 FF FF FF   00 0B 00 00 00 00 FF FF FF 00       FF FF FF FF 01 A6 54 28 2E 00 F4
+   	55 00 20 0A 07 D4         08 11 07 FF  00 0C 00 00 00 00 FF FF FF  00 0D 00 00 00 00 FF FF FF   00 0E 00 00 00 00 FF FF FF 00       FF FF FF FF 01 A6 54 28 2E 00 E1
+   	55 00 20 0A 07 D4         08 11 07 FF  00 0F 00 00 00 00 FF FF FF  00 10 00 00 00 00 FF FF FF   00 11 00 00 00 00 FF FF FF 00       FF FF FF FF 01 A6 54 28 2E 00 BC
+   	55 00 20 0A 07 D4         08 11 07 FF  00 15 00 00 00 00 FF FF FF  00 16 00 00 00 00 FF FF FF   00 17 00 00 00 00 FF FF FF 00       FF FF FF FF 01 A6 54 28 2E 00 66   
+   <textarea></textarea>
+   //get 1ere entree  link table
+   
+	 	55 00 0F 07 01 2B         C5 40 01 FF F2 11 00 00 00 00 00 00 00 00 8F       03 01 A6 54 28 FF 00 99             opt 7
+   	55 00 0E 0A 07 BB         08 11 07 FF 00 00 00 00 00 00 FF FF FF 00          FF FF FF FF 01 A6 54 28 2D 00 9C    opt 10
+   
+   	//get 2ere entree  link table
+	 	55 00 0F 07 01 2B 				C5 80 01 FF F2 11 00 01 01 00 00 00 00 00 8F 		03 01 A6 54 28 FF 00 77   
+   	55 00 0E 0A 07 BB 				08 11 07 FF 00 01 FF 99 DF 02 F6 02 01 00 			FF FF FF FF 01 A6 54 28 2C 00 96
+   
+		55 00 0F 07 01 2B 				C5 C0 01 FF F2 11 00 02 02 00 00 00 00 00 8F 		03 01 A6 54 28 FF 00 10
+		55 00 0E 0A 07 BB 				08 11 07 FF 00 02 00 00 00 00 FF FF FF 00 			FF FF FF FF 01 A6 54 28 2D 00 37
+   
+   ping
+   55 00 0F 07 01 2B         C5 80 00 7F F0 06 00 00 00 00 00 00 00 00 8F        03 01 A6 54 28 FF 00 83                             
+   //resoinse
+   55 00 08 0A 07 C6         06 06 07 FF D2 01 12 2D                             05 01 33 BE 01 A6 54 28 2D 00 34                                                                                                                        
+   
+   
+   query function
+   55 00 0F 07 01 2B 				C5 80 00 7F F0 07 00 00 00 00 00 00 00 00 8F 				03 01 A6 54 28 FF 00     8D  opt 7
+   55 00 34 0A 07 DD        06 07 07 FF 02 24 07 FF 02 27 07 FF 02 20 07 FF 02 10 07 FF 02 11 07 FF 02 12 07 FF 02 30 07 FF 02 31 07 FF 02 32 07 FF 02 33 07 FF 02 26 07 FF 00 00 00 00      FF FF FF FF 01 A6 54 28 2C 00     2E opt 10
+   													06 07 
+   													07 FF 02 24 
+   													07 FF 02 27 
+   													07 FF 02 20 
+   													07 FF 02 10 
+   													07 FF 02 11 
+   													07 FF 02 12 
+   													07 FF 02 30 
+   													07 FF 02 31 
+   													07 FF 02 32 
+   													07 FF 02 33 
+   													07 FF 02 26 
+   													07 FF 00 00 
+   													00 00 
+   
+   action
+   55 00 0F 07 01 2B 				C5 80 00 7F F0 05 00 00 00 00 00 00 00 00 8F 				03 01 A6 54 28 FF 00 		91 opt 7
+   55 00 04 0A 07 3C        02 40 07 FF 																				FF FF FF FF 01 A6 54 28 2C 00    A9 opt 10
+   
+   unlock code 00 00 00 01
+   55 00 0F 07 01 2B 		C5 C0 02 7F F0 01 00 00 00 01 00 00 00 00 8F 		03 01 A6 54 28 FF 00 		F2  opt 7
+   55 00 04 0A 07 3C 		02 40 07 FF 																		05 01 33 BE 01 A6 54 28 2C 00 	10  opt 10
+   
+   lock code 00 00 00 01
+   55 00 0F 07 01 2B 		C5 80 02 7F F0 02 00 00 00 01 00 00 00 00 8F 		03 01 A6 54 28 FF 00 		77
+   
+   setcode 
+   55 00 0F 07 01 2B 		C5 80 02 7F F0 03 00 00 00 01 00 00 00 00 8F 		03 01 A6 54 28 FF 00 		79

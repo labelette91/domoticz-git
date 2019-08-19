@@ -72,6 +72,12 @@ public:
 
 	void UpdateProfileSensors(char * szDeviceID, int rorg, int profile, int ttype);
 
+private:
+	virtual bool ParseData() { return true; };
+
+	virtual bool sendFrame(unsigned char frametype, unsigned char *databuf, unsigned short datalen, unsigned char *optdata, unsigned char optdatalen) { return true; };
+	virtual bool sendFrameQueue(unsigned char frametype, unsigned char *databuf, unsigned short datalen, unsigned char *optdata, unsigned char optdatalen) { return true; };
+
 protected:
 
 	unsigned long m_id_base;
@@ -84,6 +90,7 @@ void         setIntToArray(unsigned int sID, unsigned char buf[]);
 void         DeviceIDIntToChar(unsigned int DeviceID,  char szDeviceID[]);
 unsigned int DeviceIdCharToInt(std::string &DeviceID);
 
+bool TypFnAToB(const char * st, unsigned char bin[], int  *trame_len);
 
 #endif
 

@@ -276,3 +276,75 @@ bool CEnOcean::getProfile(unsigned int DeviceID, int &Manufacturer, int &Rorg, i
 {
 	return getProfile(DeviceIDToString(DeviceID), Manufacturer, Rorg, Profile, Type);
 }
+
+//---------------------------------------------------------------------------
+// TypFnAToB    : Convertit une chaîne hexadécimale ascii en un tableau binaire
+// Input  Arg.  : Chaîne hexadécimale ascii
+//                Adresse du tableau
+//                Adresse de rangement de la longueur du tableau
+// Output       : true  -> Conversion réussie
+//                false -> Echec
+// Remark       : Le tableau de destination doit être suffisement dimensionné
+//                La conversion s'arrête sur tout caractère non hexa
+//---------------------------------------------------------------------------
+
+int HexToBin(char c)
+{
+	int h = (unsigned char)(c - '0');
+	if (h>9)
+		h = (unsigned char)(h - 7);
+	if (h>15)
+		h = (unsigned char)(h - 32);
+	if (h>15)
+		return 0;
+	return h;
+
+}
+bool TypFnAToB(const char * st, unsigned char bin[], int  *trame_len)
+{
+	std::string x;
+	int  h, l;
+	int i = 0;
+	int index = 0;
+	/* -------------- */
+	*trame_len = 0;
+
+	while (st[index] != 0)
+	{
+
+		if (st[index] == 'b') {
+			index++;
+			h = 0;
+			while ((st[index] == '0') || (st[index] == '1'))
+			{
+				h = h << 1;
+				if ((st[index] == '1'))
+					h = h + 1;
+				index++;
+			}
+
+			bin[i++] = (unsigned char)(h);
+		}
+
+		else
+		{
+			h = HexToBin(st[index]);
+
+			index++;
+			if (st[index] != ' ')
+			{
+
+				l = HexToBin(st[index]);
+				bin[i++] = (unsigned char)((h << 4) + l);
+			}
+			else
+				bin[i++] = (unsigned char)(h);
+			index++;
+		}
+
+		if (st[index] == ' ')
+			index++;
+	}
+	*trame_len = i;
+	return true;
+};

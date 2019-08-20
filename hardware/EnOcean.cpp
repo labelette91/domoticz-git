@@ -922,7 +922,8 @@ void CEnOcean::GetNodeList(http::server::WebEmSession & session, const http::ser
 				root["result"][ii]["Profile"] = IntToString(rorg, 2) + "-" + IntToString(func, 2) + "-" + IntToString(type, 2);
 				root["result"][ii]["Manufacturer"] = sd[9];
 				root["result"][ii]["Manufacturer_name"] = Get_EnoceanManufacturer(atoi(sd[9].c_str()));
-				root["result"][ii]["BaseAddress"] = GetAdress(stoi(sd[10], 0, 10));
+				
+				root["result"][ii]["BaseAddress"] = GetAdress(atoi(sd[10].c_str()));
 				root["result"][ii]["EnoTypeName"] = Get_Enocean4BSType(rorg, func, type);
 
 

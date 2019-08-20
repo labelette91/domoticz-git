@@ -452,7 +452,7 @@ void CEnOceanESP3::Do_Work()
 				m_LastHeartbeat = mytime(NULL);
 			}
 #ifndef TEST
-			testParsingData( sec_counter);
+//			testParsingData( sec_counter);
 
 
 #endif
@@ -1657,6 +1657,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 
 						_log.Log(LOG_NORM, "EnOcean: teach-in request received from %08X (manufacturer: %03X). number of channels: %d, device profile: %02X-%02X-%02X", id, manID, nb_channel, rorg,func,type);
 
+
 						//if accept new hardware 
 						if (m_sql.m_bAcceptNewHardware)
 						{
@@ -1665,31 +1666,36 @@ void CEnOceanESP3::ParseRadioDatagram()
 							{
 								CreateSensors(id , rorg, manID, func, type );
 
-								//allocate base adress
+								//allocate base adress 1..127
 								int OffsetId = UpdateDeviceAddress(id);
 								unsigned int senderBaseAddr = GetAdress(OffsetId);
 								if (OffsetId != 0)
-									_log.Log(LOG_NORM, "EnOcean: Sender_ID 0x%08X inserted in the database Sender_ID 0x%08X : ", id, senderBaseAddr );
+									_log.Log(LOG_NORM, "EnOcean: Sender_ID 0x%08X inserted in the database with base address 0x%08X : ", id, senderBaseAddr );
+								else
+									_log.Log(LOG_ERROR, "EnOcean: could not find base empty base address for Sender_ID 0x%08X : maximum 127 address", id );
+
 
 								//automatic teach in 
 								//send teachin message
 								//Send1BSTeachIn(senderBaseAddr);
 								SendRpsTeachIn(senderBaseAddr);
 								//Send4BSTeachIn(senderBaseAddr);
+
+								//create device switch
+								if ((rorg == 0xD2) && (func == 0x01) && ((type == 0x12) || (type == 0x0F)))
+								{
+									for (int nbc = 0; nbc < nb_channel; nbc++)
+									{
+										_log.Log(LOG_TRACE, "EnOcean: TEACH : 0xD2 Node 0x%08x UnitID: %02X cmd: %02X ", id, nbc + 1, light2_sOff);
+										SendSwitchRaw(id, nbc + 1, -1, light2_sOff, 0, DeviceIDToString(senderBaseAddr).c_str());
+									}
+									return;
+								}
+
 							}
 							else
 								_log.Log(LOG_NORM, "EnOcean: Sender_ID 0x%08X already in the database", id);
 
-							//create device switch
-							if((rorg == 0xD2) && (func == 0x01) && ( (type == 0x12) || (type == 0x0F) ))
-							{
-								for(int nbc = 0; nbc < nb_channel; nbc ++)
-								{
-									_log.Log(LOG_TRACE, "EnOcean: TEACH : 0xD2 Node 0x%08x UnitID: %02X cmd: %02X ", id,	nbc + 1,	light2_sOff	);
-									SendSwitchRaw(id, nbc + 1, -1, light2_sOff, 0, DeviceIDToString(id).c_str() );
-								}
-								return;
-							}
 						}
 						else
 							_log.Log(LOG_NORM, "EnOcean: New hardware is not allowed. Turn on AcceptNewHardware in settings" );

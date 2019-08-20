@@ -16,29 +16,6 @@ namespace Json
 
 #define ENOCEAN3_READ_BUFFER_SIZE 65*1024
 
-#define uint unsigned int
-
-#define SIZE_LINK_TABLE 24 
-
-typedef struct {
-	int		Profile;	
-	uint	SenderId;
-	int		Channel;
-}T_LINK_TABLE;
-
-
-
-typedef struct  {
-	unsigned int	Profile;
-	int				Manufacturer;
-	int				CurrentSize;
-	int				MaxSize;
-	T_LINK_TABLE	LinkTable[SIZE_LINK_TABLE];
-
-}T_SENSOR;
-
-typedef 	std::map<unsigned int, T_SENSOR > T_SENSOR_MAP;
-
 class CEnOceanESP3: public CEnOcean
 {
 	enum _eEnOcean_Receive_State
@@ -65,9 +42,6 @@ public:
     ~CEnOceanESP3();
 	bool WriteToHardware(const char *pdata, const unsigned char length);
 	void SendDimmerTeachIn(const char *pdata, const unsigned char length);
-	void TeachIn(std::string& idx);
-	void GetNodeList(http::server::WebEmSession & session, const http::server::request& req, Json::Value &root);
-	void SetCode(http::server::WebEmSession & session, const http::server::request& req, Json::Value &root);
 
 private:
 	void Init();
@@ -83,6 +57,10 @@ private:
 	bool sendFrameQueue(unsigned char frametype, unsigned char *databuf, unsigned short datalen, unsigned char *optdata, unsigned char optdatalen);
 
 	void ParseRadioDatagram();
+
+	void TestData(char * sdata);
+	void TestData(char * sdata, char * optData);
+	void testParsingData(int sec_counter);
 
 	_eEnOcean_Receive_State m_receivestate;
 	int m_wantedlength;
@@ -101,41 +79,15 @@ private:
     unsigned char m_buffer[ENOCEAN3_READ_BUFFER_SIZE];
 	int m_bufferpos;
 	int m_retrycntr;
-	int m_Seq;
 	boost::mutex m_sendMutex;
 	std::vector<std::string> m_sendqueue;
-
-	T_SENSOR_MAP m_sensors ;
 
 
 	/**
      * Read callback, stores data in the buffer
      */
     void readCallback(const char *data, size_t len);
-	void sendVld(unsigned int sID, int channel, int value);
-	void SendRpsTeachIn(unsigned int sID);
-	void Send1BSTeachIn(unsigned int sID);
-	void Send4BSTeachIn(unsigned int sID);
-	void TestData(char *  data);
-	void TestData(char * sdata, char * optData);
-	void remoteLearning(unsigned int destID, bool StartLearning,  int channel = 0 );
-	void setRorg(unsigned char * buff);
-	void unlock(unsigned int destID, unsigned int code);
-	void lock(unsigned int destID, unsigned int code);
-	void setcode(unsigned int destID, unsigned int code);
-	void ping(unsigned int destID);
-	void action(unsigned int destID);
-	void getProductId();
-	void addSensorManuf(uint SensorId, uint Manuf);
-	void addSensorProfile(uint SensorId, uint Profile);
-	void getLinkTableMedadata(uint SensorId);
-	void setLinkTableMedadata(uint SensorId, int csize,int maxsize);
-	void getProductFunction(uint SensorId);
-
-	void getallLinkTable(uint SensorId, int begin, int end);
-	void addLinkTable(uint DeviceId, int entry , int profile , uint sensorId, int channel);
-	void printSensors();
-
+	
 };
 
 typedef enum	

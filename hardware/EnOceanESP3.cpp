@@ -999,7 +999,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 
 				int UpDown=(m_buffer[1] &1)==0;
 				//conpute sender ID & cmd
-				unsigned int senderId = setArrayToInt(&m_buffer[2]);
+				unsigned int senderId = DeviceArrayToInt(&m_buffer[2]);
 				bool cmnd = (UpDown == 1) ? true : false;
 				SendSwitch(senderId, 1, -1, cmnd, 0, "");
 
@@ -1652,7 +1652,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 						unsigned char func = m_buffer[6];
 						unsigned char rorg = m_buffer[7];
 
-						long id = setArrayToInt(&m_buffer[8]);
+						long id = DeviceArrayToInt(&m_buffer[8]);
 
 						_log.Log(LOG_NORM, "EnOcean: teach-in request received from %08X (manufacturer: %03X). number of channels: %d, device profile: %02X-%02X-%02X", id, manID, nb_channel, rorg,func,type);
 
@@ -1718,7 +1718,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 				if (senderOfs <= 0)
 					return;
 				//conpute sender ID
-				unsigned senderId = setArrayToInt(&m_buffer[senderOfs]);
+				unsigned senderId = DeviceArrayToInt(&m_buffer[senderOfs]);
 				int Manufacturer,Rorg, Func, iType;
 				if (!getProfile(senderId, Manufacturer,Rorg, Func, iType))
 				{

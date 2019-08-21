@@ -119,8 +119,6 @@ public:
 
 	static std::string DeviceIDToString(unsigned int DeviceID);
 
-	static void ToSensorsId(std::string &DeviceId);
-
 	bool getProfile(std::string szDeviceID, int &Manufacturer, int &Rorg, int &Profile, int &Type);
 
 	bool getProfile(unsigned int DeviceID , int &Manufacturer, int &Rorg, int &Profile, int &Type);
@@ -169,8 +167,8 @@ protected:
 };
 
 //convert id from  buffer[] to unsigned int
-unsigned int setArrayToInt(unsigned char m_buffer[]);
-void         setIntToArray(unsigned int sID, unsigned char buf[]);
+unsigned int DeviceArrayToInt(unsigned char m_buffer[]);
+void         DeviceIntToArray(unsigned int sID, unsigned char buf[]);
 
 void         DeviceIDIntToChar(unsigned int DeviceID,  char szDeviceID[]);
 std::string  DeviceIDIntToChar(unsigned int DeviceID);
@@ -180,6 +178,8 @@ std::string GetLighting2StringId(unsigned int id);
 bool TypFnAToB(const char * st, unsigned char bin[], int  *trame_len);
 const char* Get_EnoceanManufacturer(unsigned long ID);
 const char* Get_Enocean4BSType(const int Org, const int Func, const int Type);
+
+void ToSensorsId(std::string &DeviceId);
 
 
 #endif

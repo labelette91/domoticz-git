@@ -21,6 +21,7 @@
 #include <boost/lexical_cast.hpp>
 #include "../notifications/NotificationHelper.h"
 #include "IFTTT.h"
+#include "../hardware/EnOcean.h"
 
 #ifndef WIN32
 	#include <sys/stat.h>
@@ -6039,8 +6040,7 @@ void CSQLHelper::DeleteDevices(const std::string &idx)
 			}
 			result = m_sql.safe_query("SELECT DeviceID FROM DeviceStatus  WHERE (DeviceID=='%s') ", DeviceID.c_str());
 			NbDeviceId = result.size();
-			while (DeviceID.size() != 8)
-				DeviceID = "0" + DeviceID;
+			ToSensorsId (DeviceID) ;
 
 			//Avoid mutex deadlock here
 			boost::lock_guard<boost::mutex> l(m_sqlQueryMutex);

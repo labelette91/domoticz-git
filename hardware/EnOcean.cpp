@@ -230,21 +230,21 @@ std::string CEnOcean::DeviceIDToString(unsigned int DeviceID)
 	return szDeviceID;
 }
 
-void CEnOcean::ToSensorsId(std::string &DeviceId)
+void ToSensorsId(std::string &DeviceId)
 {
-	while (DeviceId.size() < 8)
-		DeviceId = '0' + DeviceId;
+//	while (DeviceId.size() < 8)
+//		DeviceId = '0' + DeviceId;
 }
 
 //convert device ID id from  buffer[] to unsigned int
-unsigned int setArrayToInt(unsigned char m_buffer[])
+unsigned int DeviceArrayToInt(unsigned char m_buffer[])
 {
 	unsigned int id = (m_buffer[0] << 24) + (m_buffer[1] << 16) + (m_buffer[2] << 8) + m_buffer[3];
 	return id;
 }
 
 //convert device ID id from   unsigned int to buffer[]  
-void  setIntToArray(unsigned int sID, unsigned char buf[])
+void  DeviceIntToArray(unsigned int sID, unsigned char buf[])
 {
 
 buf[0] = (sID >> 24) & 0xff;
@@ -255,13 +255,13 @@ buf[3] = sID & 0xff;
 
 void DeviceIDIntToChar(unsigned int DeviceID ,  char szDeviceID[])
 {
-	sprintf(szDeviceID, "%08X", (unsigned int)DeviceID);
+	sprintf(szDeviceID, "%7X", (unsigned int)DeviceID);
 
 }
 std::string  DeviceIDIntToChar(unsigned int DeviceID)
 {
 	char szDeviceID[16];
-	sprintf(szDeviceID, "%08X", (unsigned int)DeviceID);
+	sprintf(szDeviceID, "%7X", (unsigned int)DeviceID);
 	return szDeviceID;
 }
 
@@ -384,7 +384,7 @@ void CEnOcean::parse_PACKET_REMOTE_MAN_COMMAND( unsigned char m_buffer[] , int m
 		//response
 		//	55 00 08 0A 07 C6         06 06 07 FF D2 01 12 2D                             05 01 33 BE 01 A6 54 28 2D 00 34
 		int profile = m_buffer[4] * 65536 + (int)m_buffer[5] * 256 + (int)m_buffer[6];
-		unsigned int senderId = setArrayToInt(&m_buffer[12]);
+		unsigned int senderId = DeviceArrayToInt(&m_buffer[12]);
 		addSensorProfile(senderId, profile);
 
 		_log.Log(LOG_NORM, "EnOcean: Ping SenderId: %08X Profile:%06X ", senderId, profile);
@@ -397,7 +397,7 @@ void CEnOcean::parse_PACKET_REMOTE_MAN_COMMAND( unsigned char m_buffer[] , int m
 		//reponse  manu 46 procuct ref 00010003
 		//55 00 0A 0A 07 10         08 27 07 FF 00 46 00 01 00 03                       FF FF FF FF 01 A6 54 28 2C 00     B3
 		int manuf = m_buffer[5];
-		unsigned int senderId = setArrayToInt(&m_buffer[14]);
+		unsigned int senderId = DeviceArrayToInt(&m_buffer[14]);
 		_log.Log(LOG_NORM, "EnOcean: getProductId SenderId: %08X Manufacturer:%s  ", senderId, Get_EnoceanManufacturer(manuf));
 		addSensorManuf(senderId, manuf);
 		ping(senderId);
@@ -411,7 +411,7 @@ void CEnOcean::parse_PACKET_REMOTE_MAN_COMMAND( unsigned char m_buffer[] , int m
 		//55 00 09 0A 07 AD         08 10 07 FF 50 00 00 03 18                          FF FF FF FF 01 A6 54 28 2D 00 08
 		int currentSize = m_buffer[7];
 		int maxSize = m_buffer[8];
-		unsigned int senderId = setArrayToInt(&m_buffer[13]);
+		unsigned int senderId = DeviceArrayToInt(&m_buffer[13]);
 		_log.Log(LOG_NORM, "EnOcean: getLink table medatadata SenderId: %08X Size:%d Max:%d ", senderId, currentSize, maxSize);
 		setLinkTableMedadata(senderId, currentSize, maxSize);
 	}
@@ -429,14 +429,14 @@ void CEnOcean::parse_PACKET_REMOTE_MAN_COMMAND( unsigned char m_buffer[] , int m
 		//55 00 20 0A 07 D4         08 11 07 FF  00 0F 00 00 00 00 FF FF FF  00 10 00 00 00 00 FF FF FF   00 11 00 00 00 00 FF FF FF 00       FF FF FF FF 01 A6 54 28 2E 00 BC
 		//55 00 20 0A 07 D4         08 11 07 FF  00 15 00 00 00 00 FF FF FF  00 16 00 00 00 00 FF FF FF   00 17 00 00 00 00 FF FF FF 00       FF FF FF FF 01 A6 54 28 2E 00 66
 
-		unsigned int senderId = setArrayToInt(&m_buffer[m_DataSize + 4]);
+		unsigned int senderId = DeviceArrayToInt(&m_buffer[m_DataSize + 4]);
 		int nb = m_DataSize - 5;
 		nb /= 9;
 		for (int i = 0; i < nb; i++) {
 
 			int  offs = m_buffer[5 + i * 9];
-			uint entryId = setArrayToInt(&m_buffer[6 + i * 9]);
-			uint entryProfile = setArrayToInt(&m_buffer[10 + i * 9]);
+			uint entryId = DeviceArrayToInt(&m_buffer[6 + i * 9]);
+			uint entryProfile = DeviceArrayToInt(&m_buffer[10 + i * 9]);
 			int  channel = m_buffer[13 + i * 9];
 			entryProfile /= 256;
 			addLinkTable(senderId, offs, entryProfile, entryId, channel);
@@ -452,7 +452,7 @@ void CEnOcean::parse_PACKET_REMOTE_MAN_COMMAND( unsigned char m_buffer[] , int m
 		//query function
 		//55 00 0F 07 01 2B	C5 80 00 7F F0 07 00 00 00 00 00 00 00 00 8F 				03 01 A6 54 28 FF 00     8D  opt 7
 		//55 00 34 0A 07 DD 06 07 07 FF 02 24 07 FF 02 27 07 FF 02 20 07 FF 02 10 07 FF 02 11 07 FF 02 12 07 FF 02 30 07 FF 02 31 07 FF 02 32 07 FF 02 33 07 FF 02 26 07 FF 00 00 00 00      FF FF FF FF 01 A6 54 28 2C 00     2E opt 10
-		unsigned int senderId = setArrayToInt(&m_buffer[m_DataSize + 4]);
+		unsigned int senderId = DeviceArrayToInt(&m_buffer[m_DataSize + 4]);
 		int nb = m_DataSize - 4;
 		nb /= 4;
 		for (int i = 0; i < nb; i++) {
@@ -587,7 +587,7 @@ void setDestination(unsigned char * opt, unsigned int destID)
 {
 	//optionnal data
 	opt[0] = 0x03; //subtel
-	setIntToArray(destID, &opt[1]);
+	DeviceIntToArray(destID, &opt[1]);
 	opt[5] = 0xff;
 	opt[6] = 00;//RSI 
 
@@ -632,7 +632,7 @@ void CEnOcean::unlock(unsigned int destID, unsigned int code)
 	buff[5] = 0x01;			//function 001
 	buff[14] = 0x8F; //status
 
-	setIntToArray(code, &buff[6]);
+	DeviceIntToArray(code, &buff[6]);
 
 	//optionnal data
 	setDestination(opt, destID);
@@ -655,7 +655,7 @@ void CEnOcean::lock(unsigned int destID, unsigned int code)
 	buff[5] = 0x02;			//function 002
 	buff[14] = 0x8F; //status
 
-	setIntToArray(code, &buff[6]);
+	DeviceIntToArray(code, &buff[6]);
 
 	//optionnal data
 	setDestination(opt, destID);
@@ -679,7 +679,7 @@ void CEnOcean::setcode(unsigned int destID, unsigned int code)
 	buff[5] = 0x03;			//function 003
 	buff[14] = 0x8F; //status
 
-	setIntToArray(code, &buff[6]);
+	DeviceIntToArray(code, &buff[6]);
 
 	//optionnal data
 	setDestination(opt, destID);

@@ -31,11 +31,11 @@ unsigned int CEnOcean::GetAdress(int unitid) {
 	return(m_id_base + unitid);
 }
 
-uint64_t CEnOcean::CreateDevice(const int HardwareID, const char* ID, const int  unit, const unsigned char devType, const unsigned char subType, const unsigned char signallevel, const unsigned char batterylevel, const int nValue, const char* sValue, std::string &devname)
+uint64_t CEnOcean::CreateDevice(const int HardwareID, const char* ID, const int  unitCode, const unsigned char devType, const unsigned char subType, const unsigned char signallevel, const unsigned char batterylevel, const int nValue, const char* sValue, std::string &devname, int SwitchType , const char * sensorId )
 {
 	uint64_t ulID = 0;
 	std::vector<std::vector<std::string> > result;
-	result = m_sql.safe_query("SELECT ID,Name, Used, SwitchType, nValue, sValue, LastUpdate, Options, Log FROM DeviceStatus WHERE (HardwareID=%d AND DeviceID='%q' AND Unit=%d AND Type=%d AND SubType=%d)", HardwareID, ID, unit, devType, subType);
+	result = m_sql.safe_query("SELECT ID,Name, Used, SwitchType, nValue, sValue, LastUpdate, Options, Log FROM DeviceStatus WHERE (HardwareID=%d AND DeviceID='%q' AND Unit=%d AND Type=%d AND SubType=%d)", HardwareID, ID, unitCode, devType, subType);
 	if (result.size() == 0)
 	{
 		//Insert
@@ -49,17 +49,18 @@ uint64_t CEnOcean::CreateDevice(const int HardwareID, const char* ID, const int 
 		if (devname != "")
 			devname = "Unknown" + std::string(ID);
 		m_sql.safe_query(
-			"INSERT INTO DeviceStatus (HardwareID, DeviceID, Unit, Type, SubType, SignalLevel, BatteryLevel, nValue, sValue,Name) "
-			"VALUES ('%d','%q','%d','%d','%d','%d','%d','%d','%q','%q')",
+			"INSERT INTO DeviceStatus (HardwareID, DeviceID, Unit, Type, SubType, SignalLevel, BatteryLevel, nValue, sValue,Name,used,SwitchType,SensorId) "
+			"VALUES ('%d','%q','%d','%d','%d','%d','%d','%d','%q','%q',1,'%d','%q')",
 			HardwareID,
-			ID, unit, devType, subType,
+			ID, unitCode, devType, subType,
 			signallevel, batterylevel,
-			nValue, sValue, devname.c_str());
+			nValue, sValue, devname.c_str(),
+			SwitchType,sensorId);
 
 		//Get new ID
 		result = m_sql.safe_query(
 			"SELECT ID FROM DeviceStatus WHERE (HardwareID=%d AND DeviceID='%q' AND Unit=%d AND Type=%d AND SubType=%d)",
-			HardwareID, ID, unit, devType, subType);
+			HardwareID, ID, unitCode, devType, subType);
 		if (result.size() == 0)
 		{
 			_log.Log(LOG_ERROR, "Serious database error, problem getting ID from DeviceStatus!");
@@ -257,6 +258,14 @@ void DeviceIDIntToChar(unsigned int DeviceID ,  char szDeviceID[])
 	sprintf(szDeviceID, "%08X", (unsigned int)DeviceID);
 
 }
+std::string  DeviceIDIntToChar(unsigned int DeviceID)
+{
+	char szDeviceID[16];
+	sprintf(szDeviceID, "%08X", (unsigned int)DeviceID);
+	return szDeviceID;
+}
+
+
 //convert divice ID string to long
 unsigned int DeviceIdCharToInt(std::string &DeviceID) {
 	unsigned int ID;
@@ -946,5 +955,14 @@ void CEnOcean::SetCode(http::server::WebEmSession & session, const http::server:
 		setcode(DeviceIdCharToInt(http::server::request::findValue(&req, std::to_string(i).c_str())), 1);
 	}
 
+}
+
+
+std::string GetLighting2StringId(unsigned int id )
+{
+	char szTmp[300];
+
+	sprintf(szTmp, "%7X", id );
+	return szTmp;
 }
 

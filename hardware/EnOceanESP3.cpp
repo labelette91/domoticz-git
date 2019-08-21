@@ -18,7 +18,6 @@
 
 #include <ctime>
 
-#define SendSwitchRaw SendSwitch
 
 #if _DEBUG
 	#define ENOCEAN_BUTTON_DEBUG
@@ -1002,7 +1001,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 				//conpute sender ID & cmd
 				unsigned int senderId = setArrayToInt(&m_buffer[2]);
 				bool cmnd = (UpDown == 1) ? true : false;
-				SendSwitchRaw(senderId, 1, -1, cmnd, 0, "");
+				SendSwitch(senderId, 1, -1, cmnd, 0, "");
 
 
 			}
@@ -1687,7 +1686,8 @@ void CEnOceanESP3::ParseRadioDatagram()
 									for (int nbc = 0; nbc < nb_channel; nbc++)
 									{
 										_log.Log(LOG_TRACE, "EnOcean: TEACH : 0xD2 Node 0x%08x UnitID: %02X cmd: %02X ", id, nbc + 1, light2_sOff);
-										SendSwitchRaw(id, nbc + 1, -1, light2_sOff, 0, DeviceIDToString(senderBaseAddr).c_str());
+//										SendSwitch(id, nbc + 1, -1, light2_sOff, 0, DeviceIDToString(senderBaseAddr).c_str());
+										CreateDevice(m_HwdID, GetLighting2StringId(id).c_str(), nbc + 1, pTypeLighting2, sTypeAC, 0, -1, light2_sOff, "0", DeviceIDIntToChar(id), STYPE_OnOff, DeviceIDToString(senderBaseAddr).c_str());
 									}
 									return;
 								}
@@ -1748,7 +1748,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 										_log.Log(LOG_TRACE, "EnOcean: VLD : 0x%02X Node 0x%08x UnitID: %02X cmd: %02X ",
 											DATA_BYTE3, senderId,unitcode,cmnd	);
 
-										SendSwitchRaw(senderId, unitcode, -1 , cmnd , 0, "");
+										SendSwitch(senderId, unitcode, -1 , cmnd , 0, "");
 
 
 										// Note: if a device uses simultaneously RPS and VLD (ex: nodon inwall module), it can be partially initialized.

@@ -89,8 +89,8 @@ public:
 
 	virtual void SendDimmerTeachIn(const char *pdata, const unsigned char length) = 0 ;
 
-	uint64_t CreateDevice(const int HardwareID, const char* ID, const int unit, const unsigned char devType, const unsigned char subType, const unsigned char signallevel, const unsigned char batterylevel, const int nValue, const char* sValue, std::string &devname);
-	
+	uint64_t CEnOcean::CreateDevice(const int HardwareID, const char* ID, const int  unit, const unsigned char devType, const unsigned char subType, const unsigned char signallevel, const unsigned char batterylevel, const int nValue, const char* sValue, std::string &devname, int SwitchType, const char * SensorId );
+
 	int UpdateDeviceAddress(std::string idx );
 
 	int UpdateDeviceAddress(unsigned int  DeviceId);
@@ -173,7 +173,9 @@ unsigned int setArrayToInt(unsigned char m_buffer[]);
 void         setIntToArray(unsigned int sID, unsigned char buf[]);
 
 void         DeviceIDIntToChar(unsigned int DeviceID,  char szDeviceID[]);
+std::string  DeviceIDIntToChar(unsigned int DeviceID);
 unsigned int DeviceIdCharToInt(std::string &DeviceID);
+std::string GetLighting2StringId(unsigned int id);
 
 bool TypFnAToB(const char * st, unsigned char bin[], int  *trame_len);
 const char* Get_EnoceanManufacturer(unsigned long ID);

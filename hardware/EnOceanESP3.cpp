@@ -19,6 +19,10 @@
 #include <ctime>
 
 
+#include "SetGetRawValue.cpp"
+#include "eep-d2-05.h"
+
+
 #if _DEBUG
 	#define ENOCEAN_BUTTON_DEBUG
 #endif
@@ -624,6 +628,19 @@ void CEnOceanESP3::readCallback(const char *data, size_t len)
 
 }
 
+
+//return position 0..100% from command / level
+int getPositionFromCommandLevel(int cmnd , int pos )
+{
+	if (cmnd == light2_sOn)
+		pos = 100;
+	else if (cmnd == light2_sOff)
+		pos = 0;
+	else
+		pos = pos * 255 / 15;
+
+	return pos;
+}
 bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length)
 {
 	int unitCode = 0;
@@ -639,18 +656,7 @@ bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length
 
 	unsigned long sID=(tsen->LIGHTING2.id1<<24)|(tsen->LIGHTING2.id2<<16)|(tsen->LIGHTING2.id3<<8)|tsen->LIGHTING2.id4;
 
-/*
-	sendVld(  0xff99df01, 0 , 0 );
-	sleep_milliseconds(500);
-	sendVld(0xff99df01, 0, 64);
-	sleep_milliseconds(500);
-
-	sendVld(0xff99df01, 1, 0);
-	sleep_milliseconds(500);
-	sendVld(0xff99df01, 1, 64);
-	sleep_milliseconds(500);
-*/
-
+	//to in range GateWay baseAdress..baseAdress+129
 	if ((sID<m_id_base) || (sID>m_id_base + 129))
 	{
 		//get sender adress from db
@@ -660,7 +666,34 @@ bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length
 			_log.Log(LOG_ERROR, "EnOcean: (1): Can not switch with this DeviceID, use a switch created with our id_base!...");
 			return false;
 		}
-		sendVld(unitBaseAddr, tsen->LIGHTING2.unitcode-1,  tsen->LIGHTING2.cmnd*64);
+		int Manufacturer, Rorg, Func, iType;
+		if (!getProfile(sID, Manufacturer, Rorg, Func, iType))
+		{
+			_log.Log(LOG_NORM, "EnOcean: Need Teach-In for %08X", sID);
+			return false;
+		}
+		//D2-05
+		if ((Rorg == 0xd2) && (Func == 0x05))
+		{
+			uint8_t  data[16];
+			static int LastPos = -1;
+			//build CMD 1 - Go to Position and Angle
+			int channel = tsen->LIGHTING2.unitcode - 1;
+			int pos = getPositionFromCommandLevel(tsen->LIGHTING2.cmnd, tsen->LIGHTING2.level);
+			memset(data, 0, 4);
+			if (LastPos == pos) {
+				//cpmmabd stop
+				bool res = SetRawValues(data, D20500_CMD_2, D20500_CMD_2_NB_DATA, channel, 2);
+				sendVld(unitBaseAddr, data, 1);
+			}else{
+			bool res = SetRawValues(data, D20500_CMD_1, D20500_CMD_1_NB_DATA, pos, 127, 0, 0, channel, 1);
+				 sendVld(unitBaseAddr, data, 4);
+			}
+			LastPos = pos;
+		}
+		//D2-01
+		else	if ((Rorg == 0xd2) && (Func == 0x01))
+			sendVld(unitBaseAddr, tsen->LIGHTING2.unitcode-1,  tsen->LIGHTING2.cmnd*64);
 		return true ;
 
 	}
@@ -1753,17 +1786,25 @@ void CEnOceanESP3::ParseRadioDatagram()
 //printf("%x\n",  GetRawValue( data,D2_05_00_Cmd_1 ,  D20500_CMD_1_CMD  ) );
 					
 					int cmd = GetRawValue(data, D2_05_00_Cmd_1 ,  D20500_CMD_1_CMD  ) ;
+					int unitcode = GetRawValue(data, D2_05_00_Cmd_1, D20500_CMD_1_CHN);
 					//if position
 					if (cmd == 4 )
 					{
 						//get position
-						int pos = GetRawValue( data,D2_05_00_Cmd_1 ,  D20500_CMD_1_POS  ) );
- 					  SendSwitch(senderId, unitcode, -1 , true , pos , "");
-						
+						int pos = GetRawValue( data,D2_05_00_Cmd_1 ,  D20500_CMD_1_POS  ) ;
+						bool bon;
+						if (pos > 0)
+							bon = true;
+						else
+							bon = false;
+
+ 					  SendSwitch(senderId, unitcode+1, -1 , bon, pos , "");
+					  _log.Log(LOG_NORM, "EnOcean: VLD: senderID: %08X EEP:D2-05  Reply Position Position:%d%", senderId, pos );
+
 					}
 				}
 
-				if(func == 0x01)
+				if ((Rorg == 0xd2) && (Func == 0x01))
 				{
 					//get command 
 					int CMD = m_buffer[1] & 0xF;
@@ -1797,6 +1838,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 					}
 				}
 			}
+			break;
 
 		default:
 			_log.Log(LOG_NORM, "EnOcean: Unhandled RORG (%02x)", m_buffer[0]);

@@ -601,7 +601,7 @@ void CEnOcean::sendVld(unsigned int sID, unsigned char *data , int DataLen )
 				//D2 01 00 00 FF 99 DF 01 00
 				//03 FF FF FF FF FF 00
 
-	sendFrameQueue(PACKET_RADIO, buff, 9, opt, 7);
+	sendFrameQueue(PACKET_RADIO, buffer, 6+DataLen, opt, 7);
 }
 
 void CEnOcean::setRorg(unsigned char * buff)

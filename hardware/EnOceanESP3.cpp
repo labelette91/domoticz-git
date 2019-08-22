@@ -1691,6 +1691,17 @@ void CEnOceanESP3::ParseRadioDatagram()
 									}
 									return;
 								}
+								//create device blinds switch
+								if ((rorg == 0xD2) && (func == 0x05) && ((type == 0x00) || (type == 0x01)))
+								{
+									for (int nbc = 0; nbc < nb_channel; nbc++)
+									{
+										_log.Log(LOG_TRACE, "EnOcean: TEACH : 0xD2 Node 0x%08x UnitID: %02X cmd: %02X ", id, nbc + 1, light2_sOff);
+//										SendSwitch(id, nbc + 1, -1, light2_sOff, 0, DeviceIDToString(senderBaseAddr).c_str());
+										CreateDevice(m_HwdID, GetLighting2StringId(id).c_str(), nbc + 1, pTypeLighting2, sTypeAC, 0, -1, light2_sOff, "0", DeviceIDIntToChar(id), STYPE_BlindsPercentage , DeviceIDToString(senderBaseAddr).c_str());
+									}
+									return;
+								}
 
 							}
 							else
@@ -1727,6 +1738,30 @@ void CEnOceanESP3::ParseRadioDatagram()
 				}
 
 				_log.Log(LOG_NORM, "EnOcean: VLD: senderID: %08X Func:%02X  Type:%02X", senderId,Func,iType );
+
+				//D2-05
+				if ( (Rorg==0xd2) && (Func==0x05)) 
+				{
+					//get command
+					unsigned char * data =&m_buffer[1];
+					
+//printf("%x\n",  GetRawValue( data,D2_05_00_Cmd_1 ,  D20500_CMD_1_POS  ) );
+//printf("%x\n",  GetRawValue( data,D2_05_00_Cmd_1 ,  D20500_CMD_1_ANG  ) );
+//printf("%x\n",  GetRawValue( data,D2_05_00_Cmd_1 ,  D20500_CMD_1_REPO ) );
+//printf("%x\n",  GetRawValue( data,D2_05_00_Cmd_1 ,  D20500_CMD_1_LOCK ) );
+//printf("%x\n",  GetRawValue( data,D2_05_00_Cmd_1 ,  D20500_CMD_1_CHN  ) );
+//printf("%x\n",  GetRawValue( data,D2_05_00_Cmd_1 ,  D20500_CMD_1_CMD  ) );
+					
+					int cmd = GetRawValue(data, D2_05_00_Cmd_1 ,  D20500_CMD_1_CMD  ) ;
+					//if position
+					if (cmd == 4 )
+					{
+						//get position
+						int pos = GetRawValue( data,D2_05_00_Cmd_1 ,  D20500_CMD_1_POS  ) );
+ 					  SendSwitch(senderId, unitcode, -1 , true , pos , "");
+						
+					}
+				}
 
 				if(func == 0x01)
 				{

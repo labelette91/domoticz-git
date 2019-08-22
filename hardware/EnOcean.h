@@ -139,6 +139,8 @@ private:
 protected:
 	void parse_PACKET_REMOTE_MAN_COMMAND(unsigned char m_buffer[], int m_DataSize, int m_OptionalDataSize);
 	void sendVld(unsigned int sID, int channel, int value);
+	void sendVld(unsigned int sID, unsigned char *data, int DataLen);
+
 	void SendRpsTeachIn(unsigned int sID);
 	void Send1BSTeachIn(unsigned int sID);
 	void Send4BSTeachIn(unsigned int sID);

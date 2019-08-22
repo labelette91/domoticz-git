@@ -573,6 +573,37 @@ void CEnOcean::sendVld(unsigned int sID, int channel, int value)
 	sendFrameQueue(PACKET_RADIO, buff, 9, opt, 7);
 }
 
+void CEnOcean::sendVld(unsigned int sID, unsigned char *data , int DataLen )
+{
+	unsigned char buffer[64];
+
+	unsigned char *buff = buffer ;
+	*buff++ = RORG_VLD; //vld
+	for (int i = 0; i < DataLen; i++)
+		*buff++ = *data++;
+
+	*buff++ = (sID >> 24) & 0xff;		// Sender ID
+	*buff++ = (sID >> 16) & 0xff;
+	*buff++ = (sID >> 8) & 0xff;
+	*buff++ = sID & 0xff;
+	*buff++ = 0; //status
+
+				 //optionnal data
+	unsigned char opt[16];
+	opt[0] = 0x03; //subtel
+	opt[1] = 0xff;
+	opt[2] = 0xff;
+	opt[3] = 0xff;
+	opt[4] = 0xff;
+	opt[5] = 0xff;
+	opt[6] = 00;//RSI 
+
+				//D2 01 00 00 FF 99 DF 01 00
+				//03 FF FF FF FF FF 00
+
+	sendFrameQueue(PACKET_RADIO, buff, 9, opt, 7);
+}
+
 void CEnOcean::setRorg(unsigned char * buff)
 {
 	buff[0] = RORG_SYS_EX;

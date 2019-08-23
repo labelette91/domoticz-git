@@ -82,7 +82,7 @@ private:
 	boost::mutex m_sendMutex;
 	std::vector<std::string> m_sendqueue;
 
-
+	int LastPosition = -1;
 	/**
      * Read callback, stores data in the buffer
      */

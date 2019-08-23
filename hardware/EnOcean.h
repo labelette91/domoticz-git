@@ -61,6 +61,15 @@ typedef struct {
 
 typedef 	std::map<unsigned int, T_SENSOR > T_SENSOR_MAP;
 
+//Profile descriptor from eep.xml
+typedef struct {
+	int Offset;
+	int Size;
+	char * ShortCut;
+	char * description;
+}T_DATAFIELD;
+
+
 class CEnOcean : public AsyncSerial, public CDomoticzHardwareBase
 {
 	friend class CEnOceanESP3;
@@ -144,6 +153,8 @@ protected:
 	void parse_PACKET_REMOTE_MAN_COMMAND(unsigned char m_buffer[], int m_DataSize, int m_OptionalDataSize);
 	void sendVld(unsigned int sID, int channel, int value);
 	void sendVld(unsigned int sID, unsigned char *data, int DataLen);
+	uint32_t sendVld(unsigned int unitBaseAddr, T_DATAFIELD * OffsetDes, int NbParameter, ...);
+
 
 	void SendRpsTeachIn(unsigned int sID);
 	void Send1BSTeachIn(unsigned int sID);

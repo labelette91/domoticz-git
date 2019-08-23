@@ -164,13 +164,6 @@ bool SetRawValue(uint8_t * data , uint32_t value, uint16_t offset, uint8_t size)
 	return true;
 }
 
-typedef struct  {
-  int Offset ;
-  int Size   ;
-  char * ShortCut ;
-  char * description ;
-}T_DATAFIELD;
-
 T_DATAFIELD* GetOffsetFromName( char * OffsetName , T_DATAFIELD * OffsetDes )
 {
   uint32_t offsetInd = 0 ;
@@ -216,25 +209,45 @@ uint32_t GetRawValue(uint8_t * data ,  char *  OffsetName , T_DATAFIELD * Offset
 
 
 #include <stdarg.h>
-//return true if ok
-bool SetRawValues(uint8_t * data , T_DATAFIELD * OffsetDes ,int NbParameter , ...)
+//return the number of byte of data payload
+//0 if rror
+uint32_t SetRawValues(uint8_t * data , T_DATAFIELD * OffsetDes ,int NbParameter , va_list value )
 {
-   va_list value;
-   /* Initialize the va_list structure */
-   va_start( value, NbParameter );
 
    for ( int i=0;i<NbParameter;i++)
    {
       if  ( OffsetDes->Size == 0 )
-        return false ; //erreur
+        return 0 ; //erreur
 
       uint32_t par = va_arg(value,int);       /*   va_arg() donne le paramètre courant    */
       SetRawValue( data, par  , OffsetDes ) ;
       OffsetDes++;
    }
-   va_end(value);  
-   return true;
+
+   //test if all variable are sets
+   if (OffsetDes->Size != 0)
+	   return 0; //erreur
+   //last bit offser
+   OffsetDes--;
+   uint32_t total_bits  = OffsetDes->Offset + OffsetDes->Size;
+   uint32_t total_bytes = (total_bits + 7) / 8;
+
+   return total_bytes ;
 }
+
+
+uint32_t SetRawValues(uint8_t * data, T_DATAFIELD * OffsetDes, int NbParameter, ...)
+{
+	va_list value;
+
+	/* Initialize the va_list structure */
+	va_start(value, NbParameter);
+	uint32_t total_bytes = SetRawValues(data, OffsetDes, NbParameter, value);
+	va_end(value);
+
+	return total_bytes;
+}
+
 
 
 T_DATAFIELD D2_05_00_Cmd_1 [] = {

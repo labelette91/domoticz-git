@@ -625,6 +625,29 @@ void CEnOcean::sendVld(unsigned int sID, unsigned char *data , int DataLen )
 	sendFrameQueue(PACKET_RADIO, buffer, 6+DataLen, opt, 7);
 }
 
+extern uint32_t SetRawValues(uint8_t * data, T_DATAFIELD * OffsetDes, int NbParameter, va_list value);
+
+uint32_t CEnOcean::sendVld(unsigned int unitBaseAddr, T_DATAFIELD * OffsetDes, int NbParameter, ...)
+{
+	uint8_t  data[16];
+	va_list value;
+
+	/* Initialize the va_list structure */
+	va_start(value, NbParameter);
+
+	memset(data, 0, sizeof(data));
+
+	uint32_t DataSize = SetRawValues(data, OffsetDes, NbParameter, value);
+	if (DataSize)
+		sendVld(unitBaseAddr, data, DataSize);
+
+	va_end(value);
+
+	return  DataSize;
+
+}
+
+
 void CEnOcean::setRorg(unsigned char * buff)
 {
 	buff[0] = RORG_SYS_EX;

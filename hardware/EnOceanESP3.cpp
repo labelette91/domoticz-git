@@ -637,7 +637,7 @@ int getPositionFromCommandLevel(int cmnd , int pos )
 	else if (cmnd == light2_sOff)
 		pos = 0;
 	else
-		pos = pos * 255 / 15;
+		pos = pos * 100 / 15;
 
 	return pos;
 }
@@ -1773,14 +1773,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 				{
 					//get command
 					unsigned char * data =&m_buffer[1];
-					
-//printf("%x\n",  GetRawValue( data,D2_05_00_Cmd_1 ,  D20500_CMD_1_POS  ) );
-//printf("%x\n",  GetRawValue( data,D2_05_00_Cmd_1 ,  D20500_CMD_1_ANG  ) );
-//printf("%x\n",  GetRawValue( data,D2_05_00_Cmd_1 ,  D20500_CMD_1_REPO ) );
-//printf("%x\n",  GetRawValue( data,D2_05_00_Cmd_1 ,  D20500_CMD_1_LOCK ) );
-//printf("%x\n",  GetRawValue( data,D2_05_00_Cmd_1 ,  D20500_CMD_1_CHN  ) );
-//printf("%x\n",  GetRawValue( data,D2_05_00_Cmd_1 ,  D20500_CMD_1_CMD  ) );
-					
+				
 					int cmd = GetRawValue(data, D2_05_00_Cmd_1 ,  D20500_CMD_1_CMD  ) ;
 					int unitcode = GetRawValue(data, D2_05_00_Cmd_1, D20500_CMD_1_CHN);
 					//if position
@@ -1789,15 +1782,10 @@ void CEnOceanESP3::ParseRadioDatagram()
 						//get position
 						int pos = GetRawValue( data,D2_05_00_Cmd_1 ,  D20500_CMD_1_POS  ) ;
 					    _log.Log(LOG_NORM, "EnOcean: VLD: senderID: %08X EEP:D2-05  Reply Position Position:%d%", senderId, pos);
-						bool bon;
-						if (pos > 0)
-							bon = true;
-						else
-							bon = false;
-						if (pos >= 100)
-							pos = 0;
+						bool bon = (pos > 0 ? 1 : 0 );
+						if (pos >= 100)	pos = 0;
 
- 					  SendSwitch(senderId, unitcode+1, -1 , bon, pos , "");
+ 						SendSwitch(senderId, unitcode+1, -1 , bon , pos , "");
 
 					}
 				}

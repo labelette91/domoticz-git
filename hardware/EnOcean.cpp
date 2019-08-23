@@ -31,6 +31,10 @@ unsigned int CEnOcean::GetAdress(int unitid) {
 	return(m_id_base + unitid);
 }
 
+unsigned int CEnOcean::GetOffsetAdress(int unitid) {
+	return ( unitid- m_id_base) ;
+}
+
 uint64_t CEnOcean::CreateDevice(const int HardwareID, const char* ID, const int  unitCode, const unsigned char devType, const unsigned char subType, const unsigned char signallevel, const unsigned char batterylevel, const int nValue, const char* sValue, std::string &devname, int SwitchType , const char * sensorId )
 {
 	uint64_t ulID = 0;
@@ -134,6 +138,7 @@ int CEnOcean::UpdateDeviceAddress(std::string DeviceId) {
 		}
 	}
 
+	//get list of enocean sensor device
 	result = m_sql.safe_query("SELECT Address FROM EnoceanSensors WHERE (HardwareId=%d)  ",  m_HwdID );
 	//get all BaseId allready affected to switch device
 	for (unsigned int i = 0; i < result.size(); i++)
@@ -143,6 +148,22 @@ int CEnOcean::UpdateDeviceAddress(std::string DeviceId) {
 		//ID already used
 		UsedUnitId[unitId] = true;
 	}
+
+	//get list of device enocean created
+	result = m_sql.safe_query("SELECT DeviceId FROM DeviceStatus  WHERE (HardwareId=%d)  ", m_HwdID);
+	//get all BaseId allready affected to switch device
+	for (unsigned int i = 0; i < result.size(); i++)
+	{
+		int unitId = atoi(result[i][0].c_str());
+		//if it is a gateWay range adress
+		if (CheckIsGatewayAdress(unitId))
+		{
+			unitId = GetOffsetAdress(unitId) % MAX_BASE_ADDRESS;//robustess
+			//ID already used
+			UsedUnitId[unitId] = true;
+		}
+	}
+
 	//find not used addess
 	for (int i = 1; i < MAX_BASE_ADDRESS; i++)
 	{
@@ -995,5 +1016,15 @@ std::string GetLighting2StringId(unsigned int id )
 
 	sprintf(szTmp, "%7X", id );
 	return szTmp;
+}
+
+//return true if adress is in range 
+bool CEnOcean::CheckIsGatewayAdress(unsigned int deviceid)
+{
+	if ((deviceid > m_id_base) && (deviceid < m_id_base + MAX_BASE_ADDRESS))
+		return true;
+	else
+		return false;
+
 }
 

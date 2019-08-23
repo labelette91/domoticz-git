@@ -657,7 +657,7 @@ bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length
 	unsigned long sID=(tsen->LIGHTING2.id1<<24)|(tsen->LIGHTING2.id2<<16)|(tsen->LIGHTING2.id3<<8)|tsen->LIGHTING2.id4;
 
 	//to in range GateWay baseAdress..baseAdress+129
-	if ((sID<m_id_base) || (sID>m_id_base + 129))
+	if (!CheckIsGatewayAdress(sID) )
 	{
 		//get sender adress from db
 		unitBaseAddr = getSenderAdressFromDeviceId(sID);
@@ -684,10 +684,10 @@ bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length
 			if (LastPos == pos) {
 				//cpmmabd stop
 				bool res = SetRawValues(data, D20500_CMD_2, D20500_CMD_2_NB_DATA, channel, 2);
-				sendVld(unitBaseAddr, data, 1);
+				sendVld(unitBaseAddr, data, D20500_CMD_2_DATA_SIZE);
 			}else{
 			bool res = SetRawValues(data, D20500_CMD_1, D20500_CMD_1_NB_DATA, pos, 127, 0, 0, channel, 1);
-				 sendVld(unitBaseAddr, data, 4);
+				 sendVld(unitBaseAddr, data, D20500_CMD_1_DATA_SIZE);
 			}
 			LastPos = pos;
 		}

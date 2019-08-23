@@ -26,6 +26,7 @@ T_DATAFIELD D20500_CMD_1 [] = {
 #define D20500_CMD_1_CHN        4
 #define D20500_CMD_1_CMD        5
 #define D20500_CMD_1_NB_DATA    6
+#define D20500_CMD_1_DATA_SIZE  4
 
 // TITLE:CMD 2 - Stop
 T_DATAFIELD D20500_CMD_2 [] = {
@@ -38,6 +39,7 @@ T_DATAFIELD D20500_CMD_2 [] = {
 #define D20500_CMD_2_CHN        0
 #define D20500_CMD_2_CMD        1
 #define D20500_CMD_2_NB_DATA    2
+#define D20500_CMD_2_DATA_SIZE  1
 
 // TITLE:CMD 3 - Query Position and Angle
 T_DATAFIELD D20500_CMD_3 [] = {
@@ -50,6 +52,7 @@ T_DATAFIELD D20500_CMD_3 [] = {
 #define D20500_CMD_3_CHN        0
 #define D20500_CMD_3_CMD        1
 #define D20500_CMD_3_NB_DATA    2
+#define D20500_CMD_3_DATA_SIZE  1
 
 // TITLE:CMD 4 - Reply Position and Angle
 T_DATAFIELD D20500_CMD_4 [] = {
@@ -71,6 +74,7 @@ T_DATAFIELD D20500_CMD_4 [] = {
 #define D20500_CMD_4_CHN        3
 #define D20500_CMD_4_CMD        4
 #define D20500_CMD_4_NB_DATA    5
+#define D20500_CMD_4_DATA_SIZE  4
 
 // TITLE:CMD 5 - Set parameters
 T_DATAFIELD D20500_CMD_5 [] = {
@@ -94,3 +98,4 @@ T_DATAFIELD D20500_CMD_5 [] = {
 #define D20500_CMD_5_CHN        3
 #define D20500_CMD_5_CMD        4
 #define D20500_CMD_5_NB_DATA    5
+#define D20500_CMD_5_DATA_SIZE  5

@@ -2355,15 +2355,6 @@ void MainWorker::ProcessRXMessage(const CDomoticzHardwareBase *pHardware, const 
 		m_sql.safe_query("UPDATE DeviceStatus SET BatteryLevel=%d WHERE (ID==%" PRIu64 ")", BatteryLevel, DeviceRowIdx);
 	}
 
-	if ( pHardware->HwdType == HTYPE_EnOceanESP3 || pHardware->HwdType == HTYPE_EnOceanESP2 )
-		if (DeviceName == "Unknown") {
-			//update the EnOcean sendor ID passed as defaultName when creation
-			if (defaultName != NULL) 
-					m_sql.safe_query("UPDATE DeviceStatus SET SensorId='%q' WHERE (ID==%" PRIu64 ")", defaultName, DeviceRowIdx);
-			defaultName = NULL;
-		}
-
-
 	if ((defaultName != NULL) && ((DeviceName == "Unknown") || (DeviceName.empty())))
 	{
 		if (strlen(defaultName) > 0)

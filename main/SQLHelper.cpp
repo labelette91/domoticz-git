@@ -67,7 +67,6 @@ const char *sqlCreateDeviceStatus =
 "[Protected] INTEGER DEFAULT 0, "
 "[CustomImage] INTEGER DEFAULT 0, "
 "[Description] VARCHAR(200) DEFAULT '', "
-"[SensorId]    VARCHAR(20) DEFAULT '', "
 "[Options] TEXT DEFAULT null);";
 
 const char *sqlCreateDeviceStatusTrigger =
@@ -2321,9 +2320,6 @@ bool CSQLHelper::OpenDatabase()
 			//Add Address in EnOcean table 
 			query("ALTER TABLE EnoceanSensors ADD COLUMN [Address] INTEGER DEFAULT 0");
 			query("ALTER TABLE EnoceanSensors ADD COLUMN [Rorg] INTEGER DEFAULT 0");
-
-			query("ALTER TABLE DeviceStatus   ADD COLUMN [SensorId]  VARCHAR(20) DEFAULT '' ");
-
 		}
 		if (dbversion < 120)
 		{

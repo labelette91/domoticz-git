@@ -53,13 +53,13 @@ uint64_t CEnOcean::CreateDevice(const int HardwareID, const char* ID, const int 
 		if (devname != "")
 			devname = "Unknown" + std::string(ID);
 		m_sql.safe_query(
-			"INSERT INTO DeviceStatus (HardwareID, DeviceID, Unit, Type, SubType, SignalLevel, BatteryLevel, nValue, sValue,Name,used,SwitchType,SensorId) "
-			"VALUES ('%d','%q','%d','%d','%d','%d','%d','%d','%q','%q',1,'%d','%q')",
+			"INSERT INTO DeviceStatus (HardwareID, DeviceID, Unit, Type, SubType, SignalLevel, BatteryLevel, nValue, sValue,Name,used,SwitchType) "
+			"VALUES ('%d','%q','%d','%d','%d','%d','%d','%d','%q','%q',1,'%d' )",
 			HardwareID,
 			ID, unitCode, devType, subType,
 			signallevel, batterylevel,
 			nValue, sValue, devname.c_str(),
-			SwitchType,sensorId);
+			SwitchType);
 
 		//Get new ID
 		result = m_sql.safe_query(
@@ -956,7 +956,7 @@ void CEnOcean::GetNodeList(http::server::WebEmSession & session, const http::ser
 	root["title"] = "EnOceanNodes";
 
 	std::vector<std::vector<std::string> > result;
-	result = m_sql.safe_query("SELECT D.Name, D.Type, d.SubType, d.SwitchType, d.Unit, E.DeviceId, E.Rorg, E.Profile, E.Type, E.Manufacturer, E.Address FROM DeviceStatus as d LEFT OUTER JOIN EnoceanSensors as e ON(instr(E.DeviceID, D.SensorID) <> 0)  WHERE (D.HardwareID==%d) ", m_HwdID);
+	result = m_sql.safe_query("SELECT D.Name, D.Type, d.SubType, d.SwitchType, d.Unit, E.DeviceId, E.Rorg, E.Profile, E.Type, E.Manufacturer, E.Address FROM DeviceStatus as d LEFT OUTER JOIN EnoceanSensors as e ON(instr(E.DeviceID, D.DeviceId) <> 0)  WHERE (D.HardwareID==%d) ", m_HwdID);
 
 	if (result.size() > 0)
 	{

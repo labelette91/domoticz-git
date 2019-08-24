@@ -681,11 +681,12 @@ bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length
 			//build CMD 1 - Go to Position and Angle
 			int channel = tsen->LIGHTING2.unitcode - 1;
 			int pos = getPositionFromCommandLevel(tsen->LIGHTING2.cmnd, tsen->LIGHTING2.level);
+
 			if (LastPosition == pos) {
 				//send command stop si rappuie
-				sendVld(unitBaseAddr, D20500_CMD_2, D20500_CMD_2_NB_DATA, channel, 2);
+				sendVld(unitBaseAddr, D20500_CMD_2,  channel, 2, END_ARG_DATA);
 			}else{
-				 sendVld(unitBaseAddr, D20500_CMD_1, D20500_CMD_1_NB_DATA, pos, 127, 0, 0, channel, 1);
+				 sendVld(unitBaseAddr, D20500_CMD_1,  pos, 127, 0, 0, channel, 1, END_ARG_DATA);
 			}
 			LastPosition = pos;
 		}

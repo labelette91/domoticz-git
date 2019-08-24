@@ -81,11 +81,15 @@ uint32_t GetRawValue(uint8_t * data ,  uint16_t offset, uint8_t size)
 
 //copy the value at bit offset offset length : size
 //as described in eep profile 
+//return true if ok
 bool SetRawValue(uint8_t * data , uint32_t value, uint16_t offset, uint8_t size)
 {
 	if (size == 0)
 		return false;
 	if (size >= 32 )
+		return false;
+
+	if (((offset + size) / 8) > MAX_DATA_PAYLOAD)
 		return false;
 
 	uint8_t idx = (uint8_t)(offset / 8);
@@ -211,7 +215,7 @@ uint32_t GetRawValue(uint8_t * data ,  char *  OffsetName , T_DATAFIELD * Offset
 #include <stdarg.h>
 //return the number of byte of data payload
 //0 if rror
-uint32_t SetRawValues(uint8_t * data , T_DATAFIELD * OffsetDes ,int NbParameter , va_list value )
+uint32_t SetRawValuesNb(uint8_t * data , T_DATAFIELD * OffsetDes ,int NbParameter , va_list value )
 {
 
    for ( int i=0;i<NbParameter;i++)
@@ -236,13 +240,57 @@ uint32_t SetRawValues(uint8_t * data , T_DATAFIELD * OffsetDes ,int NbParameter 
 }
 
 
-uint32_t SetRawValues(uint8_t * data, T_DATAFIELD * OffsetDes, int NbParameter, ...)
+uint32_t SetRawValuesNb(uint8_t * data, T_DATAFIELD * OffsetDes, int NbParameter, ...)
 {
 	va_list value;
 
 	/* Initialize the va_list structure */
 	va_start(value, NbParameter);
-	uint32_t total_bytes = SetRawValues(data, OffsetDes, NbParameter, value);
+	uint32_t total_bytes = SetRawValuesNb(data, OffsetDes, NbParameter, value);
+	va_end(value);
+
+	return total_bytes;
+}
+
+
+
+//return the number of byte of data payload
+//0 if error
+
+uint32_t SetRawValues(uint8_t * data, T_DATAFIELD * OffsetDes,  va_list value)
+{
+
+	while (OffsetDes->Size != 0)
+	{
+
+		int par = va_arg(value, int);       /*   va_arg() donne le paramètre courant    */
+		//not enough argument
+		if (par == END_ARG_DATA)
+			return 0;
+		SetRawValue(data, par, OffsetDes);
+		OffsetDes++;
+	}
+
+	int par = va_arg(value, int);       
+	if (par != END_ARG_DATA)
+		return 0;
+
+    //last bit offset
+	OffsetDes--;
+	uint32_t total_bits = OffsetDes->Offset + OffsetDes->Size;
+	uint32_t total_bytes = (total_bits + 7) / 8;
+
+	return total_bytes;
+}
+
+
+uint32_t SetRawValues(uint8_t * data, T_DATAFIELD * OffsetDes,  ...)
+{
+	va_list value;
+
+	/* Initialize the va_list structure */
+	va_start(value, OffsetDes);
+	uint32_t total_bytes = SetRawValues(data, OffsetDes, value);
 	va_end(value);
 
 	return total_bytes;

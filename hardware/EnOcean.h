@@ -8,6 +8,8 @@
 
 #define MAX_BASE_ADDRESS 128
 
+#define MAX_DATA_PAYLOAD  16
+
 #define uint unsigned int
 
 typedef enum {
@@ -69,6 +71,8 @@ typedef struct {
 	char * description;
 }T_DATAFIELD;
 
+//value for the last argument of a telegram data payload
+#define END_ARG_DATA  ((1<<31)-1)
 
 class CEnOcean : public AsyncSerial, public CDomoticzHardwareBase
 {
@@ -153,7 +157,7 @@ protected:
 	void parse_PACKET_REMOTE_MAN_COMMAND(unsigned char m_buffer[], int m_DataSize, int m_OptionalDataSize);
 	void sendVld(unsigned int sID, int channel, int value);
 	void sendVld(unsigned int sID, unsigned char *data, int DataLen);
-	uint32_t sendVld(unsigned int unitBaseAddr, T_DATAFIELD * OffsetDes, int NbParameter, ...);
+	uint32_t sendVld(unsigned int unitBaseAddr, T_DATAFIELD * OffsetDes,  ...);
 
 
 	void SendRpsTeachIn(unsigned int sID);

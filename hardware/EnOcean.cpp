@@ -594,9 +594,13 @@ void CEnOcean::sendVld(unsigned int sID, int channel, int value)
 	sendFrameQueue(PACKET_RADIO, buff, 9, opt, 7);
 }
 
+//send a VLD datagramm with payload : data to device Id sID
 void CEnOcean::sendVld(unsigned int sID, unsigned char *data , int DataLen )
 {
 	unsigned char buffer[64];
+
+	if (DataLen > MAX_DATA_PAYLOAD)
+		return;
 
 	unsigned char *buff = buffer ;
 	*buff++ = RORG_VLD; //vld
@@ -625,19 +629,40 @@ void CEnOcean::sendVld(unsigned int sID, unsigned char *data , int DataLen )
 	sendFrameQueue(PACKET_RADIO, buffer, 6+DataLen, opt, 7);
 }
 
-extern uint32_t SetRawValues(uint8_t * data, T_DATAFIELD * OffsetDes, int NbParameter, va_list value);
+extern uint32_t SetRawValues(uint8_t * data, T_DATAFIELD * OffsetDes, va_list value);
 
-uint32_t CEnOcean::sendVld(unsigned int unitBaseAddr, T_DATAFIELD * OffsetDes, int NbParameter, ...)
+//send a VLD datagramm of the command described by descriptor OffsetDes detailed in EEP profile.to device Id sID
+
+// the argument are variable length
+//it shall correspond to each offset Data detailed in EnOcean_Equipment_Profiles_EEP_v2.x.x_public.
+//the list  parameter shall end with value END_ARG_DATA
+//return is the size of the daya payload in byte 
+// or 0 : if an error occured : not enough parameters passed
+//example :
+//sendVld(unitBaseAddr, D20500_CMD_2, channel, 2, END_ARG_DATA);
+// send a stop command = 2 to channel 9 for EEP : D2-05-00 ; Blinds control
+
+//sendVld(unitBaseAddr, D20500_CMD_1, 100, 127, 0, 0, 0 , 1, END_ARG_DATA);
+// send a got position and angle command = 1 to 
+// POS=100 % 
+// ANG=127 : dont change 
+// REPO=0 goto ditectly 
+// LOCK=0  dont change  , 
+// channel 0
+// CMD = 1 goto command for EEP : D2-05-00 ; Blinds control
+
+
+uint32_t CEnOcean::sendVld(unsigned int unitBaseAddr, T_DATAFIELD * OffsetDes,  ...)
 {
-	uint8_t  data[16];
+	uint8_t  data[MAX_DATA_PAYLOAD+2];
 	va_list value;
 
 	/* Initialize the va_list structure */
-	va_start(value, NbParameter);
+	va_start(value, OffsetDes);
 
 	memset(data, 0, sizeof(data));
 
-	uint32_t DataSize = SetRawValues(data, OffsetDes, NbParameter, value);
+	uint32_t DataSize = SetRawValues(data, OffsetDes,  value);
 	if (DataSize)
 		sendVld(unitBaseAddr, data, DataSize);
 

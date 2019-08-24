@@ -558,7 +558,7 @@ void CDomoticzHardwareBase::SendSwitchIfNotExists(const int NodeID, const int Ch
 
 void CDomoticzHardwareBase::SendSwitch(const int NodeID, const int ChildID, const int BatteryLevel, const bool bOn, const double Level, const std::string &defaultname, const int RssiLevel /* =12 */)
 {
-	double rlevel = (16.0 / 100.0)*Level;
+	double rlevel = (15.0 / 100.0)*Level;
 	int level = int(rlevel);
 
 	//make device ID

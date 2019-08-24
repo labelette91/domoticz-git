@@ -105,7 +105,7 @@ public:
 
 	virtual void SendDimmerTeachIn(const char *pdata, const unsigned char length) = 0 ;
 
-	uint64_t CEnOcean::CreateDevice(const int HardwareID, const char* ID, const int  unit, const unsigned char devType, const unsigned char subType, const unsigned char signallevel, const unsigned char batterylevel, const int nValue, const char* sValue, std::string &devname, int SwitchType, const char * SensorId );
+	uint64_t CEnOcean::CreateDevice(const int HardwareID, const char* ID, const int  unit, const unsigned char devType, const unsigned char subType, const unsigned char signallevel, const unsigned char batterylevel, const int nValue, const char* sValue, std::string &devname, int SwitchType, const std::string & deviceoptions );
 
 	int UpdateDeviceAddress(std::string idx );
 
@@ -144,6 +144,7 @@ public:
 	void TeachIn(std::string& idx);
 	void GetNodeList(http::server::WebEmSession & session, const http::server::request& req, Json::Value &root);
 	void SetCode(http::server::WebEmSession & session, const http::server::request& req, Json::Value &root);
+	void GetLinkTable(http::server::WebEmSession & session, const http::server::request& req, Json::Value &root);
 
 	bool CheckIsGatewayAdress(unsigned int id);
 

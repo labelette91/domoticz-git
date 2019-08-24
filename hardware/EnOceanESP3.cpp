@@ -676,8 +676,6 @@ bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length
 		//D2-05
 		if ((Rorg == 0xd2) && (Func == 0x05))
 		{
-			uint8_t  data[16];
-
 			//build CMD 1 - Go to Position and Angle
 			int channel = tsen->LIGHTING2.unitcode - 1;
 			int pos = getPositionFromCommandLevel(tsen->LIGHTING2.cmnd, tsen->LIGHTING2.level);
@@ -685,10 +683,11 @@ bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length
 			if (LastPosition == pos) {
 				//send command stop si rappuie
 				sendVld(unitBaseAddr, D20500_CMD_2,  channel, 2, END_ARG_DATA);
+				LastPosition = -1;
 			}else{
 				 sendVld(unitBaseAddr, D20500_CMD_1,  pos, 127, 0, 0, channel, 1, END_ARG_DATA);
+				 LastPosition = pos;
 			}
-			LastPosition = pos;
 		}
 		//D2-01
 		else	if ((Rorg == 0xd2) && (Func == 0x01))
@@ -1719,7 +1718,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 									{
 										_log.Log(LOG_TRACE, "EnOcean: TEACH : 0xD2 Node 0x%08x UnitID: %02X cmd: %02X ", id, nbc + 1, light2_sOff);
 //										SendSwitch(id, nbc + 1, -1, light2_sOff, 0, DeviceIDToString(senderBaseAddr).c_str());
-										CreateDevice(m_HwdID, GetLighting2StringId(id).c_str(), nbc + 1, pTypeLighting2, sTypeAC, 0, -1, light2_sOff, "0", DeviceIDIntToChar(id), STYPE_OnOff, DeviceIDToString(senderBaseAddr).c_str());
+										CreateDevice(m_HwdID, GetLighting2StringId(id).c_str(), nbc + 1, pTypeLighting2, sTypeAC, 0, -1, light2_sOff, "0", DeviceIDIntToChar(id), STYPE_OnOff, "" );
 									}
 									return;
 								}
@@ -1730,7 +1729,7 @@ void CEnOceanESP3::ParseRadioDatagram()
 									{
 										_log.Log(LOG_TRACE, "EnOcean: TEACH : 0xD2 Node 0x%08x UnitID: %02X cmd: %02X ", id, nbc + 1, light2_sOff);
 //										SendSwitch(id, nbc + 1, -1, light2_sOff, 0, DeviceIDToString(senderBaseAddr).c_str());
-										CreateDevice(m_HwdID, GetLighting2StringId(id).c_str(), nbc + 1, pTypeLighting2, sTypeAC, 0, -1, light2_sOff, "0", DeviceIDIntToChar(id), STYPE_BlindsPercentage , DeviceIDToString(senderBaseAddr).c_str());
+										CreateDevice(m_HwdID, GetLighting2StringId(id).c_str(), nbc + 1, pTypeLighting2, sTypeAC, 0, -1, light2_sOff, "0", DeviceIDIntToChar(id), STYPE_BlindsPercentage , "" );
 									}
 									return;
 								}
@@ -1858,6 +1857,9 @@ namespace http {
 				pEnocean->GetNodeList(session, req, root);
 			else if (cmd == "SetCode")
 				pEnocean->SetCode(session, req, root);
+			else if (cmd == "GetLinkTable") {
+				pEnocean->GetLinkTable(session, req, root);
+			}
 
 		}
 	}

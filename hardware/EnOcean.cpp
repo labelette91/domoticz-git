@@ -35,7 +35,7 @@ unsigned int CEnOcean::GetOffsetAdress(int unitid) {
 	return ( unitid- m_id_base) ;
 }
 
-uint64_t CEnOcean::CreateDevice(const int HardwareID, const char* ID, const int  unitCode, const unsigned char devType, const unsigned char subType, const unsigned char signallevel, const unsigned char batterylevel, const int nValue, const char* sValue, std::string &devname, int SwitchType , const char * sensorId )
+uint64_t CEnOcean::CreateDevice(const int HardwareID, const char* ID, const int  unitCode, const unsigned char devType, const unsigned char subType, const unsigned char signallevel, const unsigned char batterylevel, const int nValue, const char* sValue, std::string &devname, int SwitchType , const std::string & deviceoptions)
 {
 	uint64_t ulID = 0;
 	std::vector<std::vector<std::string> > result;
@@ -72,6 +72,12 @@ uint64_t CEnOcean::CreateDevice(const int HardwareID, const char* ID, const int 
 		}
 		std::stringstream s_str(result[0][0]);
 		s_str >> ulID;
+
+		//Set device options
+		//deviceoptions.append("SelectorStyle:0;LevelNames:Off|Level1|Level2|Level3");
+		if (!deviceoptions.empty()) 
+			m_sql.SetDeviceOptions(ulID , m_sql.BuildDeviceOptions(deviceoptions, false));
+
 	}
 	return ulID;
 }
@@ -1048,6 +1054,41 @@ void CEnOcean::GetNodeList(http::server::WebEmSession & session, const http::ser
 		}
 	}
 }
+
+
+
+std::string string_format(const char * fmt, ...) {
+	va_list ap;
+	char buf[1024];
+	va_start(ap, fmt);
+	int n = vsnprintf((char *)buf, sizeof(buf), fmt, ap);
+
+	return buf;
+}
+
+void CEnOcean::GetLinkTable(http::server::WebEmSession & session, const http::server::request& req, Json::Value &root)
+{
+	int nbParam = req.parameters.size() - 3;
+	root["status"] = "OK";
+	root["title"] = "EnOceanLinkTable";
+	std::string DeviceIds = http::server::request::findValue(&req, "sensorid");
+	unsigned int  DeviceId = DeviceIdCharToInt(DeviceIds);
+
+	addLinkTable(0x1a65428, 0, 0xD0500, 0xABCDEF, 1);
+
+	{
+		for (int entry = 0; entry < SIZE_LINK_TABLE; entry++)
+		{
+				root["result"][entry]["Profile"]  = string_format("%06X", m_sensors[DeviceId].LinkTable[entry].Profile) ;
+				root["result"][entry]["SenderId"] = string_format("%7X", m_sensors[DeviceId].LinkTable[entry].SenderId);
+				root["result"][entry]["Channel"] = string_format("%d", m_sensors[DeviceId].LinkTable[entry].Channel);
+			
+		}
+	}
+}
+
+
+
 
 void CEnOcean::SetCode(http::server::WebEmSession & session, const http::server::request & req, Json::Value & root)
 {

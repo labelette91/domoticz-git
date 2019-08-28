@@ -644,8 +644,6 @@ int getPositionFromCommandLevel(int cmnd , int pos )
 
 bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length)
 {
-	int unitCode = 0;
-	unsigned int unitBaseAddr = 0;
 
 	if (m_id_base==0)
 		return false;
@@ -660,6 +658,8 @@ bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length
 	//to in range GateWay baseAdress..baseAdress+129
 	if (!CheckIsGatewayAdress(sID) )
 	{
+		unsigned int unitBaseAddr = 0;
+
 		//get sender adress from db
 		unitBaseAddr = getSenderAdressFromDeviceId(sID);
 
@@ -695,8 +695,6 @@ bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length
 		return true ;
 
 	}
-	else
-		unitBaseAddr = sID;
 
 	unsigned char RockerID=0;
 	unsigned char Pressed=1;
@@ -788,10 +786,10 @@ bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length
 
 		buf[1] |= F60201_EB_MASK;		// button is pressed
 
-		buf[2]=(unitBaseAddr >> 24) & 0xff;		// Sender ID
-		buf[3]=(unitBaseAddr >> 16) & 0xff;
-		buf[4]=(unitBaseAddr >> 8) & 0xff;
-		buf[5]= unitBaseAddr & 0xff;
+		buf[2]=(sID >> 24) & 0xff;		// Sender ID
+		buf[3]=(sID >> 16) & 0xff;
+		buf[4]=(sID >> 8) & 0xff;
+		buf[5]=sID & 0xff;
 
 		buf[6] = S_RPS_T21|S_RPS_NU;	// press button			// b5=T21, b4=NU, b3-b0= RepeaterCount
 
@@ -819,10 +817,10 @@ bool CEnOceanESP3::WriteToHardware(const char *pdata, const unsigned char length
 		buf[3]=1;	//speed
 		buf[4]=0x09; // Dim Off
 
-		buf[5]=(unitBaseAddr >> 24) & 0xff;
-		buf[6]=(unitBaseAddr >> 16) & 0xff;
-		buf[7]=(unitBaseAddr >> 8) & 0xff;
-		buf[8]= unitBaseAddr & 0xff;
+		buf[5]=(sID >> 24) & 0xff;
+		buf[6]=(sID >> 16) & 0xff;
+		buf[7]=(sID >> 8) & 0xff;
+		buf[8]=sID & 0xff;
 
 		buf[9]=0x30; // status
 
@@ -1840,6 +1838,9 @@ namespace http {
 	namespace server {
 		void CWebServer::RType_OpenEnOcean(WebEmSession & session, const request& req, Json::Value &root)
 		{
+			root["status"] = "ERR";
+			root["title"] = "teachin";
+
 			std::string hwid = request::findValue(&req, "hwid");
 			if (hwid.empty())
 				return;
@@ -1860,6 +1861,15 @@ namespace http {
 			else if (cmd == "GetLinkTable") {
 				pEnocean->GetLinkTable(session, req, root);
 			}
+
+			else if (cmd == "teachin") {
+				std::string idx = request::findValue(&req, "idx");
+				if ((idx == ""))	return;
+
+				pEnocean->TeachIn(idx);
+			}
+			root["status"] = "OK";
+
 
 		}
 	}

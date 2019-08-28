@@ -182,7 +182,7 @@ protected:
 	void addLinkTable(uint DeviceId, int entry, int profile, uint sensorId, int channel);
 	void printSensors();
 
-	unsigned long m_id_base;
+public:	unsigned long m_id_base;
 	int m_Seq;
 	T_SENSOR_MAP m_sensors;
 

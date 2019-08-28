@@ -4112,18 +4112,25 @@ namespace http {
 						)
 						return;
 					sunitcode = sgroupcode;//Button A or B
-					CEnOcean *pEnoceanHardware = reinterpret_cast<CEnOcean*>(m_mainworker.GetHardware(atoi(hwdid.c_str())));
-					if (pEnoceanHardware == NULL)
+					CDomoticzHardwareBase *pBaseHardware = reinterpret_cast<CDomoticzHardwareBase*>(m_mainworker.GetHardware(atoi(hwdid.c_str())));
+					if (pBaseHardware == NULL)
 						return;
-					if (!pEnoceanHardware->IsRunning())
+					if ((pBaseHardware->HwdType != HTYPE_EnOceanESP2) && (pBaseHardware->HwdType != HTYPE_EnOceanESP3))
+						return;
+					unsigned long rID = 0;
+					if (pBaseHardware->HwdType == HTYPE_EnOceanESP2)
 					{
-						root["status"] = "ERROR";
-						root["message"] = "BaseID not found, is the hardware running?";
-						return;
+						CEnOceanESP2 *pEnoceanHardware = reinterpret_cast<CEnOceanESP2 *>(pBaseHardware);
+						rID = pEnoceanHardware->m_id_base + iUnitTest;
+					}
+					else
+					{
+						CEnOceanESP3 *pEnoceanHardware = reinterpret_cast<CEnOceanESP3 *>(pBaseHardware);
+						rID = pEnoceanHardware->m_id_base + iUnitTest;
 					}
 					//convert to hex, and we have our ID
 					std::stringstream s_strid;
-					s_strid << std::hex << std::uppercase << (pEnoceanHardware->GetAdress(iUnitTest));
+					s_strid << std::hex << std::uppercase << rID;
 					devid = s_strid.str();
 				}
 				else if (lighttype == 68)
@@ -4650,22 +4657,36 @@ namespace http {
 						)
 						return;
 					sunitcode = sgroupcode;//Button A/B
-					CEnOcean *pEnoceanHardware = reinterpret_cast<CEnOcean*>(m_mainworker.GetHardware(atoi(hwdid.c_str())));
-					if (pEnoceanHardware == NULL)
+					CDomoticzHardwareBase *pBaseHardware = reinterpret_cast<CDomoticzHardwareBase*>(m_mainworker.GetHardware(atoi(hwdid.c_str())));
+					if (pBaseHardware == NULL)
 						return;
-					if (!pEnoceanHardware->IsRunning())
+					if ((pBaseHardware->HwdType != HTYPE_EnOceanESP2) && (pBaseHardware->HwdType != HTYPE_EnOceanESP3))
+						return;
+					unsigned long rID = 0;
+					if (pBaseHardware->HwdType == HTYPE_EnOceanESP2)
 					{
-						root["status"] = "ERROR";
-						root["message"] = "BaseID not found, is the hardware running?";
-						return;
+						CEnOceanESP2 *pEnoceanHardware = reinterpret_cast<CEnOceanESP2*>(pBaseHardware);
+						if (pEnoceanHardware->m_id_base == 0)
+						{
+							root["message"] = "BaseID not found, is the hardware running?";
+							return;
+						}
+						rID = pEnoceanHardware->m_id_base + iUnitTest;
+					}
+					else
+					{
+						CEnOceanESP3 *pEnoceanHardware = reinterpret_cast<CEnOceanESP3*>(pBaseHardware);
+						if (pEnoceanHardware->m_id_base == 0)
+						{
+							root["message"] = "BaseID not found, is the hardware running?";
+							return;
+						}
+						rID = pEnoceanHardware->m_id_base + iUnitTest;
 					}
 					//convert to hex, and we have our ID
 					std::stringstream s_strid;
-					s_strid << std::hex << std::uppercase << (pEnoceanHardware->GetAdress(iUnitTest));
+					s_strid << std::hex << std::uppercase << rID;
 					devid = s_strid.str();
-
-					//add to enOcean table device
-					pEnoceanHardware->AddSensors(pEnoceanHardware->GetAdress(iUnitTest), 0, 0xD2, 01 , iUnitTest );
 				}
 				else if (lighttype == 68)
 				{
@@ -7265,18 +7286,6 @@ namespace http {
 				);
 				_log.Log(LOG_STATUS, "(Floorplan) Plan '%s' floorplan data reset.", idx.c_str());
 			}
-	else if (cparam == "teachin") {
-		std::string idx = request::findValue(&req, "idx");
-		std::string hwdid = request::findValue(&req, "hardwareid");
-		if ((idx == ""))	return;
-		CEnOceanESP3 *pEnoceanHardware = reinterpret_cast<CEnOceanESP3*>(m_mainworker.GetHardware(atoi(hwdid.c_str())));
-		if (pEnoceanHardware == NULL)
-			return;
-		pEnoceanHardware->TeachIn(idx);
-
-		root["status"] = "OK";
-		root["title"] = "teachin";
-	}
 		}
 
 		void CWebServer::DisplaySwitchTypesCombo(std::string & content_part)
